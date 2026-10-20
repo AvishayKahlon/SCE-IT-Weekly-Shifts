@@ -316,6 +316,10 @@ table.sh .an2{display:block;line-height:1.05}
 .nwp-go{min-height:48px;font-size:15px;border-radius:10px;text-wrap:balance}
 .nwp-later{border:0;background:none;color:var(--muted);font-weight:600;min-height:40px}
 @media (prefers-reduced-motion:reduce){.nwp-card{transition:opacity 150ms ease}}
+/* "new version" bar */
+.upd{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:70;background:#2E7D32;color:#fff;border:0;border-radius:999px;padding:10px 16px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.2);max-width:calc(100% - 24px)}
+@starting-style{.upd{opacity:0;transform:translate(-50%,-8px)}}
+.upd{transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out)}
 /* dev-only data toggle */
 .devbar{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:2px;padding:3px;background:#E5E5E5;border-radius:999px;z-index:50;font:500 12px system-ui,sans-serif;direction:ltr;box-shadow:0 2px 10px rgba(0,0,0,.15)}
 .devbar a{padding:5px 10px;border-radius:999px;color:#444;text-decoration:none;white-space:nowrap}
@@ -560,7 +564,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 17:20";
+const APP_VER="20.10.2026 17:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -1335,6 +1339,13 @@ async function flush(){
 }
 function load(raw){try{const o=JSON.parse(raw);S=Object.assign(defaultState(),o);S.shiftLbl=Object.assign(defaultState().shiftLbl,o.shiftLbl||{});const v=S.friVer;ensureData();if(v!==S.friVer)setTimeout(()=>changed(),0)}catch(e){}}
 
+/* ---------- update check: GitHub Pages caches the page for up to 10 minutes ---------- */
+async function checkUpdate(){
+  if(DEV_DATA||!/^https?:/.test(location.protocol))return;
+  try{const r=await fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"});if(!r.ok)return;
+    const m=(await r.text()).match(/const APP_VER="([^"]+)"/);if(!m||m[1]===APP_VER||document.querySelector(".upd"))return;
+    const b=document.createElement("button");b.className="upd";b.innerHTML=`יש עדכון לכלי (גרסה ${esc(m[1])}) – לחצו לרענון`;
+    b.onclick=()=>{flush();setTimeout(()=>location.replace(location.pathname+"?v="+encodeURIComponent(m[1])),300)};document.body.appendChild(b)}catch(e){}}
 /* ---------- from Tuesday: offer to start next week's schedule ---------- */
 function nextWeekPrompt(force){
   const t=new Date(),dow=t.getDay();if(!force&&(dow<2||dow>6))return;          /* Tuesday–Saturday */
@@ -1382,6 +1393,7 @@ function devToggle(){const b=document.createElement("nav");b.className="devbar";
   const opts=[["","Demo data"],["worst","Worst case"],["empty","Empty"],["one","One"],["many","Many"]];
   b.innerHTML=opts.map(([v,l])=>`<a href="?${v?"data="+v:""}" ${v===(DEV_DATA||"")?'aria-current="page"':""}>${l}</a>`).join("");document.body.appendChild(b)}
 (async()=>{
+  setTimeout(checkUpdate,1500);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate()});
   if(DEV_DATA){load(JSON.stringify(devFixture(DEV_DATA)));if(DEV_DATA==="worst"||DEV_DATA==="many"){const g=generate;try{g()}catch(e){}}render();setStatus("מצב בדיקה – לא נשמר");devToggle();return}
   try{const t=localStorage.getItem("shift-tab");if(t)document.querySelector(`.tabs button[data-tab="${t}"]`)?.click()}catch(e){}
   render();
