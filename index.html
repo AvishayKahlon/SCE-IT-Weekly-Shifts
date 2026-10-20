@@ -12,7 +12,7 @@
   /* sheet palette: fixed, matches the printed schedule in both themes */
   /* exact values from the Excel theme: Text1 +35% / Accent6 +40% / Accent6 +60% */
   --sh-dark:#595959; --sh-darker:#3F3F3F; --sh-date:#A9D18E; --sh-cell:#A9D18E; --sh-cell2:#A9D18E; --sh-eve:#C5E0B4; --sh-note:#F2F2F2; --sh-ink:#000000; --sh-line:#000000;
-  --sh-font:Calibri,Carlito,Arial,sans-serif; --sh-grid:#8C8C8C; --sh-frame:#595959;
+  --sh-font:Calibri,Carlito,Arial,sans-serif; --sh-grid:#000000; --sh-frame:#000000;
   --font:"Heebo",Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -74,9 +74,10 @@ button:disabled{opacity:.5;cursor:default}
 #sheet{display:grid;gap:22px;min-width:1180px;background:#FFFFFF;padding:12px;border-radius:6px}
 .sheet-title{text-align:center;color:var(--sh-ink);font-family:var(--sh-font);font-size:22px;font-weight:700;margin:0}
 /* sizes keep the Excel ratios (site 36 / day 32 / date 30 / names 28 / labels 26 / notes 20 pt) */
-table.sh{width:100%;border-collapse:collapse;table-layout:fixed;color:var(--sh-ink);border:1.5px solid var(--sh-frame);font-family:var(--sh-font)}
-/* thin, soft grid; content text max = 26pt in the Excel scale (15.6px here), shrunk to fit by fitCells() */
-table.sh td,table.sh th{border:1px solid var(--sh-grid);height:36px;padding:2px 6px;text-align:center;font-size:15.6px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.sh{width:100%;border-collapse:collapse;table-layout:fixed;color:var(--sh-ink);border:1px solid var(--sh-frame);font-family:var(--sh-font)}
+/* hairline black grid. Sizes = Excel points ×0.6 (date 30, days 32, names 28, notes 20, site 36, labels 26), all bold;
+   fitCells() shrinks any cell whose text doesn't fit */
+table.sh td,table.sh th{border:1px solid var(--sh-grid);height:36px;padding:2px 6px;text-align:center;font-size:16.8px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 table.sh .site{background:var(--sh-dark);color:#fff;font-size:21.6px;font-weight:700;height:40px}
 table.sh .lbl{background:var(--sh-dark);color:#fff;font-size:15.6px;width:150px}
 table.sh .date{background:var(--sh-date);color:#404040;font-size:18px}
@@ -85,9 +86,8 @@ table.sh .dname{background:var(--sh-dark);color:#fff;font-size:19.2px}
 table.sh .c{background:var(--sh-cell)}
 table.sh .c2{background:var(--sh-cell2)}
 table.sh .ce{background:var(--sh-eve)}
-table.sh .off{background:var(--sh-dark);color:#fff;font-size:18px}
+table.sh .off{background:var(--sh-dark);color:#fff;font-size:18px;font-weight:700}
 table.sh .note{background:var(--sh-note);font-size:12px;font-weight:700;color:#808080}
-.export table.sh .note{font-size:15.6px}
 table.sh .slot{cursor:pointer}
 table.sh .slot:hover{outline:2px solid var(--accent);outline-offset:-3px}
 table.sh .slot.bad{box-shadow:inset 0 0 0 3px #D93025}
@@ -97,6 +97,8 @@ table.sh .note .nw{display:flex;align-items:center;gap:2px}
 table.sh .nbtn{flex:none;border:0;background:#1E8E4E;color:#fff;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:700;cursor:pointer;line-height:1.6}
 table.sh .nbtn:hover{background:#166C3B}
 .export table.sh .slot{cursor:default}
+.export table.sh{border-width:.5px}
+.export table.sh td,.export table.sh th{border-width:.5px}
 .export .note input{display:none}
 #exportBox{position:fixed;left:-99999px;top:0;width:1500px}
 /* print version = the Excel print area: SCE logo banner + the site tables, A4 landscape */
@@ -466,7 +468,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 14:55";
+const APP_VER="20.10.2026 15:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -1157,31 +1159,31 @@ $("#printBtn").onclick=async()=>{
 $("#xlsBtn").onclick=async()=>{
   if(typeof ExcelJS==="undefined"){setStatus("ספריית האקסל לא נטענה");return}
   calcNeed();const w=W(),wb=new ExcelJS.Workbook(),ws=wb.addWorksheet("סידור",{views:[{rightToLeft:true}]});
-  ws.getColumn(1).width=20;for(let c=2;c<=13;c++)ws.getColumn(c).width=13;
+  ws.getColumn(1).width=34;for(let c=2;c<=13;c++)ws.getColumn(c).width=17;
   const fill=hex=>({type:"pattern",pattern:"solid",fgColor:{argb:"FF"+hex}});
-  const thin={style:"thin",color:{argb:"FF8C8C8C"}},border={top:thin,left:thin,bottom:thin,right:thin};
+  const thin={style:"hair",color:{argb:"FF000000"}},border={top:thin,left:thin,bottom:thin,right:thin};
   const sty=(cell,bg,white,size=12)=>{cell.fill=fill(bg);cell.font={bold:true,size,color:{argb:white?"FFFFFFFF":"FF000000"},name:"Calibri"};cell.alignment={horizontal:"center",vertical:"middle",readingOrder:"rtl",shrinkToFit:true};cell.border=border};
   let r=1;
   /* SCE logo banner across the top, like the Excel print version */
-  if(window.SCE_LOGO){const id=wb.addImage({base64:window.SCE_LOGO,extension:"jpeg"});ws.getRow(1).height=42;ws.getRow(2).height=42;
-    ws.addImage(id,{tl:{col:0,row:0},ext:{width:1300,height:103},editAs:"oneCell"});r=3}
+  if(window.SCE_LOGO){const id=wb.addImage({base64:window.SCE_LOGO,extension:"jpeg"});ws.getRow(1).height=62;ws.getRow(2).height=62;
+    ws.addImage(id,{tl:{col:0,row:0},ext:{width:1700,height:135},editAs:"oneCell"});r=3}
   r++;
   if(S.title){ws.mergeCells(r,1,r,13);const c=ws.getCell(r,1);c.value=S.title;c.font={bold:true,size:16,color:{argb:"FF3F3F3F"},name:"Calibri"};c.alignment={horizontal:"center",readingOrder:"rtl"};r+=2}
   ws.pageSetup={paperSize:9,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0,horizontalCentered:true,margins:{left:.28,right:.28,top:.42,bottom:.28,header:.3,footer:.3}};
 
   S.sites.forEach(s=>{
     const A=w.assign[s.id];
-    ws.mergeCells(r,1,r,13);sty(ws.getCell(r,1),"595959",true,16);ws.getCell(r,1).value=s.name;ws.getRow(r).height=26;r++;
-    const row=(label,fn,h=22)=>{sty(ws.getCell(r,1),"595959",true);ws.getCell(r,1).value=label;fn();ws.getRow(r).height=h;r++};
-    row("תאריך",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=fmt(dayDate(d));sty(x,"A9D18E",false);x.font={bold:true,size:12,color:{argb:"FF404040"},name:"Calibri"};ws.getCell(r,c+1).border=border}));
-    row("משמרת",()=>DAYS.forEach((dn,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=dn;sty(x,"595959",true,13)}));
+    ws.mergeCells(r,1,r,13);sty(ws.getCell(r,1),"595959",true,36);ws.getCell(r,1).value=s.name;ws.getRow(r).height=48;r++;
+    const row=(label,fn,h=44)=>{sty(ws.getCell(r,1),"595959",true,26);ws.getCell(r,1).value=label;fn();ws.getRow(r).height=h;r++};
+    row("תאריך",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=fmt(dayDate(d));sty(x,"A9D18E",false);x.font={bold:true,size:30,color:{argb:"FF404040"},name:"Calibri"};ws.getCell(r,c+1).border=border}));
+    row("משמרת",()=>DAYS.forEach((dn,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=dn;sty(x,"595959",true,32)}));
     row(S.shiftLbl.m,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=NEED[s.id].m[d],arr=A.m[d];
-      if(need===0&&!arr.length){ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=dm(d).off?"":"—";sty(x,"595959",true);return}
-      const a=ws.getCell(r,c),b=ws.getCell(r,c+1);a.value=arr[0]?empName(arr[0]):"";b.value=arr.slice(1).map(empName).join(", ");sty(a,"A9D18E",false);sty(b,"A9D18E",false)}));
+      if(need===0&&!arr.length){ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=dm(d).off?"":"—";sty(x,"595959",true,30);return}
+      const a=ws.getCell(r,c),b=ws.getCell(r,c+1);a.value=arr[0]?empName(arr[0]):"";b.value=arr.slice(1).map(empName).join(", ");sty(a,"A9D18E",false,28);sty(b,"A9D18E",false,28)}));
     row(S.shiftLbl.e,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=NEED[s.id].e[d],arr=A.e[d],md=dm(d);ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);
-      if(need===0&&!arr.length){x.value=d===5?"שבת שלום":(md.off||md.noEve)?"":"—";sty(x,"595959",true);return}
-      x.value=arr.map(empName).join(", ");sty(x,"C5E0B4",false)}));
-    row("הערות ואירועים",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=noteText(w,s.id,d);sty(x,"F2F2F2",false,10);x.font={bold:true,size:10,color:{argb:"FF808080"},name:"Calibri"}}));
+      if(need===0&&!arr.length){x.value=d===5?"שבת שלום":(md.off||md.noEve)?"":"—";sty(x,"595959",true,30);return}
+      x.value=arr.map(empName).join(", ");sty(x,"C5E0B4",false,28)}));
+    row("הערות ואירועים",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=noteText(w,s.id,d);sty(x,"F2F2F2",false,20);x.font={bold:true,size:20,color:{argb:"FF808080"},name:"Calibri"}}));
     r++;
   });
   ws.pageSetup.printArea="A1:M"+Math.max(1,r-2);
