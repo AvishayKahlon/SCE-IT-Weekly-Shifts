@@ -516,7 +516,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 16:10";
+const APP_VER="20.10.2026 16:20";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -792,7 +792,7 @@ function autoNote(sh,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d)
 function aNote(w,sid,sh,d,id,wk){const v=(w.anote||{})[`${sid}|${sh}|${d}|${id}`];return (v===undefined?autoNote(sh,d,wk):v)||""}
 /* cell content: morning = note on a second line, evening = note in brackets on the same line */
 function cellNames(w,sid,sh,d,ids){return ids.map(id=>{const n=aNote(w,sid,sh,d,id);
-  return sh==="m"?`<span class="nm">${esc(empName(id))}</span>${n?`<span class="an an2">${esc(n)}</span>`:""}`:`${esc(empName(id))}${n?` <span class="an">(${esc(n)})</span>`:""}`}).join(sh==="m"?"":", ")}
+  return sh==="m"?`<span class="nm">${esc(empName(id))}</span>${n?`<span class="an an2">(${esc(n)})</span>`:""}`:`${esc(empName(id))}${n?` <span class="an">(${esc(n)})</span>`:""}`}).join(sh==="m"?"":", ")}
 function plainNames(w,sid,sh,d,wk){return (w.assign[sid]?.[sh]?.[d]||[]).map(id=>{const n=aNote(w,sid,sh,d,id,wk);return empName(id)+(n?` (${n})`:"")})}
 /* note row text = holiday name(s) + the manual note, like the Excel note formula */
 function noteText(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean).join(" · ")}
@@ -1258,7 +1258,7 @@ $("#xlsBtn").onclick=async()=>{
       if(need===0&&!arr.length){ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=dm(d).off?"":"—";sty(x,"595959",true,30);return}
       const a=ws.getCell(r,c),b=ws.getCell(r,c+1);sty(a,"A9D18E",false,28);sty(b,"A9D18E",false,28);
       /* morning: hours/note on a second, smaller line */
-      const rich=ids=>{const rt=[];ids.forEach((id,k)=>{const n=aNote(w,s.id,"m",d,id);rt.push({text:(k?", ":"")+empName(id),font:{bold:true,size:28,name:"Calibri"}});if(n){rt.push({text:"\n"+n,font:{bold:true,size:18,name:"Calibri",color:{argb:"FF3F3F3F"}}});tall=true}});return rt.length?{richText:rt}:""};
+      const rich=ids=>{const rt=[];ids.forEach((id,k)=>{const n=aNote(w,s.id,"m",d,id);rt.push({text:(k?", ":"")+empName(id),font:{bold:true,size:28,name:"Calibri"}});if(n){rt.push({text:"\n("+n+")",font:{bold:true,size:18,name:"Calibri",color:{argb:"FF3F3F3F"}}});tall=true}});return rt.length?{richText:rt}:""};
       a.value=rich(arr.slice(0,1));b.value=rich(arr.slice(1));[a,b].forEach(x=>{if(String((x.value&&x.value.richText||[]).map(t=>t.text).join("")).includes("\n"))x.alignment={...x.alignment,wrapText:true,shrinkToFit:false}})}));
     row(S.shiftLbl.e,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=NEED[s.id].e[d],arr=A.e[d],md=dm(d);ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);
       if(need===0&&!arr.length){x.value=d===5?"שבת שלום":(md.off||md.noEve)?"":"—";sty(x,"595959",true,30);return}
