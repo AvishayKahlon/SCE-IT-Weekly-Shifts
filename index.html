@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>סידור עבודה שבועי</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -181,8 +181,45 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   ol.rot li{display:grid;gap:4px}
   .pop{left:8px!important;right:8px;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:60vh}
   .pop button{padding:12px 12px;font-size:16px}
+  table.rotT select{min-width:0;max-width:110px}
 }
-</style>
+/* holidays in the sheet */
+table.sh .off.hol{background:#595959}
+table.sh .note .hol,.dnote .hol{flex:none;font-weight:700;font-size:12px;color:#333;background:#E4E4E4;border-radius:4px;padding:0 4px;white-space:nowrap}
+.dcard .dh .hn{font-size:13px;font-weight:700;opacity:1;background:#E4E4E4;color:#333;border-radius:4px;padding:0 6px}
+/* constraint states (mirrors the Excel conditional formatting) */
+.cst[data-v="T"],.cst[data-v="B"]{background:#E2EFDA;color:#1b2a12}
+.cst[data-v="V"]{background:var(--warn-bg);color:var(--warn);font-size:13px}
+.cst[data-v="F"]{color:var(--muted)}
+.cst:disabled{opacity:1;cursor:default}
+.cst[data-s="ok"]{background:#C6EFCE;color:#006100}
+.cst[data-s="bad"]{background:#FFC7CE;color:#9C0006}
+.cst[data-s="miss"]{background:#FFEB9C;color:#9C6500}
+.cst[data-v="O"]{background:#595959;color:#fff}
+.cst.ev3{background:#D5C4DF!important;color:#4A235A!important}
+td.stt{font-size:18px;font-weight:800;width:44px}
+td.stt.ok{color:#008000} td.stt.bad{color:#E00000} td.stt.miss{color:#BF8F00}
+/* friday rotation table */
+table.rotT{border-collapse:collapse;min-width:320px}
+table.rotT th,table.rotT td{border:1px solid var(--line);padding:5px 6px;text-align:center}
+table.rotT th{background:var(--sh-dark);color:#fff}
+table.rotT td.rn{color:var(--muted);width:32px}
+table.rotT td.now{background:var(--sh-cell);color:var(--sh-ink)}
+table.rotT .rc{display:flex;gap:4px;align-items:center;justify-content:center}
+table.rotT .rc button{padding:3px 8px;font-size:13px}
+table.rotT tr.cur td{background:var(--sh-date);color:#1b2a12;font-weight:800}
+table.rotT tr.cur td:first-child,table.rotT tr.nxt td:first-child{white-space:nowrap}
+table.rotT tr.nxt td{color:var(--muted)}
+select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+/* vacations & holidays tables */
+table.cal{border-collapse:collapse;width:100%;min-width:760px}
+table.cal th,table.cal td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:center}
+table.cal th{background:var(--sh-date);color:#1b2a12;font-size:14px}
+table.cal input[type=text]{width:100%}
+table.cal .dot{font-size:18px;color:var(--ok)} table.cal .dot.old{color:#E00000}
+table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
+.fair .eq{color:#00B050;font-weight:800} .fair .over{color:#E08A00;font-weight:800}
+</style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
 תצוגה מקדימה (מוואטסאפ, מהקבצים או מגוגל דרייב) מציגה את הדף בלי להפעיל אותו.<br>
@@ -202,6 +239,7 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
 
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="sched" aria-selected="true">סידור ואילוצים</button>
+    <button role="tab" data-tab="cal" aria-selected="false">חופשות וחגים</button>
     <button role="tab" data-tab="msg" aria-selected="false">הודעות</button>
     <button role="tab" data-tab="staff" aria-selected="false">עובדים</button>
     <button role="tab" data-tab="set" aria-selected="false">הגדרות</button>
@@ -218,14 +256,21 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
       <button id="finalBtn">סמן כסופי</button>
     </div>
     <details class="card cons" id="consBox" open>
-      <summary><h2>אילוצים לשבוע</h2><span class="hint">לחיצה על משבצת מחליפה מצב, ואז "צור סידור אוטומטי"</span></summary>
+      <summary><h2>אילוצים לשבוע</h2><span class="hint">לחיצה על משבצת מחליפה מצב: זמין ← בוקר ← ערב ← חופש. בשישי: גיבוי לאירוע</span></summary>
       <div class="legend" style="margin:10px 0">
-        <span><i style="background:transparent"></i>זמין</span>
-        <span><i style="background:#E3F0FF"></i>רק בוקר</span>
-        <span><i style="background:#FFF1D6"></i>רק ערב</span>
-        <span><i style="background:var(--warn-bg)"></i>לא זמין</span>
+        <span><i style="background:#E3F0FF"></i>בוקר</span>
+        <span><i style="background:#FFF1D6"></i>ערב</span>
+        <span><i style="background:var(--warn-bg)"></i>חופש</span>
+        <span><i style="background:#C6EFCE"></i>✔ תואם לסידור</span>
+        <span><i style="background:#FFC7CE"></i>✘ סתירה</span>
+        <span><i style="background:#FFEB9C"></i>⚠ לא שובץ</span>
+        <span><i style="background:#D5C4DF"></i>יותר מ-2 ביקשו ערב</span>
       </div>
       <div class="scroll"><table class="grid" id="consGrid"></table></div>
+    </details>
+    <details class="card cons" id="friBox" open>
+      <summary><h2>כוננות שישי</h2><span class="hint">הסבב מתקדם שבוע בכל שישי. שישי של פגרה לא תופס תור. ◉ קובע של מי התור השבוע</span></summary>
+      <div class="scroll" id="friSet" style="margin-top:10px"></div>
     </details>
     <div class="msgs" id="msgs"></div>
     <button class="vt" id="viewToggle">הצג כטבלה מלאה</button>
@@ -239,6 +284,21 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
     </div>
   </section>
 
+
+  <section class="panel" id="tab-cal" hidden>
+    <div class="card">
+      <h2>יומן חופשות טכנאים</h2>
+      <p class="hint" style="margin-bottom:10px">חופשה מסמנת "חופש" אוטומטית בימים ראשון–חמישי שבטווח. ● אדום = החופשה הסתיימה לפני השבוע המוצג.</p>
+      <div class="scroll"><table class="cal" id="vacT"></table></div>
+      <div class="row" style="margin-top:10px"><button id="addVac" class="primary">+ הוסף חופשה</button></div>
+    </div>
+    <div class="card">
+      <h2>לוח חגים</h2>
+      <p class="hint" style="margin-bottom:10px"><b>פגרה</b>: לא עובדים, כל היום סגור, ושישי של פגרה לא תופס תור בסבב. <b>סיום ב-16:00</b>: אין משמרת ערב. <b>סיום ב-19:00</b>: המשמרות כרגיל, מופיע כהערה. שם החג מופיע אוטומטית בשורת ההערות.</p>
+      <div class="scroll"><table class="cal" id="holT"></table></div>
+      <div class="row" style="margin-top:10px"><button id="addHol" class="primary">+ הוסף חג</button></div>
+    </div>
+  </section>
 
   <section class="panel" id="tab-msg" hidden>
     <div class="card">
@@ -315,11 +375,6 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
         <label><input type="checkbox" id="siteCover"> כל עובד לפחות בוקר אחד וערב אחד בכל אתר בשבוע</label>
       </div>
     </div>
-    <div class="card">
-      <h2>בוקר שישי</h2>
-      <p class="hint" style="margin-bottom:10px">לכל אתר: אוטומטי, עובד קבוע, או סבב לפי סדר. מי שיש לו אילוץ בשישי מדולג, והתור עובר לבא אחריו.</p>
-      <div id="friSet" class="rows"></div>
-    </div>
     <div id="sitesSet" class="rows"></div>
     <div class="row"><input type="text" id="newSite" placeholder="שם אתר חדש" aria-label="שם אתר חדש"><button id="addSite">הוסף אתר</button></div>
     <div class="card">
@@ -337,7 +392,10 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
-const CST=["A","M","E","X"], CST_LBL={A:"✓",M:"בוקר",E:"ערב",X:"✗"};
+const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
+const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
+const CAMPUS=["בני ברית","ז'בוטינסקי","שניהם"];
+const HOL_PRESET=[["חג ראש השנה","2026-09-11","2026-09-13","off"],["צום יום כיפור","2026-09-20","2026-09-21","off"],["חג סוכות","2026-09-25","2026-09-26","off"],["חול המועד סוכות","2026-09-27","2026-10-01","h16"],["הושענה רבה","2026-10-02","2026-10-02","off"],["שמיני עצרת ושמחת תורה","2026-10-03","2026-10-03","off"],["חג חנוכה","2026-12-06","2026-12-06","off"],["צום תענית אסתר","2027-03-22","2027-03-22","h16"],["חג פורים","2027-03-23","2027-03-23","off"],["ערב ביעור חמץ","2027-04-20","2027-04-20","h16"],["חג פסח","2027-04-21","2027-04-22","off"],["חול המועד פסח","2027-04-23","2027-04-27","h16"],["ערב יום הזיכרון לשואה ולגבורה","2027-05-03","2027-05-03","h19"],["ערב יום הזיכרון לחללי מערכות ישראל","2027-05-10","2027-05-10","h16"],["יום הזיכרון לחללי מערכות ישראל","2027-05-11","2027-05-11","off"],["יום העצמאות","2027-05-12","2027-05-12","off"],["חג שבועות","2027-06-10","2027-06-11","off"],["צום תשעה באב","2027-08-12","2027-08-12","off"]];
 const uid=()=>Math.random().toString(36).slice(2,9);
 const clientId=uid();
 const $=s=>document.querySelector(s);
@@ -356,6 +414,49 @@ function parseKey(k){const[a,b,c]=k.split("-").map(Number);return new Date(a,b-1
 function fmt(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()}
 let cur=(()=>{const t=new Date();const s=sundayOf(t);if(t.getDay()>=4)s.setDate(s.getDate()+7);return key(s)})();
 function dayDate(i){const d=parseKey(cur);d.setDate(d.getDate()+i);return d}
+function addW(wk,n){const d=parseKey(wk);d.setDate(d.getDate()+7*n);return key(d)}
+
+/* ---------- holidays & vacations ---------- */
+function ensureData(){
+  if(!Array.isArray(S.holidays))S.holidays=HOL_PRESET.map(([name,from,to,type])=>({id:uid(),name,from,to,type}));
+  if(!Array.isArray(S.vac))S.vac=[];
+  if(S.friVer!==2){S.friVer=2;S.friRule=defaultFri()}
+  if(!S.friRule)S.friRule={};
+}
+/* holidays covering a date: off = no work at all, noEve = day ends at 16:00 */
+function dayMode(dt){const k=typeof dt==="string"?dt:key(dt);const hs=(S.holidays||[]).filter(h=>h.from&&h.from<=k&&k<=(h.to||h.from));
+  return{off:hs.some(h=>h.type==="off"),noEve:hs.some(h=>h.type==="h16"),names:hs.map(h=>h.name).filter(Boolean)}}
+function dm(d){return dayMode(dayDate(d))}
+function onVac(eid,dt){const k=key(dt);return (S.vac||[]).some(v=>v.emp===eid&&v.from&&v.from<=k&&k<=(v.to||v.from))}
+function countFris(a,b){if(!a||!b||b<a)return 0;let n=0;const d=parseKey(a),e=parseKey(b);while(d<=e){if(d.getDay()===5)n++;d.setDate(d.getDate()+1)}return n}
+/* effective staffing need for the current week: holidays close a whole day or its evening */
+let NEED={},CAPX=true,EC={};
+function calcNeed(){NEED={};const md=DAYS.map((_,d)=>dm(d));
+  S.sites.forEach(s=>{NEED[s.id]={m:DAYS.map((_,d)=>md[d].off?0:(s.req.m||[])[d]||0),e:DAYS.map((_,d)=>md[d].off||md[d].noEve?0:(s.req.e||[])[d]||0)}})}
+/* Sun–Thu target per employee, capped by the open days and by the available slots in holiday weeks */
+function weekCap(){const T=+S.target||0;if(!T)return{cap:0,exact:false};let open=0,slots=0;
+  for(let d=0;d<5;d++){let o=false;S.sites.forEach(s=>{const x=NEED[s.id].m[d]+NEED[s.id].e[d];slots+=x;if(x)o=true});if(o)open++}
+  const n=activeEmps().length,cap=Math.min(T,open);return{cap,exact:n>0&&slots>=cap*n}}
+/* personal target: the week cap minus open days the employee is on vacation */
+function empCap(eid,cap){let free=0,open=0;for(let d=0;d<5;d++){if(!S.sites.some(s=>NEED[s.id].m[d]+NEED[s.id].e[d]))continue;open++;if(!onVac(eid,dayDate(d)))free++}return Math.max(0,cap-(open-free))}
+
+/* ---------- Friday rotation (mirrors the Excel "כוננות שישי" table) ---------- */
+/* a rotation advances one step per Friday; a Friday that falls in a "פגרה" holiday is skipped and does not use a turn */
+function friOff(wk){const d=parseKey(wk);d.setDate(d.getDate()+5);return dayMode(d).off}
+function workFris(a,b){let n=0,k=a,g=0;if(b>=a){while(k<b&&g++<3000){k=addW(k,1);if(!friOff(k))n++}}else{while(k>b&&g++<3000){if(!friOff(k))n--;k=addW(k,-1)}}return n}
+function rotTurn(r,wk){const l=(r&&r.list)||[];if(!l.length||friOff(wk))return null;const n=l.length;return (((workFris(r.anchor||wk,wk)+(r.off||0))%n)+n)%n}
+function refWeek(){let k=cur;for(let i=0;i<60&&friOff(k);i++)k=addW(k,1);return k}
+function rotSetTurn(r,i){r.anchor=refWeek();r.off=i}
+function defaultFri(){const r={},by=n=>(S.employees.find(e=>e.name.trim()===n)||{}).id;
+  const bb=S.sites.find(s=>s.name.includes("בני ברית")),zb=S.sites.find(s=>s.name.includes("בוטינסקי")),sh=by("שלמה");
+  if(bb&&sh)r[bb.id]={list:[sh,sh,sh,sh],anchor:"2026-10-18",off:0};
+  /* calibrated to the Excel: Friday 23/10/2026 = אלכסיי, 30/10 = אור */
+  const zl=["אור","יהודה","מרדכי","אלכסיי"].map(by).filter(Boolean);if(zb&&zl.length)r[zb.id]={list:zl,anchor:"2026-10-18",off:zl.length===4?3:0};
+  return r}
+/* who must work Friday morning at each site this week, by rotation (no skipping — vacations are Sun–Thu only) */
+function friPlan(w,wk){const plan={};if(friOff(wk))return plan;
+  S.sites.forEach(s=>{const r=(S.friRule||{})[s.id];if(!((s.req.m||[])[5]>0))return;const t=rotTurn(r,wk);if(t!==null&&r.list[t])plan[s.id]=r.list[t]});
+  return plan}
 
 /* ---------- week data ---------- */
 function W(k=cur){
@@ -367,7 +468,24 @@ function W(k=cur){
   });
   return w;
 }
-function cons(w,eid,d){return (w.cons[eid]||[])[d]||"A"}
+/* Sun–Thu: A=זמין M=בוקר E=ערב X=חופש (a vacation in the journal forces X). Friday: A or B=גיבוי לאירוע */
+function cons(w,eid,d){if(d<5&&onVac(eid,dayDate(d)))return "X";const v=(w.cons[eid]||[])[d]||"A";return d===5?(v==="B"?"B":"A"):v}
+function friCons(w,eid){if(friOff(cur))return "O";if(Object.values(friPlan(w,cur)).includes(eid))return "T";return cons(w,eid,5)==="B"?"B":"F"}
+function onShift(w,eid,d,sh){return S.sites.some(s=>(w.assign[s.id]?.[sh]?.[d]||[]).includes(eid))}
+function hasAssign(w){return Object.values(w.assign).some(a=>a.m.some(x=>x.length)||a.e.some(x=>x.length))}
+/* per-employee status like the Excel column B: ✘ conflict, ⚠ marked but not scheduled, ✔ all good */
+function empStatus(w,eid){
+  const cells=DAYS.map((_,d)=>{const m=onShift(w,eid,d,"m"),e=onShift(w,eid,d,"e"),any=m||e;
+    if(d===5){const v=friCons(w,eid);if(v==="T"||v==="B")return any?"ok":"miss";return ""}
+    if(dm(d).off)return any?"bad":"";
+    const v=cons(w,eid,d);
+    if(v==="X")return any?"bad":"ok";
+    if(v==="M")return m?"ok":e?"bad":"miss";
+    if(v==="E")return e?"ok":m?"bad":"miss";
+    /* plain זמין only warns when the day has a slot for everyone (e.g. not in a 16:00 holiday week) */
+    const slots=S.sites.reduce((a,s)=>a+NEED[s.id].m[d]+NEED[s.id].e[d],0);
+    return any?"ok":slots>=activeEmps().length?"miss":""});
+  return{st:cells.includes("bad")?"bad":cells.includes("miss")?"miss":"ok",cells}}
 function activeEmps(){return S.employees.filter(e=>e.active!==false)}
 function empName(id){const e=S.employees.find(x=>x.id===id);return e?e.name:"?"}
 
@@ -394,24 +512,27 @@ function weekCounts(w){
 function canWork(w,eid,d,sh){const c=cons(w,eid,d);if(c==="X")return false;if(c==="M"&&sh==="e")return false;if(c==="E"&&sh==="m")return false;return true}
 function variance(a){if(!a.length)return 0;const m=a.reduce((x,y)=>x+y,0)/a.length;return a.reduce((x,y)=>x+(y-m)**2,0)/a.length}
 function generate(){
+  calcNeed();
   const w=W(),emps=activeEmps().map(e=>e.id),hist=history(cur);
   const slots=[];
-  S.sites.forEach(s=>DAYS.forEach((_,d)=>["m","e"].forEach(sh=>{const n=(s.req[sh]||[])[d]||0;for(let i=0;i<n;i++)slots.push({s:s.id,d,sh})})));
-  const T=+S.target||0;
-  ensureFri();const fp=friPlan(w,cur),lockedFri=new Set(Object.keys(fp));
+  S.sites.forEach(s=>DAYS.forEach((_,d)=>["m","e"].forEach(sh=>{const n=NEED[s.id][sh][d];for(let i=0;i<n;i++)slots.push({s:s.id,d,sh})})));
+  const C=weekCap(),T=C.cap;CAPX=C.exact;EC={};emps.forEach(e=>EC[e]=empCap(e,T));
+  const fp=friPlan(w,cur);Object.keys(fp).forEach(k=>{if(!emps.includes(fp[k]))delete fp[k]});const lockedFri=new Set(Object.keys(fp));
   const taken={};const freeSlots=slots.filter(x=>{if(x.d===5&&x.sh==="m"&&fp[x.s]&&!taken[x.s]){taken[x.s]=1;return false}return true});
   let best=null,bestScore=Infinity;
   for(let it=0;it<800;it++){
     const tot={},eve={},fri={},day={},nf={};emps.forEach(e=>{tot[e]=0;eve[e]=0;fri[e]=0;nf[e]=0;day[e]=new Set()});
     const out={};S.sites.forEach(s=>out[s.id]={m:DAYS.map(()=>[]),e:DAYS.map(()=>[])});
     Object.entries(fp).forEach(([sid,e])=>{out[sid].m[5].push(e);day[e].add(5);tot[e]++;fri[e]++});
+    /* event backups marked on Friday keep their existing manual placement */
+    S.sites.forEach(s=>w.assign[s.id].m[5].slice(1).forEach(e=>{if(emps.includes(e)&&cons(w,e,5)==="B"&&!day[e].has(5)){out[s.id].m[5].push(e);day[e].add(5)}}));
     const order=freeSlots.map(x=>({...x,r:Math.random(),cand:emps.filter(e=>canWork(w,e,x.d,x.sh)).length})).sort((a,b)=>a.cand-b.cand||a.r-b.r);
     let unfilled=0;
     for(const sl of order){
       let pick=null,ps=Infinity;
       for(const e of emps){
         if(day[e].has(sl.d)||!canWork(w,e,sl.d,sl.sh))continue;
-        if(T&&sl.d<5&&nf[e]>=T)continue;
+        if(T&&sl.d<5&&nf[e]>=EC[e])continue;
         const sc=(sl.d<5?nf[e]*3:tot[e]*1)+(sl.sh==="e"?eve[e]*4:0)+(sl.d===5?(fri[e]+hist[e].fri)*5:0)+(S.siteCover!==false&&sl.d<5&&!out[sl.s][sl.sh].some((a,dd)=>dd<5&&a.includes(e))?-5:0)+Math.random()*1.6;
         if(sc<ps){ps=sc;pick=e}
       }
@@ -426,37 +547,15 @@ function generate(){
   if(best){w.assign=best;W();}
 }
 /* every employee: at least one morning and one evening at each site, Sun–Thu only (Friday doesn't count) */
-function coverNeeds(){const n=[];S.sites.forEach(s=>["m","e"].forEach(sh=>{if((s.req[sh]||[]).some((x,d)=>d<5&&x>0))n.push([s.id,sh])}));return n}
+function coverNeeds(){const n=[];S.sites.forEach(s=>["m","e"].forEach(sh=>{if(NEED[s.id][sh].some((x,d)=>d<5&&x>0))n.push([s.id,sh])}));return n}
 function coverGaps(out,emps){
   if(S.siteCover===false)return[];
   const g=[];coverNeeds().forEach(([sid,sh])=>emps.forEach(e=>{if(!out[sid][sh].some((a,d)=>d<5&&a.includes(e)))g.push([e,sid,sh])}));return g;
 }
-/* ---------- Friday morning rules per site: auto / fixed person / rotation ---------- */
-function ensureFri(){
-  if(S.friRule)return;S.friRule={};
-  const sh=S.employees.find(e=>e.name.trim()==="שלמה"),bb=S.sites.find(s=>s.name.includes("בני ברית")),zb=S.sites.find(s=>s.name.includes("בוטינסקי"));
-  if(sh&&bb)S.friRule[bb.id]={mode:"fixed",emp:sh.id};
-  if(zb){const list=S.employees.filter(e=>e.active!==false&&(!sh||e.id!==sh.id)).map(e=>e.id);if(list.length)S.friRule[zb.id]={mode:"rot",list,anchor:"2026-10-18"}}
-}
-function weeksFrom(a,b){return Math.round((parseKey(b)-parseKey(a))/(7*864e5))}
-function rotList(r){return (r.list||[]).filter(id=>S.employees.some(e=>e.id===id&&e.active!==false))}
-function rotTurn(r,wk){const l=rotList(r);if(!l.length)return null;const n=l.length;return ((weeksFrom(r.anchor||wk,wk)%n)+n)%n}
-/* who should work Friday morning at each ruled site this week (skips people blocked by a constraint) */
-function friPlan(w,wk){
-  const plan={},used=new Set();
-  S.sites.forEach(s=>{const r=(S.friRule||{})[s.id];if(!r||!((s.req.m||[])[5]>0))return;
-    if(r.mode==="fixed"&&r.emp&&!used.has(r.emp)&&canWork(w,r.emp,5,"m")){plan[s.id]=r.emp;used.add(r.emp)}
-  });
-  S.sites.forEach(s=>{const r=(S.friRule||{})[s.id];if(!r||r.mode!=="rot"||!((s.req.m||[])[5]>0))return;
-    const l=rotList(r),t=rotTurn(r,wk);if(t===null)return;
-    for(let k=0;k<l.length;k++){const e=l[(t+k)%l.length];if(!used.has(e)&&canWork(w,e,5,"m")){plan[s.id]=e;used.add(e);break}}
-  });
-  return plan;
-}
 function planScore(out,emps,hist,T){
   const nf={},eve={},fri={};emps.forEach(e=>{nf[e]=0;eve[e]=0;fri[e]=0});let unfilled=0;
-  S.sites.forEach(s=>["m","e"].forEach(sh=>DAYS.forEach((_,d)=>{const need=(s.req[sh]||[])[d]||0;const a=out[s.id][sh][d];unfilled+=Math.max(0,need-a.length);a.forEach(e=>{if(!(e in nf))return;if(d<5)nf[e]++;if(sh==="e")eve[e]++;if(d===5)fri[e]++})})));
-  return unfilled*10000+coverGaps(out,emps).length*3000+(T?emps.reduce((a,e)=>a+Math.abs(nf[e]-T),0)*500:0)
+  S.sites.forEach(s=>["m","e"].forEach(sh=>DAYS.forEach((_,d)=>{const need=NEED[s.id][sh][d];const a=out[s.id][sh][d];unfilled+=Math.max(0,need-a.length);a.forEach(e=>{if(!(e in nf))return;if(d<5)nf[e]++;if(sh==="e")eve[e]++;if(d===5)fri[e]++})})));
+  return unfilled*10000+coverGaps(out,emps).length*3000+(T?emps.reduce((a,e)=>a+(CAPX?Math.abs(nf[e]-EC[e]):Math.max(0,nf[e]-EC[e])),0)*500:0)
     +Math.round((variance(emps.map(e=>nf[e]))*20+variance(emps.map(e=>eve[e]))*15+variance(emps.map(e=>fri[e]+hist[e].fri))*10)*100)/100;
 }
 /* local search: swap two people's shifts on the same day, or move a shift to someone free that day */
@@ -465,7 +564,7 @@ function improve(w,out,emps,hist,T,locked){
   for(let pass=0;pass<6&&cur>0;pass++){
     let better=false;
     for(let d=0;d<DAYS.length;d++){
-      const cells=[],all=[];S.sites.forEach(s=>["m","e"].forEach(sh=>out[s.id][sh][d].forEach((e,i)=>{all.push(e);if(!(d===5&&sh==="m"&&locked&&locked.has(s.id)&&i===0))cells.push({a:out[s.id][sh][d],i,sh})})));
+      const cells=[],all=[];S.sites.forEach(s=>["m","e"].forEach(sh=>out[s.id][sh][d].forEach((e,i)=>{all.push(e);if(!(d===5&&sh==="m"&&((locked&&locked.has(s.id)&&i===0)||cons(w,e,5)==="B")))cells.push({a:out[s.id][sh][d],i,sh})})));
       for(let x=0;x<cells.length;x++)for(let y=x+1;y<cells.length;y++){
         const A=cells[x],B=cells[y],ea=A.a[A.i],eb=B.a[B.i];if(ea===eb)continue;
         if(!canWork(w,ea,d,B.sh)||!canWork(w,eb,d,A.sh))continue;
@@ -487,23 +586,22 @@ function improve(w,out,emps,hist,T,locked){
 function problems(w){
   const list=[],bad=new Set();
   S.sites.forEach(s=>DAYS.forEach((dn,d)=>["m","e"].forEach(sh=>{
-    const need=(s.req[sh]||[])[d]||0,have=w.assign[s.id][sh][d].length;
+    const need=NEED[s.id][sh][d],have=w.assign[s.id][sh][d].length;
     if(have<need)list.push(`${s.name}, ${dn} ${sh==="m"?"בוקר":"ערב"}: חסר${need-have>1?"ים":""} ${need-have}`);
+    if(!need&&have&&((s.req[sh]||[])[d]||0)>0){const md=dm(d);w.assign[s.id][sh][d].forEach((_,i)=>bad.add(`${s.id}|${sh}|${d}|${i}`));list.push(`${s.name}, ${dn} ${sh==="m"?"בוקר":"ערב"}: יש שיבוץ אבל ${md.off?"זה יום פגרה":"היום מסתיים ב-16:00"}`)}
     w.assign[s.id][sh][d].forEach((id,i)=>{if(!canWork(w,id,d,sh)){bad.add(`${s.id}|${sh}|${d}|${i}`);list.push(`${empName(id)} שובץ/ה ב${dn} ${sh==="m"?"בוקר":"ערב"} למרות אילוץ`)}});
   })));
   DAYS.forEach((dn,d)=>{const cnt={};S.sites.forEach(s=>["m","e"].forEach(sh=>w.assign[s.id][sh][d].forEach((id,i)=>{(cnt[id]=cnt[id]||[]).push(`${s.id}|${sh}|${d}|${i}`)})));
     Object.entries(cnt).forEach(([id,arr])=>{if(arr.length>1){arr.forEach(x=>bad.add(x));list.push(`${empName(id)} משובץ/ת פעמיים ביום ${dn}`)}})});
-  const T=+S.target||0;
-  if(T&&Object.values(w.assign).some(a=>a.m.some(x=>x.length)||a.e.some(x=>x.length))){
+  const C=weekCap();
+  if(C.cap&&hasAssign(w)){
     const c=weekCounts(w);
-    activeEmps().forEach(e=>{const n=c[e.id].tot-c[e.id].fri;if(n!==T)list.push(`${e.name}: ${n} משמרות בראשון–חמישי במקום ${T}`)});
+    activeEmps().forEach(e=>{const n=c[e.id].tot-c[e.id].fri,k=empCap(e.id,C.cap);if(C.exact?n!==k:n>k)list.push(`${e.name}: ${n} משמרות בראשון–חמישי ${C.exact?"במקום":"(מקסימום)"} ${k}`)});
   }
-  if(Object.values(w.assign).some(a=>a.m.some(x=>x.length)||a.e.some(x=>x.length))){
-    ensureFri();const fp=friPlan(w,cur);
-    S.sites.forEach(s=>{const r=S.friRule[s.id];if(!r||r.mode==="auto"||!((s.req.m||[])[5]>0))return;
-      if(!fp[s.id])list.push(`שישי ב${s.name}: אף אחד מה${r.mode==="rot"?"סבב":"עובד הקבוע"} לא זמין`);
-      else if(!w.assign[s.id].m[5].includes(fp[s.id]))list.push(`שישי ב${s.name}: לפי ה${r.mode==="rot"?"סבב":"קבוע"} צריך להיות ${empName(fp[s.id])}`);
-    });
+  if(hasAssign(w)){
+    const fp=friPlan(w,cur);
+    S.sites.forEach(s=>{if(fp[s.id]&&!w.assign[s.id].m[5].includes(fp[s.id]))list.push(`שישי ב${s.name}: לפי הסבב צריך להיות ${empName(fp[s.id])}`)});
+    activeEmps().forEach(e=>{if(cons(w,e.id,5)==="B"&&friCons(w,e.id)==="B"&&!onShift(w,e.id,5,"m"))list.push(`${e.name}: מסומן גיבוי לאירוע בשישי אבל לא שובץ`)});
     const by={};coverGaps(w.assign,activeEmps().map(e=>e.id)).forEach(([e,sid,sh])=>{const s=S.sites.find(x=>x.id===sid);(by[e]=by[e]||[]).push(`${sh==="m"?"בוקר":"ערב"} ב${s?s.name:""}`)});
     Object.entries(by).forEach(([e,arr])=>list.push(`${empName(e)}: אין ${arr.join(", ")}`));
   }
@@ -511,6 +609,8 @@ function problems(w){
 }
 
 /* ---------- sheet rendering ---------- */
+/* note row text = holiday name(s) + the manual note, like the Excel note formula */
+function noteText(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean).join(" · ")}
 function sheetHTML(w,exportMode){
   const pr=exportMode?null:problems(w);
   const parts=[];
@@ -524,8 +624,8 @@ function sheetHTML(w,exportMode){
     // morning
     h+=`<tr><td class="lbl">${esc(S.shiftLbl.m)}</td>`;
     DAYS.forEach((_,d)=>{
-      const need=(s.req.m||[])[d]||0,arr=A.m[d];
-      if(need===0&&!arr.length){h+=`<td class="off" colspan="2">—</td>`;return}
+      const need=NEED[s.id].m[d],arr=A.m[d];
+      if(need===0&&!arr.length){h+=dm(d).off?`<td class="off hol" colspan="2"></td>`:`<td class="off" colspan="2">—</td>`;return}
       const n=Math.max(2,need);
       const cells=[];for(let i=0;i<2;i++){
         const names=i===0?arr.slice(0,1):arr.slice(1);
@@ -540,15 +640,15 @@ function sheetHTML(w,exportMode){
     // evening
     h+=`<tr><td class="lbl">${esc(S.shiftLbl.e)}</td>`;
     DAYS.forEach((_,d)=>{
-      const need=(s.req.e||[])[d]||0,arr=A.e[d];
-      if(need===0&&!arr.length){h+=`<td class="off" colspan="2">${d===5?"שבת שלום":"—"}</td>`;return}
+      const need=NEED[s.id].e[d],arr=A.e[d],md=dm(d);
+      if(need===0&&!arr.length){h+=d===5?`<td class="off" colspan="2">שבת שלום</td>`:(md.off||md.noEve)?`<td class="off hol" colspan="2"></td>`:`<td class="off" colspan="2">—</td>`;return}
       const k=`${s.id}|e|${d}|0`,cls=["slot","c"];
       if(!exportMode&&arr.length<need)cls.push("empty-need");if(pr&&arr.some((_,j)=>pr.bad.has(`${s.id}|e|${d}|${j}`)))cls.push("bad");
       h+=`<td class="${cls.join(" ")}" colspan="2" data-k="${k}">${esc(arr.map(empName).join(", "))}</td>`;
     });
     h+=`</tr>`;
     // notes
-    h+=`<tr><td class="lbl">הערות ואירועים</td>${DAYS.map((_,d)=>`<td class="note" colspan="2">${exportMode?esc(w.notes[s.id][d]):`<div class="nw"><input data-note="${s.id}|${d}" value="${esc(w.notes[s.id][d])}" aria-label="הערה ${DAYS[d]} ${esc(s.name)}">${(w.notes[s.id][d]||"").trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}" title="שליחת תזכורת לוואטסאפ" aria-label="שליחת תזכורת על האירוע">וואטסאפ</button>`:""}</div>`}</td>`).join("")}</tr>`;
+    h+=`<tr><td class="lbl">הערות ואירועים</td>${DAYS.map((_,d)=>{const hn=dm(d).names.join(" · ");return `<td class="note" colspan="2">${exportMode?esc(noteText(w,s.id,d)):`<div class="nw">${hn?`<span class="hol">${esc(hn)}</span>`:""}<input data-note="${s.id}|${d}" value="${esc(w.notes[s.id][d])}" aria-label="הערה ${DAYS[d]} ${esc(s.name)}">${(w.notes[s.id][d]||"").trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}" title="שליחת תזכורת לוואטסאפ" aria-label="שליחת תזכורת על האירוע">וואטסאפ</button>`:""}</div>`}</td>`}).join("")}</tr>`;
     h+=`</table>`;parts.push(h);
   });
   if(!S.sites.length)parts.push(`<div class="empty">אין אתרים עדיין. הוסיפו אתר בלשונית "הגדרות".</div>`);
@@ -562,18 +662,21 @@ function daysHTML(w){
     if(names.some((_,j)=>pr.bad.has(`${sid}|${sh}|${d}|${i+j}`)))cls.push("bad");
     return `<button class="${cls.join(" ")}" data-k="${sid}|${sh}|${d}|${i}">${names.length?esc(names.map(empName).join(", ")):(empty?"+ שבצו":"+")}</button>`};
   return DAYS.map((dn,d)=>{
-    const sites=S.sites.map(s=>{const A=w.assign[s.id],nm=(s.req.m||[])[d]||0,ne=(s.req.e||[])[d]||0;
-      let m="";if(nm||A.m[d].length){m=chip(s.id,"m",d,0,A.m[d].slice(0,1),nm);if(nm>1||A.m[d].length>1)m+=chip(s.id,"m",d,1,A.m[d].slice(1),nm)}else m=`<span class="chip off">—</span>`;
-      let e="";if(ne||A.e[d].length)e=chip(s.id,"e",d,0,A.e[d],ne);else e=`<span class="chip off">${d===5?"שבת שלום":"—"}</span>`;
+    const md=dm(d);
+    const sites=S.sites.map(s=>{const A=w.assign[s.id],nm=NEED[s.id].m[d],ne=NEED[s.id].e[d];
+      let m="";if(nm||A.m[d].length){m=chip(s.id,"m",d,0,A.m[d].slice(0,1),nm);if(nm>1||A.m[d].length>1)m+=chip(s.id,"m",d,1,A.m[d].slice(1),nm)}else m=`<span class="chip off">${md.off?"פגרה":"—"}</span>`;
+      let e="";if(ne||A.e[d].length)e=chip(s.id,"e",d,0,A.e[d],ne);else e=`<span class="chip off">${d===5?"שבת שלום":md.off?"פגרה":md.noEve?"סיום ב-16:00":"—"}</span>`;
       const note=w.notes[s.id][d]||"";
       return `<div class="dsite"><b>${esc(s.name)}</b>
         <div class="dl"><span class="t">בוקר</span><div class="chips">${m}</div></div>
         <div class="dl"><span class="t">ערב</span><div class="chips">${e}</div></div>
         <div class="dnote"><input type="text" data-note="${s.id}|${d}" value="${esc(note)}" placeholder="הערות ואירועים" aria-label="הערה ${dn} ${esc(s.name)}">${note.trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}">וואטסאפ</button>`:""}</div></div>`}).join("");
-    return `<div class="dcard"><div class="dh">${dn}<span>${fmt(dayDate(d)).slice(0,5)}</span></div>${sites}</div>`}).join("");
+    const hn=md.names.join(" · ");
+    return `<div class="dcard"><div class="dh">${dn}${hn?` <span class="hn">${esc(hn)}</span>`:""}<span>${fmt(dayDate(d)).slice(0,5)}</span></div>${sites}</div>`}).join("");
 }
 $("#viewToggle").onclick=()=>{document.body.classList.toggle("tableview");$("#viewToggle").textContent=document.body.classList.contains("tableview")?"הצג לפי ימים":"הצג כטבלה מלאה"};
 function render(){
+  ensureData();calcNeed();
   const w=W();
   const d0=parseKey(cur),d5=dayDate(5);
   $("#weekLbl").textContent=fmt(d0)+" – "+fmt(d5);
@@ -582,8 +685,8 @@ function render(){
   $("#finalBtn").textContent=w.final?"בטל סימון סופי":"סמן כסופי";
   $("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);
   const pr=problems(w);
-  $("#msgs").innerHTML=pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(Object.values(w.assign).some(a=>a.m.some(x=>x.length)||a.e.some(x=>x.length))?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"");
-  renderFair(w);renderCons(w);renderStaff();renderSettings();renderMsgs();
+  $("#msgs").innerHTML=pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"");
+  renderFair(w);renderCons(w);renderFriSet();renderCal();renderStaff();renderSettings();renderMsgs();
 }
 
 /* ---------- WhatsApp messages ---------- */
@@ -611,8 +714,8 @@ function renderMsgs(){
   setMsg("evMsg",lines.length?`תזכורת ליום ${DAYS[di]} ${fmt(ed).slice(0,5)}:\n${lines.join("\n")}`:"");
   // week as text
   const w=W(),out=[`סידור עבודה ${fmt(parseKey(cur)).slice(0,5)}–${fmt(dayDate(5)).slice(0,5)}`];
-  DAYS.forEach((dn,d)=>{out.push(`\n*${dn} ${fmt(dayDate(d)).slice(0,5)}*`);S.sites.forEach(s=>{const m=namesAt(w,s.id,"m",d),e=namesAt(w,s.id,"e",d),n=(w.notes[s.id][d]||"").trim();
-    if(!m.length&&!e.length&&!n)return;out.push(`${s.name}: בוקר ${m.join(", ")||"—"}${d<5||e.length?` | ערב ${e.join(", ")||"—"}`:""}${n?` (${n})`:""}`)})});
+  DAYS.forEach((dn,d)=>{const md=dm(d);out.push(`\n*${dn} ${fmt(dayDate(d)).slice(0,5)}*${md.names.length?` (${md.names.join(", ")}${md.off?" – פגרה":md.noEve?" – סיום ב-16:00":""})`:""}`);if(md.off&&!S.sites.some(s=>namesAt(w,s.id,"m",d).length))return;S.sites.forEach(s=>{const m=namesAt(w,s.id,"m",d),e=namesAt(w,s.id,"e",d),n=(w.notes[s.id][d]||"").trim();
+    if(!m.length&&!e.length&&!n)return;out.push(`${s.name}: בוקר ${m.join(", ")||"—"}${(d<5&&!md.noEve)||e.length?` | ערב ${e.join(", ")||"—"}`:""}${n?` (${n})`:""}`)})});
   setMsg("weekMsg",out.join("\n"));
   renderGroup();
 }
@@ -658,38 +761,73 @@ document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",(
   const done=()=>{note.textContent="הועתק";setTimeout(()=>note.textContent="",2000)};
   try{navigator.clipboard.writeText(ta.value).then(done,()=>{ta.select();note.textContent="סמנו והעתיקו ידנית"})}catch(e){ta.select();note.textContent="סמנו והעתיקו ידנית"}}));
 function renderFair(w){
-  const c=weekCounts(w),h=history(cur);
-  const rows=activeEmps().map(e=>`<tr><td>${esc(e.name)}</td><td>${c[e.id].tot-c[e.id].fri}</td><td>${c[e.id].tot}</td><td>${c[e.id].tot-c[e.id].eve}</td><td>${c[e.id].eve}</td><td>${c[e.id].fri}</td><td>${h[e.id].fri+c[e.id].fri}</td></tr>`).join("");
-  $("#fair").innerHTML=`<tr><th>עובד/ת</th><th>ראשון–חמישי</th><th>סה"כ השבוע</th><th>בקרים</th><th>ערבים</th><th>שישי השבוע</th><th>שישי מצטבר</th></tr>`+(rows||`<tr><td colspan="6" class="empty">הוסיפו עובדים בלשונית "עובדים"</td></tr>`);
+  const c=weekCounts(w),h=history(cur),C=weekCap();
+  const nfCls=(n,id)=>{const k=empCap(id,C.cap);return !C.cap?"":n>k?"over":n===k?"eq":""};
+  const rows=activeEmps().map(e=>{const nf=c[e.id].tot-c[e.id].fri;return `<tr><td>${esc(e.name)}</td><td class="${nfCls(nf,e.id)}">${nf}</td><td>${c[e.id].tot}</td><td>${c[e.id].tot-c[e.id].eve}</td><td>${c[e.id].eve}</td><td>${c[e.id].fri}</td><td>${h[e.id].fri+c[e.id].fri}</td></tr>`}).join("");
+  $("#fair").innerHTML=`<tr><th>עובד/ת</th><th>ראשון–חמישי</th><th>סה"כ השבוע</th><th>בקרים</th><th>ערבים</th><th>שישי השבוע</th><th>שישי מצטבר</th></tr>`+(rows||`<tr><td colspan="7" class="empty">הוסיפו עובדים בלשונית "עובדים"</td></tr>`);
 }
+/* constraints grid with the Excel status column (✔ ✘ ⚠) and cell states */
 function renderCons(w){
   const emps=activeEmps();
   if(!emps.length){$("#consGrid").innerHTML=`<tr><td class="empty">הוסיפו עובדים בלשונית "עובדים"</td></tr>`;return}
-  $("#consGrid").innerHTML=`<tr><th>עובד/ת</th>${DAYS.map((dn,d)=>`<th><span class="l">${dn}</span><span class="sd">${dn[0]}׳</span><br><span style="font-weight:400;color:var(--muted)">${fmt(dayDate(d)).slice(0,5)}</span></th>`).join("")}</tr>`+
-    emps.map(e=>`<tr><td class="name">${esc(e.name)}</td>${DAYS.map((_,d)=>{const v=cons(w,e.id,d);return `<td><button class="cst" data-cst="${e.id}|${d}" data-v="${v}" aria-label="${esc(e.name)} ${DAYS[d]}">${CST_LBL[v]}</button></td>`}).join("")}</tr>`).join("");
+  const ha=hasAssign(w),ST={ok:"✔",bad:"✘",miss:"⚠"};
+  const eve3=DAYS.map((_,d)=>d<5&&emps.filter(e=>cons(w,e.id,d)==="E").length>2);
+  $("#consGrid").innerHTML=`<tr><th>עובד/ת</th><th>סטטוס</th>${DAYS.map((dn,d)=>`<th><span class="l">${dn}</span><span class="sd">${dn[0]}׳</span><br><span style="font-weight:400;color:var(--muted)">${fmt(dayDate(d)).slice(0,5)}</span></th>`).join("")}</tr>`+
+    emps.map(e=>{const es=empStatus(w,e.id);
+      return `<tr><td class="name">${esc(e.name)}</td><td class="stt ${ha?es.st:""}" title="${ha?{ok:"תואם",bad:"יש סתירה",miss:"יש יום שסומן ולא שובץ"}[es.st]:""}">${ha?ST[es.st]:""}</td>${DAYS.map((_,d)=>{
+        let v,lbl,dis=false;
+        if(d===5){v=friCons(w,e.id);lbl=CST_LBL[v];dis=v==="T"||v==="O"}
+        else if(dm(d).off){v="O";lbl=CST_LBL.O;dis=true}
+        else if(onVac(e.id,dayDate(d))){v="V";lbl=CST_LBL.V;dis=true}
+        else{v=cons(w,e.id,d);lbl=CST_LBL[v]}
+        const s=ha&&v!=="O"?es.cells[d]:"";
+        return `<td><button class="cst${eve3[d]&&v==="E"?" ev3":""}" data-cst="${e.id}|${d}" data-v="${v}"${s?` data-s="${s}"`:""} ${dis?"disabled":""} aria-label="${esc(e.name)} ${DAYS[d]}: ${lbl}">${lbl}</button></td>`}).join("")}</tr>`}).join("");
 }
 function renderStaff(){
   $("#staffRows").innerHTML=S.employees.length?S.employees.map(e=>`<div class="row"><input type="text" data-ename="${e.id}" value="${esc(e.name)}" aria-label="שם"><label><input type="checkbox" data-eact="${e.id}" ${e.active!==false?"checked":""}> פעיל/ה</label><button data-edel="${e.id}">הסר</button></div>`).join(""):`<p class="hint">עדיין אין עובדים.</p>`;
 }
+/* Friday rotation table: one column per site, rows = rotation order (repeats allowed, like שלמה ×4) */
 function renderFriSet(){
-  ensureFri();
   const sites=S.sites.filter(s=>(s.req.m||[])[5]>0);
   if(!sites.length){$("#friSet").innerHTML=`<p class="hint">אין משמרת בוקר בשישי באף אתר.</p>`;return}
-  const nextKey=(()=>{const d=parseKey(cur);d.setDate(d.getDate()+7);return key(d)})();
-  $("#friSet").innerHTML=sites.map(s=>{const r=S.friRule[s.id]||{mode:"auto"};
-    let body="";
-    if(r.mode==="fixed")body=`<label>עובד קבוע <select data-friemp="${s.id}">${activeEmps().map(e=>`<option value="${e.id}" ${e.id===r.emp?"selected":""}>${esc(e.name)}</option>`).join("")}</select></label>`;
-    if(r.mode==="rot"){const l=rotList(r),t=rotTurn(r,cur),tn=rotTurn(r,nextKey);
-      const others=activeEmps().filter(e=>!l.includes(e.id));
-      body=`<ol class="rot">${l.map((id,i)=>`<li><span>${esc(empName(id))}${i===t?' <b class="turn">השבוע</b>':i===tn?' <span class="hint">שבוע הבא</span>':""}</span>
-        <span class="rb"><button data-rup="${s.id}|${i}" aria-label="הזז למעלה" ${i===0?"disabled":""}>↑</button><button data-rdn="${s.id}|${i}" aria-label="הזז למטה" ${i===l.length-1?"disabled":""}>↓</button><button data-rnow="${s.id}|${i}">התור שלו השבוע</button><button data-rrm="${s.id}|${id}" aria-label="הוצא מהסבב">✕</button></span></li>`).join("")}</ol>
-        ${others.length?`<div class="row"><select data-raddsel="${s.id}">${others.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join("")}</select><button data-radd="${s.id}">הוסף לסבב</button></div>`:""}`}
-    return `<div class="card"><div class="row" style="margin-bottom:8px"><b>${esc(s.name)}</b>
-      <select data-frimode="${s.id}"><option value="auto" ${r.mode==="auto"?"selected":""}>אוטומטי (לפי הוגנות)</option><option value="fixed" ${r.mode==="fixed"?"selected":""}>עובד קבוע</option><option value="rot" ${r.mode==="rot"?"selected":""}>סבב לפי סדר</option></select></div>${body}</div>`}).join("");
+  sites.forEach(s=>{const r=S.friRule[s.id];if(!r||!Array.isArray(r.list))S.friRule[s.id]={list:[],anchor:cur,off:0}});
+  const nx=addW(cur,1),rows=Math.max(1,...sites.map(s=>S.friRule[s.id].list.length));
+  const opts=sel=>{const l=activeEmps().slice();if(sel&&!l.some(e=>e.id===sel))l.push({id:sel,name:empName(sel)+" (לא פעיל)"});return l.map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("")};
+  const who=(s,wk)=>{if(friOff(wk))return "פגרה – אין כונן";const r=S.friRule[s.id],t=rotTurn(r,wk);return t===null?"אוטומטי":empName(r.list[t])};
+  let h=`<table class="rotT"><tr><th></th>${sites.map(s=>`<th>${esc(s.name)}</th>`).join("")}</tr>`;
+  for(let i=0;i<rows;i++){
+    h+=`<tr><td class="rn">${i+1}</td>`+sites.map(s=>{const r=S.friRule[s.id];if(i>=r.list.length)return `<td></td>`;
+      const isT=rotTurn(r,cur)===i;
+      return `<td class="${isT?"now":""}"><div class="rc"><select data-rsel="${s.id}|${i}" aria-label="${esc(s.name)} מקום ${i+1}">${opts(r.list[i])}</select><button data-rnow="${s.id}|${i}" title="התור שלו השבוע" aria-label="התור שלו השבוע" ${isT?"disabled":""}>◉</button><button data-rrm="${s.id}|${i}" title="הסר מהסבב" aria-label="הסר מהסבב">✕</button></div></td>`}).join("")+`</tr>`;
+  }
+  h+=`<tr><td></td>${sites.map(s=>`<td><button data-radd="${s.id}">+ שורה</button></td>`).join("")}</tr>`;
+  h+=`<tr class="cur"><td>כונן השבוע</td>${sites.map(s=>`<td>${esc(who(s,cur))}</td>`).join("")}</tr>`;
+  h+=`<tr class="nxt"><td>שבוע הבא</td>${sites.map(s=>`<td>${esc(who(s,nx))}</td>`).join("")}</tr></table>`;
+  $("#friSet").innerHTML=h;
 }
-function rotSetTurn(r,i){const d=parseKey(cur);d.setDate(d.getDate()-7*i);r.anchor=key(d)}
-function rotKeepTurn(r,fn){/* keep whoever's turn it is this week after reordering */const l=rotList(r),t=rotTurn(r,cur),who=t===null?null:l[t];fn();const l2=rotList(r),j=l2.indexOf(who);if(j>=0)rotSetTurn(r,j)}
-function renderSettings(){renderFriSet();
+/* vacations journal + holidays table */
+function renderCal(){
+  if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#tab-cal")&&document.activeElement.type==="text")return;
+  const opts=sel=>S.employees.map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
+  $("#vacT").innerHTML=`<tr><th></th><th>טכנאי</th><th>מתאריך</th><th>עד תאריך</th><th>סה"כ ימים</th><th>מטרת החופש</th><th>קמפוס</th><th></th></tr>`+
+    (S.vac.length?S.vac.map(v=>{const days=v.from&&v.to&&v.to>=v.from?Math.round((parseKey(v.to)-parseKey(v.from))/864e5)+1:"";const old=v.to&&v.to<cur;
+      return `<tr><td><span class="dot${old?" old":""}" title="${old?"החופשה הסתיימה":""}">●</span></td>
+        <td><select data-vf="${v.id}|emp" aria-label="טכנאי">${opts(v.emp)}</select></td>
+        <td><input type="date" data-vf="${v.id}|from" value="${esc(v.from||"")}" aria-label="מתאריך"></td>
+        <td><input type="date" data-vf="${v.id}|to" value="${esc(v.to||"")}" aria-label="עד תאריך"></td>
+        <td class="num">${days}</td>
+        <td><input type="text" data-vf="${v.id}|purpose" value="${esc(v.purpose||"")}" aria-label="מטרת החופש"></td>
+        <td><select data-vf="${v.id}|campus" aria-label="קמפוס"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v.campus?"selected":""}>${esc(c)}</option>`).join("")}</select></td>
+        <td><button data-vdel="${v.id}" aria-label="מחק חופשה">✕</button></td></tr>`}).join(""):`<tr><td colspan="8" class="empty">אין חופשות רשומות</td></tr>`);
+  $("#holT").innerHTML=`<tr><th>חג</th><th>מתאריך</th><th>עד תאריך</th><th>מהות</th><th>ימי שישי</th><th></th></tr>`+
+    S.holidays.map(h=>`<tr><td><input type="text" data-hf="${h.id}|name" value="${esc(h.name||"")}" aria-label="שם החג"></td>
+      <td><input type="date" data-hf="${h.id}|from" value="${esc(h.from||"")}" aria-label="מתאריך"></td>
+      <td><input type="date" data-hf="${h.id}|to" value="${esc(h.to||"")}" aria-label="עד תאריך"></td>
+      <td><select data-hf="${h.id}|type" aria-label="מהות">${Object.entries(HOL_T).map(([k,l])=>`<option value="${k}" ${k===h.type?"selected":""}>${esc(l)}</option>`).join("")}</select></td>
+      <td class="num">${h.type==="off"?countFris(h.from,h.to||h.from):0}</td>
+      <td><button data-hdel="${h.id}" aria-label="מחק חג">✕</button></td></tr>`).join("");
+}
+function renderSettings(){
   $("#lblM").value=S.shiftLbl.m;$("#lblE").value=S.shiftLbl.e;$("#sheetTitle").value=S.title||"";$("#targetN").value=S.target??5;$("#siteCover").checked=S.siteCover!==false;
   $("#sitesSet").innerHTML=S.sites.map(s=>`<div class="card"><div class="row" style="margin-bottom:10px"><input type="text" data-sname="${s.id}" value="${esc(s.name)}" aria-label="שם אתר"><button data-sdel="${s.id}">הסר אתר</button></div>
     <div class="scroll"><table class="req"><tr><th>עובדים במשמרת</th>${DAYS.map(d=>`<th>${d}</th>`).join("")}</tr>
@@ -700,7 +838,7 @@ function renderSettings(){renderFriSet();
 /* ---------- interactions ---------- */
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
-  ["sched","msg","staff","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
+  ["sched","cal","msg","staff","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
   try{localStorage.setItem("shift-tab",b.dataset.tab)}catch(e){}
 }));
 function shiftWeek(n){const d=parseKey(cur);d.setDate(d.getDate()+7*n);cur=key(d);msgEdited.consMsg={};msgEdited.weekMsg={};render()}
@@ -717,18 +855,23 @@ document.addEventListener("click",e=>{
   if(t&&t.closest("#sheet,#days")){e.stopPropagation();openPop(t);return}
   if(pop&&!e.target.closest(".pop"))closePop();
   const c=e.target.closest("[data-cst]");
-  if(c){const[eid,d]=c.dataset.cst.split("|");const w=W();w.cons[eid]=w.cons[eid]||DAYS.map(()=>"A");const v=w.cons[eid][+d]||"A";w.cons[eid][+d]=CST[(CST.indexOf(v)+1)%4];changed();render();}
+  if(c&&!c.disabled){const[eid,d]=c.dataset.cst.split("|");const w=W();w.cons[eid]=w.cons[eid]||DAYS.map(()=>"A");const v=w.cons[eid][+d]||"A";
+    /* Sun–Thu cycle זמין → בוקר → ערב → חופש; Friday toggles גיבוי לאירוע */
+    w.cons[eid][+d]=+d===5?(v==="B"?"A":"B"):CST[(Math.max(0,CST.indexOf(v))+1)%4];changed();render();}
   const del=e.target.closest("[data-edel]");
   if(del){S.employees=S.employees.filter(x=>x.id!==del.dataset.edel);changed();render()}
-  const rb=e.target.closest("[data-rup],[data-rdn],[data-rnow],[data-rrm],[data-radd]");
-  if(rb){const ds=rb.dataset,[sid,arg]=(ds.rup||ds.rdn||ds.rnow||ds.rrm||ds.radd).split("|"),r=S.friRule[sid];if(!r)return;
-    r.list=rotList(r);const i=+arg;
-    if(ds.rup)rotKeepTurn(r,()=>{[r.list[i-1],r.list[i]]=[r.list[i],r.list[i-1]]});
-    if(ds.rdn)rotKeepTurn(r,()=>{[r.list[i+1],r.list[i]]=[r.list[i],r.list[i+1]]});
+  const rb=e.target.closest("[data-rnow],[data-rrm],[data-radd]");
+  if(rb&&!rb.disabled){const ds=rb.dataset,[sid,arg]=(ds.rnow||ds.rrm||ds.radd).split("|"),r=S.friRule[sid];if(!r)return;
+    const i=+arg,ref=refWeek(),t=rotTurn(r,ref);
+    /* edits keep this week's on-duty row; the rotation continues from it */
     if(ds.rnow)rotSetTurn(r,i);
-    if(ds.rrm)rotKeepTurn(r,()=>{r.list=r.list.filter(x=>x!==arg)});
-    if(ds.radd){const v=document.querySelector(`[data-raddsel="${sid}"]`).value;rotKeepTurn(r,()=>r.list.push(v))}
+    if(ds.rrm){r.list.splice(i,1);if(r.list.length&&t!==null)rotSetTurn(r,i<t?t-1:i===t?t%r.list.length:t)}
+    if(ds.radd){const prev=r.list[r.list.length-1],first=(activeEmps()[0]||{}).id;r.list.push(prev||first);if(t!==null)rotSetTurn(r,t);else rotSetTurn(r,0)}
     changed();render();return}
+  const vd=e.target.closest("[data-vdel]");
+  if(vd){S.vac=S.vac.filter(x=>x.id!==vd.dataset.vdel);changed();render();return}
+  const hd=e.target.closest("[data-hdel]");
+  if(hd){S.holidays=S.holidays.filter(x=>x.id!==hd.dataset.hdel);changed();render();return}
   const sd=e.target.closest("[data-sdel]");
   if(sd){S.sites=S.sites.filter(x=>x.id!==sd.dataset.sdel);changed();render()}
 });
@@ -758,18 +901,22 @@ document.addEventListener("input",e=>{
   if(t.dataset.sname){const s=S.sites.find(x=>x.id===t.dataset.sname);if(s){s.name=t.value;changed(true)}}
   if(t.dataset.req){const[sid,sh,d]=t.dataset.req.split("|");const s=S.sites.find(x=>x.id===sid);if(s){s.req[sh]=s.req[sh]||DAYS.map(()=>0);s.req[sh][+d]=Math.max(0,Math.min(6,parseInt(t.value)||0));changed(true)}}
   if(t.id==="targetN"){S.target=Math.max(0,Math.min(6,parseInt(t.value)||0));changed(true)}
+  if(t.dataset.vf&&t.type==="text"){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.value;changed(true)}}
+  if(t.dataset.hf&&t.type==="text"){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.value;changed(true)}}
   if(t.id==="lblM"){S.shiftLbl.m=t.value;changed(true)} if(t.id==="lblE"){S.shiftLbl.e=t.value;changed(true)} if(t.id==="sheetTitle"){S.title=t.value;changed(true)}
 });
 document.addEventListener("change",e=>{
   const t=e.target;
   if(t.id==="siteCover"){S.siteCover=t.checked;changed();render()}
-  if(t.dataset.frimode){const sid=t.dataset.frimode,old=S.friRule[sid]||{};const m=t.value;
-    S.friRule[sid]=m==="fixed"?{mode:"fixed",emp:old.emp||(activeEmps()[0]||{}).id}:m==="rot"?{mode:"rot",list:old.list&&old.list.length?old.list:activeEmps().map(e=>e.id),anchor:old.anchor||cur}:{mode:"auto"};changed();render()}
-  if(t.dataset.friemp){S.friRule[t.dataset.friemp].emp=t.value;changed();render()}
+  if(t.dataset.rsel){const[sid,i]=t.dataset.rsel.split("|"),r=S.friRule[sid];if(r){r.list[+i]=t.value;changed();render()}}
+  if(t.dataset.vf){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.value;if(f==="from"&&(!v.to||v.to<v.from))v.to=v.from;changed();render()}}
+  if(t.dataset.hf){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.value;if(f==="from"&&(!h.to||h.to<h.from))h.to=h.from;if(f!=="name")S.holidays.sort((a,b)=>(a.from||"9").localeCompare(b.from||"9"));changed();render()}}
   if(t.dataset.eact){const em=S.employees.find(x=>x.id===t.dataset.eact);if(em){em.active=t.checked;changed();render()}}
   if(t.dataset.req||t.dataset.ename||t.dataset.sname||["lblM","lblE","sheetTitle","targetN"].includes(t.id))render();
 });
 $("#addEmp").onclick=()=>{const v=$("#newEmp").value.trim();if(!v)return;S.employees.push({id:uid(),name:v,active:true});$("#newEmp").value="";changed();render()};
+$("#addVac").onclick=()=>{const e=activeEmps()[0];if(!e)return;const d=parseKey(cur);d.setDate(d.getDate()+4);S.vac.push({id:uid(),emp:e.id,from:cur,to:key(d),purpose:"",campus:""});changed();render()};
+$("#addHol").onclick=()=>{S.holidays.push({id:uid(),name:"",from:cur,to:cur,type:"off"});changed();render()};
 $("#newEmp").addEventListener("keydown",e=>{if(e.key==="Enter")$("#addEmp").click()});
 $("#addSite").onclick=()=>{const v=$("#newSite").value.trim();if(!v)return;S.sites.push({id:uid(),name:v,req:{m:[1,1,1,1,1,1],e:[1,1,1,1,1,0]}});$("#newSite").value="";changed();render()};
 
@@ -791,7 +938,7 @@ $("#restoreBtn").onclick=()=>$("#restoreFile").click();
 $("#restoreFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o||!Array.isArray(o.employees))throw 0;load(r.result);changed();render();setStatus("הגיבוי שוחזר")}catch(err){setStatus("הקובץ הזה לא גיבוי תקין")}};r.readAsText(f);e.target.value=""};
 async function sheetBlob(){
   if(typeof html2canvas==="undefined"){setStatus("ספריית התמונה לא נטענה, בדקו חיבור לאינטרנט");return null}
-  const box=$("#exportBox");box.innerHTML=`<div class="export" style="min-width:0;padding:20px;display:grid;gap:22px;background:#FFFFFF">${sheetHTML(W(),true)}</div>`;
+  const box=$("#exportBox");calcNeed();box.innerHTML=`<div class="export" style="min-width:0;padding:20px;display:grid;gap:22px;background:#FFFFFF">${sheetHTML(W(),true)}</div>`;
   try{await document.fonts.ready}catch(e){}
   const canvas=await html2canvas(box.firstChild,{backgroundColor:"#FFFFFF",scale:2});
   box.innerHTML="";
@@ -823,7 +970,7 @@ $("#shareImgBtn").onclick=async()=>{
 };
 $("#xlsBtn").onclick=async()=>{
   if(typeof ExcelJS==="undefined"){setStatus("ספריית האקסל לא נטענה");return}
-  const w=W(),wb=new ExcelJS.Workbook(),ws=wb.addWorksheet("סידור",{views:[{rightToLeft:true}]});
+  calcNeed();const w=W(),wb=new ExcelJS.Workbook(),ws=wb.addWorksheet("סידור",{views:[{rightToLeft:true}]});
   ws.getColumn(1).width=20;for(let c=2;c<=13;c++)ws.getColumn(c).width=13;
   const fill=hex=>({type:"pattern",pattern:"solid",fgColor:{argb:"FF"+hex}});
   const thin={style:"thin",color:{argb:"FF2B2B2B"}},border={top:thin,left:thin,bottom:thin,right:thin};
@@ -836,13 +983,13 @@ $("#xlsBtn").onclick=async()=>{
     const row=(label,fn,h=22)=>{sty(ws.getCell(r,1),"595959",true);ws.getCell(r,1).value=label;fn();ws.getRow(r).height=h;r++};
     row("תאריך",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=fmt(dayDate(d));sty(x,"A9D18E",false);ws.getCell(r,c+1).border=border}));
     row("משמרת",()=>DAYS.forEach((dn,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=dn;sty(x,"595959",true,13)}));
-    row(S.shiftLbl.m,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=(s.req.m||[])[d]||0,arr=A.m[d];
-      if(need===0&&!arr.length){ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value="—";sty(x,"595959",true);return}
+    row(S.shiftLbl.m,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=NEED[s.id].m[d],arr=A.m[d];
+      if(need===0&&!arr.length){ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=dm(d).off?"":"—";sty(x,"595959",true);return}
       const a=ws.getCell(r,c),b=ws.getCell(r,c+1);a.value=arr[0]?empName(arr[0]):"";b.value=arr.slice(1).map(empName).join(", ");sty(a,"C6E0B4",false);sty(b,"E2EFDA",false)}));
-    row(S.shiftLbl.e,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=(s.req.e||[])[d]||0,arr=A.e[d];ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);
-      if(need===0&&!arr.length){x.value=d===5?"שבת שלום":"—";sty(x,"595959",true);return}
+    row(S.shiftLbl.e,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=NEED[s.id].e[d],arr=A.e[d],md=dm(d);ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);
+      if(need===0&&!arr.length){x.value=d===5?"שבת שלום":(md.off||md.noEve)?"":"—";sty(x,"595959",true);return}
       x.value=arr.map(empName).join(", ");sty(x,"C6E0B4",false)}));
-    row("הערות ואירועים",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=w.notes[s.id][d]||"";sty(x,"F2F2F2",false,10);x.font={size:10,color:{argb:"FF555555"}}}));
+    row("הערות ואירועים",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=noteText(w,s.id,d);sty(x,"F2F2F2",false,10);x.font={size:10,color:{argb:"FF555555"}}}));
     r++;
   });
   const buf=await wb.xlsx.writeBuffer();
@@ -860,7 +1007,7 @@ async function flush(){
   if(ref){saving=true;try{await ref.set(body);setStatus("נשמר")}catch(e){setStatus(e&&e.code==="invalid_argument"?"אין הרשאה לשמור":"השמירה נכשלה, ננסה שוב");if(e&&e.code!=="invalid_argument"){dirty=true;saveTimer=setTimeout(flush,2500)}}saving=false}
   else{try{localStorage.setItem("shift-state",body.state);setStatus("נשמר בדפדפן הזה בלבד")}catch(e){setStatus("לא נשמר")}}
 }
-function load(raw){try{const o=JSON.parse(raw);S=Object.assign(defaultState(),o);S.shiftLbl=Object.assign(defaultState().shiftLbl,o.shiftLbl||{})}catch(e){}}
+function load(raw){try{const o=JSON.parse(raw);S=Object.assign(defaultState(),o);S.shiftLbl=Object.assign(defaultState().shiftLbl,o.shiftLbl||{});const v=S.friVer;ensureData();if(v!==S.friVer)setTimeout(()=>changed(),0)}catch(e){}}
 
 (async()=>{
   try{const t=localStorage.getItem("shift-tab");if(t)document.querySelector(`.tabs button[data-tab="${t}"]`)?.click()}catch(e){}
