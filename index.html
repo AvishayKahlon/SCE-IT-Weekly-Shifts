@@ -380,7 +380,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
     <div class="card">
       <h2>בקשת אילוצים לשבוע הבא</h2>
       <div class="row" style="margin-bottom:10px">
-        <label>להגיש עד <input type="text" id="consDeadline" style="width:200px" placeholder="חמישי ב-12:00"></label>
+        <label>להגיש עד <input type="text" id="consDeadline" style="width:200px" placeholder="יום חמישי ב-09:00"></label>
       </div>
       <textarea id="consMsg" rows="5" aria-label="נוסח בקשת האילוצים"></textarea>
       <div class="row" style="margin-top:10px">
@@ -466,7 +466,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 14:45";
+const APP_VER="20.10.2026 14:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -820,7 +820,7 @@ function namesAt(w,sid,sh,d){return (w.assign[sid]?.[sh]?.[d]||[]).map(empName)}
 function renderMsgs(){
   // constraints request for the week after the current one
   const nx=parseKey(cur);nx.setDate(nx.getDate()+7);const nxEnd=new Date(nx);nxEnd.setDate(nxEnd.getDate()+5);
-  if(!$("#consDeadline").value)$("#consDeadline").value=S.consDeadline||"חמישי ב-12:00";
+  if(!$("#consDeadline").value)$("#consDeadline").value=S.consDeadline||"יום חמישי ב-09:00";
   setMsg("consMsg",consText());
   // events reminder
   if(!$("#evDate").dataset.iso){const t=new Date();t.setDate(t.getDate()+1);setDate($("#evDate"),key(t))}
@@ -859,8 +859,8 @@ function sendWa(text){
     openUrl(g);
   }else openUrl(wa(text));
 }
-function consText(){const nx=parseKey(cur);nx.setDate(nx.getDate()+7);const nxEnd=new Date(nx);nxEnd.setDate(nxEnd.getDate()+5);const dl=(S.consDeadline||"חמישי ב-12:00").trim();
-  return `היי לכולם 👋\nנא לשלוח אילוצים לשבוע ${weekSpan(key(nx))}${dl?` עד ${dl}`:""}.\nלכתוב באילו ימים לא יכולים, או אם יש יום שאפשר רק בוקר או רק ערב.\nתודה!`}
+function consText(){const nx=addW(cur,1),dl=(S.consDeadline||"יום חמישי ב-09:00").trim();
+  return `היי לכולם 👋\nנא לשלוח אילוצים לשבוע ${weekSpan(nx)}${dl?` עד ${dl}`:""}.\nאם אפשר מוקדם יותר, אשמח.\nתודה.`}
 function eventText(sid,d){const w=W(),s=S.sites.find(x=>x.id===sid),n=(w.notes[sid][d]||"").trim();
   const m=namesAt(w,sid,"m",d),e=namesAt(w,sid,"e",d);
   return `תזכורת ליום ${DAYS[d]} ${dot(dayDate(d))}:\n📍 ${s?s.name:""}: ${n}\n   בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`}
@@ -1103,6 +1103,7 @@ $("#pdfBtn").onclick=()=>busy($("#pdfBtn"),async()=>{const b=await sheetPdf();if
 /* Mail = PDF attachment. Subject = file name.
    Phone: share sheet with the PDF (choose Outlook / Gmail).
    Computer: an .eml draft (X-Unsent) – opening it starts a new Outlook message with To, subject and the PDF attached. */
+function mailText(){return `היי,\nמצורף סידור עבודה לשבוע ${weekSpan()}`}
 function b64utf8(t){return btoa(unescape(encodeURIComponent(t)))}
 function blobB64(b){return new Promise(r=>{const f=new FileReader();f.onload=()=>r(String(f.result).split(",")[1]);f.readAsDataURL(b)})}
 function wrap76(t){return t.replace(/.{1,76}/g,"$&\r\n")}
@@ -1115,8 +1116,8 @@ $("#mailBtn").onclick=()=>busy($("#mailBtn"),async()=>{
   const pdf=await sheetPdf();if(!pdf)return;
   const name=fileBase(),fname=name+".pdf",to=(S.mailTo||"").split(/[,;\s]+/).filter(Boolean).join(", ");
   const f=new File([pdf],fname,{type:"application/pdf"});
-  if(canShare&&navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name,text:name});return}catch(e){if(e&&e.name==="AbortError")return}}
-  const html=`<div dir="rtl" style="font-family:Arial,sans-serif;font-size:11pt">שלום,<br><br>מצורף ${esc(name)}.<br><br></div>`;
+  if(canShare&&navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name,text:mailText()});return}catch(e){if(e&&e.name==="AbortError")return}}
+  const html=`<div dir="rtl" style="font-family:Calibri,Arial,sans-serif;font-size:11pt">${esc(mailText()).replace(/\n/g,"<br>")}<br><br></div>`;
   await saveFile(name+".eml",new Blob([emlDraft(to,name,html,fname,await blobB64(pdf))],{type:"message/rfc822"}));
   toast("נוצר מייל עם ה-PDF מצורף. פתחו את הקובץ "+name+".eml – תיפתח טיוטה ב-Outlook")});
 function inFrame(){try{return window.self!==window.top}catch(e){return true}}
