@@ -183,6 +183,11 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   .pop button{padding:12px 12px;font-size:16px}
   table.rotT select{min-width:0;max-width:110px}
 }
+/* preferred technician row */
+table.sh .pref{background:#FFF8E1;padding:2px 4px}
+.psel{width:100%;min-width:0;font-size:13px;padding:3px 4px;border:1px solid #D9C27A;background:#FFFDF5;color:#1A1A1A;border-radius:6px}
+.psel.ok{border-color:#2E7D32;background:#E8F5E9}.psel.no{border-color:#D93025;background:#FCECEA}
+.dnote .t{font-size:13px;color:var(--muted);font-weight:700;white-space:nowrap}
 /* holidays in the sheet */
 table.sh .off.hol{background:#595959}
 table.sh .note .hol,.dnote .hol{flex:none;font-weight:700;font-size:12px;color:#333;background:#E4E4E4;border-radius:4px;padding:0 4px;white-space:nowrap}
@@ -378,7 +383,8 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
         <span class="hint">שישי נוסף על המספר הזה. 0 = בלי הגבלה.</span>
       </div>
       <div class="row" style="margin-top:10px">
-        <label><input type="checkbox" id="siteCover"> כל עובד לפחות בוקר אחד וערב אחד בכל אתר בשבוע</label>
+        <div style="display:grid;gap:6px"><b style="font-size:14px">מינימום משמרות לכל עובד בראשון–חמישי</b><div id="coverSet" class="scroll"></div>
+        <span class="hint">בוקר נחשב כלל חזק, ערב כשאיפה. כשאי אפשר לעמוד בכלל, הסידור יציין מי לא קיבל ולמה.</span></div>
       </div>
     </div>
     <div id="sitesSet" class="rows"></div>
@@ -433,6 +439,9 @@ function ensureData(){
   if(!Array.isArray(S.vac))S.vac=[];
   if(S.friVer!==2){S.friVer=2;S.friRule=defaultFri()}
   if(!S.friRule)S.friRule={};
+  /* minimum shifts per employee per site, Sun–Thu: בני ברית בוקר 1 (strong) + ערב 1, ז'בוטינסקי ערב 1 */
+  if(!S.cover){S.cover={};S.sites.forEach(s=>S.cover[s.id]=s.name.includes("בני ברית")?{m:1,e:1}:{m:0,e:1})}
+  S.sites.forEach(s=>{if(!S.cover[s.id])S.cover[s.id]={m:0,e:0}});
 }
 /* holidays covering a date: off = no work at all, noEve = day ends at 16:00 */
 function dayMode(dt){const k=typeof dt==="string"?dt:key(dt);const hs=(S.holidays||[]).filter(h=>h.from&&h.from<=k&&k<=(h.to||h.from));
@@ -441,7 +450,7 @@ function dm(d){return dayMode(dayDate(d))}
 function onVac(eid,dt){const k=key(dt);return (S.vac||[]).some(v=>v.emp===eid&&v.from&&v.from<=k&&k<=(v.to||v.from))}
 function countFris(a,b){if(!a||!b||b<a)return 0;let n=0;const d=parseKey(a),e=parseKey(b);while(d<=e){if(d.getDay()===5)n++;d.setDate(d.getDate()+1)}return n}
 /* effective staffing need for the current week: holidays close a whole day or its evening */
-let NEED={},CAPX=true,EC={};
+let NEED={},CAPX=true,EC={},PREF=[],CURW={pref:{}};
 function calcNeed(){NEED={};const md=DAYS.map((_,d)=>dm(d));
   S.sites.forEach(s=>{NEED[s.id]={m:DAYS.map((_,d)=>md[d].off?0:(s.req.m||[])[d]||0),e:DAYS.map((_,d)=>md[d].off||md[d].noEve?0:(s.req.e||[])[d]||0)}})}
 /* Sun–Thu target per employee, capped by the open days and by the available slots in holiday weeks */
@@ -477,6 +486,7 @@ function W(k=cur){
     if(!w.assign[s.id])w.assign[s.id]={m:DAYS.map(()=>[]),e:DAYS.map(()=>[])};
     if(!w.notes[s.id])w.notes[s.id]=DAYS.map(()=>"");
   });
+  if(!w.pref)w.pref={};
   return w;
 }
 /* Sun–Thu: A=זמין M=בוקר E=ערב X=חופש (a vacation in the journal forces X). Friday: A or B=גיבוי לאירוע */
@@ -527,7 +537,7 @@ function generate(){
   const w=W(),emps=activeEmps().map(e=>e.id),hist=history(cur);
   const slots=[];
   S.sites.forEach(s=>DAYS.forEach((_,d)=>["m","e"].forEach(sh=>{const n=NEED[s.id][sh][d];for(let i=0;i<n;i++)slots.push({s:s.id,d,sh})})));
-  const C=weekCap(),T=C.cap;CAPX=C.exact;EC={};emps.forEach(e=>EC[e]=empCap(e,T));
+  const C=weekCap(),T=C.cap;CAPX=C.exact;CURW=w;PREF=prefList(w).filter(p=>emps.includes(p.e));EC={};emps.forEach(e=>EC[e]=empCap(e,T));
   const fp=friPlan(w,cur);Object.keys(fp).forEach(k=>{if(!emps.includes(fp[k]))delete fp[k]});const lockedFri=new Set(Object.keys(fp));
   const taken={};const freeSlots=slots.filter(x=>{if(x.d===5&&x.sh==="m"&&fp[x.s]&&!taken[x.s]){taken[x.s]=1;return false}return true});
   let best=null,bestScore=Infinity;
@@ -544,7 +554,7 @@ function generate(){
       for(const e of emps){
         if(day[e].has(sl.d)||!canWork(w,e,sl.d,sl.sh))continue;
         if(T&&sl.d<5&&nf[e]>=EC[e])continue;
-        const sc=(sl.d<5?nf[e]*3:tot[e]*1)+(sl.sh==="e"?eve[e]*4:0)+(sl.d===5?(fri[e]+hist[e].fri)*5:0)+(S.siteCover!==false&&sl.d<5&&!out[sl.s][sl.sh].some((a,dd)=>dd<5&&a.includes(e))?-5:0)+Math.random()*1.6;
+        const sc=(sl.d<5?nf[e]*3:tot[e]*1)+(sl.sh==="e"?eve[e]*4:0)+(sl.d===5?(fri[e]+hist[e].fri)*5:0)+(sl.d<5&&(+((S.cover||{})[sl.s]||{})[sl.sh]||0)>out[sl.s][sl.sh].reduce((a,arr,dd)=>a+(dd<5&&arr.includes(e)?1:0),0)?-5:0)+(PREF.some(p=>p.sid===sl.s&&p.d===sl.d&&p.sh===sl.sh&&p.e===e)?-40:0)+Math.random()*1.6;
         if(sc<ps){ps=sc;pick=e}
       }
       if(pick===null){unfilled++;continue}
@@ -557,16 +567,25 @@ function generate(){
   }
   if(best){w.assign=best;W();}
 }
-/* every employee: at least one morning and one evening at each site, Sun–Thu only (Friday doesn't count) */
-function coverNeeds(){const n=[];S.sites.forEach(s=>["m","e"].forEach(sh=>{if(NEED[s.id][sh].some((x,d)=>d<5&&x>0))n.push([s.id,sh])}));return n}
-function coverGaps(out,emps){
-  if(S.siteCover===false)return[];
-  const g=[];coverNeeds().forEach(([sid,sh])=>emps.forEach(e=>{if(!out[sid][sh].some((a,d)=>d<5&&a.includes(e)))g.push([e,sid,sh])}));return g;
-}
+/* coverage rules, Sun–Thu: each employee gets at least N mornings / evenings at a site.
+   When the week has fewer slots than people (holiday weeks), only as many people as fit are expected. */
+const COVER_W={m:3000,e:1200};
+function coverEval(out,emps){
+  const res={pen:0,gaps:[],short:[]};
+  S.sites.forEach(s=>["m","e"].forEach(sh=>{const min=+((S.cover||{})[s.id]||{})[sh]||0;if(!min||!emps.length)return;
+    const slots=NEED[s.id][sh].slice(0,5).reduce((a,x)=>a+x,0);if(!slots)return;
+    const target=Math.min(emps.length,Math.floor(slots/min));if(target<emps.length)res.short.push([s.id,sh,slots]);
+    const cnt=e=>out[s.id][sh].reduce((a,arr,d)=>a+(d<5&&arr.includes(e)?1:0),0);
+    const lack=emps.filter(e=>cnt(e)<min);res.pen+=Math.max(0,target-(emps.length-lack.length))*COVER_W[sh];
+    lack.forEach(e=>res.gaps.push([e,s.id,sh]))}));
+  return res}
+/* preferred technician per site/day/shift (exams, events) */
+function prefList(w){const l=[];Object.entries(w.pref||{}).forEach(([sid,arr])=>{if(!S.sites.some(s=>s.id===sid))return;(arr||[]).forEach((p,d)=>{if(p&&p.e)l.push({sid,d,e:p.e,sh:p.sh||"m"})})});return l}
+function prefPen(out,w){return prefList(w).reduce((a,p)=>a+((out[p.sid]?.[p.sh]?.[p.d]||[]).includes(p.e)?0:2500),0)}
 function planScore(out,emps,hist,T){
   const nf={},eve={},fri={};emps.forEach(e=>{nf[e]=0;eve[e]=0;fri[e]=0});let unfilled=0;
   S.sites.forEach(s=>["m","e"].forEach(sh=>DAYS.forEach((_,d)=>{const need=NEED[s.id][sh][d];const a=out[s.id][sh][d];unfilled+=Math.max(0,need-a.length);a.forEach(e=>{if(!(e in nf))return;if(d<5)nf[e]++;if(sh==="e")eve[e]++;if(d===5)fri[e]++})})));
-  return unfilled*10000+coverGaps(out,emps).length*3000+(T?emps.reduce((a,e)=>a+(CAPX?Math.abs(nf[e]-EC[e]):Math.max(0,nf[e]-EC[e])),0)*500:0)
+  return unfilled*10000+coverEval(out,emps).pen+prefPen(out,CURW)+(T?emps.reduce((a,e)=>a+(CAPX?Math.abs(nf[e]-EC[e]):Math.max(0,nf[e]-EC[e])),0)*500:0)
     +Math.round((variance(emps.map(e=>nf[e]))*20+variance(emps.map(e=>eve[e]))*15+variance(emps.map(e=>fri[e]+hist[e].fri))*10)*100)/100;
 }
 /* local search: swap two people's shifts on the same day, or move a shift to someone free that day */
@@ -613,13 +632,26 @@ function problems(w){
     const fp=friPlan(w,cur);
     S.sites.forEach(s=>{if(fp[s.id]&&!w.assign[s.id].m[5].includes(fp[s.id]))list.push(`שישי ב${s.name}: לפי הסבב צריך להיות ${empName(fp[s.id])}`)});
     activeEmps().forEach(e=>{if(cons(w,e.id,5)==="B"&&friCons(w,e.id)==="B"&&!onShift(w,e.id,5,"m"))list.push(`${e.name}: מסומן גיבוי לאירוע בשישי אבל לא שובץ`)});
-    const by={};coverGaps(w.assign,activeEmps().map(e=>e.id)).forEach(([e,sid,sh])=>{const s=S.sites.find(x=>x.id===sid);(by[e]=by[e]||[]).push(`${sh==="m"?"בוקר":"ערב"} ב${s?s.name:""}`)});
+    const ids=activeEmps().map(e=>e.id),ce=coverEval(w.assign,ids),SN=sid=>(S.sites.find(x=>x.id===sid)||{}).name||"";
+    ce.short.forEach(([sid,sh,n])=>list.push(`השבוע יש רק ${n} ${sh==="m"?"בקרים":"ערבים"} ב${SN(sid)} ל-${ids.length} עובדים, לא כולם יכולים לקבל`));
+    /* explain gaps: can this person work any such shift this week at all? */
+    const can=(e,sid,sh)=>DAYS.some((_,d)=>d<5&&NEED[sid][sh][d]>0&&canWork(w,e,d,sh));
+    /* evening coverage is only an aim: when someone works more than 2 evenings, the others' gaps are expected */
+    const eves=e=>S.sites.reduce((a,s)=>a+w.assign[s.id].e.reduce((x,arr,d)=>x+(d<5&&arr.includes(e)),0),0),heavy=ids.filter(e=>eves(e)>2);
+    const by={},eg=[];ce.gaps.forEach(([e,sid,sh])=>{if(ce.short.some(x=>x[0]===sid&&x[1]===sh))return;
+      if(sh==="e"&&heavy.length&&!heavy.includes(e)){eg.push(`${empName(e)} (${SN(sid)})`);return}
+      (by[e]=by[e]||[]).push(`${sh==="m"?"בוקר":"ערב"} ב${SN(sid)}${can(e,sid,sh)?"":" (האילוצים לא מאפשרים)"}`)});
     Object.entries(by).forEach(([e,arr])=>list.push(`${empName(e)}: אין ${arr.join(", ")}`));
+    if(eg.length)list.push(`ℹ️ ${heavy.map(e=>`${empName(e)} עושה ${eves(e)} ערבים`).join(", ")}, ולכן חסר ערב ל: ${eg.join(", ")}`);
+    prefList(w).forEach(p=>{if(!(w.assign[p.sid]?.[p.sh]?.[p.d]||[]).includes(p.e)){const why=!canWork(w,p.e,p.d,p.sh)?" – יש לו אילוץ/חופש":NEED[p.sid][p.sh][p.d]===0?" – אין משמרת כזו ביום הזה":"";
+      list.push(`⭐ ${empName(p.e)} מועדף ל${SN(p.sid)} ${DAYS[p.d]} ${p.sh==="m"?"בוקר":"ערב"} ולא שובץ שם${why}`)}});
   }
   return{list,bad};
 }
 
 /* ---------- sheet rendering ---------- */
+function prefSel(w,sid,d){const p=(w.pref[sid]||[])[d],v=p?p.e+"|"+p.sh:"",ok=p&&(w.assign[sid]?.[p.sh]?.[d]||[]).includes(p.e);
+  return `<select class="psel${p?(ok?" ok":" no"):""}" data-pref="${sid}|${d}" aria-label="טכנאי מועדף ${DAYS[d]}"><option value="">—</option>${activeEmps().map(e=>["m","e"].map(sh=>`<option value="${e.id}|${sh}" ${v===e.id+"|"+sh?"selected":""}>${esc(e.name)} – ${sh==="m"?"בוקר":"ערב"}</option>`).join("")).join("")}</select>`}
 /* note row text = holiday name(s) + the manual note, like the Excel note formula */
 function noteText(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean).join(" · ")}
 function sheetHTML(w,exportMode){
@@ -660,6 +692,7 @@ function sheetHTML(w,exportMode){
     h+=`</tr>`;
     // notes
     h+=`<tr><td class="lbl">הערות ואירועים</td>${DAYS.map((_,d)=>{const hn=dm(d).names.join(" · ");return `<td class="note" colspan="2">${exportMode?esc(noteText(w,s.id,d)):`<div class="nw">${hn?`<span class="hol">${esc(hn)}</span>`:""}<input data-note="${s.id}|${d}" value="${esc(w.notes[s.id][d])}" aria-label="הערה ${DAYS[d]} ${esc(s.name)}">${(w.notes[s.id][d]||"").trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}" title="שליחת תזכורת לוואטסאפ" aria-label="שליחת תזכורת על האירוע">וואטסאפ</button>`:""}</div>`}</td>`}).join("")}</tr>`;
+    if(!exportMode)h+=`<tr class="prow"><td class="lbl">⭐ טכנאי מועדף</td>${DAYS.map((_,d)=>`<td class="pref" colspan="2">${prefSel(w,s.id,d)}</td>`).join("")}</tr>`;
     h+=`</table>`;parts.push(h);
   });
   if(!S.sites.length)parts.push(`<div class="empty">אין אתרים עדיין. הוסיפו אתר בלשונית "הגדרות".</div>`);
@@ -681,7 +714,7 @@ function daysHTML(w){
       return `<div class="dsite"><b>${esc(s.name)}</b>
         <div class="dl"><span class="t">בוקר</span><div class="chips">${m}</div></div>
         <div class="dl"><span class="t">ערב</span><div class="chips">${e}</div></div>
-        <div class="dnote"><input type="text" data-note="${s.id}|${d}" value="${esc(note)}" placeholder="הערות ואירועים" aria-label="הערה ${dn} ${esc(s.name)}">${note.trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}">וואטסאפ</button>`:""}</div></div>`}).join("");
+        <div class="dnote"><input type="text" data-note="${s.id}|${d}" value="${esc(note)}" placeholder="הערות ואירועים" aria-label="הערה ${dn} ${esc(s.name)}">${note.trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}">וואטסאפ</button>`:""}</div><div class="dnote"><span class="t">⭐ מועדף</span>${prefSel(w,s.id,d)}</div></div>`}).join("");
     const hn=md.names.join(" · ");
     return `<div class="dcard"><div class="dh">${dn}${hn?` <span class="hn">${esc(hn)}</span>`:""}<span>${fmt(dayDate(d)).slice(0,5)}</span></div>${sites}</div>`}).join("");
 }
@@ -839,7 +872,7 @@ function renderCal(){
       <td><button data-hdel="${h.id}" aria-label="מחק חג">✕</button></td></tr>`).join("");
 }
 function renderSettings(){
-  $("#lblM").value=S.shiftLbl.m;$("#lblE").value=S.shiftLbl.e;$("#sheetTitle").value=S.title||"";$("#targetN").value=S.target??5;$("#siteCover").checked=S.siteCover!==false;
+  $("#lblM").value=S.shiftLbl.m;$("#lblE").value=S.shiftLbl.e;$("#sheetTitle").value=S.title||"";$("#targetN").value=S.target??5;$("#coverSet").innerHTML=`<table class="req"><tr><th>אתר</th><th>בקרים</th><th>ערבים</th></tr>${S.sites.map(s=>`<tr><td>${esc(s.name)}</td>${["m","e"].map(sh=>`<td><input type="number" min="0" max="5" data-cov="${s.id}|${sh}" value="${S.cover[s.id][sh]||0}" aria-label="${esc(s.name)} ${sh==="m"?"בקרים":"ערבים"}"></td>`).join("")}</tr>`).join("")}</table>`;
   $("#sitesSet").innerHTML=S.sites.map(s=>`<div class="card"><div class="row" style="margin-bottom:10px"><input type="text" data-sname="${s.id}" value="${esc(s.name)}" aria-label="שם אתר"><button data-sdel="${s.id}">הסר אתר</button></div>
     <div class="scroll"><table class="req"><tr><th>עובדים במשמרת</th>${DAYS.map(d=>`<th>${d}</th>`).join("")}</tr>
     ${["m","e"].map(sh=>`<tr><td>${sh==="m"?"בוקר":"ערב"}</td>${DAYS.map((_,d)=>`<td><input type="number" min="0" max="6" data-req="${s.id}|${sh}|${d}" value="${(s.req[sh]||[])[d]||0}" aria-label="${sh==="m"?"בוקר":"ערב"} ${DAYS[d]}"></td>`).join("")}</tr>`).join("")}
@@ -918,7 +951,8 @@ document.addEventListener("input",e=>{
 });
 document.addEventListener("change",e=>{
   const t=e.target;
-  if(t.id==="siteCover"){S.siteCover=t.checked;changed();render()}
+  if(t.dataset.cov){const[sid,sh]=t.dataset.cov.split("|");S.cover[sid]=S.cover[sid]||{m:0,e:0};S.cover[sid][sh]=Math.max(0,Math.min(5,parseInt(t.value)||0));changed();render()}
+  if(t.dataset.pref){const[sid,d]=t.dataset.pref.split("|"),w=W();w.pref[sid]=w.pref[sid]||DAYS.map(()=>null);const[e,sh]=(t.value||"|").split("|");w.pref[sid][+d]=e?{e,sh}:null;changed();render()}
   if(t.dataset.rsel){const[sid,i]=t.dataset.rsel.split("|"),r=S.friRule[sid];if(r){r.list[+i]=t.value;changed();render()}}
   if(t.dataset.vf){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.classList.contains("dtx")?t.dataset.iso:t.value;if(f==="from"&&(!v.to||v.to<v.from))v.to=v.from;changed();render()}}
   if(t.dataset.hf){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.classList.contains("dtx")?t.dataset.iso:t.value;if(f==="from"&&(!h.to||h.to<h.from))h.to=h.from;if(f!=="name")S.holidays.sort((a,b)=>(a.from||"9").localeCompare(b.from||"9"));changed();render()}}
