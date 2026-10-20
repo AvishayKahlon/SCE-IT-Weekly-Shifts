@@ -267,12 +267,19 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   table.grid th:first-child,table.grid td.name{width:84px;font-size:13px;white-space:normal;overflow-wrap:break-word;word-break:normal;padding-inline:4px}
   table.grid th .l{display:none}
   table.grid .cst .lf{display:none}table.grid .cst .ls{display:inline}
-  .cst{min-height:42px;padding:0;font-size:14px}
+  .cst{min-height:42px;padding:0 1px;font-size:12px;letter-spacing:-.2px;overflow:hidden;white-space:nowrap}
+  table.grid td.stt,table.grid th:nth-child(2){width:34px;font-size:15px;padding-inline:0}
+  table.grid th:nth-child(2){font-size:10px}
   table.grid th .sd{display:inline;font-size:15px}
   input[type=text],input[type=number],input[type=date],select{font-size:16px}
   ol.rot li{display:grid;gap:4px}
   .pop{left:8px!important;right:8px;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:60dvh;transform-origin:bottom center;overscroll-behavior:contain}
   .pop button{padding:12px 12px;font-size:16px}
+}
+@media (max-width:400px){
+  table.grid th:first-child,table.grid td.name{width:68px;font-size:12px}
+  .cst{font-size:11px;letter-spacing:-.3px}
+  table.grid th .sd{font-size:13px}table.grid th span[style]{font-size:10px}
   table.rotT select{min-width:0;max-width:110px}
 }
 /* per-person hours / note inside a cell */
@@ -540,7 +547,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 17:00";
+const APP_VER="20.10.2026 17:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -997,7 +1004,7 @@ function renderCons(w){
   if(!emps.length){$("#consGrid").innerHTML=`<tr><td class="empty">הוסיפו עובדים בלשונית "עובדים"</td></tr>`;return}
   const ha=hasAssign(w),ST={ok:"✔",bad:"✘",miss:"⚠"};
   const eve3=DAYS.map((_,d)=>d<5&&emps.filter(e=>cons(w,e.id,d)==="E").length>2);
-  $("#consGrid").innerHTML=`<tr><th>עובד/ת</th><th>סטטוס</th>${DAYS.map((dn,d)=>`<th><span class="l">${dn}</span><span class="sd">${dn[0]}׳</span><br><span style="font-weight:400;color:var(--muted)">${fmt(dayDate(d)).slice(0,5)}</span></th>`).join("")}</tr>`+
+  $("#consGrid").innerHTML=`<tr><th>עובד/ת</th><th>סטטוס</th>${DAYS.map((dn,d)=>`<th><span class="l">${dn}</span><span class="sd">${"אבגדהו"[d]}׳</span><br><span style="font-weight:400;color:var(--muted)">${fmt(dayDate(d)).slice(0,5)}</span></th>`).join("")}</tr>`+
     emps.map(e=>{const es=empStatus(w,e.id);
       return `<tr><td class="name">${esc(e.name)}</td><td class="stt ${ha?es.st:""}" title="${ha?{ok:"תואם",bad:"יש סתירה",miss:"יש יום שסומן ולא שובץ"}[es.st]:""}">${ha?ST[es.st]:""}</td>${DAYS.map((_,d)=>{
         let v,lbl,dis=false;
