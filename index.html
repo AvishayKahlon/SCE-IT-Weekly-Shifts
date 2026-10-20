@@ -152,7 +152,7 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   header{gap:8px}
   .week{width:100%;display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:6px}
   .week b{grid-column:1/-1;grid-row:1;text-align:center;font-size:15px}
-  .week input[type=date]{min-width:0;width:100%}
+  .week .df,.week .dtx{min-width:0;width:100%}
   .week button{padding:8px 6px;white-space:nowrap;font-size:14px}
   .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:0}
   .tabs button{flex:1 1 auto;padding:10px 4px;font-size:14px;white-space:nowrap}
@@ -210,6 +210,12 @@ table.rotT .rc button{padding:3px 8px;font-size:13px}
 table.rotT tr.cur td{background:var(--sh-date);color:#1b2a12;font-weight:800}
 table.rotT tr.cur td:first-child,table.rotT tr.nxt td:first-child{white-space:nowrap}
 table.rotT tr.nxt td{color:var(--muted)}
+/* dd/mm/yyyy date fields: text input + native picker behind the calendar icon */
+.df{position:relative;display:inline-flex;align-items:center;vertical-align:middle}
+.df .dtx{width:136px;padding-left:34px;text-align:center;font-variant-numeric:tabular-nums}
+.df .dfi{position:absolute;left:9px;font-size:15px;pointer-events:none}
+.df .dfp{position:absolute;left:0;top:0;width:34px;height:100%;opacity:0;cursor:pointer;padding:0;border:0;margin:0}
+.df .dtx.err{border-color:var(--warn);outline:2px solid var(--warn)}
 select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
 /* vacations & holidays tables */
 table.cal{border-collapse:collapse;width:100%;min-width:760px}
@@ -232,7 +238,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
       <button id="prevW" aria-label="שבוע קודם">→ שבוע קודם</button>
       <b id="weekLbl"></b>
       <button id="nextW" aria-label="שבוע הבא">שבוע הבא ←</button>
-      <input type="date" id="weekPick" aria-label="בחירת שבוע">
+      <span class="df"><input type="text" class="dtx" id="weekPick" data-iso="" value="" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="בחירת שבוע (dd/mm/yyyy)"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" tabindex="-1" aria-hidden="true"></span>
     </div>
     <span class="status" id="status">טוען…</span>
   </header>
@@ -324,7 +330,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
     <div class="card">
       <h2>תזכורת לאירועים</h2>
       <div class="row" style="margin-bottom:10px">
-        <label>ליום <input type="date" id="evDate"></label>
+        <label>ליום <span class="df"><input type="text" class="dtx" id="evDate" data-iso="" value="" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="תאריך התזכורת (dd/mm/yyyy)"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" tabindex="-1" aria-hidden="true"></span></label>
         <span class="hint" id="evHint"></span>
       </div>
       <textarea id="evMsg" rows="7" aria-label="נוסח התזכורת"></textarea>
@@ -414,6 +420,11 @@ function parseKey(k){const[a,b,c]=k.split("-").map(Number);return new Date(a,b-1
 function fmt(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()}
 let cur=(()=>{const t=new Date();const s=sundayOf(t);if(t.getDay()>=4)s.setDate(s.getDate()+7);return key(s)})();
 function dayDate(i){const d=parseKey(cur);d.setDate(d.getDate()+i);return d}
+/* dd/mm/yyyy <-> yyyy-mm-dd */
+function dmy(iso){return iso?fmt(parseKey(iso)):""}
+function parseDMY(t){const m=String(t||"").trim().match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/);if(!m)return null;let y=+m[3];if(y<100)y+=2000;const d=new Date(y,+m[2]-1,+m[1]);if(d.getDate()!==+m[1]||d.getMonth()!==+m[2]-1)return null;return key(d)}
+function dateField(attrs,iso,label){return `<span class="df"><input type="text" class="dtx" ${attrs} data-iso="${esc(iso||"")}" value="${esc(dmy(iso))}" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="${esc(label)}"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" value="${esc(iso||"")}" tabindex="-1" aria-hidden="true"></span>`}
+function setDate(el,iso){el.dataset.iso=iso||"";if(document.activeElement!==el)el.value=dmy(iso);const p=el.parentNode.querySelector(".dfp");if(p)p.value=iso||""}
 function addW(wk,n){const d=parseKey(wk);d.setDate(d.getDate()+7*n);return key(d)}
 
 /* ---------- holidays & vacations ---------- */
@@ -680,7 +691,7 @@ function render(){
   const w=W();
   const d0=parseKey(cur),d5=dayDate(5);
   $("#weekLbl").textContent=fmt(d0)+" – "+fmt(d5);
-  $("#weekPick").value=cur;
+  setDate($("#weekPick"),cur);
   $("#finalBadge").hidden=!w.final;
   $("#finalBtn").textContent=w.final?"בטל סימון סופי":"סמן כסופי";
   $("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);
@@ -704,8 +715,8 @@ function renderMsgs(){
   if(!$("#consDeadline").value)$("#consDeadline").value=S.consDeadline||"חמישי ב-12:00";
   setMsg("consMsg",consText());
   // events reminder
-  if(!$("#evDate").value){const t=new Date();t.setDate(t.getDate()+1);$("#evDate").value=key(t)}
-  const ed=parseKey($("#evDate").value),ek=key(sundayOf(ed)),di=ed.getDay();
+  if(!$("#evDate").dataset.iso){const t=new Date();t.setDate(t.getDate()+1);setDate($("#evDate"),key(t))}
+  const ed=parseKey($("#evDate").dataset.iso),ek=key(sundayOf(ed)),di=ed.getDay();
   const ew=S.weeks[ek];let lines=[];
   if(di<=5&&ew){S.sites.forEach(s=>{const n=(ew.notes?.[s.id]||[])[di];if(n&&n.trim()){
     const m=(ew.assign?.[s.id]?.m?.[di]||[]).map(empName),e=(ew.assign?.[s.id]?.e?.[di]||[]).map(empName);
@@ -807,22 +818,22 @@ function renderFriSet(){
 }
 /* vacations journal + holidays table */
 function renderCal(){
-  if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#tab-cal")&&document.activeElement.type==="text")return;
+  if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#tab-cal")&&document.activeElement.type==="text"&&!document.activeElement.classList.contains("dtx"))return;
   const opts=sel=>S.employees.map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
   $("#vacT").innerHTML=`<tr><th></th><th>טכנאי</th><th>מתאריך</th><th>עד תאריך</th><th>סה"כ ימים</th><th>מטרת החופש</th><th>קמפוס</th><th></th></tr>`+
     (S.vac.length?S.vac.map(v=>{const days=v.from&&v.to&&v.to>=v.from?Math.round((parseKey(v.to)-parseKey(v.from))/864e5)+1:"";const old=v.to&&v.to<cur;
       return `<tr><td><span class="dot${old?" old":""}" title="${old?"החופשה הסתיימה":""}">●</span></td>
         <td><select data-vf="${v.id}|emp" aria-label="טכנאי">${opts(v.emp)}</select></td>
-        <td><input type="date" data-vf="${v.id}|from" value="${esc(v.from||"")}" aria-label="מתאריך"></td>
-        <td><input type="date" data-vf="${v.id}|to" value="${esc(v.to||"")}" aria-label="עד תאריך"></td>
+        <td>${dateField(`data-vf="${v.id}|from"`,v.from,"מתאריך")}</td>
+        <td>${dateField(`data-vf="${v.id}|to"`,v.to,"עד תאריך")}</td>
         <td class="num">${days}</td>
         <td><input type="text" data-vf="${v.id}|purpose" value="${esc(v.purpose||"")}" aria-label="מטרת החופש"></td>
         <td><select data-vf="${v.id}|campus" aria-label="קמפוס"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v.campus?"selected":""}>${esc(c)}</option>`).join("")}</select></td>
         <td><button data-vdel="${v.id}" aria-label="מחק חופשה">✕</button></td></tr>`}).join(""):`<tr><td colspan="8" class="empty">אין חופשות רשומות</td></tr>`);
   $("#holT").innerHTML=`<tr><th>חג</th><th>מתאריך</th><th>עד תאריך</th><th>מהות</th><th>ימי שישי</th><th></th></tr>`+
     S.holidays.map(h=>`<tr><td><input type="text" data-hf="${h.id}|name" value="${esc(h.name||"")}" aria-label="שם החג"></td>
-      <td><input type="date" data-hf="${h.id}|from" value="${esc(h.from||"")}" aria-label="מתאריך"></td>
-      <td><input type="date" data-hf="${h.id}|to" value="${esc(h.to||"")}" aria-label="עד תאריך"></td>
+      <td>${dateField(`data-hf="${h.id}|from"`,h.from,"מתאריך")}</td>
+      <td>${dateField(`data-hf="${h.id}|to"`,h.to,"עד תאריך")}</td>
       <td><select data-hf="${h.id}|type" aria-label="מהות">${Object.entries(HOL_T).map(([k,l])=>`<option value="${k}" ${k===h.type?"selected":""}>${esc(l)}</option>`).join("")}</select></td>
       <td class="num">${h.type==="off"?countFris(h.from,h.to||h.from):0}</td>
       <td><button data-hdel="${h.id}" aria-label="מחק חג">✕</button></td></tr>`).join("");
@@ -843,7 +854,7 @@ document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",
 }));
 function shiftWeek(n){const d=parseKey(cur);d.setDate(d.getDate()+7*n);cur=key(d);msgEdited.consMsg={};msgEdited.weekMsg={};render()}
 $("#prevW").onclick=()=>shiftWeek(-1);$("#nextW").onclick=()=>shiftWeek(1);
-$("#weekPick").onchange=e=>{if(e.target.value){cur=key(sundayOf(parseKey(e.target.value)));render()}};
+$("#weekPick").addEventListener("change",e=>{const v=e.target.dataset.iso;if(v){cur=key(sundayOf(parseKey(v)));render()}});
 $("#genBtn").onclick=()=>{if(!activeEmps().length)return;generate();changed();render()};
 $("#clearBtn").onclick=()=>{const w=W();S.sites.forEach(s=>w.assign[s.id]={m:DAYS.map(()=>[]),e:DAYS.map(()=>[])});changed();render()};
 $("#finalBtn").onclick=()=>{const w=W();w.final=!w.final;changed();render()};
@@ -901,16 +912,16 @@ document.addEventListener("input",e=>{
   if(t.dataset.sname){const s=S.sites.find(x=>x.id===t.dataset.sname);if(s){s.name=t.value;changed(true)}}
   if(t.dataset.req){const[sid,sh,d]=t.dataset.req.split("|");const s=S.sites.find(x=>x.id===sid);if(s){s.req[sh]=s.req[sh]||DAYS.map(()=>0);s.req[sh][+d]=Math.max(0,Math.min(6,parseInt(t.value)||0));changed(true)}}
   if(t.id==="targetN"){S.target=Math.max(0,Math.min(6,parseInt(t.value)||0));changed(true)}
-  if(t.dataset.vf&&t.type==="text"){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.value;changed(true)}}
-  if(t.dataset.hf&&t.type==="text"){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.value;changed(true)}}
+  if(t.dataset.vf&&t.type==="text"&&!t.classList.contains("dtx")){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.value;changed(true)}}
+  if(t.dataset.hf&&t.type==="text"&&!t.classList.contains("dtx")){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.value;changed(true)}}
   if(t.id==="lblM"){S.shiftLbl.m=t.value;changed(true)} if(t.id==="lblE"){S.shiftLbl.e=t.value;changed(true)} if(t.id==="sheetTitle"){S.title=t.value;changed(true)}
 });
 document.addEventListener("change",e=>{
   const t=e.target;
   if(t.id==="siteCover"){S.siteCover=t.checked;changed();render()}
   if(t.dataset.rsel){const[sid,i]=t.dataset.rsel.split("|"),r=S.friRule[sid];if(r){r.list[+i]=t.value;changed();render()}}
-  if(t.dataset.vf){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.value;if(f==="from"&&(!v.to||v.to<v.from))v.to=v.from;changed();render()}}
-  if(t.dataset.hf){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.value;if(f==="from"&&(!h.to||h.to<h.from))h.to=h.from;if(f!=="name")S.holidays.sort((a,b)=>(a.from||"9").localeCompare(b.from||"9"));changed();render()}}
+  if(t.dataset.vf){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.classList.contains("dtx")?t.dataset.iso:t.value;if(f==="from"&&(!v.to||v.to<v.from))v.to=v.from;changed();render()}}
+  if(t.dataset.hf){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.classList.contains("dtx")?t.dataset.iso:t.value;if(f==="from"&&(!h.to||h.to<h.from))h.to=h.from;if(f!=="name")S.holidays.sort((a,b)=>(a.from||"9").localeCompare(b.from||"9"));changed();render()}}
   if(t.dataset.eact){const em=S.employees.find(x=>x.id===t.dataset.eact);if(em){em.active=t.checked;changed();render()}}
   if(t.dataset.req||t.dataset.ename||t.dataset.sname||["lblM","lblE","sheetTitle","targetN"].includes(t.id))render();
 });
@@ -919,6 +930,20 @@ $("#addVac").onclick=()=>{const e=activeEmps()[0];if(!e)return;const d=parseKey(
 $("#addHol").onclick=()=>{S.holidays.push({id:uid(),name:"",from:cur,to:cur,type:"off"});changed();render()};
 $("#newEmp").addEventListener("keydown",e=>{if(e.key==="Enter")$("#addEmp").click()});
 $("#addSite").onclick=()=>{const v=$("#newSite").value.trim();if(!v)return;S.sites.push({id:uid(),name:v,req:{m:[1,1,1,1,1,1],e:[1,1,1,1,1,0]}});$("#newSite").value="";changed();render()};
+
+/* ---------- dd/mm/yyyy date fields ---------- */
+document.addEventListener("input",e=>{const t=e.target;if(!t.classList||!t.classList.contains("dtx"))return;
+  /* auto-insert slashes while typing digits: 18102026 -> 18/10/2026 */
+  if(e.inputType&&e.inputType.startsWith("delete"))return;
+  let v=t.value.replace(/[^\d\/.\-]/g,"");if(/^\d{2}$/.test(v)||/^\d{1,2}[\/.\-]\d{2}$/.test(v))v+="/";
+  if(/^\d{8}$/.test(v))v=v.slice(0,2)+"/"+v.slice(2,4)+"/"+v.slice(4);t.value=v;t.classList.remove("err")},true);
+document.addEventListener("change",e=>{const t=e.target;if(!t.classList)return;
+  if(t.classList.contains("dfp")){const x=t.parentNode.querySelector(".dtx");if(!t.value)return;e.stopPropagation();x.dataset.iso=t.value;x.value=dmy(t.value);x.classList.remove("err");x.dispatchEvent(new Event("change",{bubbles:true}));return}
+  if(t.classList.contains("dtx")){const iso=parseDMY(t.value);
+    if(!iso){e.stopImmediatePropagation();t.classList.add("err");toast("תאריך לא תקין. הפורמט: dd/mm/yyyy, למשל 23/10/2026");t.value=dmy(t.dataset.iso);setTimeout(()=>t.classList.remove("err"),2500);return}
+    t.dataset.iso=iso;t.value=dmy(iso);const p=t.parentNode.querySelector(".dfp");if(p)p.value=iso}},true);
+document.addEventListener("click",e=>{const p=e.target.closest&&e.target.closest(".dfp");if(!p)return;const x=p.parentNode.querySelector(".dtx");p.value=x.dataset.iso||"";try{p.showPicker()}catch(err){}},true);
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList&&e.target.classList.contains("dtx"))e.target.blur()});
 
 /* ---------- export ---------- */
 function fileBase(){return "סידור עבודה "+fmt(parseKey(cur)).replace(/\//g,".")}
