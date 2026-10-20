@@ -274,6 +274,19 @@ table.sh .an2{display:block;line-height:1.05}
 .pop .pn{display:grid;gap:3px;font-size:12px;color:var(--muted)}
 .pop .pn input{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 .pop .tag.bk{background:#EEF2F7;color:#455A64;border-radius:4px;padding:0 5px;font-size:11px}
+/* next-week prompt (modal: stays centered) */
+.nwp{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(20,23,20,.45);transition:opacity 200ms var(--ease-out)}
+@starting-style{.nwp{opacity:0}}
+.nwp-card{background:var(--surface);color:var(--ink);border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.25);padding:24px 22px 18px;max-width:440px;width:100%;display:grid;gap:8px;text-align:center;transition:transform 220ms var(--ease-out),opacity 220ms var(--ease-out)}
+@starting-style{.nwp-card{transform:scale(.96);opacity:0}}
+.nwp-ic{width:52px;height:52px;border-radius:14px;background:#EEF8F1;color:#2E7D32;display:grid;place-items:center;margin:0 auto 4px}
+.nwp-ic svg{width:28px;height:28px}
+.nwp h2{font-size:19px;margin:0}
+.nwp-week{margin:0;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)}
+.nwp-st{margin:0 0 8px;color:var(--muted);font-size:14px}
+.nwp-go{min-height:48px;font-size:15px;border-radius:10px;text-wrap:balance}
+.nwp-later{border:0;background:none;color:var(--muted);font-weight:600;min-height:40px}
+@media (prefers-reduced-motion:reduce){.nwp-card{transition:opacity 150ms ease}}
 /* dev-only data toggle */
 .devbar{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:2px;padding:3px;background:#E5E5E5;border-radius:999px;z-index:50;font:500 12px system-ui,sans-serif;direction:ltr;box-shadow:0 2px 10px rgba(0,0,0,.15)}
 .devbar a{padding:5px 10px;border-radius:999px;color:#444;text-decoration:none;white-space:nowrap}
@@ -516,7 +529,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 16:20";
+const APP_VER="20.10.2026 16:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -1284,6 +1297,30 @@ async function flush(){
 }
 function load(raw){try{const o=JSON.parse(raw);S=Object.assign(defaultState(),o);S.shiftLbl=Object.assign(defaultState().shiftLbl,o.shiftLbl||{});const v=S.friVer;ensureData();if(v!==S.friVer)setTimeout(()=>changed(),0)}catch(e){}}
 
+/* ---------- from Tuesday: offer to start next week's schedule ---------- */
+function nextWeekPrompt(force){
+  const t=new Date(),dow=t.getDay();if(!force&&(dow<2||dow>6))return;          /* Tuesday–Saturday */
+  const nk=addW(key(sundayOf(t)),1);if(!force&&cur===nk)return;                 /* already looking at next week */
+  const nw=S.weeks[nk];if(!force&&nw&&nw.final)return;                           /* next week already final */
+  try{if(!force&&localStorage.getItem("nw-dismissed")===nk)return}catch(e){}     /* "not now" for this week */
+  if(document.querySelector(".nwp"))return;
+  const has=nw&&Object.values(nw.assign||{}).some(a=>a.m.some(x=>x.length)||a.e.some(x=>x.length));
+  const o=document.createElement("div");o.className="nwp";
+  o.innerHTML=`<div class="nwp-card" role="dialog" aria-modal="true" aria-labelledby="nwpT">
+    <div class="nwp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13v4M10 15h4"/></svg></div>
+    <h2 id="nwpT">סידור העבודה הבא</h2>
+    <p class="nwp-week">שבוע ${weekSpan(nk)}</p>
+    <p class="nwp-st">${has?"יש כבר שיבוצים בטיוטה לשבוע הזה":"עדיין לא התחלת את הסידור לשבוע הזה"}</p>
+    <button class="primary nwp-go">להתחיל לעבוד על סידור העבודה הבא – לחץ כאן</button>
+    <button class="nwp-later">לא עכשיו</button></div>`;
+  document.body.appendChild(o);
+  const close=later=>{if(later){try{localStorage.setItem("nw-dismissed",nk)}catch(e){}}o.remove();document.removeEventListener("keydown",esc)};
+  const esc=e=>{if(e.key==="Escape")close(true)};document.addEventListener("keydown",esc);
+  o.querySelector(".nwp-go").onclick=()=>{close(false);cur=nk;msgEdited.consMsg={};msgEdited.weekMsg={};document.querySelector('.tabs button[data-tab="sched"]')?.click();render();window.scrollTo({top:0})};
+  o.querySelector(".nwp-later").onclick=()=>close(true);
+  o.addEventListener("click",e=>{if(e.target===o)close(true)});
+  setTimeout(()=>o.querySelector(".nwp-go").focus(),0);
+}
 /* ---------- dev-only stress-test data (?data=worst|empty|one|many). Never saved. ---------- */
 const DEV_DATA=(()=>{try{const v=new URLSearchParams(location.search).get("data");return ["worst","empty","one","many"].includes(v)?v:null}catch(e){return null}})();
 function devFixture(kind){
@@ -1316,6 +1353,7 @@ function devToggle(){const b=document.createElement("nav");b.className="devbar";
     if(raw)load(raw);else if(window.PRESET)load(JSON.stringify(window.PRESET));
     render();
     setStatus("שמירה בדפדפן הזה בלבד");
+    nextWeekPrompt();
   }
   if(window.claude&&claude.use){
     try{claude.use("downloads").then(x=>{dl=x},()=>{})}catch(e){}
@@ -1327,7 +1365,7 @@ function devToggle(){const b=document.createElement("nav");b.className="devbar";
       let first=true;
       ref.onSnapshot(snap=>{
         if(snap.exists){const d=snap.data();if(d.client!==clientId||first){if((d.ts||0)>=lastTs&&!dirty){load(d.state);lastTs=d.ts||0;render()}}}
-        if(first){first=false;setStatus(snap.exists?"נשמר":"מוכן")}
+        if(first){first=false;setStatus(snap.exists?"נשמר":"מוכן");nextWeekPrompt()}
       },e=>{if(first){first=false;goLocal()}else setStatus("החיבור לשמירה נותק")});
     }catch(e){goLocal()}
   }else goLocal();
