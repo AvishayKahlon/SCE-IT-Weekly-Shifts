@@ -3,6 +3,14 @@
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F3F0">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141714">
 <meta name="color-scheme" content="light dark">
+<!-- home-screen app (iPhone "Add to Home Screen" / Android install) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="סידור עבודה">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>סידור עבודה שבועי</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -529,7 +537,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 16:30";
+const APP_VER="20.10.2026 16:40";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
