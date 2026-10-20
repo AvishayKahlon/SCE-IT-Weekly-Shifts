@@ -107,6 +107,7 @@ button:disabled{opacity:.5;cursor:default}
 .msgs{display:grid;gap:4px}
 .msg{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:6px 10px;font-size:14px}
 .msg.ok{background:transparent;color:var(--ok);padding:0}
+.msg.info{background:transparent;color:var(--muted);padding:0}
 .scroll{overflow-x:auto;max-width:100%}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
 .card h2{font-size:16px;margin:0 0 10px}
@@ -410,7 +411,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
     <div class="scroll" id="sheetScroll"><div id="sheet"></div></div>
     <p class="hint sheethint">לחיצה על משבצת פותחת רשימת עובדים לשיבוץ ידני. בשורת "הערות ואירועים" אפשר להקליד ישירות.</p>
     <div class="card">
-      <h2>הוגנות</h2>
+      <h2>סיכום משמרות</h2>
       <div class="scroll"><table class="fair" id="fair"></table></div>
       <p class="hint" style="margin-top:8px">"שישי מצטבר" סופר את כל השבועות שסומנו כסופיים, כדי שהסבב בשישי יתחלק בין כולם לאורך זמן.</p>
     </div>
@@ -537,7 +538,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 16:40";
+const APP_VER="20.10.2026 16:50";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -767,8 +768,7 @@ function problems(w){
   const list=[],bad=new Set();
   S.sites.forEach(s=>DAYS.forEach((dn,d)=>["m","e"].forEach(sh=>{
     const need=NEED[s.id][sh][d],have=w.assign[s.id][sh][d].length;
-    if(have<need){const busyD=new Set();S.sites.forEach(x=>["m","e"].forEach(y=>w.assign[x.id][y][d].forEach(id=>busyD.add(id))));const free=backupEmps().filter(e=>!busyD.has(e.id)).map(e=>e.name);
-      list.push(`${s.name}, ${dn} ${sh==="m"?"בוקר":"ערב"}: חסר${need-have>1?"ים":""} ${need-have}${free.length?` – אפשר לשבץ את ${free.join(" / ")}`:""}`)}
+    if(have<need)list.push(`${s.name}, ${dn} ${sh==="m"?"בוקר":"ערב"}: חסר${need-have>1?"ים":""} ${need-have}`);
     if(!need&&have&&((s.req[sh]||[])[d]||0)>0){const md=dm(d);w.assign[s.id][sh][d].forEach((_,i)=>bad.add(`${s.id}|${sh}|${d}|${i}`));list.push(`${s.name}, ${dn} ${sh==="m"?"בוקר":"ערב"}: יש שיבוץ אבל ${md.off?"זה יום פגרה":"היום מסתיים ב-16:00"}`)}
     w.assign[s.id][sh][d].forEach((id,i)=>{if(!canWork(w,id,d,sh)){bad.add(`${s.id}|${sh}|${d}|${i}`);list.push(`${empName(id)} שובץ/ה ב${dn} ${sh==="m"?"בוקר":"ערב"} למרות אילוץ`)}});
   })));
@@ -897,7 +897,7 @@ function render(){
   $("#finalBtn .lb").textContent=w.final?"בטל סימון סופי":"סמן כסופי";$("#finalBtn").classList.toggle("on",!!w.final);
   $("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);
   const pr=problems(w);
-  $("#msgs").innerHTML=pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"");
+  $("#msgs").innerHTML=!hasAssign(w)?`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`:pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"");
   fitCells($("#sheet"));
   renderFair(w);renderCons(w);renderFriSet();renderCal();renderStaff();renderSettings();renderMsgs();
 }
