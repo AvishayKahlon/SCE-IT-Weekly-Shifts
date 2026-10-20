@@ -564,7 +564,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 17:50";
+const APP_VER="20.10.2026 18:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -896,7 +896,6 @@ function sheetHTML(w,exportMode){
     h+=`</table>`;parts.push(h);
   });
   if(!S.sites.length)parts.push(`<div class="empty">אין אתרים עדיין. הוסיפו אתר בלשונית "הגדרות".</div>`);
-  if(exportMode){const n=new Date();parts.push(`<div class="doc-foot"><span>שינויים בסידור יתעדכנו בקבוצת הצוות</span><span>הופק: ${dot(n)} ${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}</span></div>`)}
   return parts.join("");
 }
 
