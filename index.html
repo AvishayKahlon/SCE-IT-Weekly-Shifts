@@ -466,7 +466,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 14:30";
+const APP_VER="20.10.2026 14:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -729,8 +729,8 @@ function sheetHTML(w,exportMode){
   if(exportMode){
     /* official document header: logo, title, week range */
     if(window.SCE_LOGO)parts.push(`<img class="logo" src="${window.SCE_LOGO}" alt="SCE – המכללה האקדמית להנדסה ע״ש סמי שמעון">`);
-    parts.push(`<div class="doc-head"><div class="doc-title">סידור עבודה שבועי${S.title?` – ${esc(S.title)}`:""}</div><div class="doc-sub">${DAYS[0]} ${fmt(parseKey(cur))} עד ${DAYS[5]} ${fmt(dayDate(5))}</div></div>`);
-  }else if(S.title)parts.push(`<p class="sheet-title">${esc(S.title)}</p>`);
+  }
+  if(S.title)parts.push(`<p class="sheet-title">${esc(S.title)}</p>`);
   S.sites.forEach(s=>{
     const A=w.assign[s.id];
     let h=`<table class="sh"><colgroup><col style="width:150px">${DAYS.map(()=>'<col><col>').join("")}</colgroup>`;
@@ -769,7 +769,7 @@ function sheetHTML(w,exportMode){
     h+=`</table>`;parts.push(h);
   });
   if(!S.sites.length)parts.push(`<div class="empty">אין אתרים עדיין. הוסיפו אתר בלשונית "הגדרות".</div>`);
-  if(exportMode){const n=new Date();parts.push(`<div class="doc-foot"><span>שינויים בסידור יתעדכנו בקבוצת הצוות</span><span>הופק: ${fmt(n)} ${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}</span></div>`)}
+  if(exportMode){const n=new Date();parts.push(`<div class="doc-foot"><span>שינויים בסידור יתעדכנו בקבוצת הצוות</span><span>הופק: ${dot(n)} ${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}</span></div>`)}
   return parts.join("");
 }
 
@@ -830,10 +830,10 @@ function renderMsgs(){
     const m=(ew.assign?.[s.id]?.m?.[di]||[]).map(empName),e=(ew.assign?.[s.id]?.e?.[di]||[]).map(empName);
     lines.push(`📍 ${s.name}: ${n.trim()}\n   בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`)}})}
   $("#evHint").textContent=lines.length?`${lines.length} אירועים ביום הזה`:"אין אירועים בהערות ליום הזה";
-  setMsg("evMsg",lines.length?`תזכורת ליום ${DAYS[di]} ${fmt(ed).slice(0,5)}:\n${lines.join("\n")}`:"");
+  setMsg("evMsg",lines.length?`תזכורת ליום ${DAYS[di]} ${dot(ed)}:\n${lines.join("\n")}`:"");
   // week as text
-  const w=W(),out=[`סידור עבודה ${fmt(parseKey(cur)).slice(0,5)}–${fmt(dayDate(5)).slice(0,5)}`];
-  DAYS.forEach((dn,d)=>{const md=dm(d);out.push(`\n*${dn} ${fmt(dayDate(d)).slice(0,5)}*${md.names.length?` (${md.names.join(", ")}${md.off?" – פגרה":md.noEve?" – סיום ב-16:00":""})`:""}`);if(md.off&&!S.sites.some(s=>namesAt(w,s.id,"m",d).length))return;S.sites.forEach(s=>{const m=namesAt(w,s.id,"m",d),e=namesAt(w,s.id,"e",d),n=(w.notes[s.id][d]||"").trim();
+  const w=W(),out=[`סידור עבודה ${weekSpan()}`];
+  DAYS.forEach((dn,d)=>{const md=dm(d);out.push(`\n*${dn} ${dot(dayDate(d))}*${md.names.length?` (${md.names.join(", ")}${md.off?" – פגרה":md.noEve?" – סיום ב-16:00":""})`:""}`);if(md.off&&!S.sites.some(s=>namesAt(w,s.id,"m",d).length))return;S.sites.forEach(s=>{const m=namesAt(w,s.id,"m",d),e=namesAt(w,s.id,"e",d),n=(w.notes[s.id][d]||"").trim();
     if(!m.length&&!e.length&&!n)return;out.push(`${s.name}: בוקר ${m.join(", ")||"—"}${(d<5&&!md.noEve)||e.length?` | ערב ${e.join(", ")||"—"}`:""}${n?` (${n})`:""}`)})});
   setMsg("weekMsg",out.join("\n"));
   renderGroup();
@@ -860,10 +860,10 @@ function sendWa(text){
   }else openUrl(wa(text));
 }
 function consText(){const nx=parseKey(cur);nx.setDate(nx.getDate()+7);const nxEnd=new Date(nx);nxEnd.setDate(nxEnd.getDate()+5);const dl=(S.consDeadline||"חמישי ב-12:00").trim();
-  return `היי לכולם 👋\nנא לשלוח אילוצים לשבוע ${fmt(nx).slice(0,5)}–${fmt(nxEnd).slice(0,5)}${dl?` עד ${dl}`:""}.\nלכתוב באילו ימים לא יכולים, או אם יש יום שאפשר רק בוקר או רק ערב.\nתודה!`}
+  return `היי לכולם 👋\nנא לשלוח אילוצים לשבוע ${weekSpan(key(nx))}${dl?` עד ${dl}`:""}.\nלכתוב באילו ימים לא יכולים, או אם יש יום שאפשר רק בוקר או רק ערב.\nתודה!`}
 function eventText(sid,d){const w=W(),s=S.sites.find(x=>x.id===sid),n=(w.notes[sid][d]||"").trim();
   const m=namesAt(w,sid,"m",d),e=namesAt(w,sid,"e",d);
-  return `תזכורת ליום ${DAYS[d]} ${fmt(dayDate(d)).slice(0,5)}:\n📍 ${s?s.name:""}: ${n}\n   בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`}
+  return `תזכורת ליום ${DAYS[d]} ${dot(dayDate(d))}:\n📍 ${s?s.name:""}: ${n}\n   בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`}
 $("#askConsBtn").onclick=()=>sendWa(consText());
 function renderGroup(){
   if(document.activeElement!==$("#mailTo"))$("#mailTo").value=S.mailTo||"";
@@ -1059,7 +1059,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList&&
 
 /* ---------- export ---------- */
 /* file name for every export: "סידור עבודה 18-23.10.2026", across months "29.11-04.12.2026", across years "27.12.2026-01.01.2027" */
-function weekSpan(){const a=parseKey(cur),b=dayDate(5),p=n=>String(n).padStart(2,"0");
+function dot(d){const p=n=>String(n).padStart(2,"0");return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}`}
+function weekSpan(wk){const a=parseKey(wk||cur),b=new Date(a);b.setDate(b.getDate()+5);const p=n=>String(n).padStart(2,"0");
   if(a.getFullYear()!==b.getFullYear())return `${p(a.getDate())}.${p(a.getMonth()+1)}.${a.getFullYear()}-${p(b.getDate())}.${p(b.getMonth()+1)}.${b.getFullYear()}`;
   if(a.getMonth()!==b.getMonth())return `${p(a.getDate())}.${p(a.getMonth()+1)}-${p(b.getDate())}.${p(b.getMonth()+1)}.${b.getFullYear()}`;
   return `${p(a.getDate())}-${p(b.getDate())}.${p(b.getMonth()+1)}.${b.getFullYear()}`}
@@ -1163,7 +1164,8 @@ $("#xlsBtn").onclick=async()=>{
   /* SCE logo banner across the top, like the Excel print version */
   if(window.SCE_LOGO){const id=wb.addImage({base64:window.SCE_LOGO,extension:"jpeg"});ws.getRow(1).height=42;ws.getRow(2).height=42;
     ws.addImage(id,{tl:{col:0,row:0},ext:{width:1300,height:103},editAs:"oneCell"});r=3}
-  ws.mergeCells(r,1,r,13);{const c=ws.getCell(r,1);c.value=`סידור עבודה שבועי${S.title?" – "+S.title:""}  ·  ${fmt(parseKey(cur))} – ${fmt(dayDate(5))}`;c.font={bold:true,size:16,color:{argb:"FF3F3F3F"},name:"Calibri"};c.alignment={horizontal:"center",vertical:"middle",readingOrder:"rtl"};ws.getRow(r).height=28;r+=2}
+  r++;
+  if(S.title){ws.mergeCells(r,1,r,13);const c=ws.getCell(r,1);c.value=S.title;c.font={bold:true,size:16,color:{argb:"FF3F3F3F"},name:"Calibri"};c.alignment={horizontal:"center",readingOrder:"rtl"};r+=2}
   ws.pageSetup={paperSize:9,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0,horizontalCentered:true,margins:{left:.28,right:.28,top:.42,bottom:.28,header:.3,footer:.3}};
 
   S.sites.forEach(s=>{
