@@ -291,7 +291,6 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   /* Friday rotation fits the screen: narrow number column, select takes the free width */
   #friSet{overflow-x:visible}
   table.rotT{min-width:0;width:100%;table-layout:fixed}
-  table.rotT th:first-child,table.rotT td:first-child{width:38px;padding:4px 2px;font-size:12px}
   table.rotT th,table.rotT td{padding:4px 3px}
   table.rotT th{font-size:13px;overflow-wrap:break-word}
   /* phone: name gets the full cell width, ◉ ✕ in a small row under it */
@@ -299,7 +298,6 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   #friSet table.rotT .rc select{grid-column:1/-1;width:100%;min-width:0;max-width:none;padding:6px 6px}
   #friSet table.rotT .rc button{height:30px;padding:0;font-size:12px}
   table.rotT td>button[data-radd]{padding:5px 8px;font-size:13px}
-  #friSet table.rotT .lf{display:none}#friSet table.rotT .ls{display:inline;font-size:11px}
   table.rotT tr.cur td,table.rotT tr.nxt td{font-size:14px}
 }
 /* per-person hours / note inside a cell */
@@ -346,7 +344,7 @@ table.sh .note .hol,.dnote .hol{flex:none;font-weight:700;font-size:12px;color:#
 .cst[data-v="V"]{background:var(--warn-bg);color:var(--warn);font-size:13px}
 .cst[data-v="F"]{color:var(--muted)}
 .cst .ls{display:none}
-table.rotT .ls{display:none}
+table.rotT .cap{display:block;font-size:11px;font-weight:600;opacity:.75;line-height:1.2}
 .cst:disabled{opacity:1;cursor:default}
 .cst[data-s="ok"]{background:#C6EFCE;color:#006100}
 .cst[data-s="bad"]{background:#FFC7CE;color:#9C0006}
@@ -572,7 +570,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 18:10";
+const APP_VER="20.10.2026 18:20";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -1051,15 +1049,16 @@ function renderFriSet(){
   const nx=addW(cur,1),rows=Math.max(1,...sites.map(s=>S.friRule[s.id].list.length));
   const opts=sel=>{const l=activeEmps().slice();if(sel&&!l.some(e=>e.id===sel))l.push({id:sel,name:empName(sel)+" (לא פעיל)"});return l.map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("")};
   const who=(s,wk)=>{if(friOff(wk))return "פגרה – אין כונן";const r=S.friRule[s.id],t=rotTurn(r,wk);return t===null?"אוטומטי":empName(r.list[t])};
-  let h=`<table class="rotT"><tr><th></th>${sites.map(s=>`<th>${esc(s.name)}</th>`).join("")}</tr>`;
+  let h=`<table class="rotT"><tr>${sites.map(s=>`<th>${esc(s.name)}</th>`).join("")}</tr>`;
   for(let i=0;i<rows;i++){
-    h+=`<tr><td class="rn">${i+1}</td>`+sites.map(s=>{const r=S.friRule[s.id];if(i>=r.list.length)return `<td></td>`;
+    h+=`<tr>`+sites.map(s=>{const r=S.friRule[s.id];if(i>=r.list.length)return `<td></td>`;
       const isT=rotTurn(r,cur)===i;
       return `<td class="${isT?"now":""}"><div class="rc"><select data-rsel="${s.id}|${i}" aria-label="${esc(s.name)} מקום ${i+1}">${opts(r.list[i])}</select><button data-rnow="${s.id}|${i}" title="התור שלו השבוע" aria-label="התור שלו השבוע" ${isT?"disabled":""}>◉</button><button data-rrm="${s.id}|${i}" title="הסר מהסבב" aria-label="הסר מהסבב">✕</button></div></td>`}).join("")+`</tr>`;
   }
-  h+=`<tr><td></td>${sites.map(s=>`<td><button data-radd="${s.id}">+ שורה</button></td>`).join("")}</tr>`;
-  h+=`<tr class="cur"><td><span class="lf">כונן השבוע</span><span class="ls">השבוע</span></td>${sites.map(s=>`<td>${esc(who(s,cur))}</td>`).join("")}</tr>`;
-  h+=`<tr class="nxt"><td><span class="lf">שבוע הבא</span><span class="ls">הבא</span></td>${sites.map(s=>`<td>${esc(who(s,nx))}</td>`).join("")}</tr></table>`;
+  h+=`<tr>${sites.map(s=>`<td><button data-radd="${s.id}">+ שורה</button></td>`).join("")}</tr>`;
+  /* summary rows: the caption sits inside each cell, so no label column is needed */
+  h+=`<tr class="cur">${sites.map(s=>`<td><span class="cap">כונן השבוע</span>${esc(who(s,cur))}</td>`).join("")}</tr>`;
+  h+=`<tr class="nxt">${sites.map(s=>`<td><span class="cap">שבוע הבא</span>${esc(who(s,nx))}</td>`).join("")}</tr></table>`;
   $("#friSet").innerHTML=h;
 }
 /* vacations journal + holidays table */
