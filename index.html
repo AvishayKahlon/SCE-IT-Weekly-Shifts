@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>סידור עבודה שבועי</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: tool header with week nav, tabs (schedule / constraints / staff / settings); the schedule tab renders a sheet that mirrors the team's printed format */
+:root{
+  --bg:#F2F3F0; --surface:#FFFFFF; --ink:#1E2320; --muted:#5D655F; --line:#D9DDD6; --accent:#4F7A2C; --accent-ink:#FFFFFF;
+  --warn:#B3261E; --warn-bg:#FCECEA; --ok:#2E7D32;
+  /* sheet palette: fixed, matches the printed schedule in both themes */
+  --sh-dark:#595959; --sh-darker:#3F3F3F; --sh-date:#A9D18E; --sh-cell:#C6E0B4; --sh-cell2:#E2EFDA; --sh-note:#F2F2F2; --sh-ink:#1A1A1A; --sh-line:#2B2B2B;
+  --font:"Heebo",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141714; --surface:#1D211D; --ink:#E9ECE7; --muted:#A4ACA4; --line:#323832; --accent:#8DBF5E; --accent-ink:#10140E; --warn:#F28B82; --warn-bg:#3A1F1C; --ok:#81C995; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141714; --surface:#1D211D; --ink:#E9ECE7; --muted:#A4ACA4; --line:#323832; --accent:#8DBF5E; --accent-ink:#10140E; --warn:#F28B82; --warn-bg:#3A1F1C; --ok:#81C995; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+.nojs{background:#FFF4D6;color:#5A3E00;border-bottom:2px solid #E0B44A;padding:14px 16px;font-size:16px;line-height:1.6}
+.bar button.wa{background:#1E8E4E;color:#fff;border-color:#1E8E4E;font-weight:700}
+.sheetready{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;z-index:40;padding:16px}
+.sheetready .card{display:grid;gap:10px;min-width:240px;text-align:center}
+.sheetready .wa{background:#1E8E4E;color:#fff;border-color:#1E8E4E;font-weight:700;min-height:46px}
+.toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:14px;z-index:30}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;direction:rtl;margin:0}
+.wrap{max-width:1560px;margin:0 auto;padding-block:18px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:16px}
+header{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
+h1{font-size:22px;font-weight:800;margin:0}
+.week{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.week b{font-variant-numeric:tabular-nums;min-width:190px;text-align:center}
+.status{font-size:13px;color:var(--muted)}
+.final-badge{font-size:12px;font-weight:700;color:var(--ok);border:1px solid currentColor;border-radius:999px;padding:1px 8px}
+button,.btn{font:inherit;font-size:14px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+button:disabled{opacity:.5;cursor:default}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 14px;font-weight:700;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.panel{display:grid;gap:14px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar .sp{flex:1}
+.msgs{display:grid;gap:4px}
+.msg{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:6px 10px;font-size:14px}
+.msg.ok{background:transparent;color:var(--ok);padding:0}
+.scroll{overflow-x:auto;max-width:100%}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.card h2{font-size:16px;margin:0 0 10px}
+.hint{color:var(--muted);font-size:13px;margin:0}
+
+/* ===== sheet (mirrors the printed format) ===== */
+#sheet{display:grid;gap:22px;min-width:1180px;background:#FFFFFF;padding:12px;border-radius:6px}
+.sheet-title{text-align:center;color:var(--sh-ink);font-size:22px;font-weight:800;margin:0}
+table.sh{width:100%;border-collapse:collapse;table-layout:fixed;color:var(--sh-ink);border:3px solid var(--sh-line);font-family:var(--font)}
+table.sh td,table.sh th{border:1.5px solid var(--sh-line);height:36px;padding:2px 6px;text-align:center;font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.sh .site{background:var(--sh-dark);color:#fff;font-size:22px;font-weight:800;height:40px}
+table.sh .lbl{background:var(--sh-dark);color:#fff;font-size:16px;width:150px}
+table.sh .date{background:var(--sh-date);font-size:18px;font-variant-numeric:tabular-nums}
+table.sh .dname{background:var(--sh-dark);color:#fff;font-size:20px}
+table.sh .c{background:var(--sh-cell)}
+table.sh .c2{background:var(--sh-cell2)}
+table.sh .off{background:var(--sh-dark);color:#fff;font-size:18px}
+table.sh .note{background:var(--sh-note);font-size:13px;font-weight:500;color:#555}
+table.sh .slot{cursor:pointer}
+table.sh .slot:hover{outline:2px solid var(--accent);outline-offset:-3px}
+table.sh .slot.bad{box-shadow:inset 0 0 0 3px #D93025}
+table.sh .slot.empty-need{background:repeating-linear-gradient(135deg,var(--sh-cell),var(--sh-cell) 6px,#F4D6D3 6px,#F4D6D3 12px)}
+table.sh .note input{width:100%;border:0;background:transparent;text-align:center;font:inherit;color:inherit;padding:2px;min-width:0}
+table.sh .note .nw{display:flex;align-items:center;gap:2px}
+table.sh .nbtn{flex:none;border:0;background:#1E8E4E;color:#fff;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:700;cursor:pointer;line-height:1.6}
+table.sh .nbtn:hover{background:#166C3B}
+.export table.sh .slot{cursor:default}
+.export .note input{display:none}
+#exportBox{position:fixed;left:-99999px;top:0;width:1500px}
+
+/* popover */
+.pop{position:fixed;z-index:20;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:6px;display:grid;gap:2px;min-width:200px;max-height:70vh;overflow:auto}
+.pop button{border:0;text-align:right;display:flex;justify-content:space-between;gap:10px;padding:7px 10px;border-radius:6px;background:none}
+.pop button:hover{background:var(--bg)}
+.pop .tag{font-size:12px;color:var(--muted)}
+.pop .tag.no{color:var(--warn)}
+
+/* constraints grid */
+table.grid{border-collapse:collapse;width:100%;min-width:720px}
+table.grid th,table.grid td{border:1px solid var(--line);padding:6px;text-align:center}
+table.grid th{background:var(--bg);font-size:14px}
+table.grid td.name{text-align:right;font-weight:700;white-space:nowrap}
+.cst{width:100%;min-height:36px;border-radius:6px;font-weight:700;border:1px solid var(--line)}
+.cst[data-v="A"]{background:transparent;color:var(--muted)}
+.cst[data-v="M"]{background:#E3F0FF;color:#174EA6}
+.cst[data-v="E"]{background:#FFF1D6;color:#8A5300}
+.cst[data-v="X"]{background:var(--warn-bg);color:var(--warn)}
+ol.rot{margin:0 0 10px;padding-inline-start:22px;display:grid;gap:6px}
+ol.rot li{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+ol.rot .rb{display:flex;gap:4px;flex-wrap:wrap}
+ol.rot .rb button{padding:4px 9px;font-size:13px}
+ol.rot .turn{background:var(--sh-date);color:#1b2a12;border-radius:999px;padding:1px 8px;font-size:12px}
+details.cons>summary{cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;list-style:none}
+details.cons>summary::-webkit-details-marker{display:none}
+details.cons>summary h2{margin:0}
+details.cons>summary::before{content:"▾";color:var(--muted)}
+details.cons:not([open])>summary::before{content:"◂"}
+.legend{display:flex;flex-wrap:wrap;gap:8px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;border:1px solid var(--line)}
+
+/* fairness */
+table.fair{border-collapse:collapse;min-width:520px;width:100%}
+table.fair th,table.fair td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:center;font-variant-numeric:tabular-nums}
+table.fair th{font-size:13px;color:var(--muted);font-weight:500}
+table.fair td:first-child,table.fair th:first-child{text-align:right;font-weight:700}
+
+/* staff & settings */
+.rows{display:grid;gap:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=text],input[type=number],input[type=date]{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+input[type=number]{width:64px;text-align:center}
+.req th,.req td{padding:4px 6px;text-align:center;border-bottom:1px solid var(--line)}
+.req{border-collapse:collapse}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+textarea{width:100%;font:inherit;font-size:15px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+a.btn{text-decoration:none;display:inline-block}
+a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight:700}
+/* ===== phone: day cards instead of the wide sheet ===== */
+#days{display:none}
+.vt{display:none}
+.dcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.dcard .dh{background:var(--sh-dark);color:#fff;font-weight:800;font-size:17px;padding:8px 12px;display:flex;justify-content:space-between}
+.dcard .dh span{font-weight:500;font-variant-numeric:tabular-nums;opacity:.9}
+.dsite{padding:10px 12px;display:grid;gap:6px;border-top:1px solid var(--line)}
+.dsite:first-of-type{border-top:0}
+.dsite>b{font-size:14px;color:var(--muted)}
+.dl{display:grid;grid-template-columns:52px 1fr;align-items:center;gap:8px}
+.dl .t{font-size:13px;color:var(--muted);font-weight:700}
+.dl .chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{min-height:40px;min-width:84px;padding:6px 12px;border-radius:8px;border:1px solid #9DBB86;background:var(--sh-cell);color:var(--sh-ink);font-weight:700;font-size:15px}
+.chip.c2{background:var(--sh-cell2)}
+.chip.empty-need{background:repeating-linear-gradient(135deg,var(--sh-cell),var(--sh-cell) 6px,#F4D6D3 6px,#F4D6D3 12px);color:#7A2A22}
+.chip.bad{box-shadow:inset 0 0 0 3px #D93025}
+.chip.off{background:transparent;border-style:dashed;color:var(--muted);font-weight:500}
+.dnote{display:flex;gap:6px;align-items:center}
+.dnote input{flex:1;min-width:0}
+.dnote .nbtn{border:0;background:#1E8E4E;color:#fff;border-radius:8px;padding:8px 10px;font-size:13px;font-weight:700}
+.sd{display:none}
+@media (max-width:700px){
+  h1{font-size:19px}.week b{min-width:0}
+  body{font-size:16px}
+  .wrap{gap:12px;padding-block:12px 40px}
+  header{gap:8px}
+  .week{width:100%;display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:6px}
+  .week b{grid-column:1/-1;grid-row:1;text-align:center;font-size:15px}
+  .week input[type=date]{min-width:0;width:100%}
+  .week button{padding:8px 6px;white-space:nowrap;font-size:14px}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:0}
+  .tabs button{flex:1 1 auto;padding:10px 4px;font-size:14px;white-space:nowrap}
+  select{min-height:40px}
+  .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .bar .sp{display:none}
+  .bar button{min-height:44px;padding:8px 6px}
+  .bar #genBtn,.bar #askConsBtn,.bar #shareImgBtn{grid-column:1/-1}
+  .bar #clearBtn{order:9}
+  .bar #askConsBtn{order:-1}
+  .card{padding:12px}
+  /* sheet → day cards (table still available via toggle) */
+  body:not(.tableview) #sheetScroll{display:none}
+  body:not(.tableview) #days{display:grid;gap:10px}
+  .vt{display:block;justify-self:start;font-size:13px;padding:6px 10px}
+  .hint.sheethint{display:none}
+  /* compact constraints grid */
+  table.grid{min-width:0;table-layout:fixed}
+  table.grid th,table.grid td{padding:3px 2px}
+  table.grid th{font-size:12px}
+  table.grid th:first-child,table.grid td.name{width:68px;font-size:13px;white-space:normal;overflow-wrap:anywhere;padding-inline:4px}
+  table.grid th .l{display:none}
+  .cst{min-height:42px;padding:0;font-size:14px}
+  table.grid th .sd{display:inline;font-size:15px}
+  input[type=text],input[type=number],input[type=date],select{font-size:16px}
+  ol.rot li{display:grid;gap:4px}
+  .pop{left:8px!important;right:8px;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:60vh}
+  .pop button{padding:12px 12px;font-size:16px}
+}
+</style>
+
+<div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
+תצוגה מקדימה (מוואטסאפ, מהקבצים או מגוגל דרייב) מציגה את הדף בלי להפעיל אותו.<br>
+<b>אנדרואיד:</b> שומרים את הקובץ, ובקבצים בוחרים "פתח באמצעות" ← Chrome.<br>
+<b>אייפון:</b> אי אפשר להריץ קובץ כזה מהטלפון. משתמשים בקישור של הכלי במקום בקובץ.</div>
+<div class="wrap">
+  <header>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><h1>סידור עבודה</h1><span id="finalBadge" class="final-badge" hidden>סידור סופי</span></div>
+    <div class="week">
+      <button id="prevW" aria-label="שבוע קודם">→ שבוע קודם</button>
+      <b id="weekLbl"></b>
+      <button id="nextW" aria-label="שבוע הבא">שבוע הבא ←</button>
+      <input type="date" id="weekPick" aria-label="בחירת שבוע">
+    </div>
+    <span class="status" id="status">טוען…</span>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="sched" aria-selected="true">סידור ואילוצים</button>
+    <button role="tab" data-tab="msg" aria-selected="false">הודעות</button>
+    <button role="tab" data-tab="staff" aria-selected="false">עובדים</button>
+    <button role="tab" data-tab="set" aria-selected="false">הגדרות</button>
+  </nav>
+
+  <section class="panel" id="tab-sched">
+    <div class="bar">
+      <button class="primary" id="genBtn">צור סידור אוטומטי</button>
+      <button id="clearBtn">נקה שיבוצים</button>
+      <button class="wa" id="askConsBtn">💬 בקש אילוצים לשבוע הבא</button>
+      <span class="sp"></span>
+      <button class="wa" id="shareImgBtn">📤 שלח סידור לוואטסאפ</button>
+      <button id="xlsBtn">הורד אקסל</button>
+      <button id="finalBtn">סמן כסופי</button>
+    </div>
+    <details class="card cons" id="consBox" open>
+      <summary><h2>אילוצים לשבוע</h2><span class="hint">לחיצה על משבצת מחליפה מצב, ואז "צור סידור אוטומטי"</span></summary>
+      <div class="legend" style="margin:10px 0">
+        <span><i style="background:transparent"></i>זמין</span>
+        <span><i style="background:#E3F0FF"></i>רק בוקר</span>
+        <span><i style="background:#FFF1D6"></i>רק ערב</span>
+        <span><i style="background:var(--warn-bg)"></i>לא זמין</span>
+      </div>
+      <div class="scroll"><table class="grid" id="consGrid"></table></div>
+    </details>
+    <div class="msgs" id="msgs"></div>
+    <button class="vt" id="viewToggle">הצג כטבלה מלאה</button>
+    <div id="days"></div>
+    <div class="scroll" id="sheetScroll"><div id="sheet"></div></div>
+    <p class="hint sheethint">לחיצה על משבצת פותחת רשימת עובדים לשיבוץ ידני. בשורת "הערות ואירועים" אפשר להקליד ישירות.</p>
+    <div class="card">
+      <h2>הוגנות</h2>
+      <div class="scroll"><table class="fair" id="fair"></table></div>
+      <p class="hint" style="margin-top:8px">"שישי מצטבר" סופר את כל השבועות שסומנו כסופיים, כדי שהסבב בשישי יתחלק בין כולם לאורך זמן.</p>
+    </div>
+  </section>
+
+
+  <section class="panel" id="tab-msg" hidden>
+    <div class="card">
+      <h2>קבוצת הוואטסאפ של הצוות</h2>
+      <div class="row">
+        <input type="text" id="groupLink" style="flex:1;min-width:240px" placeholder="https://chat.whatsapp.com/..." aria-label="קישור הזמנה לקבוצה" dir="ltr">
+      </div>
+      <p class="hint" style="margin-top:8px">מדביקים כאן פעם אחת את קישור ההזמנה לקבוצה: בוואטסאפ נכנסים לפרטי הקבוצה, ובוחרים "הזמנה באמצעות קישור", ואז "העתקת קישור". אחרי זה הכפתור "העתק ופתח את הקבוצה" מעתיק את ההודעה ופותח ישר את הקבוצה, ונשאר רק להדביק ולשלוח.</p>
+    </div>
+    <div class="card">
+      <h2>בקשת אילוצים לשבוע הבא</h2>
+      <div class="row" style="margin-bottom:10px">
+        <label>להגיש עד <input type="text" id="consDeadline" style="width:200px" placeholder="חמישי ב-12:00"></label>
+      </div>
+      <textarea id="consMsg" rows="5" aria-label="נוסח בקשת האילוצים"></textarea>
+      <div class="row" style="margin-top:10px">
+        <a class="btn primary-link grp" data-grp="consMsg" target="_blank" rel="noopener" hidden>העתק ופתח את הקבוצה</a>
+        <a class="btn" id="consWa" target="_blank" rel="noopener">פתח בוואטסאפ (בחירת צ'אט)</a>
+        <button data-copy="consMsg">העתק</button>
+        <span class="hint" data-copied="consMsg"></span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>תזכורת לאירועים</h2>
+      <div class="row" style="margin-bottom:10px">
+        <label>ליום <input type="date" id="evDate"></label>
+        <span class="hint" id="evHint"></span>
+      </div>
+      <textarea id="evMsg" rows="7" aria-label="נוסח התזכורת"></textarea>
+      <div class="row" style="margin-top:10px">
+        <a class="btn primary-link grp" data-grp="evMsg" target="_blank" rel="noopener" hidden>העתק ופתח את הקבוצה</a>
+        <a class="btn" id="evWa" target="_blank" rel="noopener">פתח בוואטסאפ (בחירת צ'אט)</a>
+        <button data-copy="evMsg">העתק</button>
+        <span class="hint" data-copied="evMsg"></span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>הסידור של השבוע בטקסט</h2>
+      <textarea id="weekMsg" rows="9" aria-label="הסידור בטקסט"></textarea>
+      <div class="row" style="margin-top:10px">
+        <a class="btn primary-link grp" data-grp="weekMsg" target="_blank" rel="noopener" hidden>העתק ופתח את הקבוצה</a>
+        <a class="btn" id="weekWa" target="_blank" rel="noopener">פתח בוואטסאפ (בחירת צ'אט)</a>
+        <button data-copy="weekMsg">העתק</button>
+        <span class="hint" data-copied="weekMsg"></span>
+      </div>
+    </div>
+    <p class="hint">"פתח בוואטסאפ" פותח את וואטסאפ עם ההודעה כבר כתובה. בוחרים את הקבוצה ושולחים. אפשר לערוך את הנוסח לפני השליחה.</p>
+  </section>
+
+  <section class="panel" id="tab-staff" hidden>
+    <div class="card">
+      <h2>עובדים</h2>
+      <div class="rows" id="staffRows"></div>
+      <div class="row" style="margin-top:12px">
+        <input type="text" id="newEmp" placeholder="שם עובד/ת חדש/ה" aria-label="שם עובד חדש">
+        <button id="addEmp" class="primary">הוסף</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-set" hidden>
+    <div class="card">
+      <h2>שעות משמרת</h2>
+      <div class="row">
+        <label>בוקר <input type="text" id="lblM" style="width:150px"></label>
+        <label>ערב <input type="text" id="lblE" style="width:150px"></label>
+        <label>כותרת עליונה <input type="text" id="sheetTitle" style="width:220px" placeholder="למשל שם המקום"></label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label>משמרות לכל עובד בראשון–חמישי <input type="number" id="targetN" min="0" max="6"></label>
+        <span class="hint">שישי נוסף על המספר הזה. 0 = בלי הגבלה.</span>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label><input type="checkbox" id="siteCover"> כל עובד לפחות בוקר אחד וערב אחד בכל אתר בשבוע</label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>בוקר שישי</h2>
+      <p class="hint" style="margin-bottom:10px">לכל אתר: אוטומטי, עובד קבוע, או סבב לפי סדר. מי שיש לו אילוץ בשישי מדולג, והתור עובר לבא אחריו.</p>
+      <div id="friSet" class="rows"></div>
+    </div>
+    <div id="sitesSet" class="rows"></div>
+    <div class="row"><input type="text" id="newSite" placeholder="שם אתר חדש" aria-label="שם אתר חדש"><button id="addSite">הוסף אתר</button></div>
+    <div class="card">
+      <h2>גיבוי</h2>
+      <p class="hint" style="margin-bottom:10px">כשהכלי פתוח כקובץ במחשב, הנתונים נשמרים רק בדפדפן הזה. מומלץ להוריד גיבוי מדי פעם.</p>
+      <div class="row"><button id="backupBtn">הורד גיבוי</button><button id="restoreBtn">שחזר מגיבוי</button><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
+    </div>
+  </section>
+</div>
+<div id="exportBox"></div>
+
+<script>window.PRESET={"title": "", "shiftLbl": {"m": "07:45 - 16:00", "e": "14:00 - 22:00"}, "sites": [{"id": "bb", "name": "בני ברית", "req": {"m": [1, 1, 1, 1, 1, 1], "e": [1, 1, 1, 1, 1, 0]}}, {"id": "zb", "name": "ז'בוטינסקי", "req": {"m": [2, 2, 2, 2, 2, 1], "e": [1, 1, 1, 1, 1, 0]}}], "employees": [{"id": "al", "name": "אלכסיי", "active": true}, {"id": "mo", "name": "מרדכי", "active": true}, {"id": "sh", "name": "שלמה", "active": true}, {"id": "or", "name": "אור", "active": true}, {"id": "ye", "name": "יהודה", "active": true}], "weeks": {"2026-10-18": {"cons": {}, "final": true, "assign": {"bb": {"m": [["al"], ["mo"], ["sh"], ["or"], ["ye"], ["sh"]], "e": [["or"], ["ye"], ["ye"], ["mo"], ["sh"], []]}, "zb": {"m": [["ye", "sh"], ["or", "sh"], ["al", "or"], ["al", "ye"], ["mo", "al"], ["al"]], "e": [["mo"], ["al"], ["mo"], ["sh"], ["or"], []]}}, "notes": {"bb": ["", "", "", "", "", ""], "zb": ["כנס פתיחה | 110 | 08:30", "", "כלי תוכנה | 09:00", "", "", ""]}}}, "target": 5};</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script>
+try{document.getElementById("nojs").remove()}catch(e){}
+const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
+const CST=["A","M","E","X"], CST_LBL={A:"✓",M:"בוקר",E:"ערב",X:"✗"};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const clientId=uid();
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function defaultState(){return{
+  title:"", target:5, shiftLbl:{m:"07:45 - 16:00",e:"14:00 - 22:00"},
+  sites:[], employees:[], weeks:{}
+}}
+let S=defaultState(), db=null, ref=null, dl=null, saveTimer=null, lastTs=0, saving=false, dirty=false;
+
+/* ---------- dates ---------- */
+function sundayOf(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-x.getDay());return x}
+function key(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function parseKey(k){const[a,b,c]=k.split("-").map(Number);return new Date(a,b-1,c)}
+function fmt(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()}
+let cur=(()=>{const t=new Date();const s=sundayOf(t);if(t.getDay()>=4)s.setDate(s.getDate()+7);return key(s)})();
+function dayDate(i){const d=parseKey(cur);d.setDate(d.getDate()+i);return d}
+
+/* ---------- week data ---------- */
+function W(k=cur){
+  if(!S.weeks[k])S.weeks[k]={cons:{},assign:{},notes:{},final:false};
+  const w=S.weeks[k];
+  S.sites.forEach(s=>{
+    if(!w.assign[s.id])w.assign[s.id]={m:DAYS.map(()=>[]),e:DAYS.map(()=>[])};
+    if(!w.notes[s.id])w.notes[s.id]=DAYS.map(()=>"");
+  });
+  return w;
+}
+function cons(w,eid,d){return (w.cons[eid]||[])[d]||"A"}
+function activeEmps(){return S.employees.filter(e=>e.active!==false)}
+function empName(id){const e=S.employees.find(x=>x.id===id);return e?e.name:"?"}
+
+/* ---------- history (finalized weeks except current) ---------- */
+function history(exclude){
+  const h={};S.employees.forEach(e=>h[e.id]={fri:0,eve:0,tot:0,weeks:0});
+  Object.entries(S.weeks).forEach(([k,w])=>{
+    if(!w.final||k===exclude)return;
+    const seen=new Set();
+    Object.values(w.assign).forEach(a=>{
+      ["m","e"].forEach(sh=>a[sh].forEach((arr,d)=>arr.forEach(id=>{if(!h[id])return;h[id].tot++;if(sh==="e")h[id].eve++;if(d===5)h[id].fri++;seen.add(id)})));
+    });
+    seen.forEach(id=>h[id]&&h[id].weeks++);
+  });
+  return h;
+}
+function weekCounts(w){
+  const c={};S.employees.forEach(e=>c[e.id]={tot:0,eve:0,fri:0});
+  Object.values(w.assign).forEach(a=>["m","e"].forEach(sh=>a[sh].forEach((arr,d)=>arr.forEach(id=>{if(!c[id])return;c[id].tot++;if(sh==="e")c[id].eve++;if(d===5)c[id].fri++;}))));
+  return c;
+}
+
+/* ---------- generator ---------- */
+function canWork(w,eid,d,sh){const c=cons(w,eid,d);if(c==="X")return false;if(c==="M"&&sh==="e")return false;if(c==="E"&&sh==="m")return false;return true}
+function variance(a){if(!a.length)return 0;const m=a.reduce((x,y)=>x+y,0)/a.length;return a.reduce((x,y)=>x+(y-m)**2,0)/a.length}
+function generate(){
+  const w=W(),emps=activeEmps().map(e=>e.id),hist=history(cur);
+  const slots=[];
+  S.sites.forEach(s=>DAYS.forEach((_,d)=>["m","e"].forEach(sh=>{const n=(s.req[sh]||[])[d]||0;for(let i=0;i<n;i++)slots.push({s:s.id,d,sh})})));
+  const T=+S.target||0;
+  ensureFri();const fp=friPlan(w,cur),lockedFri=new Set(Object.keys(fp));
+  const taken={};const freeSlots=slots.filter(x=>{if(x.d===5&&x.sh==="m"&&fp[x.s]&&!taken[x.s]){taken[x.s]=1;return false}return true});
+  let best=null,bestScore=Infinity;
+  for(let it=0;it<800;it++){
+    const tot={},eve={},fri={},day={},nf={};emps.forEach(e=>{tot[e]=0;eve[e]=0;fri[e]=0;nf[e]=0;day[e]=new Set()});
+    const out={};S.sites.forEach(s=>out[s.id]={m:DAYS.map(()=>[]),e:DAYS.map(()=>[])});
+    Object.entries(fp).forEach(([sid,e])=>{out[sid].m[5].push(e);day[e].add(5);tot[e]++;fri[e]++});
+    const order=freeSlots.map(x=>({...x,r:Math.random(),cand:emps.filter(e=>canWork(w,e,x.d,x.sh)).length})).sort((a,b)=>a.cand-b.cand||a.r-b.r);
+    let unfilled=0;
+    for(const sl of order){
+      let pick=null,ps=Infinity;
+      for(const e of emps){
+        if(day[e].has(sl.d)||!canWork(w,e,sl.d,sl.sh))continue;
+        if(T&&sl.d<5&&nf[e]>=T)continue;
+        const sc=(sl.d<5?nf[e]*3:tot[e]*1)+(sl.sh==="e"?eve[e]*4:0)+(sl.d===5?(fri[e]+hist[e].fri)*5:0)+(S.siteCover!==false&&sl.d<5&&!out[sl.s][sl.sh].some((a,dd)=>dd<5&&a.includes(e))?-5:0)+Math.random()*1.6;
+        if(sc<ps){ps=sc;pick=e}
+      }
+      if(pick===null){unfilled++;continue}
+      out[sl.s][sl.sh][sl.d].push(pick);day[pick].add(sl.d);tot[pick]++;if(sl.d<5)nf[pick]++;if(sl.sh==="e")eve[pick]++;if(sl.d===5)fri[pick]++;
+    }
+    improve(w,out,emps,hist,T,lockedFri);
+    const score=planScore(out,emps,hist,T);
+    if(score<bestScore){bestScore=score;best=out}
+    if(bestScore===0)break;
+  }
+  if(best){w.assign=best;W();}
+}
+/* every employee: at least one morning and one evening at each site, Sun–Thu only (Friday doesn't count) */
+function coverNeeds(){const n=[];S.sites.forEach(s=>["m","e"].forEach(sh=>{if((s.req[sh]||[]).some((x,d)=>d<5&&x>0))n.push([s.id,sh])}));return n}
+function coverGaps(out,emps){
+  if(S.siteCover===false)return[];
+  const g=[];coverNeeds().forEach(([sid,sh])=>emps.forEach(e=>{if(!out[sid][sh].some((a,d)=>d<5&&a.includes(e)))g.push([e,sid,sh])}));return g;
+}
+/* ---------- Friday morning rules per site: auto / fixed person / rotation ---------- */
+function ensureFri(){
+  if(S.friRule)return;S.friRule={};
+  const sh=S.employees.find(e=>e.name.trim()==="שלמה"),bb=S.sites.find(s=>s.name.includes("בני ברית")),zb=S.sites.find(s=>s.name.includes("בוטינסקי"));
+  if(sh&&bb)S.friRule[bb.id]={mode:"fixed",emp:sh.id};
+  if(zb){const list=S.employees.filter(e=>e.active!==false&&(!sh||e.id!==sh.id)).map(e=>e.id);if(list.length)S.friRule[zb.id]={mode:"rot",list,anchor:"2026-10-18"}}
+}
+function weeksFrom(a,b){return Math.round((parseKey(b)-parseKey(a))/(7*864e5))}
+function rotList(r){return (r.list||[]).filter(id=>S.employees.some(e=>e.id===id&&e.active!==false))}
+function rotTurn(r,wk){const l=rotList(r);if(!l.length)return null;const n=l.length;return ((weeksFrom(r.anchor||wk,wk)%n)+n)%n}
+/* who should work Friday morning at each ruled site this week (skips people blocked by a constraint) */
+function friPlan(w,wk){
+  const plan={},used=new Set();
+  S.sites.forEach(s=>{const r=(S.friRule||{})[s.id];if(!r||!((s.req.m||[])[5]>0))return;
+    if(r.mode==="fixed"&&r.emp&&!used.has(r.emp)&&canWork(w,r.emp,5,"m")){plan[s.id]=r.emp;used.add(r.emp)}
+  });
+  S.sites.forEach(s=>{const r=(S.friRule||{})[s.id];if(!r||r.mode!=="rot"||!((s.req.m||[])[5]>0))return;
+    const l=rotList(r),t=rotTurn(r,wk);if(t===null)return;
+    for(let k=0;k<l.length;k++){const e=l[(t+k)%l.length];if(!used.has(e)&&canWork(w,e,5,"m")){plan[s.id]=e;used.add(e);break}}
+  });
+  return plan;
+}
+function planScore(out,emps,hist,T){
+  const nf={},eve={},fri={};emps.forEach(e=>{nf[e]=0;eve[e]=0;fri[e]=0});let unfilled=0;
+  S.sites.forEach(s=>["m","e"].forEach(sh=>DAYS.forEach((_,d)=>{const need=(s.req[sh]||[])[d]||0;const a=out[s.id][sh][d];unfilled+=Math.max(0,need-a.length);a.forEach(e=>{if(!(e in nf))return;if(d<5)nf[e]++;if(sh==="e")eve[e]++;if(d===5)fri[e]++})})));
+  return unfilled*10000+coverGaps(out,emps).length*3000+(T?emps.reduce((a,e)=>a+Math.abs(nf[e]-T),0)*500:0)
+    +Math.round((variance(emps.map(e=>nf[e]))*20+variance(emps.map(e=>eve[e]))*15+variance(emps.map(e=>fri[e]+hist[e].fri))*10)*100)/100;
+}
+/* local search: swap two people's shifts on the same day, or move a shift to someone free that day */
+function improve(w,out,emps,hist,T,locked){
+  let cur=planScore(out,emps,hist,T);
+  for(let pass=0;pass<6&&cur>0;pass++){
+    let better=false;
+    for(let d=0;d<DAYS.length;d++){
+      const cells=[],all=[];S.sites.forEach(s=>["m","e"].forEach(sh=>out[s.id][sh][d].forEach((e,i)=>{all.push(e);if(!(d===5&&sh==="m"&&locked&&locked.has(s.id)&&i===0))cells.push({a:out[s.id][sh][d],i,sh})})));
+      for(let x=0;x<cells.length;x++)for(let y=x+1;y<cells.length;y++){
+        const A=cells[x],B=cells[y],ea=A.a[A.i],eb=B.a[B.i];if(ea===eb)continue;
+        if(!canWork(w,ea,d,B.sh)||!canWork(w,eb,d,A.sh))continue;
+        A.a[A.i]=eb;B.a[B.i]=ea;const sc=planScore(out,emps,hist,T);
+        if(sc<cur){cur=sc;better=true}else{A.a[A.i]=ea;B.a[B.i]=eb}
+      }
+      const busy=new Set(all);
+      for(const c of cells)for(const e of emps){
+        if(busy.has(e)||!canWork(w,e,d,c.sh))continue;
+        const old=c.a[c.i];c.a[c.i]=e;const sc=planScore(out,emps,hist,T);
+        if(sc<cur){cur=sc;better=true;busy.delete(old);busy.add(e)}else c.a[c.i]=old;
+      }
+    }
+    if(!better)break;
+  }
+}
+
+/* ---------- validation ---------- */
+function problems(w){
+  const list=[],bad=new Set();
+  S.sites.forEach(s=>DAYS.forEach((dn,d)=>["m","e"].forEach(sh=>{
+    const need=(s.req[sh]||[])[d]||0,have=w.assign[s.id][sh][d].length;
+    if(have<need)list.push(`${s.name}, ${dn} ${sh==="m"?"בוקר":"ערב"}: חסר${need-have>1?"ים":""} ${need-have}`);
+    w.assign[s.id][sh][d].forEach((id,i)=>{if(!canWork(w,id,d,sh)){bad.add(`${s.id}|${sh}|${d}|${i}`);list.push(`${empName(id)} שובץ/ה ב${dn} ${sh==="m"?"בוקר":"ערב"} למרות אילוץ`)}});
+  })));
+  DAYS.forEach((dn,d)=>{const cnt={};S.sites.forEach(s=>["m","e"].forEach(sh=>w.assign[s.id][sh][d].forEach((id,i)=>{(cnt[id]=cnt[id]||[]).push(`${s.id}|${sh}|${d}|${i}`)})));
+    Object.entries(cnt).forEach(([id,arr])=>{if(arr.length>1){arr.forEach(x=>bad.add(x));list.push(`${empName(id)} משובץ/ת פעמיים ביום ${dn}`)}})});
+  const T=+S.target||0;
+  if(T&&Object.values(w.assign).some(a=>a.m.some(x=>x.length)||a.e.some(x=>x.length))){
+    const c=weekCounts(w);
+    activeEmps().forEach(e=>{const n=c[e.id].tot-c[e.id].fri;if(n!==T)list.push(`${e.name}: ${n} משמרות בראשון–חמישי במקום ${T}`)});
+  }
+  if(Object.values(w.assign).some(a=>a.m.some(x=>x.length)||a.e.some(x=>x.length))){
+    ensureFri();const fp=friPlan(w,cur);
+    S.sites.forEach(s=>{const r=S.friRule[s.id];if(!r||r.mode==="auto"||!((s.req.m||[])[5]>0))return;
+      if(!fp[s.id])list.push(`שישי ב${s.name}: אף אחד מה${r.mode==="rot"?"סבב":"עובד הקבוע"} לא זמין`);
+      else if(!w.assign[s.id].m[5].includes(fp[s.id]))list.push(`שישי ב${s.name}: לפי ה${r.mode==="rot"?"סבב":"קבוע"} צריך להיות ${empName(fp[s.id])}`);
+    });
+    const by={};coverGaps(w.assign,activeEmps().map(e=>e.id)).forEach(([e,sid,sh])=>{const s=S.sites.find(x=>x.id===sid);(by[e]=by[e]||[]).push(`${sh==="m"?"בוקר":"ערב"} ב${s?s.name:""}`)});
+    Object.entries(by).forEach(([e,arr])=>list.push(`${empName(e)}: אין ${arr.join(", ")}`));
+  }
+  return{list,bad};
+}
+
+/* ---------- sheet rendering ---------- */
+function sheetHTML(w,exportMode){
+  const pr=exportMode?null:problems(w);
+  const parts=[];
+  if(S.title)parts.push(`<p class="sheet-title">${esc(S.title)}</p>`);
+  S.sites.forEach(s=>{
+    const A=w.assign[s.id];
+    let h=`<table class="sh"><colgroup><col style="width:150px">${DAYS.map(()=>'<col><col>').join("")}</colgroup>`;
+    h+=`<tr><td class="site" colspan="13">${esc(s.name)}</td></tr>`;
+    h+=`<tr><td class="lbl">תאריך</td>${DAYS.map((_,d)=>`<td class="date" colspan="2">${fmt(dayDate(d))}</td>`).join("")}</tr>`;
+    h+=`<tr><td class="lbl">משמרת</td>${DAYS.map(dn=>`<td class="dname" colspan="2">${dn}</td>`).join("")}</tr>`;
+    // morning
+    h+=`<tr><td class="lbl">${esc(S.shiftLbl.m)}</td>`;
+    DAYS.forEach((_,d)=>{
+      const need=(s.req.m||[])[d]||0,arr=A.m[d];
+      if(need===0&&!arr.length){h+=`<td class="off" colspan="2">—</td>`;return}
+      const n=Math.max(2,need);
+      const cells=[];for(let i=0;i<2;i++){
+        const names=i===0?arr.slice(0,1):arr.slice(1);
+        const k=`${s.id}|m|${d}|${i}`;
+        const empty=i<need&&!names.length;
+        const cls=["slot",i===0?"c":"c2"];if(!exportMode&&empty)cls.push("empty-need");if(pr&&names.some((_,j)=>pr.bad.has(`${s.id}|m|${d}|${i+j}`)))cls.push("bad");
+        cells.push(`<td class="${cls.join(" ")}" data-k="${k}">${esc(names.map(empName).join(", "))}</td>`);
+      }
+      h+=cells.join("");
+    });
+    h+=`</tr>`;
+    // evening
+    h+=`<tr><td class="lbl">${esc(S.shiftLbl.e)}</td>`;
+    DAYS.forEach((_,d)=>{
+      const need=(s.req.e||[])[d]||0,arr=A.e[d];
+      if(need===0&&!arr.length){h+=`<td class="off" colspan="2">${d===5?"שבת שלום":"—"}</td>`;return}
+      const k=`${s.id}|e|${d}|0`,cls=["slot","c"];
+      if(!exportMode&&arr.length<need)cls.push("empty-need");if(pr&&arr.some((_,j)=>pr.bad.has(`${s.id}|e|${d}|${j}`)))cls.push("bad");
+      h+=`<td class="${cls.join(" ")}" colspan="2" data-k="${k}">${esc(arr.map(empName).join(", "))}</td>`;
+    });
+    h+=`</tr>`;
+    // notes
+    h+=`<tr><td class="lbl">הערות ואירועים</td>${DAYS.map((_,d)=>`<td class="note" colspan="2">${exportMode?esc(w.notes[s.id][d]):`<div class="nw"><input data-note="${s.id}|${d}" value="${esc(w.notes[s.id][d])}" aria-label="הערה ${DAYS[d]} ${esc(s.name)}">${(w.notes[s.id][d]||"").trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}" title="שליחת תזכורת לוואטסאפ" aria-label="שליחת תזכורת על האירוע">וואטסאפ</button>`:""}</div>`}</td>`).join("")}</tr>`;
+    h+=`</table>`;parts.push(h);
+  });
+  if(!S.sites.length)parts.push(`<div class="empty">אין אתרים עדיין. הוסיפו אתר בלשונית "הגדרות".</div>`);
+  return parts.join("");
+}
+
+function daysHTML(w){
+  if(!S.sites.length)return `<div class="empty">אין אתרים עדיין. הוסיפו אתר בלשונית "הגדרות".</div>`;
+  const pr=problems(w);
+  const chip=(sid,sh,d,i,names,need)=>{const empty=i<need&&!names.length;const cls=["slot","chip",i===1?"c2":""];if(empty)cls.push("empty-need");
+    if(names.some((_,j)=>pr.bad.has(`${sid}|${sh}|${d}|${i+j}`)))cls.push("bad");
+    return `<button class="${cls.join(" ")}" data-k="${sid}|${sh}|${d}|${i}">${names.length?esc(names.map(empName).join(", ")):(empty?"+ שבצו":"+")}</button>`};
+  return DAYS.map((dn,d)=>{
+    const sites=S.sites.map(s=>{const A=w.assign[s.id],nm=(s.req.m||[])[d]||0,ne=(s.req.e||[])[d]||0;
+      let m="";if(nm||A.m[d].length){m=chip(s.id,"m",d,0,A.m[d].slice(0,1),nm);if(nm>1||A.m[d].length>1)m+=chip(s.id,"m",d,1,A.m[d].slice(1),nm)}else m=`<span class="chip off">—</span>`;
+      let e="";if(ne||A.e[d].length)e=chip(s.id,"e",d,0,A.e[d],ne);else e=`<span class="chip off">${d===5?"שבת שלום":"—"}</span>`;
+      const note=w.notes[s.id][d]||"";
+      return `<div class="dsite"><b>${esc(s.name)}</b>
+        <div class="dl"><span class="t">בוקר</span><div class="chips">${m}</div></div>
+        <div class="dl"><span class="t">ערב</span><div class="chips">${e}</div></div>
+        <div class="dnote"><input type="text" data-note="${s.id}|${d}" value="${esc(note)}" placeholder="הערות ואירועים" aria-label="הערה ${dn} ${esc(s.name)}">${note.trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}">וואטסאפ</button>`:""}</div></div>`}).join("");
+    return `<div class="dcard"><div class="dh">${dn}<span>${fmt(dayDate(d)).slice(0,5)}</span></div>${sites}</div>`}).join("");
+}
+$("#viewToggle").onclick=()=>{document.body.classList.toggle("tableview");$("#viewToggle").textContent=document.body.classList.contains("tableview")?"הצג לפי ימים":"הצג כטבלה מלאה"};
+function render(){
+  const w=W();
+  const d0=parseKey(cur),d5=dayDate(5);
+  $("#weekLbl").textContent=fmt(d0)+" – "+fmt(d5);
+  $("#weekPick").value=cur;
+  $("#finalBadge").hidden=!w.final;
+  $("#finalBtn").textContent=w.final?"בטל סימון סופי":"סמן כסופי";
+  $("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);
+  const pr=problems(w);
+  $("#msgs").innerHTML=pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(Object.values(w.assign).some(a=>a.m.some(x=>x.length)||a.e.some(x=>x.length))?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"");
+  renderFair(w);renderCons(w);renderStaff();renderSettings();renderMsgs();
+}
+
+/* ---------- WhatsApp messages ---------- */
+const msgEdited={};
+const wa=t=>"https://wa.me/?text="+encodeURIComponent(t);
+function setMsg(id,text){
+  const ta=$("#"+id),st=msgEdited[id]||(msgEdited[id]={});
+  if(!st.dirty)ta.value=text;
+  const link={consMsg:"#consWa",evMsg:"#evWa",weekMsg:"#weekWa"}[id];$(link).href=wa(ta.value);
+}
+function namesAt(w,sid,sh,d){return (w.assign[sid]?.[sh]?.[d]||[]).map(empName)}
+function renderMsgs(){
+  // constraints request for the week after the current one
+  const nx=parseKey(cur);nx.setDate(nx.getDate()+7);const nxEnd=new Date(nx);nxEnd.setDate(nxEnd.getDate()+5);
+  if(!$("#consDeadline").value)$("#consDeadline").value=S.consDeadline||"חמישי ב-12:00";
+  setMsg("consMsg",consText());
+  // events reminder
+  if(!$("#evDate").value){const t=new Date();t.setDate(t.getDate()+1);$("#evDate").value=key(t)}
+  const ed=parseKey($("#evDate").value),ek=key(sundayOf(ed)),di=ed.getDay();
+  const ew=S.weeks[ek];let lines=[];
+  if(di<=5&&ew){S.sites.forEach(s=>{const n=(ew.notes?.[s.id]||[])[di];if(n&&n.trim()){
+    const m=(ew.assign?.[s.id]?.m?.[di]||[]).map(empName),e=(ew.assign?.[s.id]?.e?.[di]||[]).map(empName);
+    lines.push(`📍 ${s.name}: ${n.trim()}\n   בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`)}})}
+  $("#evHint").textContent=lines.length?`${lines.length} אירועים ביום הזה`:"אין אירועים בהערות ליום הזה";
+  setMsg("evMsg",lines.length?`תזכורת ליום ${DAYS[di]} ${fmt(ed).slice(0,5)}:\n${lines.join("\n")}`:"");
+  // week as text
+  const w=W(),out=[`סידור עבודה ${fmt(parseKey(cur)).slice(0,5)}–${fmt(dayDate(5)).slice(0,5)}`];
+  DAYS.forEach((dn,d)=>{out.push(`\n*${dn} ${fmt(dayDate(d)).slice(0,5)}*`);S.sites.forEach(s=>{const m=namesAt(w,s.id,"m",d),e=namesAt(w,s.id,"e",d),n=(w.notes[s.id][d]||"").trim();
+    if(!m.length&&!e.length&&!n)return;out.push(`${s.name}: בוקר ${m.join(", ")||"—"}${d<5||e.length?` | ערב ${e.join(", ")||"—"}`:""}${n?` (${n})`:""}`)})});
+  setMsg("weekMsg",out.join("\n"));
+  renderGroup();
+}
+["consMsg","evMsg","weekMsg"].forEach(id=>$("#"+id).addEventListener("input",()=>{msgEdited[id]=Object.assign(msgEdited[id]||{},{dirty:true});const link={consMsg:"#consWa",evMsg:"#evWa",weekMsg:"#weekWa"}[id];$(link).href=wa($("#"+id).value)}));
+document.addEventListener("click",ev=>{
+  const b=ev.target.closest("[data-evmsg]");if(!b)return;ev.stopPropagation();
+  const[sid,d]=b.dataset.evmsg.split("|");sendWa(eventText(sid,+d));
+},true);
+function groupOk(u){return /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+/.test((u||"").trim())}
+function toast(t){const x=document.createElement("div");x.className="toast";x.textContent=t;document.body.appendChild(x);setTimeout(()=>x.remove(),3200)}
+function openUrl(u){const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove()}
+const canShare=(()=>{try{return window.self===window.top&&typeof navigator.share==="function"&&matchMedia("(pointer:coarse)").matches}catch(e){return false}})();
+function sendWa(text){
+  const g=(S.groupLink||"").trim();
+  if(canShare){
+    navigator.share({text}).then(()=>{},err=>{if(err&&err.name!=="AbortError"){toast("השיתוף נכשל, ההודעה הועתקה");try{navigator.clipboard.writeText(text)}catch(e){}}});
+    toast("בחרו וואטסאפ ואת הקבוצה. הטקסט כבר בפנים, נשאר ללחוץ שליחה");
+    return;
+  }
+  if(groupOk(g)){
+    try{navigator.clipboard.writeText(text).then(()=>toast("ההודעה הועתקה. בקבוצה: Ctrl+V ואז שליחה"),()=>toast("לא הצלחתי להעתיק. העתיקו מלשונית הודעות"))}catch(e){toast("לא הצלחתי להעתיק. העתיקו מלשונית הודעות")}
+    openUrl(g);
+  }else openUrl(wa(text));
+}
+function consText(){const nx=parseKey(cur);nx.setDate(nx.getDate()+7);const nxEnd=new Date(nx);nxEnd.setDate(nxEnd.getDate()+5);const dl=(S.consDeadline||"חמישי ב-12:00").trim();
+  return `היי לכולם 👋\nנא לשלוח אילוצים לשבוע ${fmt(nx).slice(0,5)}–${fmt(nxEnd).slice(0,5)}${dl?` עד ${dl}`:""}.\nלכתוב באילו ימים לא יכולים, או אם יש יום שאפשר רק בוקר או רק ערב.\nתודה!`}
+function eventText(sid,d){const w=W(),s=S.sites.find(x=>x.id===sid),n=(w.notes[sid][d]||"").trim();
+  const m=namesAt(w,sid,"m",d),e=namesAt(w,sid,"e",d);
+  return `תזכורת ליום ${DAYS[d]} ${fmt(dayDate(d)).slice(0,5)}:\n📍 ${s?s.name:""}: ${n}\n   בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`}
+$("#askConsBtn").onclick=()=>sendWa(consText());
+function renderGroup(){
+  const u=(S.groupLink||"").trim();if(document.activeElement!==$("#groupLink"))$("#groupLink").value=u;
+  document.querySelectorAll("a.grp").forEach(a=>{a.hidden=!groupOk(u);if(groupOk(u))a.href=u});
+}
+$("#groupLink").addEventListener("input",e=>{S.groupLink=e.target.value.trim();changed(true);renderGroup()});
+document.querySelectorAll("a.grp").forEach(a=>a.addEventListener("click",()=>{
+  const ta=$("#"+a.dataset.grp),note=document.querySelector(`[data-copied="${a.dataset.grp}"]`);
+  try{navigator.clipboard.writeText(ta.value).then(()=>{note.textContent="ההודעה הועתקה, הדביקו בקבוצה"},()=>{note.textContent="לא הצלחתי להעתיק, השתמשו בכפתור העתק"})}catch(e){note.textContent="לא הצלחתי להעתיק, השתמשו בכפתור העתק"}
+}));
+$("#consDeadline").addEventListener("input",e=>{S.consDeadline=e.target.value;msgEdited.consMsg={};changed(true);renderMsgs()});
+$("#evDate").addEventListener("change",()=>{msgEdited.evMsg={};renderMsgs()});
+document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.copy,ta=$("#"+id),note=document.querySelector(`[data-copied="${id}"]`);
+  const done=()=>{note.textContent="הועתק";setTimeout(()=>note.textContent="",2000)};
+  try{navigator.clipboard.writeText(ta.value).then(done,()=>{ta.select();note.textContent="סמנו והעתיקו ידנית"})}catch(e){ta.select();note.textContent="סמנו והעתיקו ידנית"}}));
+function renderFair(w){
+  const c=weekCounts(w),h=history(cur);
+  const rows=activeEmps().map(e=>`<tr><td>${esc(e.name)}</td><td>${c[e.id].tot-c[e.id].fri}</td><td>${c[e.id].tot}</td><td>${c[e.id].tot-c[e.id].eve}</td><td>${c[e.id].eve}</td><td>${c[e.id].fri}</td><td>${h[e.id].fri+c[e.id].fri}</td></tr>`).join("");
+  $("#fair").innerHTML=`<tr><th>עובד/ת</th><th>ראשון–חמישי</th><th>סה"כ השבוע</th><th>בקרים</th><th>ערבים</th><th>שישי השבוע</th><th>שישי מצטבר</th></tr>`+(rows||`<tr><td colspan="6" class="empty">הוסיפו עובדים בלשונית "עובדים"</td></tr>`);
+}
+function renderCons(w){
+  const emps=activeEmps();
+  if(!emps.length){$("#consGrid").innerHTML=`<tr><td class="empty">הוסיפו עובדים בלשונית "עובדים"</td></tr>`;return}
+  $("#consGrid").innerHTML=`<tr><th>עובד/ת</th>${DAYS.map((dn,d)=>`<th><span class="l">${dn}</span><span class="sd">${dn[0]}׳</span><br><span style="font-weight:400;color:var(--muted)">${fmt(dayDate(d)).slice(0,5)}</span></th>`).join("")}</tr>`+
+    emps.map(e=>`<tr><td class="name">${esc(e.name)}</td>${DAYS.map((_,d)=>{const v=cons(w,e.id,d);return `<td><button class="cst" data-cst="${e.id}|${d}" data-v="${v}" aria-label="${esc(e.name)} ${DAYS[d]}">${CST_LBL[v]}</button></td>`}).join("")}</tr>`).join("");
+}
+function renderStaff(){
+  $("#staffRows").innerHTML=S.employees.length?S.employees.map(e=>`<div class="row"><input type="text" data-ename="${e.id}" value="${esc(e.name)}" aria-label="שם"><label><input type="checkbox" data-eact="${e.id}" ${e.active!==false?"checked":""}> פעיל/ה</label><button data-edel="${e.id}">הסר</button></div>`).join(""):`<p class="hint">עדיין אין עובדים.</p>`;
+}
+function renderFriSet(){
+  ensureFri();
+  const sites=S.sites.filter(s=>(s.req.m||[])[5]>0);
+  if(!sites.length){$("#friSet").innerHTML=`<p class="hint">אין משמרת בוקר בשישי באף אתר.</p>`;return}
+  const nextKey=(()=>{const d=parseKey(cur);d.setDate(d.getDate()+7);return key(d)})();
+  $("#friSet").innerHTML=sites.map(s=>{const r=S.friRule[s.id]||{mode:"auto"};
+    let body="";
+    if(r.mode==="fixed")body=`<label>עובד קבוע <select data-friemp="${s.id}">${activeEmps().map(e=>`<option value="${e.id}" ${e.id===r.emp?"selected":""}>${esc(e.name)}</option>`).join("")}</select></label>`;
+    if(r.mode==="rot"){const l=rotList(r),t=rotTurn(r,cur),tn=rotTurn(r,nextKey);
+      const others=activeEmps().filter(e=>!l.includes(e.id));
+      body=`<ol class="rot">${l.map((id,i)=>`<li><span>${esc(empName(id))}${i===t?' <b class="turn">השבוע</b>':i===tn?' <span class="hint">שבוע הבא</span>':""}</span>
+        <span class="rb"><button data-rup="${s.id}|${i}" aria-label="הזז למעלה" ${i===0?"disabled":""}>↑</button><button data-rdn="${s.id}|${i}" aria-label="הזז למטה" ${i===l.length-1?"disabled":""}>↓</button><button data-rnow="${s.id}|${i}">התור שלו השבוע</button><button data-rrm="${s.id}|${id}" aria-label="הוצא מהסבב">✕</button></span></li>`).join("")}</ol>
+        ${others.length?`<div class="row"><select data-raddsel="${s.id}">${others.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join("")}</select><button data-radd="${s.id}">הוסף לסבב</button></div>`:""}`}
+    return `<div class="card"><div class="row" style="margin-bottom:8px"><b>${esc(s.name)}</b>
+      <select data-frimode="${s.id}"><option value="auto" ${r.mode==="auto"?"selected":""}>אוטומטי (לפי הוגנות)</option><option value="fixed" ${r.mode==="fixed"?"selected":""}>עובד קבוע</option><option value="rot" ${r.mode==="rot"?"selected":""}>סבב לפי סדר</option></select></div>${body}</div>`}).join("");
+}
+function rotSetTurn(r,i){const d=parseKey(cur);d.setDate(d.getDate()-7*i);r.anchor=key(d)}
+function rotKeepTurn(r,fn){/* keep whoever's turn it is this week after reordering */const l=rotList(r),t=rotTurn(r,cur),who=t===null?null:l[t];fn();const l2=rotList(r),j=l2.indexOf(who);if(j>=0)rotSetTurn(r,j)}
+function renderSettings(){renderFriSet();
+  $("#lblM").value=S.shiftLbl.m;$("#lblE").value=S.shiftLbl.e;$("#sheetTitle").value=S.title||"";$("#targetN").value=S.target??5;$("#siteCover").checked=S.siteCover!==false;
+  $("#sitesSet").innerHTML=S.sites.map(s=>`<div class="card"><div class="row" style="margin-bottom:10px"><input type="text" data-sname="${s.id}" value="${esc(s.name)}" aria-label="שם אתר"><button data-sdel="${s.id}">הסר אתר</button></div>
+    <div class="scroll"><table class="req"><tr><th>עובדים במשמרת</th>${DAYS.map(d=>`<th>${d}</th>`).join("")}</tr>
+    ${["m","e"].map(sh=>`<tr><td>${sh==="m"?"בוקר":"ערב"}</td>${DAYS.map((_,d)=>`<td><input type="number" min="0" max="6" data-req="${s.id}|${sh}|${d}" value="${(s.req[sh]||[])[d]||0}" aria-label="${sh==="m"?"בוקר":"ערב"} ${DAYS[d]}"></td>`).join("")}</tr>`).join("")}
+    </table></div></div>`).join("");
+}
+
+/* ---------- interactions ---------- */
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  ["sched","msg","staff","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
+  try{localStorage.setItem("shift-tab",b.dataset.tab)}catch(e){}
+}));
+function shiftWeek(n){const d=parseKey(cur);d.setDate(d.getDate()+7*n);cur=key(d);msgEdited.consMsg={};msgEdited.weekMsg={};render()}
+$("#prevW").onclick=()=>shiftWeek(-1);$("#nextW").onclick=()=>shiftWeek(1);
+$("#weekPick").onchange=e=>{if(e.target.value){cur=key(sundayOf(parseKey(e.target.value)));render()}};
+$("#genBtn").onclick=()=>{if(!activeEmps().length)return;generate();changed();render()};
+$("#clearBtn").onclick=()=>{const w=W();S.sites.forEach(s=>w.assign[s.id]={m:DAYS.map(()=>[]),e:DAYS.map(()=>[])});changed();render()};
+$("#finalBtn").onclick=()=>{const w=W();w.final=!w.final;changed();render()};
+
+let pop=null;
+function closePop(){if(pop){pop.remove();pop=null}}
+document.addEventListener("click",e=>{
+  const t=e.target.closest(".slot");
+  if(t&&t.closest("#sheet,#days")){e.stopPropagation();openPop(t);return}
+  if(pop&&!e.target.closest(".pop"))closePop();
+  const c=e.target.closest("[data-cst]");
+  if(c){const[eid,d]=c.dataset.cst.split("|");const w=W();w.cons[eid]=w.cons[eid]||DAYS.map(()=>"A");const v=w.cons[eid][+d]||"A";w.cons[eid][+d]=CST[(CST.indexOf(v)+1)%4];changed();render();}
+  const del=e.target.closest("[data-edel]");
+  if(del){S.employees=S.employees.filter(x=>x.id!==del.dataset.edel);changed();render()}
+  const rb=e.target.closest("[data-rup],[data-rdn],[data-rnow],[data-rrm],[data-radd]");
+  if(rb){const ds=rb.dataset,[sid,arg]=(ds.rup||ds.rdn||ds.rnow||ds.rrm||ds.radd).split("|"),r=S.friRule[sid];if(!r)return;
+    r.list=rotList(r);const i=+arg;
+    if(ds.rup)rotKeepTurn(r,()=>{[r.list[i-1],r.list[i]]=[r.list[i],r.list[i-1]]});
+    if(ds.rdn)rotKeepTurn(r,()=>{[r.list[i+1],r.list[i]]=[r.list[i],r.list[i+1]]});
+    if(ds.rnow)rotSetTurn(r,i);
+    if(ds.rrm)rotKeepTurn(r,()=>{r.list=r.list.filter(x=>x!==arg)});
+    if(ds.radd){const v=document.querySelector(`[data-raddsel="${sid}"]`).value;rotKeepTurn(r,()=>r.list.push(v))}
+    changed();render();return}
+  const sd=e.target.closest("[data-sdel]");
+  if(sd){S.sites=S.sites.filter(x=>x.id!==sd.dataset.sdel);changed();render()}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closePop()});
+function openPop(td){
+  closePop();
+  const[sid,sh,d,i]=td.dataset.k.split("|");const w=W();const arr=w.assign[sid][sh][+d];
+  const busy=new Set();S.sites.forEach(s=>["m","e"].forEach(x=>w.assign[s.id][x][+d].forEach(id=>busy.add(id))));
+  const curIds=sh==="m"?(+i===0?arr.slice(0,1):arr.slice(1)):arr.slice();
+  pop=document.createElement("div");pop.className="pop";
+  const opts=activeEmps().map(e=>{const ok=canWork(w,e.id,+d,sh),isCur=curIds.includes(e.id);const b=busy.has(e.id)&&!isCur;
+    return `<button data-pick="${e.id}"><span>${isCur?"✓ ":""}${esc(e.name)}</span><span class="tag ${(!ok||b)?"no":""}">${!ok?"אילוץ":b?"כבר משובץ/ת":"זמין/ה"}</span></button>`}).join("");
+  pop.innerHTML=opts+`<button data-pick=""><span>ריק</span><span class="tag">הסר שיבוץ</span></button>`;
+  document.body.appendChild(pop);
+  const r=td.getBoundingClientRect();pop.style.top=Math.min(r.bottom+4,innerHeight-pop.offsetHeight-8)+"px";pop.style.left=Math.max(8,Math.min(r.left,innerWidth-pop.offsetWidth-8))+"px";
+  pop.addEventListener("click",ev=>{const b=ev.target.closest("[data-pick]");if(!b)return;const id=b.dataset.pick;
+    let list=arr.slice();
+    if(sh==="m"){if(+i===0){list=id?[id,...list.slice(1).filter(x=>x!==id)]:list.slice(1)}else{list=list.slice(0,1);if(id&&list[0]!==id)list.push(id)}}
+    else list=id?[id]:[];
+    w.assign[sid][sh][+d]=list;closePop();changed();render();
+  });
+}
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.dataset.note){const[sid,d]=t.dataset.note.split("|");W().notes[sid][+d]=t.value;changed(true)}
+  if(t.dataset.ename){const em=S.employees.find(x=>x.id===t.dataset.ename);if(em){em.name=t.value;changed(true)}}
+  if(t.dataset.sname){const s=S.sites.find(x=>x.id===t.dataset.sname);if(s){s.name=t.value;changed(true)}}
+  if(t.dataset.req){const[sid,sh,d]=t.dataset.req.split("|");const s=S.sites.find(x=>x.id===sid);if(s){s.req[sh]=s.req[sh]||DAYS.map(()=>0);s.req[sh][+d]=Math.max(0,Math.min(6,parseInt(t.value)||0));changed(true)}}
+  if(t.id==="targetN"){S.target=Math.max(0,Math.min(6,parseInt(t.value)||0));changed(true)}
+  if(t.id==="lblM"){S.shiftLbl.m=t.value;changed(true)} if(t.id==="lblE"){S.shiftLbl.e=t.value;changed(true)} if(t.id==="sheetTitle"){S.title=t.value;changed(true)}
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.id==="siteCover"){S.siteCover=t.checked;changed();render()}
+  if(t.dataset.frimode){const sid=t.dataset.frimode,old=S.friRule[sid]||{};const m=t.value;
+    S.friRule[sid]=m==="fixed"?{mode:"fixed",emp:old.emp||(activeEmps()[0]||{}).id}:m==="rot"?{mode:"rot",list:old.list&&old.list.length?old.list:activeEmps().map(e=>e.id),anchor:old.anchor||cur}:{mode:"auto"};changed();render()}
+  if(t.dataset.friemp){S.friRule[t.dataset.friemp].emp=t.value;changed();render()}
+  if(t.dataset.eact){const em=S.employees.find(x=>x.id===t.dataset.eact);if(em){em.active=t.checked;changed();render()}}
+  if(t.dataset.req||t.dataset.ename||t.dataset.sname||["lblM","lblE","sheetTitle","targetN"].includes(t.id))render();
+});
+$("#addEmp").onclick=()=>{const v=$("#newEmp").value.trim();if(!v)return;S.employees.push({id:uid(),name:v,active:true});$("#newEmp").value="";changed();render()};
+$("#newEmp").addEventListener("keydown",e=>{if(e.key==="Enter")$("#addEmp").click()});
+$("#addSite").onclick=()=>{const v=$("#newSite").value.trim();if(!v)return;S.sites.push({id:uid(),name:v,req:{m:[1,1,1,1,1,1],e:[1,1,1,1,1,0]}});$("#newSite").value="";changed();render()};
+
+/* ---------- export ---------- */
+function fileBase(){return "סידור עבודה "+fmt(parseKey(cur)).replace(/\//g,".")}
+async function saveFile(name,data){
+  if(dl){
+    try{await dl.save({filename:name,data});}catch(e){if(e&&e.code!=="declined")setStatus("ההורדה לא הצליחה: "+(e.message||e.code))}
+    return;
+  }
+  try{
+    const blob=data instanceof Blob?data:new Blob([data]);
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
+  }catch(e){setStatus("ההורדה לא הצליחה")}
+}
+$("#backupBtn").onclick=()=>saveFile("גיבוי סידור עבודה "+fmt(new Date()).replace(/\//g,".")+".json",JSON.stringify(S));
+$("#restoreBtn").onclick=()=>$("#restoreFile").click();
+$("#restoreFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o||!Array.isArray(o.employees))throw 0;load(r.result);changed();render();setStatus("הגיבוי שוחזר")}catch(err){setStatus("הקובץ הזה לא גיבוי תקין")}};r.readAsText(f);e.target.value=""};
+async function sheetBlob(){
+  if(typeof html2canvas==="undefined"){setStatus("ספריית התמונה לא נטענה, בדקו חיבור לאינטרנט");return null}
+  const box=$("#exportBox");box.innerHTML=`<div class="export" style="min-width:0;padding:20px;display:grid;gap:22px;background:#FFFFFF">${sheetHTML(W(),true)}</div>`;
+  try{await document.fonts.ready}catch(e){}
+  const canvas=await html2canvas(box.firstChild,{backgroundColor:"#FFFFFF",scale:2});
+  box.innerHTML="";
+  return await new Promise(r=>canvas.toBlob(r,"image/png"));
+}
+function inFrame(){try{return window.self!==window.top}catch(e){return true}}
+function shareReady(f){
+  const o=document.createElement("div");o.className="sheetready";
+  o.innerHTML=`<div class="card"><b>התמונה מוכנה</b><button class="wa" data-go>📤 שלח לוואטסאפ</button><button data-x>סגור</button></div>`;
+  document.body.appendChild(o);
+  o.querySelector("[data-go]").onclick=()=>{navigator.share({files:[f]}).catch(()=>{});o.remove()};
+  o.querySelector("[data-x]").onclick=()=>o.remove();
+}
+$("#shareImgBtn").onclick=async()=>{
+  const btn=$("#shareImgBtn"),lbl=btn.textContent;btn.disabled=true;btn.textContent="מכין תמונה…";
+  let b=null;try{b=await sheetBlob()}finally{btn.disabled=false;btn.textContent=lbl}
+  if(!b)return;
+  const f=new File([b],fileBase()+".png",{type:"image/png"});
+  if(!inFrame()&&navigator.canShare&&navigator.canShare({files:[f]})){
+    try{await navigator.share({files:[f]});return}
+    catch(e){if(e&&e.name==="AbortError")return;if(e&&e.name==="NotAllowedError"){shareReady(f);return}}
+  }
+  const g=(S.groupLink||"").trim();
+  try{
+    await navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
+    toast(groupOk(g)?"התמונה הועתקה. בקבוצה: Ctrl+V ואז שליחה":"התמונה הועתקה. פתחו את הקבוצה, Ctrl+V ושליחה");
+    openUrl(groupOk(g)?g:"https://web.whatsapp.com/");
+  }catch(e){saveFile(fileBase()+".png",b);toast("התמונה ירדה למחשב. צרפו אותה בקבוצה בוואטסאפ")}
+};
+$("#xlsBtn").onclick=async()=>{
+  if(typeof ExcelJS==="undefined"){setStatus("ספריית האקסל לא נטענה");return}
+  const w=W(),wb=new ExcelJS.Workbook(),ws=wb.addWorksheet("סידור",{views:[{rightToLeft:true}]});
+  ws.getColumn(1).width=20;for(let c=2;c<=13;c++)ws.getColumn(c).width=13;
+  const fill=hex=>({type:"pattern",pattern:"solid",fgColor:{argb:"FF"+hex}});
+  const thin={style:"thin",color:{argb:"FF2B2B2B"}},border={top:thin,left:thin,bottom:thin,right:thin};
+  const sty=(cell,bg,white,size=12)=>{cell.fill=fill(bg);cell.font={bold:true,size,color:{argb:white?"FFFFFFFF":"FF1A1A1A"},name:"Arial"};cell.alignment={horizontal:"center",vertical:"middle",readingOrder:"rtl"};cell.border=border};
+  let r=1;
+  if(S.title){ws.mergeCells(r,1,r,13);const c=ws.getCell(r,1);c.value=S.title;c.font={bold:true,size:16};c.alignment={horizontal:"center"};r+=2}
+  S.sites.forEach(s=>{
+    const A=w.assign[s.id];
+    ws.mergeCells(r,1,r,13);sty(ws.getCell(r,1),"595959",true,16);ws.getCell(r,1).value=s.name;ws.getRow(r).height=26;r++;
+    const row=(label,fn,h=22)=>{sty(ws.getCell(r,1),"595959",true);ws.getCell(r,1).value=label;fn();ws.getRow(r).height=h;r++};
+    row("תאריך",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=fmt(dayDate(d));sty(x,"A9D18E",false);ws.getCell(r,c+1).border=border}));
+    row("משמרת",()=>DAYS.forEach((dn,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=dn;sty(x,"595959",true,13)}));
+    row(S.shiftLbl.m,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=(s.req.m||[])[d]||0,arr=A.m[d];
+      if(need===0&&!arr.length){ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value="—";sty(x,"595959",true);return}
+      const a=ws.getCell(r,c),b=ws.getCell(r,c+1);a.value=arr[0]?empName(arr[0]):"";b.value=arr.slice(1).map(empName).join(", ");sty(a,"C6E0B4",false);sty(b,"E2EFDA",false)}));
+    row(S.shiftLbl.e,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=(s.req.e||[])[d]||0,arr=A.e[d];ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);
+      if(need===0&&!arr.length){x.value=d===5?"שבת שלום":"—";sty(x,"595959",true);return}
+      x.value=arr.map(empName).join(", ");sty(x,"C6E0B4",false)}));
+    row("הערות ואירועים",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=w.notes[s.id][d]||"";sty(x,"F2F2F2",false,10);x.font={size:10,color:{argb:"FF555555"}}}));
+    r++;
+  });
+  const buf=await wb.xlsx.writeBuffer();
+  saveFile(fileBase()+".xlsx",new Blob([buf]));
+};
+
+/* ---------- persistence ---------- */
+function setStatus(t){$("#status").textContent=t}
+function changed(soft){dirty=true;setStatus("שומר…");clearTimeout(saveTimer);saveTimer=setTimeout(flush,soft?900:300)}
+async function flush(){
+  if(!dirty)return;
+  if(saving){clearTimeout(saveTimer);saveTimer=setTimeout(flush,400);return}
+  dirty=false;lastTs=Date.now();
+  const body={state:JSON.stringify(S),ts:lastTs,client:clientId};
+  if(ref){saving=true;try{await ref.set(body);setStatus("נשמר")}catch(e){setStatus(e&&e.code==="invalid_argument"?"אין הרשאה לשמור":"השמירה נכשלה, ננסה שוב");if(e&&e.code!=="invalid_argument"){dirty=true;saveTimer=setTimeout(flush,2500)}}saving=false}
+  else{try{localStorage.setItem("shift-state",body.state);setStatus("נשמר בדפדפן הזה בלבד")}catch(e){setStatus("לא נשמר")}}
+}
+function load(raw){try{const o=JSON.parse(raw);S=Object.assign(defaultState(),o);S.shiftLbl=Object.assign(defaultState().shiftLbl,o.shiftLbl||{})}catch(e){}}
+
+(async()=>{
+  try{const t=localStorage.getItem("shift-tab");if(t)document.querySelector(`.tabs button[data-tab="${t}"]`)?.click()}catch(e){}
+  render();
+  function goLocal(){
+    ref=null;
+    let raw=null;try{raw=localStorage.getItem("shift-state")}catch(e){}
+    if(raw)load(raw);else if(window.PRESET)load(JSON.stringify(window.PRESET));
+    render();
+    setStatus("שמירה בדפדפן הזה בלבד");
+  }
+  if(window.claude&&claude.use){
+    try{claude.use("downloads").then(x=>{dl=x},()=>{})}catch(e){}
+    try{db=await claude.use("db")}catch(e){db=null}
+  }
+  if(db){
+    try{
+      ref=db.doc("app/state");
+      let first=true;
+      ref.onSnapshot(snap=>{
+        if(snap.exists){const d=snap.data();if(d.client!==clientId||first){if((d.ts||0)>=lastTs&&!dirty){load(d.state);lastTs=d.ts||0;render()}}}
+        if(first){first=false;setStatus(snap.exists?"נשמר":"מוכן")}
+      },e=>{if(first){first=false;goLocal()}else setStatus("החיבור לשמירה נותק")});
+    }catch(e){goLocal()}
+  }else goLocal();
+})();
+</script>
+
+</body></html>
