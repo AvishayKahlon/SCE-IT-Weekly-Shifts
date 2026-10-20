@@ -12,7 +12,7 @@
   /* sheet palette: fixed, matches the printed schedule in both themes */
   /* exact values from the Excel theme: Text1 +35% / Accent6 +40% / Accent6 +60% */
   --sh-dark:#595959; --sh-darker:#3F3F3F; --sh-date:#A9D18E; --sh-cell:#A9D18E; --sh-cell2:#A9D18E; --sh-eve:#C5E0B4; --sh-note:#F2F2F2; --sh-ink:#000000; --sh-line:#000000;
-  --sh-font:"Calibri","Carlito",Arial,sans-serif;
+  --sh-font:Calibri,Carlito,Arial,sans-serif; --sh-grid:#8C8C8C; --sh-frame:#595959;
   --font:"Heebo",Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -74,17 +74,20 @@ button:disabled{opacity:.5;cursor:default}
 #sheet{display:grid;gap:22px;min-width:1180px;background:#FFFFFF;padding:12px;border-radius:6px}
 .sheet-title{text-align:center;color:var(--sh-ink);font-family:var(--sh-font);font-size:22px;font-weight:700;margin:0}
 /* sizes keep the Excel ratios (site 36 / day 32 / date 30 / names 28 / labels 26 / notes 20 pt) */
-table.sh{width:100%;border-collapse:collapse;table-layout:fixed;color:var(--sh-ink);border:3px solid var(--sh-line);font-family:var(--sh-font)}
-table.sh td,table.sh th{border:2px solid var(--sh-line);height:36px;padding:2px 6px;text-align:center;font-size:16.8px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.sh{width:100%;border-collapse:collapse;table-layout:fixed;color:var(--sh-ink);border:1.5px solid var(--sh-frame);font-family:var(--sh-font)}
+/* thin, soft grid; content text max = 26pt in the Excel scale (15.6px here), shrunk to fit by fitCells() */
+table.sh td,table.sh th{border:1px solid var(--sh-grid);height:36px;padding:2px 6px;text-align:center;font-size:15.6px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 table.sh .site{background:var(--sh-dark);color:#fff;font-size:21.6px;font-weight:700;height:40px}
 table.sh .lbl{background:var(--sh-dark);color:#fff;font-size:15.6px;width:150px}
-table.sh .date{background:var(--sh-date);color:#404040;font-size:18px;font-variant-numeric:tabular-nums}
+table.sh .date{background:var(--sh-date);color:#404040;font-size:18px}
+table.sh .date,table.sh .lbl.tm{direction:ltr;unicode-bidi:isolate}
 table.sh .dname{background:var(--sh-dark);color:#fff;font-size:19.2px}
 table.sh .c{background:var(--sh-cell)}
 table.sh .c2{background:var(--sh-cell2)}
 table.sh .ce{background:var(--sh-eve)}
 table.sh .off{background:var(--sh-dark);color:#fff;font-size:18px}
 table.sh .note{background:var(--sh-note);font-size:12px;font-weight:700;color:#808080}
+.export table.sh .note{font-size:15.6px}
 table.sh .slot{cursor:pointer}
 table.sh .slot:hover{outline:2px solid var(--accent);outline-offset:-3px}
 table.sh .slot.bad{box-shadow:inset 0 0 0 3px #D93025}
@@ -97,7 +100,13 @@ table.sh .nbtn:hover{background:#166C3B}
 .export .note input{display:none}
 #exportBox{position:fixed;left:-99999px;top:0;width:1500px}
 /* print version = the Excel print area: SCE logo banner + the site tables, A4 landscape */
-.export .logo{display:block;width:100%;height:auto;margin:0 0 4px}
+.export .logo{display:block;width:100%;height:auto;margin:0}
+.export .doc-head{text-align:center;font-family:var(--sh-font);color:#3F3F3F;margin:-6px 0 2px}
+.export .doc-title{font-size:26px;font-weight:700;letter-spacing:.2px}
+.export .doc-sub{font-size:16px;color:#595959;margin-top:2px}
+.export .doc-head::after{content:"";display:block;width:140px;height:3px;background:#A9D18E;margin:10px auto 0;border-radius:2px}
+.export .doc-foot{display:flex;justify-content:space-between;font-family:var(--sh-font);font-size:12px;color:#808080;border-top:1px solid #D9D9D9;padding-top:6px;margin-top:-6px}
+.ver{color:var(--muted);font-size:12px;text-align:center;margin:8px 0 0}
 #printBox{display:none}
 @page{size:A4 landscape;margin:7mm}
 @media print{
@@ -445,6 +454,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
     </div>
   </section>
 </div>
+<p class="ver" id="appVer"></p>
 <div id="exportBox"></div>
 <div id="printBox" aria-hidden="true"></div>
 
@@ -455,6 +465,8 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
+document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
+const APP_VER="20.10.2026 14:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -704,13 +716,21 @@ function problems(w){
 /* ---------- sheet rendering ---------- */
 function prefSel(w,sid,d){const p=(w.pref[sid]||[])[d],v=p?p.e+"|"+p.sh:"",ok=p&&(w.assign[sid]?.[p.sh]?.[d]||[]).includes(p.e);
   return `<select class="psel${p?(ok?" ok":" no"):""}" data-pref="${sid}|${d}" aria-label="טכנאי מועדף ${DAYS[d]}"><option value="">—</option>${activeEmps().map(e=>["m","e"].map(sh=>`<option value="${e.id}|${sh}" ${v===e.id+"|"+sh?"selected":""}>${esc(e.name)} – ${sh==="m"?"בוקר":"ערב"}</option>`).join("")).join("")}</select>`}
+/* shrink text until it fits its cell (start from the CSS size, never larger) */
+function fitCells(root){if(!root)return;root.querySelectorAll("table.sh td").forEach(td=>{
+  if(td.querySelector("input,select,button")||!td.textContent.trim()||!td.clientWidth)return;
+  td.style.fontSize="";let f=parseFloat(getComputedStyle(td).fontSize);
+  while(f>7&&td.scrollWidth>td.clientWidth+1){f-=0.5;td.style.fontSize=f+"px"}})}
 /* note row text = holiday name(s) + the manual note, like the Excel note formula */
 function noteText(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean).join(" · ")}
 function sheetHTML(w,exportMode){
   const pr=exportMode?null:problems(w);
   const parts=[];
-  if(exportMode&&window.SCE_LOGO)parts.push(`<img class="logo" src="${window.SCE_LOGO}" alt="SCE – המכללה האקדמית להנדסה ע״ש סמי שמעון">`);
-  if(S.title)parts.push(`<p class="sheet-title">${esc(S.title)}</p>`);
+  if(exportMode){
+    /* official document header: logo, title, week range */
+    if(window.SCE_LOGO)parts.push(`<img class="logo" src="${window.SCE_LOGO}" alt="SCE – המכללה האקדמית להנדסה ע״ש סמי שמעון">`);
+    parts.push(`<div class="doc-head"><div class="doc-title">סידור עבודה שבועי${S.title?` – ${esc(S.title)}`:""}</div><div class="doc-sub">${DAYS[0]} ${fmt(parseKey(cur))} עד ${DAYS[5]} ${fmt(dayDate(5))}</div></div>`);
+  }else if(S.title)parts.push(`<p class="sheet-title">${esc(S.title)}</p>`);
   S.sites.forEach(s=>{
     const A=w.assign[s.id];
     let h=`<table class="sh"><colgroup><col style="width:150px">${DAYS.map(()=>'<col><col>').join("")}</colgroup>`;
@@ -749,6 +769,7 @@ function sheetHTML(w,exportMode){
     h+=`</table>`;parts.push(h);
   });
   if(!S.sites.length)parts.push(`<div class="empty">אין אתרים עדיין. הוסיפו אתר בלשונית "הגדרות".</div>`);
+  if(exportMode){const n=new Date();parts.push(`<div class="doc-foot"><span>שינויים בסידור יתעדכנו בקבוצת הצוות</span><span>הופק: ${fmt(n)} ${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}</span></div>`)}
   return parts.join("");
 }
 
@@ -771,7 +792,7 @@ function daysHTML(w){
     const hn=md.names.join(" · ");
     return `<div class="dcard"><div class="dh">${dn}${hn?` <span class="hn">${esc(hn)}</span>`:""}<span>${fmt(dayDate(d)).slice(0,5)}</span></div>${sites}</div>`}).join("");
 }
-$("#viewToggle").onclick=()=>{document.body.classList.toggle("tableview");$("#viewToggle").textContent=document.body.classList.contains("tableview")?"הצג לפי ימים":"הצג כטבלה מלאה"};
+$("#viewToggle").onclick=()=>{document.body.classList.toggle("tableview");setTimeout(()=>fitCells($("#sheet")));$("#viewToggle").textContent=document.body.classList.contains("tableview")?"הצג לפי ימים":"הצג כטבלה מלאה"};
 function render(){
   ensureData();calcNeed();
   const w=W();
@@ -783,6 +804,7 @@ function render(){
   $("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);
   const pr=problems(w);
   $("#msgs").innerHTML=pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"");
+  fitCells($("#sheet"));
   renderFair(w);renderCons(w);renderFriSet();renderCal();renderStaff();renderSettings();renderMsgs();
 }
 
@@ -939,6 +961,7 @@ document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
   ["sched","cal","msg","staff","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
   try{localStorage.setItem("shift-tab",b.dataset.tab)}catch(e){}
+  fitCells($("#sheet"));
 }));
 function shiftWeek(n){const d=parseKey(cur);d.setDate(d.getDate()+7*n);cur=key(d);msgEdited.consMsg={};msgEdited.weekMsg={};render()}
 $("#prevW").onclick=()=>shiftWeek(-1);$("#nextW").onclick=()=>shiftWeek(1);
@@ -1060,6 +1083,7 @@ async function sheetCanvas(){
   const box=$("#exportBox");calcNeed();box.innerHTML=`<div class="export" style="min-width:0;padding:20px;display:grid;gap:22px;background:#FFFFFF">${sheetHTML(W(),true)}</div>`;
   try{await document.fonts.ready}catch(e){}
   await Promise.all([...box.querySelectorAll("img")].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));
+  fitCells(box);
   const canvas=await html2canvas(box.firstChild,{backgroundColor:"#FFFFFF",scale:2});
   box.innerHTML="";
   return canvas;
@@ -1122,6 +1146,8 @@ $("#shareImgBtn").onclick=async()=>{
 $("#printBtn").onclick=async()=>{
   calcNeed();const box=$("#printBox");box.innerHTML=`<div class="export">${sheetHTML(W(),true)}</div>`;
   await Promise.all([...box.querySelectorAll("img")].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));
+  /* measure off-screen at print width so the text fits the printed cells */
+  box.style.cssText="display:block;position:fixed;left:-99999px;top:0";box.firstChild.style.width="1180px";fitCells(box);box.style.cssText="";box.firstChild.style.width="";
   const prev=document.title;document.title=fileBase();
   try{window.print()}catch(e){setStatus("ההדפסה לא נתמכת כאן")}
   setTimeout(()=>{document.title=prev},1000);
@@ -1131,14 +1157,15 @@ $("#xlsBtn").onclick=async()=>{
   calcNeed();const w=W(),wb=new ExcelJS.Workbook(),ws=wb.addWorksheet("סידור",{views:[{rightToLeft:true}]});
   ws.getColumn(1).width=20;for(let c=2;c<=13;c++)ws.getColumn(c).width=13;
   const fill=hex=>({type:"pattern",pattern:"solid",fgColor:{argb:"FF"+hex}});
-  const thin={style:"medium",color:{argb:"FF000000"}},border={top:thin,left:thin,bottom:thin,right:thin};
-  const sty=(cell,bg,white,size=12)=>{cell.fill=fill(bg);cell.font={bold:true,size,color:{argb:white?"FFFFFFFF":"FF000000"},name:"Calibri"};cell.alignment={horizontal:"center",vertical:"middle",readingOrder:"rtl"};cell.border=border};
+  const thin={style:"thin",color:{argb:"FF8C8C8C"}},border={top:thin,left:thin,bottom:thin,right:thin};
+  const sty=(cell,bg,white,size=12)=>{cell.fill=fill(bg);cell.font={bold:true,size,color:{argb:white?"FFFFFFFF":"FF000000"},name:"Calibri"};cell.alignment={horizontal:"center",vertical:"middle",readingOrder:"rtl",shrinkToFit:true};cell.border=border};
   let r=1;
   /* SCE logo banner across the top, like the Excel print version */
   if(window.SCE_LOGO){const id=wb.addImage({base64:window.SCE_LOGO,extension:"jpeg"});ws.getRow(1).height=42;ws.getRow(2).height=42;
-    ws.addImage(id,{tl:{col:0,row:0},ext:{width:1300,height:103},editAs:"oneCell"});r=4}
+    ws.addImage(id,{tl:{col:0,row:0},ext:{width:1300,height:103},editAs:"oneCell"});r=3}
+  ws.mergeCells(r,1,r,13);{const c=ws.getCell(r,1);c.value=`סידור עבודה שבועי${S.title?" – "+S.title:""}  ·  ${fmt(parseKey(cur))} – ${fmt(dayDate(5))}`;c.font={bold:true,size:16,color:{argb:"FF3F3F3F"},name:"Calibri"};c.alignment={horizontal:"center",vertical:"middle",readingOrder:"rtl"};ws.getRow(r).height=28;r+=2}
   ws.pageSetup={paperSize:9,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0,horizontalCentered:true,margins:{left:.28,right:.28,top:.42,bottom:.28,header:.3,footer:.3}};
-  if(S.title){ws.mergeCells(r,1,r,13);const c=ws.getCell(r,1);c.value=S.title;c.font={bold:true,size:16};c.alignment={horizontal:"center"};r+=2}
+
   S.sites.forEach(s=>{
     const A=w.assign[s.id];
     ws.mergeCells(r,1,r,13);sty(ws.getCell(r,1),"595959",true,16);ws.getCell(r,1).value=s.name;ws.getRow(r).height=26;r++;
