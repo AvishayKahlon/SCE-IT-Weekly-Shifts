@@ -10,7 +10,9 @@
   --bg:#F2F3F0; --surface:#FFFFFF; --ink:#1E2320; --muted:#5D655F; --line:#D9DDD6; --accent:#4F7A2C; --accent-ink:#FFFFFF;
   --warn:#B3261E; --warn-bg:#FCECEA; --ok:#2E7D32;
   /* sheet palette: fixed, matches the printed schedule in both themes */
-  --sh-dark:#595959; --sh-darker:#3F3F3F; --sh-date:#A9D18E; --sh-cell:#C6E0B4; --sh-cell2:#E2EFDA; --sh-note:#F2F2F2; --sh-ink:#1A1A1A; --sh-line:#2B2B2B;
+  /* exact values from the Excel theme: Text1 +35% / Accent6 +40% / Accent6 +60% */
+  --sh-dark:#595959; --sh-darker:#3F3F3F; --sh-date:#A9D18E; --sh-cell:#A9D18E; --sh-cell2:#A9D18E; --sh-eve:#C5E0B4; --sh-note:#F2F2F2; --sh-ink:#000000; --sh-line:#000000;
+  --sh-font:"Calibri","Carlito",Arial,sans-serif;
   --font:"Heebo",Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -20,7 +22,24 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 .nojs{background:#FFF4D6;color:#5A3E00;border-bottom:2px solid #E0B44A;padding:14px 16px;font-size:16px;line-height:1.6}
-.bar button.wa{background:#1E8E4E;color:#fff;border-color:#1E8E4E;font-weight:700}
+/* action bar */
+.bar .act{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:7px 13px;font-weight:600}
+.bar .act .ico{width:18px;height:18px;flex:none}
+.bar .act.soft{color:#1E6B3F;border-color:#A8D5B9;background:#EEF8F1}
+.bar .act.soft:hover{background:#E1F2E7}
+.bar .act:not(.primary):not(.soft):hover{background:var(--bg)}
+.tools{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.tools .tool{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:0;border-inline-start:1px solid var(--line);padding:6px 12px;font-weight:600;background:none;min-height:40px}
+.tools .tool:first-child{border-inline-start:0}
+.tools .tool:hover{background:var(--bg)}
+.tools .badge{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:#fff;flex:none}
+.tools .badge .ico{width:17px;height:17px}
+.t-wa .badge{background:#1E8E4E}.t-pdf .badge{background:#C62828}.t-mail .badge{background:#1565C0}.t-xls .badge{background:#2E7D32}.t-print .badge{background:#546E7A}
+.tool.busy,.act.busy{opacity:.55;pointer-events:none}
+.tool.busy .badge{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(.88)}}
+@media (prefers-reduced-motion:reduce){.tool.busy .badge{animation:none}}
+#finalBtn.on{color:var(--ok);border-color:currentColor}
 .sheetready{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;z-index:40;padding:16px}
 .sheetready .card{display:grid;gap:10px;min-width:240px;text-align:center}
 .sheetready .wa{background:#1E8E4E;color:#fff;border-color:#1E8E4E;font-weight:700;min-height:46px}
@@ -53,17 +72,19 @@ button:disabled{opacity:.5;cursor:default}
 
 /* ===== sheet (mirrors the printed format) ===== */
 #sheet{display:grid;gap:22px;min-width:1180px;background:#FFFFFF;padding:12px;border-radius:6px}
-.sheet-title{text-align:center;color:var(--sh-ink);font-size:22px;font-weight:800;margin:0}
-table.sh{width:100%;border-collapse:collapse;table-layout:fixed;color:var(--sh-ink);border:3px solid var(--sh-line);font-family:var(--font)}
-table.sh td,table.sh th{border:1.5px solid var(--sh-line);height:36px;padding:2px 6px;text-align:center;font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-table.sh .site{background:var(--sh-dark);color:#fff;font-size:22px;font-weight:800;height:40px}
-table.sh .lbl{background:var(--sh-dark);color:#fff;font-size:16px;width:150px}
-table.sh .date{background:var(--sh-date);font-size:18px;font-variant-numeric:tabular-nums}
-table.sh .dname{background:var(--sh-dark);color:#fff;font-size:20px}
+.sheet-title{text-align:center;color:var(--sh-ink);font-family:var(--sh-font);font-size:22px;font-weight:700;margin:0}
+/* sizes keep the Excel ratios (site 36 / day 32 / date 30 / names 28 / labels 26 / notes 20 pt) */
+table.sh{width:100%;border-collapse:collapse;table-layout:fixed;color:var(--sh-ink);border:3px solid var(--sh-line);font-family:var(--sh-font)}
+table.sh td,table.sh th{border:2px solid var(--sh-line);height:36px;padding:2px 6px;text-align:center;font-size:16.8px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.sh .site{background:var(--sh-dark);color:#fff;font-size:21.6px;font-weight:700;height:40px}
+table.sh .lbl{background:var(--sh-dark);color:#fff;font-size:15.6px;width:150px}
+table.sh .date{background:var(--sh-date);color:#404040;font-size:18px;font-variant-numeric:tabular-nums}
+table.sh .dname{background:var(--sh-dark);color:#fff;font-size:19.2px}
 table.sh .c{background:var(--sh-cell)}
 table.sh .c2{background:var(--sh-cell2)}
+table.sh .ce{background:var(--sh-eve)}
 table.sh .off{background:var(--sh-dark);color:#fff;font-size:18px}
-table.sh .note{background:var(--sh-note);font-size:13px;font-weight:500;color:#555}
+table.sh .note{background:var(--sh-note);font-size:12px;font-weight:700;color:#808080}
 table.sh .slot{cursor:pointer}
 table.sh .slot:hover{outline:2px solid var(--accent);outline-offset:-3px}
 table.sh .slot.bad{box-shadow:inset 0 0 0 3px #D93025}
@@ -150,6 +171,7 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
 .dl .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{min-height:40px;min-width:84px;padding:6px 12px;border-radius:8px;border:1px solid #9DBB86;background:var(--sh-cell);color:var(--sh-ink);font-weight:700;font-size:15px}
 .chip.c2{background:var(--sh-cell2)}
+.chip.ce{background:var(--sh-eve)}
 .chip.empty-need{background:repeating-linear-gradient(135deg,var(--sh-cell),var(--sh-cell) 6px,#F4D6D3 6px,#F4D6D3 12px);color:#7A2A22}
 .chip.bad{box-shadow:inset 0 0 0 3px #D93025}
 .chip.off{background:transparent;border-style:dashed;color:var(--muted);font-weight:500}
@@ -172,7 +194,10 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .bar .sp{display:none}
   .bar button{min-height:44px;padding:8px 6px}
-  .bar #genBtn,.bar #askConsBtn,.bar #shareImgBtn{grid-column:1/-1}
+  .bar #genBtn,.bar #askConsBtn,.bar .tools{grid-column:1/-1}
+  .bar .act{justify-content:center}
+  .tools{display:grid;grid-template-columns:repeat(5,1fr)}
+  .tools .tool{flex-direction:column;gap:4px;font-size:12.5px;padding:8px 2px;min-height:64px;justify-content:center}
   .bar #clearBtn{order:9}
   .bar #askConsBtn{order:-1}
   .card{padding:12px}
@@ -270,14 +295,18 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 
   <section class="panel" id="tab-sched">
     <div class="bar">
-      <button class="primary" id="genBtn">צור סידור אוטומטי</button>
-      <button id="clearBtn">נקה שיבוצים</button>
-      <button class="wa" id="askConsBtn">💬 בקש אילוצים לשבוע הבא</button>
+      <button class="primary act" id="genBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span class="lb">צור סידור אוטומטי</span></button>
+      <button class="act" id="clearBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5l4.5 4.5-9.5 9.5H6.5L3.5 14.5z"/><path d="M9 21h12"/><path d="M11 8.5l4.5 4.5"/></svg><span class="lb">נקה שיבוצים</span></button>
+      <button class="act soft" id="askConsBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01" stroke-width="2.6"/></svg><span class="lb">בקש אילוצים לשבוע הבא</span></button>
       <span class="sp"></span>
-      <button class="wa" id="shareImgBtn">📤 שלח סידור לוואטסאפ</button>
-      <button id="printBtn">🖨️ הדפסה / PDF</button>
-      <button id="xlsBtn">הורד אקסל</button>
-      <button id="finalBtn">סמן כסופי</button>
+      <div class="tools" role="group" aria-label="שליחה וייצוא של הסידור">
+        <button class="tool t-wa" id="shareImgBtn" title="שליחת הסידור כתמונה לוואטסאפ"><span class="badge"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01" stroke-width="2.6"/></svg></span><span class="lb">וואטסאפ</span></button>
+        <button class="tool t-pdf" id="pdfBtn" title="הורדת הסידור כקובץ PDF"><span class="badge"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h8l4.5 4.5v14.5H6z"/><path d="M14 2.5V7h4.5"/><text x="12.2" y="17.6" text-anchor="middle" font-size="6.4" font-weight="800" fill="currentColor" stroke="none" font-family="Arial">PDF</text></svg></span><span class="lb">PDF</span></button>
+        <button class="tool t-mail" id="mailBtn" title="פתיחת מייל חדש עם הסידור"><span class="badge"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg></span><span class="lb">מייל</span></button>
+        <button class="tool t-xls" id="xlsBtn" title="הורדת הסידור כקובץ אקסל"><span class="badge"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4" width="17" height="16" rx="1.5"/><path d="M3.5 9.5h17M3.5 14.8h17M9.5 9.5V20"/></svg></span><span class="lb">אקסל</span></button>
+        <button class="tool t-print" id="printBtn" title="הדפסת הסידור"><span class="badge"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="1.5"/><path d="M7 14h10v6.5H7z"/></svg></span><span class="lb">הדפסה</span></button>
+      </div>
+      <button class="act" id="finalBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5"/></svg><span class="lb">סמן כסופי</span></button>
     </div>
     <details class="card cons" id="consBox" open>
       <summary><h2>אילוצים לשבוע</h2><span class="hint">לחיצה על משבצת מחליפה מצב: זמין ← בוקר ← ערב ← חופש. בשישי: גיבוי לאירוע</span></summary>
@@ -325,6 +354,14 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
   </section>
 
   <section class="panel" id="tab-msg" hidden>
+    <div class="card">
+      <h2>שליחה במייל</h2>
+      <div class="row">
+        <input type="text" id="mailTo" style="flex:1;min-width:240px" placeholder="name@sce.ac.il, name2@sce.ac.il" aria-label="נמענים" dir="ltr">
+        <input type="text" id="mailSubject" style="flex:1;min-width:200px" placeholder="סידור עבודה {שבוע}" aria-label="נושא המייל">
+      </div>
+      <p class="hint" style="margin-top:8px">כפתור "מייל" פותח מייל חדש (ב-Outlook, אם הוא תוכנת המייל המוגדרת במחשב) לנמענים האלה, ומעתיק את תמונת הסידור. בגוף המייל לוחצים Ctrl+V. <b>{שבוע}</b> בנושא מוחלף בתאריכי השבוע.</p>
+    </div>
     <div class="card">
       <h2>קבוצת הוואטסאפ של הצוות</h2>
       <div class="row">
@@ -416,6 +453,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>window.PRESET={"title": "", "shiftLbl": {"m": "07:45 - 16:00", "e": "14:00 - 22:00"}, "sites": [{"id": "bb", "name": "בני ברית", "req": {"m": [1, 1, 1, 1, 1, 1], "e": [1, 1, 1, 1, 1, 0]}}, {"id": "zb", "name": "ז'בוטינסקי", "req": {"m": [2, 2, 2, 2, 2, 1], "e": [1, 1, 1, 1, 1, 0]}}], "employees": [{"id": "al", "name": "אלכסיי", "active": true}, {"id": "mo", "name": "מרדכי", "active": true}, {"id": "sh", "name": "שלמה", "active": true}, {"id": "or", "name": "אור", "active": true}, {"id": "ye", "name": "יהודה", "active": true}], "weeks": {"2026-10-18": {"cons": {}, "final": true, "assign": {"bb": {"m": [["al"], ["mo"], ["sh"], ["or"], ["ye"], ["sh"]], "e": [["or"], ["ye"], ["ye"], ["mo"], ["sh"], []]}, "zb": {"m": [["ye", "sh"], ["or", "sh"], ["al", "or"], ["al", "ye"], ["mo", "al"], ["al"]], "e": [["mo"], ["al"], ["mo"], ["sh"], ["or"], []]}}, "notes": {"bb": ["", "", "", "", "", ""], "zb": ["כנס פתיחה | 110 | 08:30", "", "כלי תוכנה | 09:00", "", "", ""]}}}, "target": 5};</script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
@@ -701,7 +739,7 @@ function sheetHTML(w,exportMode){
     DAYS.forEach((_,d)=>{
       const need=NEED[s.id].e[d],arr=A.e[d],md=dm(d);
       if(need===0&&!arr.length){h+=d===5?`<td class="off" colspan="2">שבת שלום</td>`:(md.off||md.noEve)?`<td class="off hol" colspan="2"></td>`:`<td class="off" colspan="2">—</td>`;return}
-      const k=`${s.id}|e|${d}|0`,cls=["slot","c"];
+      const k=`${s.id}|e|${d}|0`,cls=["slot","ce"];
       if(!exportMode&&arr.length<need)cls.push("empty-need");if(pr&&arr.some((_,j)=>pr.bad.has(`${s.id}|e|${d}|${j}`)))cls.push("bad");
       h+=`<td class="${cls.join(" ")}" colspan="2" data-k="${k}">${esc(arr.map(empName).join(", "))}</td>`;
     });
@@ -718,7 +756,7 @@ function sheetHTML(w,exportMode){
 function daysHTML(w){
   if(!S.sites.length)return `<div class="empty">אין אתרים עדיין. הוסיפו אתר בלשונית "הגדרות".</div>`;
   const pr=problems(w);
-  const chip=(sid,sh,d,i,names,need)=>{const empty=i<need&&!names.length;const cls=["slot","chip",i===1?"c2":""];if(empty)cls.push("empty-need");
+  const chip=(sid,sh,d,i,names,need)=>{const empty=i<need&&!names.length;const cls=["slot","chip",sh==="e"?"ce":i===1?"c2":""];if(empty)cls.push("empty-need");
     if(names.some((_,j)=>pr.bad.has(`${sid}|${sh}|${d}|${i+j}`)))cls.push("bad");
     return `<button class="${cls.join(" ")}" data-k="${sid}|${sh}|${d}|${i}">${names.length?esc(names.map(empName).join(", ")):(empty?"+ שבצו":"+")}</button>`};
   return DAYS.map((dn,d)=>{
@@ -742,7 +780,7 @@ function render(){
   $("#weekLbl").textContent=fmt(d0)+" – "+fmt(d5);
   setDate($("#weekPick"),cur);
   $("#finalBadge").hidden=!w.final;
-  $("#finalBtn").textContent=w.final?"בטל סימון סופי":"סמן כסופי";
+  $("#finalBtn .lb").textContent=w.final?"בטל סימון סופי":"סמן כסופי";$("#finalBtn").classList.toggle("on",!!w.final);
   $("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);
   const pr=problems(w);
   $("#msgs").innerHTML=pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"");
@@ -807,9 +845,12 @@ function eventText(sid,d){const w=W(),s=S.sites.find(x=>x.id===sid),n=(w.notes[s
   return `תזכורת ליום ${DAYS[d]} ${fmt(dayDate(d)).slice(0,5)}:\n📍 ${s?s.name:""}: ${n}\n   בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`}
 $("#askConsBtn").onclick=()=>sendWa(consText());
 function renderGroup(){
+  if(document.activeElement!==$("#mailTo"))$("#mailTo").value=S.mailTo||"";if(document.activeElement!==$("#mailSubject"))$("#mailSubject").value=S.mailSubject||"";
   const u=(S.groupLink||"").trim();if(document.activeElement!==$("#groupLink"))$("#groupLink").value=u;
   document.querySelectorAll("a.grp").forEach(a=>{a.hidden=!groupOk(u);if(groupOk(u))a.href=u});
 }
+$("#mailTo").addEventListener("input",e=>{S.mailTo=e.target.value;changed(true)});
+$("#mailSubject").addEventListener("input",e=>{S.mailSubject=e.target.value;changed(true)});
 $("#groupLink").addEventListener("input",e=>{S.groupLink=e.target.value.trim();changed(true);renderGroup()});
 document.querySelectorAll("a.grp").forEach(a=>a.addEventListener("click",()=>{
   const ta=$("#"+a.dataset.grp),note=document.querySelector(`[data-copied="${a.dataset.grp}"]`);
@@ -1011,15 +1052,36 @@ async function saveFile(name,data){
 $("#backupBtn").onclick=()=>saveFile("גיבוי סידור עבודה "+fmt(new Date()).replace(/\//g,".")+".json",JSON.stringify(S));
 $("#restoreBtn").onclick=()=>$("#restoreFile").click();
 $("#restoreFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o||!Array.isArray(o.employees))throw 0;load(r.result);changed();render();setStatus("הגיבוי שוחזר")}catch(err){setStatus("הקובץ הזה לא גיבוי תקין")}};r.readAsText(f);e.target.value=""};
-async function sheetBlob(){
+async function sheetCanvas(){
   if(typeof html2canvas==="undefined"){setStatus("ספריית התמונה לא נטענה, בדקו חיבור לאינטרנט");return null}
   const box=$("#exportBox");calcNeed();box.innerHTML=`<div class="export" style="min-width:0;padding:20px;display:grid;gap:22px;background:#FFFFFF">${sheetHTML(W(),true)}</div>`;
   try{await document.fonts.ready}catch(e){}
   await Promise.all([...box.querySelectorAll("img")].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));
   const canvas=await html2canvas(box.firstChild,{backgroundColor:"#FFFFFF",scale:2});
   box.innerHTML="";
-  return await new Promise(r=>canvas.toBlob(r,"image/png"));
+  return canvas;
 }
+async function sheetBlob(){const c=await sheetCanvas();return c?await new Promise(r=>c.toBlob(r,"image/png")):null}
+function weekRange(){return `${fmt(parseKey(cur)).slice(0,5)}–${fmt(dayDate(5)).slice(0,5)}`}
+/* PDF: same layout as the Excel print area, A4 landscape */
+$("#pdfBtn").onclick=()=>busy($("#pdfBtn"),async()=>{
+  if(!window.jspdf){setStatus("ספריית ה-PDF לא נטענה, בדקו חיבור לאינטרנט");return}
+  const c=await sheetCanvas();if(!c)return;
+  const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"mm",format:"a4"}),PW=297,PH=210,m=7;
+  let w=PW-2*m,h=w*c.height/c.width;if(h>PH-2*m){h=PH-2*m;w=h*c.width/c.height}
+  doc.addImage(c.toDataURL("image/jpeg",0.92),"JPEG",(PW-w)/2,m,w,h);
+  doc.setProperties({title:fileBase()});
+  await saveFile(fileBase()+".pdf",doc.output("blob"));toast("קובץ ה-PDF ירד")});
+/* Mail: copies the schedule image and opens a new email (Outlook or the default mail app) */
+$("#mailBtn").onclick=()=>busy($("#mailBtn"),async()=>{
+  const b=await sheetBlob();if(!b)return;let copied=false;
+  try{await navigator.clipboard.write([new ClipboardItem({"image/png":b})]);copied=true}catch(e){}
+  if(!copied)await saveFile(fileBase()+".png",b);
+  const to=(S.mailTo||"").split(/[,;\s]+/).filter(Boolean).join(",");
+  const subj=(S.mailSubject||"סידור עבודה {שבוע}").replace("{שבוע}",weekRange());
+  const body=`שלום,\n\nמצורף סידור העבודה לשבוע ${weekRange()}.\n\n`;
+  const a=document.createElement("a");a.href=`mailto:${to}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;document.body.appendChild(a);a.click();a.remove();
+  toast(copied?"התמונה הועתקה. במייל שנפתח: לחצו בגוף ההודעה ו-Ctrl+V":"התמונה ירדה למחשב. צרפו אותה למייל שנפתח")});
 function inFrame(){try{return window.self!==window.top}catch(e){return true}}
 function shareReady(f){
   const o=document.createElement("div");o.className="sheetready";
@@ -1028,9 +1090,10 @@ function shareReady(f){
   o.querySelector("[data-go]").onclick=()=>{navigator.share({files:[f]}).catch(()=>{});o.remove()};
   o.querySelector("[data-x]").onclick=()=>o.remove();
 }
+async function busy(btn,fn){btn.classList.add("busy");btn.setAttribute("aria-busy","true");try{return await fn()}finally{btn.classList.remove("busy");btn.removeAttribute("aria-busy")}}
 $("#shareImgBtn").onclick=async()=>{
-  const btn=$("#shareImgBtn"),lbl=btn.textContent;btn.disabled=true;btn.textContent="מכין תמונה…";
-  let b=null;try{b=await sheetBlob()}finally{btn.disabled=false;btn.textContent=lbl}
+  const btn=$("#shareImgBtn");
+  let b=null;b=await busy(btn,sheetBlob);
   if(!b)return;
   const f=new File([b],fileBase()+".png",{type:"image/png"});
   if(!inFrame()&&navigator.canShare&&navigator.canShare({files:[f]})){
@@ -1056,8 +1119,8 @@ $("#xlsBtn").onclick=async()=>{
   calcNeed();const w=W(),wb=new ExcelJS.Workbook(),ws=wb.addWorksheet("סידור",{views:[{rightToLeft:true}]});
   ws.getColumn(1).width=20;for(let c=2;c<=13;c++)ws.getColumn(c).width=13;
   const fill=hex=>({type:"pattern",pattern:"solid",fgColor:{argb:"FF"+hex}});
-  const thin={style:"thin",color:{argb:"FF2B2B2B"}},border={top:thin,left:thin,bottom:thin,right:thin};
-  const sty=(cell,bg,white,size=12)=>{cell.fill=fill(bg);cell.font={bold:true,size,color:{argb:white?"FFFFFFFF":"FF1A1A1A"},name:"Arial"};cell.alignment={horizontal:"center",vertical:"middle",readingOrder:"rtl"};cell.border=border};
+  const thin={style:"medium",color:{argb:"FF000000"}},border={top:thin,left:thin,bottom:thin,right:thin};
+  const sty=(cell,bg,white,size=12)=>{cell.fill=fill(bg);cell.font={bold:true,size,color:{argb:white?"FFFFFFFF":"FF000000"},name:"Calibri"};cell.alignment={horizontal:"center",vertical:"middle",readingOrder:"rtl"};cell.border=border};
   let r=1;
   /* SCE logo banner across the top, like the Excel print version */
   if(window.SCE_LOGO){const id=wb.addImage({base64:window.SCE_LOGO,extension:"jpeg"});ws.getRow(1).height=42;ws.getRow(2).height=42;
@@ -1068,15 +1131,15 @@ $("#xlsBtn").onclick=async()=>{
     const A=w.assign[s.id];
     ws.mergeCells(r,1,r,13);sty(ws.getCell(r,1),"595959",true,16);ws.getCell(r,1).value=s.name;ws.getRow(r).height=26;r++;
     const row=(label,fn,h=22)=>{sty(ws.getCell(r,1),"595959",true);ws.getCell(r,1).value=label;fn();ws.getRow(r).height=h;r++};
-    row("תאריך",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=fmt(dayDate(d));sty(x,"A9D18E",false);ws.getCell(r,c+1).border=border}));
+    row("תאריך",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=fmt(dayDate(d));sty(x,"A9D18E",false);x.font={bold:true,size:12,color:{argb:"FF404040"},name:"Calibri"};ws.getCell(r,c+1).border=border}));
     row("משמרת",()=>DAYS.forEach((dn,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=dn;sty(x,"595959",true,13)}));
     row(S.shiftLbl.m,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=NEED[s.id].m[d],arr=A.m[d];
       if(need===0&&!arr.length){ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=dm(d).off?"":"—";sty(x,"595959",true);return}
-      const a=ws.getCell(r,c),b=ws.getCell(r,c+1);a.value=arr[0]?empName(arr[0]):"";b.value=arr.slice(1).map(empName).join(", ");sty(a,"C6E0B4",false);sty(b,"E2EFDA",false)}));
+      const a=ws.getCell(r,c),b=ws.getCell(r,c+1);a.value=arr[0]?empName(arr[0]):"";b.value=arr.slice(1).map(empName).join(", ");sty(a,"A9D18E",false);sty(b,"A9D18E",false)}));
     row(S.shiftLbl.e,()=>DAYS.forEach((_,d)=>{const c=2+d*2,need=NEED[s.id].e[d],arr=A.e[d],md=dm(d);ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);
       if(need===0&&!arr.length){x.value=d===5?"שבת שלום":(md.off||md.noEve)?"":"—";sty(x,"595959",true);return}
-      x.value=arr.map(empName).join(", ");sty(x,"C6E0B4",false)}));
-    row("הערות ואירועים",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=noteText(w,s.id,d);sty(x,"F2F2F2",false,10);x.font={size:10,color:{argb:"FF555555"}}}));
+      x.value=arr.map(empName).join(", ");sty(x,"C5E0B4",false)}));
+    row("הערות ואירועים",()=>DAYS.forEach((_,d)=>{const c=2+d*2;ws.mergeCells(r,c,r,c+1);const x=ws.getCell(r,c);x.value=noteText(w,s.id,d);sty(x,"F2F2F2",false,10);x.font={bold:true,size:10,color:{argb:"FF808080"},name:"Calibri"}}));
     r++;
   });
   ws.pageSetup.printArea="A1:M"+Math.max(1,r-2);
