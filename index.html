@@ -264,8 +264,9 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   table.grid{min-width:0;table-layout:fixed}
   table.grid th,table.grid td{padding:3px 2px}
   table.grid th{font-size:12px}
-  table.grid th:first-child,table.grid td.name{width:68px;font-size:13px;white-space:normal;overflow-wrap:anywhere;padding-inline:4px}
+  table.grid th:first-child,table.grid td.name{width:84px;font-size:13px;white-space:normal;overflow-wrap:break-word;word-break:normal;padding-inline:4px}
   table.grid th .l{display:none}
+  table.grid .cst .lf{display:none}table.grid .cst .ls{display:inline}
   .cst{min-height:42px;padding:0;font-size:14px}
   table.grid th .sd{display:inline;font-size:15px}
   input[type=text],input[type=number],input[type=date],select{font-size:16px}
@@ -313,6 +314,7 @@ table.sh .note .hol,.dnote .hol{flex:none;font-weight:700;font-size:12px;color:#
 .cst[data-v="T"],.cst[data-v="B"]{background:#E2EFDA;color:#1b2a12}
 .cst[data-v="V"]{background:var(--warn-bg);color:var(--warn);font-size:13px}
 .cst[data-v="F"]{color:var(--muted)}
+.cst .ls{display:none}
 .cst:disabled{opacity:1;cursor:default}
 .cst[data-s="ok"]{background:#C6EFCE;color:#006100}
 .cst[data-s="bad"]{background:#FFC7CE;color:#9C0006}
@@ -493,7 +495,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
       <h2>עובדים</h2>
       <div class="rows" id="staffRows"></div>
       <div class="row" style="margin-top:12px">
-        <input type="text" id="newEmp" placeholder="שם עובד/ת חדש/ה" aria-label="שם עובד חדש">
+        <input type="text" id="newEmp" maxlength="40" placeholder="שם עובד/ת חדש/ה" aria-label="שם עובד חדש">
         <button id="addEmp" class="primary">הוסף</button>
       </div>
     </div>
@@ -518,7 +520,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
       </div>
     </div>
     <div id="sitesSet" class="rows"></div>
-    <div class="row"><input type="text" id="newSite" placeholder="שם אתר חדש" aria-label="שם אתר חדש"><button id="addSite">הוסף אתר</button></div>
+    <div class="row"><input type="text" id="newSite" maxlength="60" placeholder="שם אתר חדש" aria-label="שם אתר חדש"><button id="addSite">הוסף אתר</button></div>
     <div class="card">
       <h2>גיבוי</h2>
       <p class="hint" style="margin-bottom:10px">כשהכלי פתוח כקובץ במחשב, הנתונים נשמרים רק בדפדפן הזה. מומלץ להוריד גיבוי מדי פעם.</p>
@@ -538,7 +540,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 16:50";
+const APP_VER="20.10.2026 17:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -806,8 +808,15 @@ function prefSel(w,sid,d){const p=(w.pref[sid]||[])[d],v=p?p.e+"|"+p.sh:"",ok=p&
 /* shrink text until it fits its cell (start from the CSS size, never larger) */
 function fitCells(root){if(!root)return;root.querySelectorAll("table.sh td").forEach(td=>{
   if(td.querySelector("input,select,button")||!td.textContent.trim()||!td.clientWidth)return;
-  td.style.fontSize="";let f=parseFloat(getComputedStyle(td).fontSize);
-  while(f>7&&td.scrollWidth>td.clientWidth+1){f-=0.5;td.style.fontSize=f+"px"}})}
+  td.style.cssText="";const over=()=>td.scrollWidth>td.clientWidth+1;if(!over())return;   /* fits: leave exactly as designed */
+  const h0=td.offsetHeight;let f=parseFloat(getComputedStyle(td).fontSize);
+  /* names and notes may use a second line (row height stays the same), then shrink to fit */
+  if(td.classList.contains("slot")||td.classList.contains("note")){
+    td.style.whiteSpace="normal";td.style.lineHeight="1.05";
+    const tooBig=()=>over()||td.offsetHeight>h0+0.5;
+    while(f>9&&tooBig()){f-=0.5;td.style.fontSize=f+"px"}
+    if(!tooBig())return;td.style.whiteSpace="";td.style.lineHeight=""}
+  while(f>6&&over()){f-=0.5;td.style.fontSize=f+"px"}})}
 /* hours / note for one assigned person: manual text, else automatic evening hours on "סיום ב-19:00" days */
 function autoNote(sh,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return sh==="e"&&(S.holidays||[]).some(h=>h.type==="h19"&&h.from<=key(dt)&&key(dt)<=(h.to||h.from))?(S.h19Eve||""):""}
 function aNote(w,sid,sh,d,id,wk){const v=(w.anote||{})[`${sid}|${sh}|${d}|${id}`];return (v===undefined?autoNote(sh,d,wk):v)||""}
@@ -997,10 +1006,11 @@ function renderCons(w){
         else if(onVac(e.id,dayDate(d))){v="V";lbl=CST_LBL.V;dis=true}
         else{v=cons(w,e.id,d);lbl=CST_LBL[v]}
         const s=ha&&v!=="O"?es.cells[d]:"";
-        return `<td><button class="cst${eve3[d]&&v==="E"?" ev3":""}" data-cst="${e.id}|${d}" data-v="${v}"${s?` data-s="${s}"`:""} ${dis?"disabled":""} aria-label="${esc(e.name)} ${DAYS[d]}: ${lbl}">${lbl}</button></td>`}).join("")}</tr>`}).join("");
+        const sh={T:"תורן",B:"גיבוי",V:"חופש"}[v];
+        return `<td><button class="cst${eve3[d]&&v==="E"?" ev3":""}" data-cst="${e.id}|${d}" data-v="${v}"${s?` data-s="${s}"`:""} ${dis?"disabled":""} aria-label="${esc(e.name)} ${DAYS[d]}: ${lbl}">${sh?`<span class="lf">${lbl}</span><span class="ls">${sh}</span>`:lbl}</button></td>`}).join("")}</tr>`}).join("");
 }
 function renderStaff(){
-  $("#staffRows").innerHTML=S.employees.length?S.employees.map(e=>`<div class="row"><input type="text" data-ename="${e.id}" value="${esc(e.name)}" aria-label="שם"><label><input type="checkbox" data-eact="${e.id}" ${e.active!==false?"checked":""}> פעיל/ה</label><label title="לא משובץ בסידור האוטומטי, רק ידנית"><input type="checkbox" data-ebk="${e.id}" ${e.backup?"checked":""}> גיבוי בלבד</label><button data-edel="${e.id}">הסר</button></div>`).join(""):`<p class="hint">עדיין אין עובדים.</p>`;
+  $("#staffRows").innerHTML=S.employees.length?S.employees.map(e=>`<div class="row"><input type="text" maxlength="40" data-ename="${e.id}" value="${esc(e.name)}" aria-label="שם"><label><input type="checkbox" data-eact="${e.id}" ${e.active!==false?"checked":""}> פעיל/ה</label><label title="לא משובץ בסידור האוטומטי, רק ידנית"><input type="checkbox" data-ebk="${e.id}" ${e.backup?"checked":""}> גיבוי בלבד</label><button data-edel="${e.id}">הסר</button></div>`).join(""):`<p class="hint">עדיין אין עובדים.</p>`;
 }
 /* Friday rotation table: one column per site, rows = rotation order (repeats allowed, like שלמה ×4) */
 function renderFriSet(){
@@ -1045,7 +1055,7 @@ function renderCal(){
 }
 function renderSettings(){
   $("#lblM").value=S.shiftLbl.m;$("#lblE").value=S.shiftLbl.e;$("#h19Eve").value=S.h19Eve||"";$("#sheetTitle").value=S.title||"";$("#targetN").value=S.target??5;$("#coverSet").innerHTML=`<table class="req"><tr><th>אתר</th><th>בקרים</th><th>ערבים</th></tr>${S.sites.map(s=>`<tr><td>${esc(s.name)}</td>${["m","e"].map(sh=>`<td><input type="number" min="0" max="5" data-cov="${s.id}|${sh}" value="${S.cover[s.id][sh]||0}" aria-label="${esc(s.name)} ${sh==="m"?"בקרים":"ערבים"}"></td>`).join("")}</tr>`).join("")}</table>`;
-  $("#sitesSet").innerHTML=S.sites.map(s=>`<div class="card"><div class="row" style="margin-bottom:10px"><input type="text" data-sname="${s.id}" value="${esc(s.name)}" aria-label="שם אתר"><button data-sdel="${s.id}">הסר אתר</button></div>
+  $("#sitesSet").innerHTML=S.sites.map(s=>`<div class="card"><div class="row" style="margin-bottom:10px"><input type="text" maxlength="60" data-sname="${s.id}" value="${esc(s.name)}" aria-label="שם אתר"><button data-sdel="${s.id}">הסר אתר</button></div>
     <div class="scroll"><table class="req"><tr><th>עובדים במשמרת</th>${DAYS.map(d=>`<th>${d}</th>`).join("")}</tr>
     ${["m","e"].map(sh=>`<tr><td>${sh==="m"?"בוקר":"ערב"}</td>${DAYS.map((_,d)=>`<td><input type="number" min="0" max="6" data-req="${s.id}|${sh}|${d}" value="${(s.req[sh]||[])[d]||0}" aria-label="${sh==="m"?"בוקר":"ערב"} ${DAYS[d]}"></td>`).join("")}</tr>`).join("")}
     </table></div></div>`).join("");
