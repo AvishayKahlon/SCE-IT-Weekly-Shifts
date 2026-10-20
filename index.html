@@ -358,9 +358,8 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
       <h2>שליחה במייל</h2>
       <div class="row">
         <input type="text" id="mailTo" style="flex:1;min-width:240px" placeholder="name@sce.ac.il, name2@sce.ac.il" aria-label="נמענים" dir="ltr">
-        <input type="text" id="mailSubject" style="flex:1;min-width:200px" placeholder="סידור עבודה {שבוע}" aria-label="נושא המייל">
       </div>
-      <p class="hint" style="margin-top:8px">כפתור "מייל" פותח מייל חדש (ב-Outlook, אם הוא תוכנת המייל המוגדרת במחשב) לנמענים האלה, ומעתיק את תמונת הסידור. בגוף המייל לוחצים Ctrl+V. <b>{שבוע}</b> בנושא מוחלף בתאריכי השבוע.</p>
+      <p class="hint" style="margin-top:8px">כפתור "מייל" מכין מייל עם קובץ PDF של הסידור מצורף, והנושא הוא שם הקובץ (למשל "סידור עבודה 18-23.10.2026"). במחשב יורד קובץ .eml – פתיחה שלו פותחת טיוטה חדשה ב-Outlook עם הנמענים האלה והקובץ מצורף. בטלפון נפתח תפריט השיתוף.</p>
     </div>
     <div class="card">
       <h2>קבוצת הוואטסאפ של הצוות</h2>
@@ -845,12 +844,11 @@ function eventText(sid,d){const w=W(),s=S.sites.find(x=>x.id===sid),n=(w.notes[s
   return `תזכורת ליום ${DAYS[d]} ${fmt(dayDate(d)).slice(0,5)}:\n📍 ${s?s.name:""}: ${n}\n   בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`}
 $("#askConsBtn").onclick=()=>sendWa(consText());
 function renderGroup(){
-  if(document.activeElement!==$("#mailTo"))$("#mailTo").value=S.mailTo||"";if(document.activeElement!==$("#mailSubject"))$("#mailSubject").value=S.mailSubject||"";
+  if(document.activeElement!==$("#mailTo"))$("#mailTo").value=S.mailTo||"";
   const u=(S.groupLink||"").trim();if(document.activeElement!==$("#groupLink"))$("#groupLink").value=u;
   document.querySelectorAll("a.grp").forEach(a=>{a.hidden=!groupOk(u);if(groupOk(u))a.href=u});
 }
 $("#mailTo").addEventListener("input",e=>{S.mailTo=e.target.value;changed(true)});
-$("#mailSubject").addEventListener("input",e=>{S.mailSubject=e.target.value;changed(true)});
 $("#groupLink").addEventListener("input",e=>{S.groupLink=e.target.value.trim();changed(true);renderGroup()});
 document.querySelectorAll("a.grp").forEach(a=>a.addEventListener("click",()=>{
   const ta=$("#"+a.dataset.grp),note=document.querySelector(`[data-copied="${a.dataset.grp}"]`);
@@ -1037,7 +1035,12 @@ document.addEventListener("click",e=>{const p=e.target.closest&&e.target.closest
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList&&e.target.classList.contains("dtx"))e.target.blur()});
 
 /* ---------- export ---------- */
-function fileBase(){return "סידור עבודה "+fmt(parseKey(cur)).replace(/\//g,".")}
+/* file name for every export: "סידור עבודה 18-23.10.2026", across months "29.11-04.12.2026", across years "27.12.2026-01.01.2027" */
+function weekSpan(){const a=parseKey(cur),b=dayDate(5),p=n=>String(n).padStart(2,"0");
+  if(a.getFullYear()!==b.getFullYear())return `${p(a.getDate())}.${p(a.getMonth()+1)}.${a.getFullYear()}-${p(b.getDate())}.${p(b.getMonth()+1)}.${b.getFullYear()}`;
+  if(a.getMonth()!==b.getMonth())return `${p(a.getDate())}.${p(a.getMonth()+1)}-${p(b.getDate())}.${p(b.getMonth()+1)}.${b.getFullYear()}`;
+  return `${p(a.getDate())}-${p(b.getDate())}.${p(b.getMonth()+1)}.${b.getFullYear()}`}
+function fileBase(){return "סידור עבודה "+weekSpan()}
 async function saveFile(name,data){
   if(dl){
     try{await dl.save({filename:name,data});}catch(e){if(e&&e.code!=="declined")setStatus("ההורדה לא הצליחה: "+(e.message||e.code))}
@@ -1062,26 +1065,35 @@ async function sheetCanvas(){
   return canvas;
 }
 async function sheetBlob(){const c=await sheetCanvas();return c?await new Promise(r=>c.toBlob(r,"image/png")):null}
-function weekRange(){return `${fmt(parseKey(cur)).slice(0,5)}–${fmt(dayDate(5)).slice(0,5)}`}
 /* PDF: same layout as the Excel print area, A4 landscape */
-$("#pdfBtn").onclick=()=>busy($("#pdfBtn"),async()=>{
-  if(!window.jspdf){setStatus("ספריית ה-PDF לא נטענה, בדקו חיבור לאינטרנט");return}
-  const c=await sheetCanvas();if(!c)return;
+async function sheetPdf(){
+  if(!window.jspdf){setStatus("ספריית ה-PDF לא נטענה, בדקו חיבור לאינטרנט");return null}
+  const c=await sheetCanvas();if(!c)return null;
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"mm",format:"a4"}),PW=297,PH=210,m=7;
   let w=PW-2*m,h=w*c.height/c.width;if(h>PH-2*m){h=PH-2*m;w=h*c.width/c.height}
   doc.addImage(c.toDataURL("image/jpeg",0.92),"JPEG",(PW-w)/2,m,w,h);
   doc.setProperties({title:fileBase()});
-  await saveFile(fileBase()+".pdf",doc.output("blob"));toast("קובץ ה-PDF ירד")});
-/* Mail: copies the schedule image and opens a new email (Outlook or the default mail app) */
+  return doc.output("blob")}
+$("#pdfBtn").onclick=()=>busy($("#pdfBtn"),async()=>{const b=await sheetPdf();if(!b)return;await saveFile(fileBase()+".pdf",b);toast("הקובץ ירד: "+fileBase()+".pdf")});
+/* Mail = PDF attachment. Subject = file name.
+   Phone: share sheet with the PDF (choose Outlook / Gmail).
+   Computer: an .eml draft (X-Unsent) – opening it starts a new Outlook message with To, subject and the PDF attached. */
+function b64utf8(t){return btoa(unescape(encodeURIComponent(t)))}
+function blobB64(b){return new Promise(r=>{const f=new FileReader();f.onload=()=>r(String(f.result).split(",")[1]);f.readAsDataURL(b)})}
+function wrap76(t){return t.replace(/.{1,76}/g,"$&\r\n")}
+function emlDraft(to,subj,html,fname,pdf64){const B="----=_sce_"+uid(),E=t=>"=?UTF-8?B?"+b64utf8(t)+"?=";
+  return ["To: "+to,"Subject: "+E(subj),"X-Unsent: 1","MIME-Version: 1.0",`Content-Type: multipart/mixed; boundary="${B}"`,"",
+    "--"+B,"Content-Type: text/html; charset=UTF-8","Content-Transfer-Encoding: base64","",wrap76(b64utf8(html)),
+    "--"+B,`Content-Type: application/pdf; name="${E(fname)}"`,"Content-Transfer-Encoding: base64",`Content-Disposition: attachment; filename="${E(fname)}"; filename*=UTF-8''${encodeURIComponent(fname)}`,"",wrap76(pdf64),
+    "--"+B+"--",""].join("\r\n")}
 $("#mailBtn").onclick=()=>busy($("#mailBtn"),async()=>{
-  const b=await sheetBlob();if(!b)return;let copied=false;
-  try{await navigator.clipboard.write([new ClipboardItem({"image/png":b})]);copied=true}catch(e){}
-  if(!copied)await saveFile(fileBase()+".png",b);
-  const to=(S.mailTo||"").split(/[,;\s]+/).filter(Boolean).join(",");
-  const subj=(S.mailSubject||"סידור עבודה {שבוע}").replace("{שבוע}",weekRange());
-  const body=`שלום,\n\nמצורף סידור העבודה לשבוע ${weekRange()}.\n\n`;
-  const a=document.createElement("a");a.href=`mailto:${to}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;document.body.appendChild(a);a.click();a.remove();
-  toast(copied?"התמונה הועתקה. במייל שנפתח: לחצו בגוף ההודעה ו-Ctrl+V":"התמונה ירדה למחשב. צרפו אותה למייל שנפתח")});
+  const pdf=await sheetPdf();if(!pdf)return;
+  const name=fileBase(),fname=name+".pdf",to=(S.mailTo||"").split(/[,;\s]+/).filter(Boolean).join(", ");
+  const f=new File([pdf],fname,{type:"application/pdf"});
+  if(canShare&&navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name,text:name});return}catch(e){if(e&&e.name==="AbortError")return}}
+  const html=`<div dir="rtl" style="font-family:Arial,sans-serif;font-size:11pt">שלום,<br><br>מצורף ${esc(name)}.<br><br></div>`;
+  await saveFile(name+".eml",new Blob([emlDraft(to,name,html,fname,await blobB64(pdf))],{type:"message/rfc822"}));
+  toast("נוצר מייל עם ה-PDF מצורף. פתחו את הקובץ "+name+".eml – תיפתח טיוטה ב-Outlook")});
 function inFrame(){try{return window.self!==window.top}catch(e){return true}}
 function shareReady(f){
   const o=document.createElement("div");o.className="sheetready";
