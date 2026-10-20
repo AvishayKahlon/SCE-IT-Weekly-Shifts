@@ -140,6 +140,14 @@ table.sh .note .nw{display:flex;align-items:center;gap:2px}
 table.sh .nbtn{flex:none;border:0;background:#1E8E4E;color:#fff;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:700;cursor:pointer;line-height:1.6}
 
 .export table.sh .slot{cursor:default}
+/* exported file (image / PDF / print): larger type for reading on a phone; long text still shrinks to fit */
+.export table.sh td,.export table.sh th{height:46px;font-size:22px}
+.export table.sh .site{font-size:28px;height:52px}
+.export table.sh .lbl{font-size:19px}
+.export table.sh .date{font-size:23px}
+.export table.sh .dname{font-size:25px}
+.export table.sh .off{font-size:23px}
+.export table.sh .note{font-size:15px}
 .export table.sh{border-width:.5px}
 .export table.sh td,.export table.sh th{border-width:.5px}
 .export .note input{display:none}
@@ -564,7 +572,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 18:00";
+const APP_VER="20.10.2026 18:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
