@@ -1,5 +1,8 @@
 <!doctype html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F3F0">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141714">
+<meta name="color-scheme" content="light dark">
 <title>סידור עבודה שבועי</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,18 +23,49 @@
 :root[data-theme="dark"]{
   --bg:#141714; --surface:#1D211D; --ink:#E9ECE7; --muted:#A4ACA4; --line:#323832; --accent:#8DBF5E; --accent-ink:#10140E; --warn:#F28B82; --warn-bg:#3A1F1C; --ok:#81C995; color-scheme:dark}
 *{box-sizing:border-box}
+/* ===== interaction polish & mobile baseline ===== */
+:root{--ease-out:cubic-bezier(.23,1,.32,1)}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+button,a.btn,.tabs button,.chip,.cst,table.sh .slot,select{touch-action:manipulation}
+button,a.btn,.tabs button,.chip,.cst{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+/* press feedback: the UI answers the moment the finger lands */
+button,a.btn{transition:transform 140ms var(--ease-out),background-color 140ms ease,border-color 140ms ease,color 140ms ease}
+button:not(:disabled):active,a.btn:active{transform:scale(.97)}
+.tabs button:active,.tools .tool:active{transform:none}
+.tools .tool:not(:disabled):active .badge{transform:scale(.92)}
+.tools .badge{transition:transform 140ms var(--ease-out)}
+table.sh .slot{transition:background-color 140ms ease}
+table.sh .slot:active{filter:brightness(.94)}
+@media (hover:hover) and (pointer:fine){
+  .bar .act.soft:hover{background:#E1F2E7}
+  .bar .act:not(.primary):not(.soft):hover{background:var(--bg)}
+  .bar .act.primary:hover{filter:brightness(1.06)}
+  .tools .tool:hover{background:var(--bg)}
+  table.sh .slot:hover{outline:2px solid var(--accent);outline-offset:-3px}
+  table.sh .nbtn:hover{background:#166C3B}
+  .pop button:hover{background:var(--bg)}
+  .cst:not(:disabled):hover{filter:brightness(.97)}
+}
+/* popover & toast: enter from their origin instead of popping into existence */
+.pop{transition:opacity 150ms var(--ease-out),transform 150ms var(--ease-out);transform-origin:top right}
+@starting-style{.pop{opacity:0;transform:scale(.97) translateY(-4px)}}
+.toast{transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out)}
+@starting-style{.toast{opacity:0;transform:translate(-50%,8px)}}
+@media (prefers-reduced-motion:reduce){button,a.btn,.pop,.toast,.tools .badge{transition:opacity 150ms ease}button:active,a.btn:active{transform:none}}
+/* inputs at 16px on touch screens so iOS doesn't zoom the page on focus */
+@media (pointer:coarse){input,select,textarea,.psel,.pop .pn input{font-size:16px}}
 [hidden]{display:none!important}
 .nojs{background:#FFF4D6;color:#5A3E00;border-bottom:2px solid #E0B44A;padding:14px 16px;font-size:16px;line-height:1.6}
 /* action bar */
 .bar .act{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:7px 13px;font-weight:600}
 .bar .act .ico{width:18px;height:18px;flex:none}
 .bar .act.soft{color:#1E6B3F;border-color:#A8D5B9;background:#EEF8F1}
-.bar .act.soft:hover{background:#E1F2E7}
-.bar .act:not(.primary):not(.soft):hover{background:var(--bg)}
+
+
 .tools{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.05)}
 .tools .tool{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:0;border-inline-start:1px solid var(--line);padding:6px 12px;font-weight:600;background:none;min-height:40px}
 .tools .tool:first-child{border-inline-start:0}
-.tools .tool:hover{background:var(--bg)}
+
 .tools .badge{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:#fff;flex:none}
 .tools .badge .ico{width:17px;height:17px}
 .t-wa .badge{background:#1E8E4E}.t-pdf .badge{background:#C62828}.t-mail .badge{background:#1565C0}.t-xls .badge{background:#2E7D32}.t-print .badge{background:#546E7A}
@@ -89,13 +123,13 @@ table.sh .ce{background:var(--sh-eve)}
 table.sh .off{background:var(--sh-dark);color:#fff;font-size:18px;font-weight:700}
 table.sh .note{background:var(--sh-note);font-size:12px;font-weight:700;color:#808080}
 table.sh .slot{cursor:pointer}
-table.sh .slot:hover{outline:2px solid var(--accent);outline-offset:-3px}
+
 table.sh .slot.bad{box-shadow:inset 0 0 0 3px #D93025}
 table.sh .slot.empty-need{background:repeating-linear-gradient(135deg,var(--sh-cell),var(--sh-cell) 6px,#F4D6D3 6px,#F4D6D3 12px)}
 table.sh .note input{width:100%;border:0;background:transparent;text-align:center;font:inherit;color:inherit;padding:2px;min-width:0}
 table.sh .note .nw{display:flex;align-items:center;gap:2px}
 table.sh .nbtn{flex:none;border:0;background:#1E8E4E;color:#fff;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:700;cursor:pointer;line-height:1.6}
-table.sh .nbtn:hover{background:#166C3B}
+
 .export table.sh .slot{cursor:default}
 .export table.sh{border-width:.5px}
 .export table.sh td,.export table.sh th{border-width:.5px}
@@ -123,7 +157,7 @@ table.sh .nbtn:hover{background:#166C3B}
 /* popover */
 .pop{position:fixed;z-index:20;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:6px;display:grid;gap:2px;min-width:200px;max-height:70vh;overflow:auto}
 .pop button{border:0;text-align:right;display:flex;justify-content:space-between;gap:10px;padding:7px 10px;border-radius:6px;background:none}
-.pop button:hover{background:var(--bg)}
+
 .pop .tag{font-size:12px;color:var(--muted)}
 .pop .tag.no{color:var(--warn)}
 
@@ -227,7 +261,7 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   table.grid th .sd{display:inline;font-size:15px}
   input[type=text],input[type=number],input[type=date],select{font-size:16px}
   ol.rot li{display:grid;gap:4px}
-  .pop{left:8px!important;right:8px;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:60vh}
+  .pop{left:8px!important;right:8px;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:60dvh;transform-origin:bottom center;overscroll-behavior:contain}
   .pop button{padding:12px 12px;font-size:16px}
   table.rotT select{min-width:0;max-width:110px}
 }
@@ -240,6 +274,10 @@ table.sh .an2{display:block;line-height:1.05}
 .pop .pn{display:grid;gap:3px;font-size:12px;color:var(--muted)}
 .pop .pn input{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 .pop .tag.bk{background:#EEF2F7;color:#455A64;border-radius:4px;padding:0 5px;font-size:11px}
+/* dev-only data toggle */
+.devbar{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:2px;padding:3px;background:#E5E5E5;border-radius:999px;z-index:50;font:500 12px system-ui,sans-serif;direction:ltr;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.devbar a{padding:5px 10px;border-radius:999px;color:#444;text-decoration:none;white-space:nowrap}
+.devbar a[aria-current]{background:#fff;color:#111;box-shadow:0 1px 2px rgba(0,0,0,.12)}
 /* preferred technician row */
 table.sh .pref{background:#FFF8E1;padding:2px 4px}
 .psel{width:100%;min-width:0;font-size:13px;padding:3px 4px;border:1px solid #D9C27A;background:#FFFDF5;color:#1A1A1A;border-radius:6px}
@@ -478,7 +516,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 15:50";
+const APP_VER="20.10.2026 16:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -1235,7 +1273,7 @@ $("#xlsBtn").onclick=async()=>{
 
 /* ---------- persistence ---------- */
 function setStatus(t){$("#status").textContent=t}
-function changed(soft){dirty=true;setStatus("שומר…");clearTimeout(saveTimer);saveTimer=setTimeout(flush,soft?900:300)}
+function changed(soft){if(DEV_DATA){setStatus("מצב בדיקה – לא נשמר");return}dirty=true;setStatus("שומר…");clearTimeout(saveTimer);saveTimer=setTimeout(flush,soft?900:300)}
 async function flush(){
   if(!dirty)return;
   if(saving){clearTimeout(saveTimer);saveTimer=setTimeout(flush,400);return}
@@ -1246,7 +1284,30 @@ async function flush(){
 }
 function load(raw){try{const o=JSON.parse(raw);S=Object.assign(defaultState(),o);S.shiftLbl=Object.assign(defaultState().shiftLbl,o.shiftLbl||{});const v=S.friVer;ensureData();if(v!==S.friVer)setTimeout(()=>changed(),0)}catch(e){}}
 
+/* ---------- dev-only stress-test data (?data=worst|empty|one|many). Never saved. ---------- */
+const DEV_DATA=(()=>{try{const v=new URLSearchParams(location.search).get("data");return ["worst","empty","one","many"].includes(v)?v:null}catch(e){return null}})();
+function devFixture(kind){
+  const base=JSON.parse(JSON.stringify(window.PRESET));base.bkVer=1;const wk=cur;
+  if(kind==="empty"){base.employees=[];base.weeks={};return base}
+  if(kind==="one"){base.employees=[{id:"al",name:"אלכסיי",active:true}];base.weeks={};return base}
+  if(kind==="many"){base.employees=["אלכסיי","מרדכי","שלמה","אור","יהודה","דניאל","נועה","תמר","איתי","רוני","מיכל","עומר","שירה","גל"].map((n,i)=>({id:"e"+i,name:n,active:true}));base.weeks={};return base}
+  /* worst: realistic long / short / mixed values, spread across rows */
+  base.title="צוות טכנאי מחשוב ומערכות מידע – קמפוסים באר שבע ואשדוד";
+  base.sites[0].name="בני ברית – בניין 8 (ספרייה ומעבדות מחשבים)";
+  base.employees=[{id:"al",name:"אלכסנדרה וישנייבסקה-קובלצ'יק",active:true},{id:"mo",name:"יו",active:true},{id:"sh",name:"שלמה",active:true},
+    {id:"or",name:"מרדכי בן-שושן אלמוג",active:true},{id:"ye",name:"יהודה",active:true},{id:"av",name:"אבישי כהלון",active:true,backup:true},{id:"xx",name:"עובד שעזב",active:false}];
+  const zb=base.sites[1].id,bb=base.sites[0].id;
+  base.weeks={[wk]:{cons:{al:["E","E","A","X","A","A"],mo:["M","A","A","A","E","B"]},assign:{},final:false,
+    notes:{[bb]:["מבחן מבוא למדעי המחשב | אולמות 110, 112, 204 | 08:30-12:00 | השגחה מוגברת","","יום פתוח 🎓","","",""],[zb]:["","כנס","","","","הרצאת אורח – ד״ר אלכסנדר גרינברג-רוזנטל, אולם 101"]},
+    anote:{[bb+"|m|1|mo"]:"מגיע ב-10:00 בגלל תור לרופא",[zb+"|e|2|al"]:"11:00-19:00"},pref:{[zb]:[null,null,null,{e:"or",sh:"m"},null,null]}}};
+  base.vac=[{id:"v1",emp:"or",from:key(dayDate(3)),to:key(dayDate(4)),purpose:"מילואים – צו 8 ללא הגבלת זמן, ייתכן שיוארך",campus:"שניהם"}];
+  base.mailTo="bartholomew.fitzgerald@northwind-industries-holdings.example.com, it@sce.ac.il";
+  return base}
+function devToggle(){const b=document.createElement("nav");b.className="devbar";b.setAttribute("aria-label","נתוני בדיקה");
+  const opts=[["","Demo data"],["worst","Worst case"],["empty","Empty"],["one","One"],["many","Many"]];
+  b.innerHTML=opts.map(([v,l])=>`<a href="?${v?"data="+v:""}" ${v===(DEV_DATA||"")?'aria-current="page"':""}>${l}</a>`).join("");document.body.appendChild(b)}
 (async()=>{
+  if(DEV_DATA){load(JSON.stringify(devFixture(DEV_DATA)));if(DEV_DATA==="worst"||DEV_DATA==="many"){const g=generate;try{g()}catch(e){}}render();setStatus("מצב בדיקה – לא נשמר");devToggle();return}
   try{const t=localStorage.getItem("shift-tab");if(t)document.querySelector(`.tabs button[data-tab="${t}"]`)?.click()}catch(e){}
   render();
   function goLocal(){
