@@ -337,6 +337,21 @@ table.sh .an2{display:block;line-height:1.05}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .brand-mark{filter:brightness(2.4)}}
 :root[data-theme="dark"] .brand-mark{filter:brightness(2.4)}
 @media (max-width:700px){.brand-mark{height:18px}.brand-sep{height:20px}}
+/* settings categories: segmented control */
+.subtabs{display:inline-flex;gap:2px;padding:3px;background:var(--line);border-radius:10px;justify-self:start;max-width:100%}
+.subtabs button{border:0;background:none;border-radius:8px;padding:7px 16px;font-weight:700;color:var(--muted);min-height:36px}
+.subtabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.subtabs button:active{transform:none}
+@media (max-width:700px){.subtabs{display:grid;grid-template-columns:repeat(3,1fr);justify-self:stretch}.subtabs button{padding:8px 4px}}
+/* employees list */
+#staffRows .row{padding:8px 0;border-bottom:1px solid var(--line)}
+#staffRows .row:last-child{border-bottom:0}
+#staffRows .row label{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+@media (max-width:700px){
+  #staffRows .row{display:grid;grid-template-columns:auto auto 1fr;gap:8px 14px;align-items:center}
+  #staffRows .row input[type=text]{grid-column:1/-1;width:100%}
+  #staffRows .row button{justify-self:end}
+}
 /* "new version" bar */
 .upd{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:70;background:#2E7D32;color:#fff;border:0;border-radius:999px;padding:10px 16px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.2);max-width:calc(100% - 24px)}
 @starting-style{.upd{opacity:0;transform:translate(-50%,-8px)}}
@@ -415,8 +430,6 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="sched" aria-selected="true">סידור ואילוצים</button>
     <button role="tab" data-tab="cal" aria-selected="false">חופשות וחגים</button>
-    <button role="tab" data-tab="msg" aria-selected="false">הודעות</button>
-    <button role="tab" data-tab="staff" aria-selected="false">עובדים</button>
     <button role="tab" data-tab="set" aria-selected="false">הגדרות</button>
   </nav>
 
@@ -480,96 +493,103 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
     </div>
   </section>
 
-  <section class="panel" id="tab-msg" hidden>
-    <div class="card">
-      <h2>שליחה במייל</h2>
-      <div class="row">
-        <input type="text" id="mailTo" style="flex:1;min-width:240px" placeholder="name@sce.ac.il, name2@sce.ac.il" aria-label="נמענים" dir="ltr">
-      </div>
-      <p class="hint" style="margin-top:8px">כפתור "מייל" מכין מייל עם קובץ PDF של הסידור מצורף, והנושא הוא שם הקובץ (למשל "סידור עבודה 18-23.10.2026"). במחשב יורד קובץ .eml – פתיחה שלו פותחת טיוטה חדשה ב-Outlook עם הנמענים האלה והקובץ מצורף. בטלפון נפתח תפריט השיתוף.</p>
-    </div>
-    <div class="card">
-      <h2>קבוצת הוואטסאפ של הצוות</h2>
-      <div class="row">
-        <input type="text" id="groupLink" style="flex:1;min-width:240px" placeholder="https://chat.whatsapp.com/..." aria-label="קישור הזמנה לקבוצה" dir="ltr">
-      </div>
-      <p class="hint" style="margin-top:8px">מדביקים כאן פעם אחת את קישור ההזמנה לקבוצה: בוואטסאפ נכנסים לפרטי הקבוצה, ובוחרים "הזמנה באמצעות קישור", ואז "העתקת קישור". אחרי זה הכפתור "העתק ופתח את הקבוצה" מעתיק את ההודעה ופותח ישר את הקבוצה, ונשאר רק להדביק ולשלוח.</p>
-    </div>
-    <div class="card">
-      <h2>בקשת אילוצים לשבוע הבא</h2>
-      <div class="row" style="margin-bottom:10px">
-        <label>להגיש עד <input type="text" id="consDeadline" style="width:200px" placeholder="יום חמישי ב-09:00"></label>
-      </div>
-      <textarea id="consMsg" rows="5" aria-label="נוסח בקשת האילוצים"></textarea>
-      <div class="row" style="margin-top:10px">
-        <a class="btn primary-link grp" data-grp="consMsg" target="_blank" rel="noopener" hidden>העתק ופתח את הקבוצה</a>
-        <a class="btn" id="consWa" target="_blank" rel="noopener">פתח בוואטסאפ (בחירת צ'אט)</a>
-        <button data-copy="consMsg">העתק</button>
-        <span class="hint" data-copied="consMsg"></span>
-      </div>
-    </div>
-    <div class="card">
-      <h2>תזכורת לאירועים</h2>
-      <div class="row" style="margin-bottom:10px">
-        <label>ליום <span class="df"><input type="text" class="dtx" id="evDate" data-iso="" value="" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="תאריך התזכורת (dd/mm/yyyy)"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" tabindex="-1" aria-hidden="true"></span></label>
-        <span class="hint" id="evHint"></span>
-      </div>
-      <textarea id="evMsg" rows="7" aria-label="נוסח התזכורת"></textarea>
-      <div class="row" style="margin-top:10px">
-        <a class="btn primary-link grp" data-grp="evMsg" target="_blank" rel="noopener" hidden>העתק ופתח את הקבוצה</a>
-        <a class="btn" id="evWa" target="_blank" rel="noopener">פתח בוואטסאפ (בחירת צ'אט)</a>
-        <button data-copy="evMsg">העתק</button>
-        <span class="hint" data-copied="evMsg"></span>
-      </div>
-    </div>
-    <div class="card">
-      <h2>הסידור של השבוע בטקסט</h2>
-      <textarea id="weekMsg" rows="9" aria-label="הסידור בטקסט"></textarea>
-      <div class="row" style="margin-top:10px">
-        <a class="btn primary-link grp" data-grp="weekMsg" target="_blank" rel="noopener" hidden>העתק ופתח את הקבוצה</a>
-        <a class="btn" id="weekWa" target="_blank" rel="noopener">פתח בוואטסאפ (בחירת צ'אט)</a>
-        <button data-copy="weekMsg">העתק</button>
-        <span class="hint" data-copied="weekMsg"></span>
-      </div>
-    </div>
-    <p class="hint">"פתח בוואטסאפ" פותח את וואטסאפ עם ההודעה כבר כתובה. בוחרים את הקבוצה ושולחים. אפשר לערוך את הנוסח לפני השליחה.</p>
-  </section>
 
-  <section class="panel" id="tab-staff" hidden>
-    <div class="card">
-      <h2>עובדים</h2>
-      <div class="rows" id="staffRows"></div>
-      <div class="row" style="margin-top:12px">
-        <input type="text" id="newEmp" maxlength="40" placeholder="שם עובד/ת חדש/ה" aria-label="שם עובד חדש">
-        <button id="addEmp" class="primary">הוסף</button>
-      </div>
-    </div>
-  </section>
 
   <section class="panel" id="tab-set" hidden>
-    <div class="card">
-      <h2>שעות משמרת</h2>
-      <div class="row">
-        <label>בוקר <input type="text" id="lblM" style="width:150px"></label>
-        <label>ערב <input type="text" id="lblE" style="width:150px"></label>
-        <label>ערב בימי סיום ב-19:00 <input type="text" id="h19Eve" style="width:130px" placeholder="11:00-19:00"></label>
-        <label>כותרת עליונה <input type="text" id="sheetTitle" style="width:220px" placeholder="למשל שם המקום"></label>
+    <nav class="subtabs" role="tablist" aria-label="קטגוריות הגדרות">
+      <button role="tab" data-sub="gen" aria-selected="true">כללי</button>
+      <button role="tab" data-sub="staff" aria-selected="false">עובדים</button>
+      <button role="tab" data-sub="msg" aria-selected="false">הודעות</button>
+    </nav>
+    <div class="panel" id="sub-gen">
+      <div class="card">
+        <h2>שעות משמרת</h2>
+        <div class="row">
+          <label>בוקר <input type="text" id="lblM" style="width:150px"></label>
+          <label>ערב <input type="text" id="lblE" style="width:150px"></label>
+          <label>ערב בימי סיום ב-19:00 <input type="text" id="h19Eve" style="width:130px" placeholder="11:00-19:00"></label>
+          <label>כותרת עליונה <input type="text" id="sheetTitle" style="width:220px" placeholder="למשל שם המקום"></label>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <label>משמרות לכל עובד בראשון–חמישי <input type="number" id="targetN" min="0" max="6"></label>
+          <span class="hint">שישי נוסף על המספר הזה. 0 = בלי הגבלה.</span>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div style="display:grid;gap:6px"><b style="font-size:14px">מינימום משמרות לכל עובד בראשון–חמישי</b><div id="coverSet" class="scroll"></div>
+          <span class="hint">בוקר נחשב כלל חזק, ערב כשאיפה. כשאי אפשר לעמוד בכלל, הסידור יציין מי לא קיבל ולמה.</span></div>
+        </div>
       </div>
-      <div class="row" style="margin-top:10px">
-        <label>משמרות לכל עובד בראשון–חמישי <input type="number" id="targetN" min="0" max="6"></label>
-        <span class="hint">שישי נוסף על המספר הזה. 0 = בלי הגבלה.</span>
-      </div>
-      <div class="row" style="margin-top:10px">
-        <div style="display:grid;gap:6px"><b style="font-size:14px">מינימום משמרות לכל עובד בראשון–חמישי</b><div id="coverSet" class="scroll"></div>
-        <span class="hint">בוקר נחשב כלל חזק, ערב כשאיפה. כשאי אפשר לעמוד בכלל, הסידור יציין מי לא קיבל ולמה.</span></div>
+      <div id="sitesSet" class="rows"></div>
+      <div class="row"><input type="text" id="newSite" maxlength="60" placeholder="שם אתר חדש" aria-label="שם אתר חדש"><button id="addSite">הוסף אתר</button></div>
+      <div class="card">
+        <h2>גיבוי</h2>
+        <p class="hint" style="margin-bottom:10px">כשהכלי פתוח כקובץ במחשב, הנתונים נשמרים רק בדפדפן הזה. מומלץ להוריד גיבוי מדי פעם.</p>
+        <div class="row"><button id="backupBtn">הורד גיבוי</button><button id="restoreBtn">שחזר מגיבוי</button><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
       </div>
     </div>
-    <div id="sitesSet" class="rows"></div>
-    <div class="row"><input type="text" id="newSite" maxlength="60" placeholder="שם אתר חדש" aria-label="שם אתר חדש"><button id="addSite">הוסף אתר</button></div>
-    <div class="card">
-      <h2>גיבוי</h2>
-      <p class="hint" style="margin-bottom:10px">כשהכלי פתוח כקובץ במחשב, הנתונים נשמרים רק בדפדפן הזה. מומלץ להוריד גיבוי מדי פעם.</p>
-      <div class="row"><button id="backupBtn">הורד גיבוי</button><button id="restoreBtn">שחזר מגיבוי</button><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
+    <div class="panel" id="sub-staff" hidden>
+      <div class="card">
+        <h2>עובדים</h2>
+        <div class="rows" id="staffRows"></div>
+        <div class="row" style="margin-top:12px">
+          <input type="text" id="newEmp" maxlength="40" placeholder="שם עובד/ת חדש/ה" aria-label="שם עובד חדש">
+          <button id="addEmp" class="primary">הוסף</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel" id="sub-msg" hidden>
+      <div class="card">
+        <h2>שליחה במייל</h2>
+        <div class="row">
+          <input type="text" id="mailTo" style="flex:1;min-width:240px" placeholder="name@sce.ac.il, name2@sce.ac.il" aria-label="נמענים" dir="ltr">
+        </div>
+        <p class="hint" style="margin-top:8px">כפתור "מייל" מכין מייל עם קובץ PDF של הסידור מצורף, והנושא הוא שם הקובץ (למשל "סידור עבודה 18-23.10.2026"). במחשב יורד קובץ .eml – פתיחה שלו פותחת טיוטה חדשה ב-Outlook עם הנמענים האלה והקובץ מצורף. בטלפון נפתח תפריט השיתוף.</p>
+      </div>
+      <div class="card">
+        <h2>קבוצת הוואטסאפ של הצוות</h2>
+        <div class="row">
+          <input type="text" id="groupLink" style="flex:1;min-width:240px" placeholder="https://chat.whatsapp.com/..." aria-label="קישור הזמנה לקבוצה" dir="ltr">
+        </div>
+        <p class="hint" style="margin-top:8px">מדביקים כאן פעם אחת את קישור ההזמנה לקבוצה: בוואטסאפ נכנסים לפרטי הקבוצה, ובוחרים "הזמנה באמצעות קישור", ואז "העתקת קישור". אחרי זה הכפתור "העתק ופתח את הקבוצה" מעתיק את ההודעה ופותח ישר את הקבוצה, ונשאר רק להדביק ולשלוח.</p>
+      </div>
+      <div class="card">
+        <h2>בקשת אילוצים לשבוע הבא</h2>
+        <div class="row" style="margin-bottom:10px">
+          <label>להגיש עד <input type="text" id="consDeadline" style="width:200px" placeholder="יום חמישי ב-09:00"></label>
+        </div>
+        <textarea id="consMsg" rows="5" aria-label="נוסח בקשת האילוצים"></textarea>
+        <div class="row" style="margin-top:10px">
+          <a class="btn primary-link grp" data-grp="consMsg" target="_blank" rel="noopener" hidden>העתק ופתח את הקבוצה</a>
+          <a class="btn" id="consWa" target="_blank" rel="noopener">פתח בוואטסאפ (בחירת צ'אט)</a>
+          <button data-copy="consMsg">העתק</button>
+          <span class="hint" data-copied="consMsg"></span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>תזכורת לאירועים</h2>
+        <div class="row" style="margin-bottom:10px">
+          <label>ליום <span class="df"><input type="text" class="dtx" id="evDate" data-iso="" value="" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="תאריך התזכורת (dd/mm/yyyy)"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" tabindex="-1" aria-hidden="true"></span></label>
+          <span class="hint" id="evHint"></span>
+        </div>
+        <textarea id="evMsg" rows="7" aria-label="נוסח התזכורת"></textarea>
+        <div class="row" style="margin-top:10px">
+          <a class="btn primary-link grp" data-grp="evMsg" target="_blank" rel="noopener" hidden>העתק ופתח את הקבוצה</a>
+          <a class="btn" id="evWa" target="_blank" rel="noopener">פתח בוואטסאפ (בחירת צ'אט)</a>
+          <button data-copy="evMsg">העתק</button>
+          <span class="hint" data-copied="evMsg"></span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>הסידור של השבוע בטקסט</h2>
+        <textarea id="weekMsg" rows="9" aria-label="הסידור בטקסט"></textarea>
+        <div class="row" style="margin-top:10px">
+          <a class="btn primary-link grp" data-grp="weekMsg" target="_blank" rel="noopener" hidden>העתק ופתח את הקבוצה</a>
+          <a class="btn" id="weekWa" target="_blank" rel="noopener">פתח בוואטסאפ (בחירת צ'אט)</a>
+          <button data-copy="weekMsg">העתק</button>
+          <span class="hint" data-copied="weekMsg"></span>
+        </div>
+      </div>
+      <p class="hint">"פתח בוואטסאפ" פותח את וואטסאפ עם ההודעה כבר כתובה. בוחרים את הקבוצה ושולחים. אפשר לערוך את הנוסח לפני השליחה.</p>
     </div>
   </section>
 </div>
@@ -585,7 +605,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="20.10.2026 18:40";
+const APP_VER="21.10.2026 07:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -1106,10 +1126,14 @@ function renderSettings(){
     </table></div></div>`).join("");
 }
 
+/* ---------- settings categories ---------- */
+function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.sub===k));
+  ["gen","staff","msg"].forEach(t=>{$("#sub-"+t).hidden=t!==k});try{localStorage.setItem("shift-sub",k)}catch(e){}}
+document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>openSub(b.dataset.sub)));
 /* ---------- interactions ---------- */
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
-  ["sched","cal","msg","staff","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
+  ["sched","cal","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
   try{localStorage.setItem("shift-tab",b.dataset.tab)}catch(e){}
   fitCells($("#sheet"));
 }));
@@ -1418,7 +1442,9 @@ function devToggle(){const b=document.createElement("nav");b.className="devbar";
 (async()=>{
   setTimeout(checkUpdate,1500);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate()});
   if(DEV_DATA){load(JSON.stringify(devFixture(DEV_DATA)));if(DEV_DATA==="worst"||DEV_DATA==="many"){const g=generate;try{g()}catch(e){}}render();setStatus("מצב בדיקה – לא נשמר");devToggle();return}
-  try{const t=localStorage.getItem("shift-tab");if(t)document.querySelector(`.tabs button[data-tab="${t}"]`)?.click()}catch(e){}
+  try{let t=localStorage.getItem("shift-tab"),u=localStorage.getItem("shift-sub");
+    if(t==="msg"||t==="staff"){u=t;t="set"}      /* old tabs now live inside settings */
+    if(t)document.querySelector(`.tabs button[data-tab="${t}"]`)?.click();if(u)openSub(u)}catch(e){}
   render();
   function goLocal(){
     ref=null;
