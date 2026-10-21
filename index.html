@@ -1207,6 +1207,25 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
   @starting-style{.bar.share-open .tools{transform:translateY(24px);opacity:0}}
 }
 @media (prefers-reduced-motion:reduce){.bar.share-open .tools{transition:opacity 150ms ease}}
+
+/* schedule status: one glass pill when all is well */
+.msgok{border-radius:22px;background:var(--glass-bg,var(--surface));-webkit-backdrop-filter:blur(14px) saturate(180%);backdrop-filter:blur(14px) saturate(180%);
+  box-shadow:var(--glass-shadow,0 4px 14px rgba(0,0,0,.08)),inset 0 1px 0 var(--glass-edge,#fff),inset 0 0 0 .5px var(--glass-edge,#fff);overflow:hidden}
+.msgok>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:15px}
+.msgok>summary::-webkit-details-marker{display:none}
+.msgok .mk{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--ok,#2E7D32);color:#fff;font-size:13px;font-weight:900;flex:none}
+.msgok b{color:var(--ok,#2E7D32)}
+.msgok .mn{margin-inline-start:auto;font-size:12.5px;color:var(--muted);background:var(--g-field,var(--line));border-radius:999px;padding:2px 10px;display:inline-flex;gap:6px;align-items:center}
+.msgok .mn::after{content:"";width:7px;height:7px;border:solid var(--muted);border-width:0 1.6px 1.6px 0;transform:translateY(-2px) rotate(45deg);transition:transform 300ms var(--spring,ease)}
+.msgok[open] .mn::after{transform:translateY(1px) rotate(-135deg)}
+.msgok .msgd{display:grid;gap:6px;padding:0 14px 12px;animation:msgin 380ms var(--spring,ease)}
+@keyframes msgin{from{opacity:0;transform:translateY(-6px)}}
+.msgprob{display:grid;gap:6px;padding:12px;border-radius:22px;background:color-mix(in srgb,var(--warn-bg) 70%,transparent);
+  box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--warn) 35%,transparent)}
+.msgprob .msgh{font-weight:800;color:var(--warn);font-size:15px;padding:0 2px}
+.msgprob .msg{background:transparent;padding:0 2px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .msgok b{color:#8FD99A}:root:not([data-theme="light"]) .msgprob{background:rgba(230,90,80,.10)}}
+:root[data-theme="dark"] .msgok b{color:#8FD99A}:root[data-theme="dark"] .msgprob{background:rgba(230,90,80,.10)}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1259,13 +1278,13 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
     <div class="st-scrim" id="stScrim" hidden></div>
     <div class="stpop" id="stPop" role="dialog" aria-modal="true" aria-labelledby="stPopT" hidden></div>
     <div class="duo" id="duo">
-    <details class="card cons" id="agendaBox" open hidden>
+    <details class="card cons" id="agendaBox" hidden>
       <summary><h2 id="agendaTitle">הערות ואירועים</h2></summary>
       <p class="hint" style="margin:10px 0">מבחנים, אירועים, חגים והערות לפי יום וקמפוס. ⭐ בוחרים כאן טכנאי מועדף לפני "צור סידור אוטומטי".</p>
       <div id="agenda"></div>
     </details>
     </div>
-    <details class="card cons" id="consBox" open>
+    <details class="card cons" id="consBox">
       <summary><h2>אילוצים לשבוע</h2><span class="xcnt" id="gotN"></span><span class="hint">לחיצה על משבצת מחליפה מצב: זמין ← בוקר ← ערב ← חופש. בשישי: גיבוי לאירוע</span></summary>
       <div class="legend" style="margin:10px 0">
         <span><i style="background:#E3F0FF"></i>בוקר</span>
@@ -1450,7 +1469,7 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 01:20";
+const APP_VER="22.10.2026 01:35";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1991,6 +2010,7 @@ document.querySelectorAll("#viewSeg button").forEach(b=>b.addEventListener("clic
   const upd=()=>{document.body.classList.toggle("tableview",tbl);fitCells($("#sheet"))};
   document.documentElement.dataset.vdir=tbl?"fwd":"back";
   if(document.startViewTransition&&!matchMedia("(prefers-reduced-motion:reduce)").matches){try{document.startViewTransition(upd);return}catch(e){}}upd()}));
+let MSG_OPEN=false;
 function render(){
   ensureData();calcNeed();
   const w=W();
@@ -2007,7 +2027,15 @@ function render(){
   $("#gotN").textContent=emps0.length?`התקבלו ${emps0.length-miss.length}/${emps0.length}`:"";$("#gotN").classList.toggle("all",emps0.length>0&&!miss.length);
   const gotInfo=!w.final&&emps0.length&&miss.length&&miss.length<emps0.length?`<div class="msg info">📥 חסרים אילוצים מ: ${miss.map(e=>esc(e.name)).join(", ")}</div>`:"";
   const shortInfo=gotInfo;
-  $("#msgs").innerHTML=shortInfo+(!hasAssign(w)?`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`:pr.list.length?(pr.list.every(m=>m.startsWith("ℹ️"))?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"")+pr.list.slice(0,12).map(m=>`<div class="msg${m.startsWith("ℹ️")?" info":""}">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:""));
+  /* all good → one calm pill, details on tap; any real problem → shown open */
+  {const probs=hasAssign(w)?pr.list.filter(m=>!m.startsWith("ℹ️")):[],infos=hasAssign(w)?pr.list.filter(m=>m.startsWith("ℹ️")):[];
+   const line=(m,c)=>`<div class="msg${c?" "+c:""}">${esc(m)}</div>`;
+   let h="";
+   if(!hasAssign(w))h=shortInfo+`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`;
+   else if(probs.length)h=`<div class="msgprob"><div class="msgh">⚠️ ${probs.length===1?"בעיה אחת בסידור":probs.length+" בעיות בסידור"}</div>`+probs.slice(0,12).map(m=>line(m)).join("")+(probs.length>12?line(`ועוד ${probs.length-12}…`):"")+shortInfo+infos.map(m=>line(m,"info")).join("")+`</div>`;
+   else{const n=infos.length+(shortInfo?1:0);
+     h=`<details class="msgok" ${MSG_OPEN?"open":""}><summary><span class="mk">✓</span><b>הכל משובץ, בלי התנגשויות</b>${n?`<span class="mn">${n} ${n===1?"הערה":"הערות"}</span>`:""}</summary>${n?`<div class="msgd">${shortInfo}${infos.map(m=>line(m,"info")).join("")}</div>`:""}</details>`}
+   $("#msgs").innerHTML=h;const d=$("#msgs .msgok");if(d)d.addEventListener("toggle",()=>{MSG_OPEN=d.open})}
   fitCells($("#sheet"));
   renderSync();renderAgenda(w);
   renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderStaff();renderSettings();renderMsgs();
@@ -2374,8 +2402,11 @@ function toggleSection(d){
   }}
 document.addEventListener("click",e=>{const s=e.target.closest&&e.target.closest("details.cons>summary");if(!s||e.target.closest(".ib"))return;
   e.preventDefault();toggleSection(s.parentElement)});
-{const a=$("#agendaBox");try{if(sessionStorage.getItem("open-agendaBox")==="0")a.open=false}catch(e){}
-  a.addEventListener("toggle",()=>{try{sessionStorage.setItem("open-agendaBox",a.open?"1":"0")}catch(e){}})}
+/* everything starts closed; from Wednesday (when the next schedule is being built) constraints and notes start open.
+   A section you opened or closed stays that way for the rest of the visit. */
+{const wed=new Date().getDay()>=3;
+  ["consBox","agendaBox"].forEach(id=>{const a=$("#"+id),k="open-"+id;let v=null;try{v=sessionStorage.getItem(k)}catch(e){}
+    a.open=v===null?wed:v==="1";a.addEventListener("toggle",()=>{try{sessionStorage.setItem(k,a.open?"1":"0")}catch(e){}})})}
 ["friBox","catBox","exBox","evBox","vacBox","holBox"].forEach(id=>{const b=$("#"+id),k="open-"+id;
   try{if(sessionStorage.getItem(k)==="1")b.open=true}catch(e){}
   b.addEventListener("toggle",()=>{try{sessionStorage.setItem(k,b.open?"1":"0")}catch(e){}})});
