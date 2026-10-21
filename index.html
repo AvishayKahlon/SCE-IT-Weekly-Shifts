@@ -404,6 +404,8 @@ table.cal.xt tr:has(+ tr.xdet) td{border-bottom:0}
 .xdg{display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px;padding:2px 0 8px}
 .xdg label{display:grid;gap:2px;font-size:11px;color:var(--muted)}
 #catBox>summary{margin-bottom:0}
+details.sub{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+details.sub>summary h3{margin:0;font-size:16px}
 .xsec>summary{align-items:center;padding:2px 0;-webkit-tap-highlight-color:transparent}
 .xcnt{font-size:12px;font-weight:700;color:var(--muted);background:var(--line);border-radius:999px;padding:1px 9px}
 .xcnt:empty{display:none}
@@ -604,18 +606,18 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
       <p class="hint" style="margin:10px 0">מבחן מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם המבחן | שעה.</p>
       <div class="scroll"><table class="cal xt" id="exT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
+      <details class="cons xsec sub" id="catBox" open>
+        <summary><h3>מאגר מבחנים קבועים</h3><span class="xcnt" id="ecN"></span></summary>
+        <p class="hint" style="margin:10px 0">ממוין לפי א-ב. בחירת שם מבחן בטבלה למעלה ממלאת אוטומטית תוכנה, מרצה, קמפוס, שעה והערות. מבחן או מרצה חדשים שמוסיפים למעלה נשמרים כאן לפעם הבאה.</p>
+        <div class="scroll"><table class="cal xt" id="ecT"></table></div>
+        <div class="row" style="margin-top:10px"><button data-xadd="examCat">+ הוסף למאגר</button></div>
+      </details>
     </details>
     <details class="card cons xsec" id="evBox" open>
       <summary><h2>אירועים וכנסים</h2><span class="xcnt" id="evN"></span></summary>
       <p class="hint" style="margin:10px 0">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם האירוע | שעה. אירועים שעברו מוצגים באפור.</p>
       <div class="scroll"><table class="cal xt" id="evT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button></div>
-    </details>
-    <details class="card cons xsec" id="catBox" open>
-      <summary><h2>מאגר מבחנים קבועים</h2><span class="xcnt" id="ecN"></span></summary>
-      <p class="hint" style="margin:10px 0">ממוין לפי א-ב. בחירת שם מבחן בטבלה למעלה ממלאת אוטומטית תוכנה, מרצה, קמפוס, שעה והערות. מבחן או מרצה חדשים שמוסיפים למעלה נשמרים כאן לפעם הבאה.</p>
-      <div class="scroll"><table class="cal xt" id="ecT"></table></div>
-      <div class="row" style="margin-top:10px"><button data-xadd="examCat">+ הוסף למאגר</button></div>
     </details>
     <datalist id="dlExam"></datalist><datalist id="dlLect"></datalist><datalist id="dlSoft"></datalist><datalist id="dlEvent"></datalist>
   </section>
@@ -734,7 +736,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 12:35";
+const APP_VER="21.10.2026 12:50";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
