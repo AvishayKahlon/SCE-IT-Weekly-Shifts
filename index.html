@@ -1031,7 +1031,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 
 /* desktop: two compact tiles side by side */
 .duo{display:grid;gap:16px;align-items:start}
-@media (min-width:1000px){
+@media (min-width:1400px){
   .duo{grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
   .duo>.card{padding:12px 14px}
   .duo #agenda{display:grid;gap:8px}
@@ -1041,42 +1041,18 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 }
 
 /* desktop row: constraints | notes | Friday — proportional, compact */
-@media (min-width:1000px){
+@media (min-width:1400px){
   .duo{grid-template-columns:minmax(0,1.75fr) minmax(0,1fr) minmax(0,1fr)}
   .duo:has(#agendaBox[hidden]){grid-template-columns:minmax(0,1.75fr) minmax(0,1fr)}
   .duo>details.card.cons:not([open]){align-self:start}
-  /* constraints, compact */
-  .duo table.grid{min-width:0;table-layout:fixed}
-  .duo table.grid th,.duo table.grid td{padding:3px 2px}
-  .duo table.grid th{font-size:12px}
-  .duo table.grid th .l{display:none}.duo table.grid th .sd{display:inline;font-size:14px}
-  .duo table.grid th:first-child,.duo table.grid td.name{width:104px;font-size:13.5px;white-space:normal;overflow-wrap:anywhere}
-  .duo table.grid td.stt,.duo table.grid th:nth-child(2){width:30px;font-size:14px;padding-inline:0}
-  .duo table.grid th:nth-child(2){font-size:0}
-  .duo table.grid .cst .lf{display:none}.duo table.grid .cst .ls{display:inline}
-  .duo .cst{min-height:30px;font-size:12.5px;border-radius:9px;padding:2px}
-  .duo .got{width:18px;height:18px;min-width:18px;font-size:11px;margin-inline-end:4px}
-  .duo .legend{font-size:11.5px;gap:4px 8px;margin:8px 0!important}.duo .legend i{width:11px;height:11px}
-  /* Friday rotation, compact */
-  .duo #friSet{overflow-x:visible}
-  .duo table.rotT{min-width:0;width:100%;table-layout:fixed}
-  .duo table.rotT th,.duo table.rotT td{padding:4px 3px}
-  .duo #friSet table.rotT .rc{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-  .duo #friSet table.rotT .rc select{grid-column:1/-1;width:100%;min-width:0;padding:5px 6px;font-size:13.5px}
-  .duo #friSet table.rotT .rc button{height:26px;padding:0;font-size:11px}
-  .duo table.rotT td>button[data-radd]{padding:4px 8px;font-size:12.5px}
-  .duo table.rotT tr.cur td,.duo table.rotT tr.nxt td{font-size:13px}
-  /* notes & events */
-  .duo .ag-site{grid-template-columns:1fr;gap:4px}
-  .duo .ag-n{font-size:12.5px}
 }
 
 /* desktop row, tidier: equal-height tiles, same title style, long content scrolls inside its tile */
-@media (min-width:1000px){
+@media (min-width:1400px){
   .duo{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:14px}
   .duo:has(#agendaBox[hidden]){grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
   .duo>.card,.duo>details.card.cons,.duo>details.card.cons:not([open]){border-radius:24px;padding:14px 16px;align-self:stretch;min-width:0}
-  .duo>.card h2,.duo>details.cons>summary h2{font-size:18px;margin:0}
+  .duo>.card h2,.duo>details.cons>summary h2{font-size:20px;margin:0}
   .duo>details.cons>summary,.duo>#agendaBox>h2{min-height:30px;display:flex;align-items:center;gap:8px;margin-bottom:10px}
   .duo>details.cons:not([open])>summary{margin-bottom:0}
   .duo>details.cons>.dbody{max-height:520px;overflow:auto;overscroll-behavior:contain}
@@ -1085,6 +1061,17 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
   .duo .ag-day{border-radius:14px}
   .duo #friSet{display:grid;justify-items:stretch}
   .duo table.rotT{margin:0}
+}
+
+/* desktop row at normal text size: the constraint grid only drops its fixed minimum width; Friday keeps its usual layout */
+@media (min-width:1400px){
+  .duo table.grid{min-width:0;table-layout:fixed}
+  .duo table.grid th:first-child,.duo table.grid td.name{width:120px;white-space:normal;overflow-wrap:anywhere}
+  .duo table.grid td.stt,.duo table.grid th:nth-child(2){width:46px}
+  .duo #friSet table.rotT{width:100%;min-width:0}
+  .duo .ag-site{grid-template-columns:1fr;gap:6px}
+  .duo .ag-l{display:flex;flex-wrap:wrap;gap:6px}
+  .duo .ag-p{width:100%}
 }
 </style></head><body>
 
@@ -1324,7 +1311,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 00:25";
+const APP_VER="22.10.2026 00:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2152,7 +2139,7 @@ document.querySelectorAll(".card, details.sub").forEach(c=>{
   b.addEventListener("click",ev=>{ev.preventDefault();ev.stopPropagation();const on=c.classList.toggle("tipon");b.setAttribute("aria-expanded",on);if(on&&c.tagName==="DETAILS")c.open=true});
   h.appendChild(b)});
 /* computer: constraints | notes & events | Friday on-call in one row; phone: the usual stacked order */
-{const mq=matchMedia("(min-width:1000px)"),place=()=>{const c=$("#consBox"),f=$("#friBox"),d=$("#duo");
+{const mq=matchMedia("(min-width:1400px)"),place=()=>{const c=$("#consBox"),f=$("#friBox"),d=$("#duo");
     if(mq.matches){d.prepend(c);d.appendChild(f)}else{d.after(c);c.after(f)}};
   place();mq.addEventListener?mq.addEventListener("change",place):mq.addListener(place)}
 /* collapsible sections open and close like a Mac window: open = scale up out of the title bar (macOS "Scale" effect),
