@@ -1350,6 +1350,18 @@ body.dragging .tabs,body.dragging .minibar{opacity:0;pointer-events:none;transit
    viewport, so the dock sat higher than on long pages. Every page is now at least one screen tall, so it is always the same. */
 html,body{min-height:100%}
 @media (max-width:700px){body{min-height:calc(100lvh + env(safe-area-inset-top,0px) + 1px)}}
+
+/* settings categories as a floating glass bar with a sliding lens (matches the dock) */
+.subtabs{position:relative;display:grid!important;grid-template-columns:repeat(3,1fr);justify-self:stretch;width:min(460px,100%);padding:5px!important;gap:0;border-radius:999px!important;
+  background:var(--glass-bg)!important;-webkit-backdrop-filter:blur(22px) saturate(185%)!important;backdrop-filter:blur(22px) saturate(185%)!important;
+  box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-edge),inset 0 -1px 0 var(--glass-rim),inset 0 0 0 .5px var(--glass-edge)!important;touch-action:pan-y;--si:0}
+.subtabs::before{content:"";position:absolute;top:5px;bottom:5px;right:5px;width:calc((100% - 10px)/3);border-radius:999px;background:var(--glass-pill);
+  box-shadow:inset 0 1px 0 var(--glass-edge),inset 0 0 0 .5px var(--glass-edge);transform:translateX(calc(var(--si) * -100%));transition:transform 480ms cubic-bezier(.3,1.35,.45,1);will-change:transform}
+.subtabs.drag::before{transform:translateX(calc(var(--si) * -100%)) scale(1.06,1.12);transition:transform 70ms linear;background:color-mix(in srgb,var(--glass-pill) 70%,var(--glass-edge))}
+.subtabs button{position:relative;background:none!important;box-shadow:none!important;border-radius:999px!important;color:var(--ink);opacity:.7;font-weight:700;padding:9px 6px!important;min-height:40px;transition:opacity 200ms ease,color 200ms ease}
+.subtabs button[aria-selected="true"],.subtabs button.hov{opacity:1;color:var(--accent)}
+.subtabs button.pressed{background:none!important;transform:scale(.94)}
+@media (max-width:700px){.subtabs{touch-action:none}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1592,7 +1604,7 @@ html,body{min-height:100%}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 04:55";
+const APP_VER="22.10.2026 05:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2486,8 +2498,22 @@ window.addEventListener("resize",()=>{if(CMB)cmbPlace()});
 if(window.visualViewport){visualViewport.addEventListener("resize",()=>{if(CMB)cmbPlace()});visualViewport.addEventListener("scroll",()=>{if(CMB)cmbPlace()})}
 /* ---------- settings categories ---------- */
 function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.sub===k));
+  {const bs=[...document.querySelectorAll(".subtabs button")];$(".subtabs").style.setProperty("--si",Math.max(0,bs.findIndex(x=>x.dataset.sub===k)))}
   ["gen","staff","msg"].forEach(t=>{$("#sub-"+t).hidden=t!==k});try{sessionStorage.setItem("shift-sub",k)}catch(e){}}
-document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>{if(b.getAttribute("aria-selected")!=="true")haptic();openSub(b.dataset.sub)}));
+document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>{if(skipSub)return;if(b.getAttribute("aria-selected")!=="true")haptic();openSub(b.dataset.sub)}));
+/* settings categories: same glass bar as the dock — slide a finger along it and the lens follows, the page under it shows */
+let skipSub=false;
+{const bar=$(".subtabs"),btns=[...bar.querySelectorAll("button")],N=btns.length;let st=null;
+  const at=x=>{const r=bar.getBoundingClientRect();return Math.max(0,Math.min(N-1,Math.floor((r.right-x)/(r.width/N))))};
+  bar.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse")return;st={x:e.clientX,i:btns.findIndex(b=>b.getAttribute("aria-selected")==="true"),moved:false,id:e.pointerId}},{passive:true});
+  bar.addEventListener("pointermove",e=>{if(!st||e.pointerId!==st.id)return;if(!st.moved&&Math.abs(e.clientX-st.x)<10)return;
+    if(!st.moved){st.moved=true;bar.classList.add("drag");try{bar.setPointerCapture(e.pointerId)}catch(_){}}
+    const r=bar.getBoundingClientRect(),f=Math.max(0,Math.min(N-1,(r.right-e.clientX)/(r.width/N)-.5));bar.style.setProperty("--si",f.toFixed(3));
+    const i=at(e.clientX);if(i!==st.i){st.i=i;btns.forEach((b,k)=>b.classList.toggle("hov",k===i));
+      ["gen","staff","msg"].forEach(t=>{const p=$("#sub-"+t);if(p)p.hidden=t!==btns[i].dataset.sub});haptic()}});
+  const end=()=>{if(!st)return;const s0=st;st=null;bar.classList.remove("drag");btns.forEach(b=>b.classList.remove("hov"));
+    if(s0.moved){openSub(btns[s0.i].dataset.sub);skipSub=true;setTimeout(()=>skipSub=false,350)}};
+  bar.addEventListener("pointerup",end);bar.addEventListener("pointercancel",end)}
 $("#status").addEventListener("click",()=>{toast($("#status").title);if($("#status").classList.contains("warn")){document.querySelector('.tabs button[data-tab="set"]').click();openSub("gen");$("#syncBox").scrollIntoView({block:"center",behavior:"smooth"})}});
 /* collapsible sections start closed; an opened one stays open only for this visit (incl. auto-update reloads) */
 /* long explanations stay hidden behind a small ⓘ next to the section title */
