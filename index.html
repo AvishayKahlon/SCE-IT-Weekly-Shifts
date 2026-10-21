@@ -5,6 +5,8 @@
 <meta name="color-scheme" content="light dark">
 <!-- home-screen app (iPhone "Add to Home Screen" / Android install) -->
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&display=swap">   <!-- headings only; the app falls back to the system font offline -->
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,7 +24,8 @@
   /* exact values from the Excel theme: Text1 +35% / Accent6 +40% / Accent6 +60% */
   --sh-dark:#595959; --sh-darker:#3F3F3F; --sh-date:#A9D18E; --sh-cell:#A9D18E; --sh-cell2:#A9D18E; --sh-eve:#C5E0B4; --sh-note:#F2F2F2; --sh-ink:#000000; --sh-line:#000000;
   --sh-font:Calibri,Carlito,Arial,sans-serif; --sh-grid:#000000; --sh-frame:#000000;
-  --font:Calibri,Carlito,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Calibri,Carlito,Arial,sans-serif;   /* app UI: San Francisco on Apple, Segoe on Windows (the sheet keeps --sh-font) */
+  --font-display:Rubik,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;                  /* headings and big numbers */
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#141714; --surface:#1D211D; --ink:#E9ECE7; --muted:#A4ACA4; --line:#323832; --accent:#8DBF5E; --accent-ink:#10140E; --warn:#F28B82; --warn-bg:#3A1F1C; --ok:#81C995; color-scheme:dark}}
@@ -1073,6 +1076,97 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
   .duo .ag-l{display:flex;flex-wrap:wrap;gap:6px}
   .duo .ag-p{width:100%}
 }
+
+/* ================= REDESIGN 2026 (phase 1): type, summary tiles, day cards, share sheet =================
+   App chrome only – nothing here matches inside #exportBox / #printBox / .export, so the image, PDF, Excel and print are unchanged. */
+:root{--accent-text:#3E6620;--ok-text:#1F6B25;--ok-bg:rgba(198,239,206,.85);--amber:#A35A00;--amber-ring:#C77700;--amber-bg:rgba(255,183,77,.2);
+  --st-sh:0 1px 1px rgba(20,35,20,.04),0 8px 24px rgba(20,35,20,.08),inset 0 1px 0 var(--g-rim1),inset 0 0 0 .5px var(--g-line);--av-bg:rgba(255,255,255,.62)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--accent-text:#8FD45F;--ok-text:#9BE3A8;--ok-bg:rgba(110,200,120,.16);--amber:#FFB74D;--amber-ring:#E0951F;--amber-bg:rgba(255,183,77,.14);
+  --st-sh:0 8px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.09);--av-bg:rgba(255,255,255,.12)}}
+:root[data-theme="dark"]{--accent-text:#8FD45F;--ok-text:#9BE3A8;--ok-bg:rgba(110,200,120,.16);--amber:#FFB74D;--amber-ring:#E0951F;--amber-bg:rgba(255,183,77,.14);
+  --st-sh:0 8px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.09);--av-bg:rgba(255,255,255,.12)}
+
+/* type: Rubik for headings and big numbers, the system font for everything else */
+h1,h2,h3{font-family:var(--font-display)}
+h1{font-weight:700;letter-spacing:-.2px}
+.card h2,details.cons>summary h2,.nwp h2{font-weight:600}
+details.sub>summary h3{font-weight:600}
+@media (max-width:700px){h1{font-size:28px;letter-spacing:-.1px}}
+
+/* summary tiles above the schedule */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stats[hidden]{display:none}
+.st{display:grid;gap:4px;align-content:start;min-width:0;padding:12px 16px;border-radius:20px;background:var(--g-card);box-shadow:var(--st-sh);
+  -webkit-backdrop-filter:blur(14px) saturate(170%);backdrop-filter:blur(14px) saturate(170%)}
+.st-l{font-size:13px;font-weight:600;color:var(--muted)}
+.st-v{font-family:var(--font-display);font-size:26px;line-height:30px;font-weight:600;font-variant-numeric:tabular-nums}
+.st-v small{font-size:.65em;font-weight:500;color:var(--muted)}
+.st-s{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-bar{display:block;height:5px;border-radius:999px;background:var(--g-line);overflow:hidden}
+.st-bar i{display:block;height:100%;border-radius:inherit;background:var(--accent)}
+.st.warn .st-v{color:var(--warn)}
+.st.amber .st-v{color:var(--amber)}
+@media (min-width:1100px){.stats{grid-template-columns:repeat(3,minmax(0,220px))}}
+@media (max-width:700px){.stats{gap:8px}.st{padding:10px 12px;border-radius:18px;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .st-v{font-size:22px;line-height:26px}.st-l{font-size:12px}.st-s{font-size:11px}}
+
+/* day cards: day name in Rubik, a status pill, shift start times, chips with an initial */
+.dcard .dh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px 8px}
+.dcard .dh .dt{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;min-width:0}
+.dcard .dh .dn{font-family:var(--font-display);font-size:21px;font-weight:600;letter-spacing:0;color:var(--ink)}
+.dcard .dh .dd{font-size:14px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.dcard .dh .hn{margin:0}
+.dcard .dh .dpill{display:inline-flex;align-items:center;gap:4px;flex:none;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.dpill svg{width:13px;height:13px}
+.dcard .dh .dpill.ok{color:var(--ok-text);background:var(--ok-bg)}
+.dcard .dh .dpill.warn{color:var(--warn);background:var(--warn-bg)}
+.dcard .dh .dpill.amber{color:var(--amber);background:var(--amber-bg)}
+.dl{grid-template-columns:56px 1fr}
+.dl .t{display:grid;line-height:1.15;color:var(--ink)}
+.dl .t small{font-size:11px;font-weight:500;color:var(--muted);direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+#days .chip{display:inline-flex;align-items:center;gap:7px;min-width:0;min-height:42px;padding:0 14px}
+#days .chip:has(.av){padding-inline:6px 14px}
+#days .chip .av{width:28px;height:28px;flex:none;border-radius:999px;display:grid;place-items:center;font-size:12px;font-weight:800;background:var(--av-bg)}
+#days .chip .cn{display:grid;text-align:right}
+#days .chip .cw{width:16px;height:16px;flex:none;color:var(--amber)}
+#days .chip .cp{width:16px;height:16px;flex:none}
+#days .chip.bad{box-shadow:inset 0 0 0 2px var(--amber-ring),inset 0 1px 0 rgba(255,255,255,.4)}
+#days .chip.empty-need{gap:6px;font-size:14px;color:var(--warn);background:var(--warn-bg);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--warn) 45%,transparent);
+  border:0;outline:1.5px dashed color-mix(in srgb,var(--warn) 55%,transparent);outline-offset:-1.5px}
+#days .chip:not(.empty-need):not(.off):not(:has(.av)){min-width:42px;padding:0 12px;color:var(--muted);background:transparent;box-shadow:inset 0 0 0 1px var(--g-line)}
+
+/* tab bar + week arrows: darker green for small text (4.5:1 on the glass), and arrows that point the RTL way */
+@media (max-width:700px){
+  .tabs button[aria-selected="true"]{color:var(--accent-text)}
+  .tabs::before{background:color-mix(in srgb,var(--accent) 14%,var(--glass-pill))}
+  .week>#prevW::before{content:"›";color:var(--accent-text)}
+  .week>#nextW::before{content:"‹";color:var(--accent-text)}
+  .minibar .mb-p,.minibar .mb-n{color:var(--accent-text)}
+}
+
+/* one share button on the phone; the five export tools open as a glass sheet */
+.bar .share-btn,.share-scrim{display:none}
+@media (max-width:700px){
+  .bar{grid-template-columns:1fr 1fr 50px}
+  .bar #askConsBtn{grid-column:1/-1}
+  .bar #genBtn{grid-column:1/3;min-height:50px;font-size:16px}
+  .bar .share-btn{display:grid;place-items:center;grid-column:3;width:50px;min-height:50px;padding:0}
+  .bar .share-btn .ico{width:21px;height:21px}
+  .bar #finalBtn{grid-column:1/2}
+  .bar #clearBtn{grid-column:2/4}
+  .bar .tools{display:none}
+  body.sharing .tabs{transform:translateY(calc(100% + 30px));opacity:0;pointer-events:none}   /* the sheet takes the tab bar's place, like the keyboard does */
+  .bar .share-scrim:not([hidden]){display:block;position:fixed;inset:0;z-index:58;background:rgba(20,23,20,.28);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .bar.share-open .tools{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:60;
+    padding:16px 8px 12px;border-radius:30px;background:var(--g-pop);-webkit-backdrop-filter:blur(30px) saturate(200%);backdrop-filter:blur(30px) saturate(200%);
+    box-shadow:0 24px 60px rgba(0,0,0,.25),inset 0 1px 0 var(--g-hi),inset 0 0 0 .5px var(--g-line);transition:transform 380ms var(--spring),opacity 200ms ease}
+  .bar.share-open .tools::after{display:none}
+  .bar.share-open .tools .tool{border:0;min-height:72px;font-size:12.5px}
+  .bar.share-open .tools .badge{width:44px;height:44px;border-radius:13px}
+  .bar.share-open .tools .badge .ico{width:24px;height:24px}
+  @starting-style{.bar.share-open .tools{transform:translateY(24px);opacity:0}}
+}
+@media (prefers-reduced-motion:reduce){.bar.share-open .tools{transition:opacity 150ms ease}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1092,9 +1186,9 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
     <span class="status" id="status">טוען…</span>
   </header>
   <div class="minibar" aria-hidden="true">
-    <button class="mb-p" data-wk="-1" tabindex="-1" aria-label="שבוע קודם">‹</button>
+    <button class="mb-p" data-wk="-1" tabindex="-1" aria-label="שבוע קודם">›</button>
     <button class="mb-t" tabindex="-1"><span>ניהול צוות טכנאים</span><b id="mbTxt"></b></button>
-    <button class="mb-n" data-wk="1" tabindex="-1" aria-label="שבוע הבא">›</button>
+    <button class="mb-n" data-wk="1" tabindex="-1" aria-label="שבוע הבא">‹</button>
   </div>
 
   <nav class="tabs" role="tablist">
@@ -1110,7 +1204,9 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
       <button class="act" id="clearBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5l4.5 4.5-9.5 9.5H6.5L3.5 14.5z"/><path d="M9 21h12"/><path d="M11 8.5l4.5 4.5"/></svg><span class="lb">נקה שיבוצים</span></button>
       <button class="act soft" id="askConsBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01" stroke-width="2.6"/></svg><span class="lb">בקש אילוצים לשבוע הבא</span></button>
       <span class="sp"></span>
-      <div class="tools" role="group" aria-label="שליחה וייצוא של הסידור">
+      <button class="act share-btn" id="shareBtn" aria-label="שיתוף וייצוא" aria-expanded="false" aria-controls="tools"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 5 21h14a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 19 11h-1"/></svg></button>
+      <div class="share-scrim" id="shareScrim" hidden></div>
+      <div class="tools" id="tools" role="group" aria-label="שליחה וייצוא של הסידור">
         <button class="tool t-wa" id="shareImgBtn" title="שליחת הסידור כתמונה לוואטסאפ"><span class="badge"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01" stroke-width="2.6"/></svg></span><span class="lb" lang="en" dir="ltr">WhatsApp</span></button>
         <button class="tool t-pdf" id="pdfBtn" title="הורדת הסידור כקובץ PDF"><span class="badge"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h8l4.5 4.5v14.5H6z"/><path d="M14 2.5V7h4.5"/><text x="12.2" y="17.6" text-anchor="middle" font-size="6.4" font-weight="800" fill="currentColor" stroke="none" font-family="Arial">PDF</text></svg></span><span class="lb" lang="en" dir="ltr">PDF</span></button>
         <button class="tool t-mail" id="mailBtn" title="פתיחת מייל חדש עם הסידור"><span class="badge"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg></span><span class="lb" lang="en" dir="ltr">Mail</span></button>
@@ -1119,6 +1215,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
       </div>
       <button class="act" id="finalBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5"/></svg><span class="lb">סמן כסופי</span></button>
     </div>
+    <div class="stats" id="stats" hidden></div>
     <div class="duo" id="duo">
     <section class="card" id="agendaBox" hidden>
       <h2 id="agendaTitle">הערות ואירועים</h2>
@@ -1720,9 +1817,12 @@ function sheetHTML(w,exportMode){
 function daysHTML(w){
   if(!S.sites.length)return `<div class="empty">אין אתרים עדיין. הוסיפו אתר בלשונית "הגדרות".</div>`;
   const pr=problems(w);
+  /* chip: initial avatar + name; a missing must-fill slot is a dashed "שבצו טכנאי"; a clash gets an amber ring and ⚠ (not colour alone) */
   const chip=(sid,sh,d,i,names,need)=>{const empty=i<need&&!names.length;const cls=["slot","chip",sh==="e"?"ce":i===1?"c2":""];if(empty)cls.push("empty-need");
-    if(names.some((_,j)=>pr.bad.has(`${sid}|${sh}|${d}|${i+j}`)))cls.push("bad");
-    return `<button class="${cls.join(" ")}" data-k="${sid}|${sh}|${d}|${i}">${names.length?cellNames(W(),sid,sh,d,names):(empty?"+ שבצו":"+")}</button>`};
+    const clash=names.some((_,j)=>pr.bad.has(`${sid}|${sh}|${d}|${i+j}`));if(clash)cls.push("bad");
+    const body=names.length?`<span class="av" aria-hidden="true">${esc(initial(empName(names[0])))}</span><span class="cn">${cellNames(W(),sid,sh,d,names)}</span>${clash?ICO_WARN:""}`
+      :`${ICO_PLUS}${empty?"שבצו טכנאי":""}`;
+    return `<button class="${cls.join(" ")}" data-k="${sid}|${sh}|${d}|${i}"${names.length?"":` aria-label="${empty?"שבצו טכנאי":"הוספת טכנאי"}"`}>${body}</button>`};
   return DAYS.map((dn,d)=>{
     const md=dm(d);
     const sites=S.sites.map(s=>{const A=w.assign[s.id],nm=NEED[s.id].m[d],ne=NEED[s.id].e[d];
@@ -1730,12 +1830,36 @@ function daysHTML(w){
       let e="";if(ne||A.e[d].length)e=chip(s.id,"e",d,0,A.e[d],ne);else e=`<span class="chip off">${d===5?"שבת שלום":md.off?"פגרה":md.noEve?"סיום ב-16:00":"—"}</span>`;
       const note=w.notes[s.id][d]||"",auto=dayItems(dayDate(d),s.id);
       return `<div class="dsite"><b>${esc(s.name)}</b>${auto.length?`<div class="dauto">${itemChips(d,s.id)}</div>`:""}
-        <div class="dl"><span class="t">בוקר</span><div class="chips">${m}</div></div>
-        <div class="dl"><span class="t">ערב</span><div class="chips">${e}</div></div>
+        <div class="dl"><span class="t">בוקר<small>${shiftStart("m")}</small></span><div class="chips">${m}</div></div>
+        <div class="dl"><span class="t">ערב<small>${shiftStart("e")}</small></span><div class="chips">${e}</div></div>
         <div class="dnote"><input type="text" data-note="${s.id}|${d}" value="${esc(note)}" placeholder="הערות ואירועים" aria-label="הערה ${dn} ${esc(s.name)}">${note.trim()?waBtn(`data-evmsg="${s.id}|${d}"`,"שליחת ההערה לוואטסאפ"):""}</div><div class="dnote"><span class="t">⭐ מועדף</span>${prefSel(w,s.id,d)}</div></div>`}).join("");
     const hn=md.names.join(" · ");
-    return `<div class="dcard"><div class="dh">${dn}${hn?` <span class="hn">${esc(hn)}</span>`:""}<span>${fmt(dayDate(d)).slice(0,5)}</span></div>${sites}</div>`}).join("");
+    return `<div class="dcard"><div class="dh"><div class="dt"><span class="dn">${dn}</span><span class="dd">${fmt(dayDate(d)).slice(0,5).replace("/",".")}</span>${hn?`<span class="hn">${esc(hn)}</span>`:""}</div>${dayPill(w,pr,d)}</div>${sites}</div>`}).join("");
 }
+/* ---------- redesign helpers (day cards + summary tiles) ---------- */
+const ICO_WARN=`<svg class="cw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="התנגשות"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>`;
+const ICO_PLUS=`<svg class="cp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`;
+const ICO_OK=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5"/></svg>`;
+const ICO_INFO=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16h.01"/></svg>`;
+const initial=n=>{const s=String(n||"").trim();return s?[...s][0]:"?"};
+const shiftStart=sh=>{const m=String(S.shiftLbl[sh]||"").match(/\d{1,2}:\d{2}/);return m?m[0]:""};
+/* how a day / the week stands: slots still missing, and clashes (from problems()) */
+function dayState(w,pr,d){let need=0,have=0,clash=0;
+  S.sites.forEach(s=>["m","e"].forEach(sh=>{const n=NEED[s.id][sh][d],a=w.assign[s.id][sh][d];need+=n;have+=Math.min(a.length,n);
+    a.forEach((_,i)=>{if(pr.bad.has(`${s.id}|${sh}|${d}|${i}`))clash++})}));
+  return{need,have,miss:need-have,clash}}
+function dayPill(w,pr,d){if(!hasAssign(w))return "";const st=dayState(w,pr,d);if(!st.need&&!st.clash)return "";
+  if(st.miss)return `<span class="dpill warn">${ICO_INFO}חסר ${st.miss}</span>`;
+  if(st.clash)return `<span class="dpill amber">${ICO_WARN}התנגשות</span>`;
+  return `<span class="dpill ok">${ICO_OK}מאויש</span>`}
+function statsHTML(w,pr){
+  let need=0,have=0,clash=0;const missDays=[],clashNames=new Set();
+  DAYS.forEach((dn,d)=>{const st=dayState(w,pr,d);need+=st.need;have+=st.have;clash+=st.clash;if(st.miss)missDays.push(dn)});
+  pr.bad.forEach(k=>{const [sid,sh,d,i]=k.split("|"),id=w.assign[sid]?.[sh]?.[+d]?.[+i];if(id)clashNames.add(empName(id))});
+  const pct=need?Math.round(have/need*100):100,miss=need-have,cn=[...clashNames];
+  return `<div class="st"><span class="st-l">כיסוי משמרות</span><span class="st-v">${have}<small>/${need}</small></span><span class="st-bar" role="img" aria-label="${pct}% מאויש"><i style="width:${pct}%"></i></span></div>
+    <div class="st${miss?" warn":""}"><span class="st-l">חסרים</span><span class="st-v">${miss}</span><span class="st-s">${miss?esc(missDays.join(", ")):"הכול מאויש"}</span></div>
+    <div class="st${clash?" amber":""}"><span class="st-l">התנגשויות</span><span class="st-v">${clash}</span><span class="st-s">${clash?esc(cn.slice(0,2).join(", ")+(cn.length>2?` +${cn.length-2}`:"")):"אין"}</span></div>`}
 
 /* ---------- font editor for the sent schedule ----------
    Tap a cell type in the full table to see and change its size / bold. Sizes are the ones in the exported image / PDF / print
@@ -1802,6 +1926,7 @@ function render(){
   $("#finalBtn .lb").textContent=w.final?"בטל סימון סופי":"סמן כסופי";$("#finalBtn").classList.toggle("on",!!w.final);
   applyFonts();$("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);if(FONT_SEL)markFontCat();
   const pr=problems(w);
+  $("#stats").innerHTML=hasAssign(w)?statsHTML(w,pr):"";$("#stats").hidden=!hasAssign(w);
   const emps0=activeEmps(),miss=emps0.filter(e=>!(w.got||{})[e.id]);
   $("#gotN").textContent=emps0.length?`התקבלו ${emps0.length-miss.length}/${emps0.length}`:"";$("#gotN").classList.toggle("all",emps0.length>0&&!miss.length);
   const gotInfo=!w.final&&emps0.length&&miss.length&&miss.length<emps0.length?`<div class="msg info">📥 חסרים אילוצים מ: ${miss.map(e=>esc(e.name)).join(", ")}</div>`:"";
@@ -2215,6 +2340,13 @@ $("#wkDate").addEventListener("change",e=>{const v=e.target.value;if(v){cur=key(
     if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){e.preventDefault();weekStep(dx>0?1:-1)}})}
 document.querySelectorAll(".minibar [data-wk]").forEach(b=>b.addEventListener("click",()=>weekStep(+b.dataset.wk)));
 $(".minibar .mb-t").addEventListener("click",()=>scrollTo({top:0,behavior:"smooth"}));
+/* phone: the five export tools live in one share sheet (same buttons, same ids – only where they show changes) */
+(()=>{const bar=$("#tab-sched .bar"),btn=$("#shareBtn"),scr=$("#shareScrim");
+  const set=on=>{bar.classList.toggle("share-open",on);document.body.classList.toggle("sharing",on);btn.setAttribute("aria-expanded",on);scr.hidden=!on};
+  btn.addEventListener("click",()=>set(!bar.classList.contains("share-open")));
+  scr.addEventListener("click",()=>set(false));
+  $("#tools").addEventListener("click",e=>{if(e.target.closest(".tool"))setTimeout(()=>set(false),0)});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&bar.classList.contains("share-open"))set(false)})})();
 /* large title → compact bar once the title has scrolled under the status bar */
 if("IntersectionObserver" in window){new IntersectionObserver(([en])=>document.body.classList.toggle("scrolled",!en.isIntersecting&&en.boundingClientRect.top<0),{threshold:0}).observe($("header .week"))}
 $("#weekPick").addEventListener("change",e=>{const v=e.target.dataset.iso;if(v){cur=key(sundayOf(parseKey(v)));render()}});
