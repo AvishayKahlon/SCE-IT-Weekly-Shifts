@@ -705,7 +705,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 09:45";
+const APP_VER="21.10.2026 09:50";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -735,7 +735,8 @@ function sundayOf(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
 function key(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function parseKey(k){const[a,b,c]=k.split("-").map(Number);return new Date(a,b-1,c)}
 function fmt(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()}
-let cur=(()=>{const t=new Date();const s=sundayOf(t);if(t.getDay()>=4)s.setDate(s.getDate()+7);return key(s)})();
+/* from Wednesday the tool opens on next week's schedule */
+let cur=(()=>{const t=new Date();const s=sundayOf(t);if(t.getDay()>=3)s.setDate(s.getDate()+7);return key(s)})();
 function dayDate(i){const d=parseKey(cur);d.setDate(d.getDate()+i);return d}
 /* dd/mm/yyyy <-> yyyy-mm-dd */
 function dmy(iso){return iso?fmt(parseKey(iso)):""}
