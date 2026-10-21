@@ -286,16 +286,15 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
     -webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);
     box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-edge),inset 0 -1px 0 var(--glass-rim),inset 0 0 0 .5px var(--glass-edge);
     transform:translateY(calc(-100% - 30px)) scale(.92);opacity:0;pointer-events:none;
-    transition:transform 460ms cubic-bezier(.32,1.25,.5,1),opacity 220ms ease,left 300ms var(--ease-out),right 300ms var(--ease-out),padding 300ms var(--ease-out)}
+    transition:transform 440ms cubic-bezier(.32,1.2,.5,1),opacity 220ms ease;will-change:transform}
   .minibar::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
     background:linear-gradient(140deg,var(--g-rim1,#fff) 0%,var(--g-rim2,transparent) 38%,var(--g-rim2,transparent) 62%,var(--g-rim3,#fff) 100%);
     -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
   body.scrolled .minibar{transform:none;opacity:1;pointer-events:auto}
-  .minibar .mb-t span{max-height:14px;overflow:hidden;transition:max-height 260ms var(--ease-out),opacity 200ms ease}
-  .minibar.mini{left:18%;right:18%;padding:2px}
-  .minibar.mini .mb-t span{max-height:0;opacity:0}
-  .minibar.mini button{height:34px}
-  .minibar.mini .mb-t b{font-size:15px}
+  .minibar .mb-t span{transition:opacity 180ms ease}.minibar .mb-t b{transition:transform 380ms cubic-bezier(.32,1.2,.5,1)}
+  body.scrolled .minibar.mini{transform:translateY(-6px) scale(.82)}
+  .minibar.mini .mb-t span{opacity:0}
+  .minibar.mini .mb-t b{transform:translateY(-8px) scale(1.08)}
   .minibar button{background:none!important;border:0;box-shadow:none!important;padding:0;height:40px;display:grid;place-items:center}
   .minibar .mb-p,.minibar .mb-n{font-size:26px;color:var(--accent)}
   .minibar .mb-t{display:grid;gap:0;line-height:1.15}
@@ -309,14 +308,14 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
     padding:5px;border:0;border-radius:999px;background:var(--glass-bg);
     -webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);
     box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-edge),inset 0 -1px 0 var(--glass-rim),inset 0 0 0 .5px var(--glass-edge);
-    transition:transform 420ms cubic-bezier(.32,1.25,.5,1),padding 300ms var(--ease-out),left 300ms var(--ease-out),right 300ms var(--ease-out),opacity 200ms ease;--ti:0}
+    transition:transform 420ms cubic-bezier(.32,1.2,.5,1),opacity 200ms ease;will-change:transform;--ti:0}
   .tabs::before{content:"";position:absolute;top:5px;bottom:5px;right:5px;width:calc((100% - 10px)/4);border-radius:999px;background:var(--glass-pill);
     box-shadow:inset 0 1px 0 var(--glass-edge),inset 0 0 0 .5px var(--glass-edge);transform:translateX(calc(var(--ti) * -100%));
     transition:transform 480ms cubic-bezier(.3,1.35,.45,1)}
   .tabs button{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 2px 6px;font-size:11px;font-weight:700;letter-spacing:.1px;border:0;border-radius:999px;background:none;white-space:nowrap;color:var(--ink);opacity:.72;transition:color 200ms ease,opacity 200ms ease}
   .tabs button[aria-selected="true"]{color:var(--accent);opacity:1;border:0}
   .tabs button .ti{display:block;width:25px;height:25px;transition:transform 380ms cubic-bezier(.3,1.5,.5,1)}.tabs button .tl{display:none}
-  .tabs button .ts{display:block;max-height:16px;overflow:hidden;transition:max-height 260ms var(--ease-out),opacity 200ms ease}
+  .tabs button .ts{display:block;transition:opacity 180ms ease}
   .tabs button[aria-selected="true"] .ti{stroke-width:2.2}
   .tabs button.pressed{background:none;filter:none;transform:none}
   .tabs button.pressed .ti{transform:scale(.84)}
@@ -326,9 +325,8 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   .tabs.drag{transform:scale(1.02)}
   .tabs button.hov{color:var(--accent);opacity:1}
 
-  .tabs.mini{left:22%;right:22%;padding:3px}
-  .tabs.mini::before{top:3px;bottom:3px;right:3px;width:calc((100% - 6px)/4)}
-  .tabs.mini button{padding:6px 2px}.tabs.mini .ts{max-height:0;opacity:0}.tabs.mini .ti{transform:scale(.9)}
+  .tabs.mini{transform:translateY(8px) scale(.8)}
+  .tabs.mini .ts{opacity:0}.tabs.mini .ti{transform:translateY(7px) scale(1.06)}
   body.kb .tabs{transform:translateY(calc(100% + 30px));opacity:0;pointer-events:none}
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabs{background:var(--surface)}}
   .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
@@ -623,8 +621,8 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 ::view-transition-new(tabpage){animation:440ms cubic-bezier(.32,.72,0,1) both vt-in-l}
 html[data-dir="back"]::view-transition-old(tabpage){animation-name:vt-out-l}
 html[data-dir="back"]::view-transition-new(tabpage){animation-name:vt-in-r}
-@keyframes vt-out-r{to{opacity:0;transform:translateX(22%) scale(.94);filter:blur(3px)}}
-@keyframes vt-out-l{to{opacity:0;transform:translateX(-22%) scale(.94);filter:blur(3px)}}
+@keyframes vt-out-r{to{opacity:0;transform:translateX(22%) scale(.95)}}
+@keyframes vt-out-l{to{opacity:0;transform:translateX(-22%) scale(.95)}}
 @keyframes vt-in-l{from{opacity:0;transform:translateX(-28%) scale(.97)}}
 @keyframes vt-in-r{from{opacity:0;transform:translateX(28%) scale(.97)}}
 .panel.peek{animation:peek 260ms cubic-bezier(.32,.72,0,1)}
@@ -761,7 +759,23 @@ details.cons>summary::before{content:"";width:9px;height:9px;flex:none;border:so
 details.cons:not([open])>summary::before{content:"";transform:rotate(135deg)}
 details.cons.sub{border:0;margin-top:14px;background:var(--g-field);border-radius:22px;padding:12px 14px;box-shadow:inset 0 0 0 .5px var(--g-line),inset 0 1px 0 var(--g-rim1,#fff);transition:border-radius 380ms cubic-bezier(.32,.72,0,1)}
 details.cons.sub:not([open]){border-radius:30px}
-.dbody{transform-origin:50% 0}
+.dbody{transform-origin:50% 0;backface-visibility:hidden}
+details.card.cons{transition:none}
+
+@media (max-width:700px){
+  .card{-webkit-backdrop-filter:blur(12px) saturate(170%);backdrop-filter:blur(12px) saturate(170%)}
+  details.card.cons{-webkit-backdrop-filter:blur(14px) saturate(180%);backdrop-filter:blur(14px) saturate(180%)}
+  :is(.week,.bar,header) :is(button,.btn):not(.primary),.tools,.subtabs{-webkit-backdrop-filter:none;backdrop-filter:none}
+}
+/* exams & events on the phone: every item is its own card */
+@media (max-width:700px){
+  table.xt tr:not(.none){border:0!important;border-radius:18px;padding:12px;margin-bottom:14px;
+    background:color-mix(in srgb,var(--surface) 82%,transparent);box-shadow:0 1px 2px rgba(20,35,20,.08),0 6px 18px rgba(20,35,20,.08),inset 0 1px 0 var(--g-rim1,#fff),inset 0 0 0 .5px var(--g-line,var(--line))}
+  #exT tr.has-det:not(.xdet){border-radius:18px 18px 0 0;margin-bottom:0;box-shadow:inset 0 1px 0 var(--g-rim1,#fff),inset 0 0 0 .5px var(--g-line,var(--line))}
+  #exT tr.xdet{border:0!important;border-radius:0 0 18px 18px;margin:0 0 14px!important;padding:0 12px 12px!important;
+    background:color-mix(in srgb,var(--surface) 82%,transparent);box-shadow:0 6px 18px rgba(20,35,20,.08),inset 0 -.5px 0 var(--g-line,var(--line))}
+  table.xt tr.past:not(.none){background:color-mix(in srgb,var(--surface) 45%,transparent)}
+}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -996,7 +1010,7 @@ details.cons.sub:not([open]){border-radius:30px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 21:05";
+const APP_VER="21.10.2026 21:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1775,23 +1789,28 @@ document.querySelectorAll("details.cons").forEach(d=>{if(d.querySelector(":scope
   [...d.childNodes].filter(n=>n.nodeName!=="SUMMARY").forEach(n=>b.appendChild(n));d.appendChild(b)});
 function toggleSection(d){
   const body=d.querySelector(":scope>.dbody");if(!body){d.open=!d.open;return}
-  (d._an||[]).forEach(a=>{try{a.cancel()}catch(e){}});d._an=[];d.style.overflow="";
+  (d._an||[]).forEach(a=>{try{a.finish()}catch(e){}});d._an=[];
   if(matchMedia("(prefers-reduced-motion:reduce)").matches||!d.animate){d.open=!d.open;return}
   haptic();
-  const h0=d.getBoundingClientRect().height;
+  /* everything below the section: remember where it was, then slide it from there (FLIP) — only transforms move,
+     so it stays on the GPU at 120 Hz */
+  const after=[];for(let n=d.nextElementSibling;n;n=n.nextElementSibling)if(n.offsetParent)after.push(n);
+  const footer=document.querySelector("footer,.ver");if(footer&&!after.includes(footer))after.push(footer);
+  const y0=after.map(n=>n.getBoundingClientRect().top);
+  const flip=(dur,ease)=>after.forEach((n,k)=>{const dy=y0[k]-n.getBoundingClientRect().top;if(Math.abs(dy)<1)return;
+    d._an.push(n.animate([{transform:`translateY(${dy}px)`},{transform:"none"}],{duration:dur,easing:ease}))});
   if(!d.open){
-    d.open=true;const h1=d.getBoundingClientRect().height;d.style.overflow="hidden";
-    const a=d.animate([{height:h0+"px"},{height:h1+"px"}],{duration:520,easing:"cubic-bezier(.32,.72,0,1)"});
-    const b=body.animate([{opacity:0,transform:"scale(.9) translateY(-16px)",filter:"blur(8px)"},{opacity:1,transform:"none",filter:"blur(0)"}],{duration:560,easing:"cubic-bezier(.3,1.22,.45,1)"});
-    d._an=[a,b];a.onfinish=()=>{d.style.overflow=""};
+    d.open=true;flip(520,"cubic-bezier(.32,.72,0,1)");
+    d._an.push(body.animate([{opacity:0,transform:"translateY(-18px) scale(.92)"},{opacity:1,transform:"none"}],{duration:520,easing:"cubic-bezier(.32,1.15,.45,1)"}));
   }else{
-    d.open=false;const h1=d.getBoundingClientRect().height;d.open=true;d.style.overflow="hidden";
-    const a=d.animate([{height:h0+"px"},{height:h1+"px"}],{duration:430,easing:"cubic-bezier(.55,0,.25,1)"});
-    const b=body.animate([
-      {clipPath:"polygon(0% 0%,100% 0%,100% 100%,0% 100%)",transform:"none",opacity:1,filter:"blur(0)"},
-      {clipPath:"polygon(0% 0%,100% 0%,80% 60%,20% 60%)",transform:"scaleY(.72)",opacity:.75,filter:"blur(1px)",offset:.45},
-      {clipPath:"polygon(44% 0%,56% 0%,50.5% 0%,49.5% 0%)",transform:"scaleY(.15) translateY(-24px)",opacity:0,filter:"blur(4px)"}],{duration:430,easing:"cubic-bezier(.55,0,.25,1)"});
-    d._an=[a,b];a.onfinish=()=>{d.open=false;d.style.overflow=""};
+    /* genie: the content funnels up into the title, then the section closes */
+    const g=body.animate([{opacity:1,transform:"none"},
+      {opacity:.7,transform:"perspective(700px) rotateX(-18deg) scale(.82,.55) translateY(-14px)",offset:.55},
+      {opacity:0,transform:"perspective(700px) rotateX(-30deg) scale(.4,.08) translateY(-60px)"}],{duration:340,easing:"cubic-bezier(.55,0,.35,1)"});
+    d._an.push(g);
+    g.onfinish=()=>{const y1=after.map(n=>n.getBoundingClientRect().top);d.open=false;
+      after.forEach((n,k)=>{const dy=y1[k]-n.getBoundingClientRect().top;if(Math.abs(dy)<1)return;
+        d._an.push(n.animate([{transform:`translateY(${dy}px)`},{transform:"none"}],{duration:380,easing:"cubic-bezier(.32,.72,0,1)"}))})};
   }}
 document.addEventListener("click",e=>{const s=e.target.closest&&e.target.closest("details.cons>summary");if(!s||e.target.closest(".ib"))return;
   e.preventDefault();toggleSection(s.parentElement)});
