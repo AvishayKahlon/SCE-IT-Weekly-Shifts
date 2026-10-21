@@ -262,10 +262,37 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   .card h2{font-size:19px}
   .wrap{gap:12px;padding-block:12px 40px}
   header{gap:8px}
-  .week{width:100%;display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:6px}
-  .week b{grid-column:1/-1;grid-row:1;text-align:center;font-size:15px}
-  .week .df,.week .dtx{min-width:0;width:100%}
-  .week button{padding:8px 6px;white-space:nowrap;font-size:14px}
+  /* large title, like iOS */
+  h1{font-size:28px;letter-spacing:-.2px}
+  /* week navigator: one glass capsule  ›  25-30.10.2026 ▾  ‹  (tap the dates for a calendar, swipe to change week) */
+  .week{width:100%;display:grid;grid-template-columns:52px 1fr 52px;align-items:center;gap:0;padding:4px;border-radius:999px;background:var(--g-ctl,var(--surface));
+    -webkit-backdrop-filter:blur(16px) saturate(180%);backdrop-filter:blur(16px) saturate(180%);touch-action:pan-y;
+    box-shadow:0 1px 2px rgba(20,35,20,.08),0 6px 18px rgba(20,35,20,.07),inset 0 1px 0 var(--g-rim1,#fff),inset 0 0 0 .5px var(--g-line,var(--line))}
+  .week>b,.week>.df{display:none}
+  .week>#prevW,.week>#nextW{font-size:0;height:44px;padding:0;border-radius:999px;background:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;display:grid;place-items:center}
+  .week>#prevW::before{content:"›";font-size:28px;line-height:1;color:var(--accent);font-weight:400}
+  .week>#nextW::before{content:"‹";font-size:28px;line-height:1;color:var(--accent);font-weight:400}
+  .week>#prevW{grid-column:1}.week>.wkc{grid-column:2}.week>#nextW{grid-column:3}
+  .wkc{position:relative;display:grid;place-items:center;height:44px;border-radius:999px;cursor:pointer}
+  .wkc-t{display:inline-flex;align-items:center;gap:6px;font-size:18px;font-variant-numeric:tabular-nums;transition:transform 300ms cubic-bezier(.3,1.3,.45,1),opacity 200ms ease}
+  .wkc-c{font-size:12px;color:var(--muted)}
+  .wkc input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;-webkit-appearance:none;appearance:none}
+  .wkc.go-n .wkc-t{transform:translateX(-30px);opacity:0;transition:none}
+  .wkc.go-p .wkc-t{transform:translateX(30px);opacity:0;transition:none}
+  /* compact glass bar that takes over once the large title scrolls away */
+  .minibar{position:fixed;top:0;left:0;right:0;z-index:35;display:grid;grid-template-columns:52px 1fr 52px;align-items:center;
+    padding:calc(env(safe-area-inset-top,0px) + 4px) 8px 6px;background:var(--glass-bg);
+    -webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);
+    box-shadow:0 .5px 0 var(--g-line,var(--line)),0 6px 20px rgba(20,35,20,.06);
+    transform:translateY(-105%);opacity:0;transition:transform 340ms cubic-bezier(.32,.72,0,1),opacity 220ms ease;pointer-events:none}
+  body.scrolled .minibar{transform:none;opacity:1;pointer-events:auto}
+  .minibar button{background:none!important;border:0;box-shadow:none!important;padding:0;height:40px;display:grid;place-items:center}
+  .minibar .mb-p,.minibar .mb-n{font-size:26px;color:var(--accent)}
+  .minibar .mb-t{display:grid;gap:0;line-height:1.15}
+  .minibar .mb-t span{font-size:11px;color:var(--muted);font-weight:600}
+  .minibar .mb-t b{font-size:16px;font-variant-numeric:tabular-nums}
+  header h1,header .brand-mark{transition:opacity 200ms ease}
+  body.scrolled header .brand{opacity:.0}
   /* floating liquid-glass tab bar: translucent capsule, blurred content behind, a lens-like pill that glides to the
      selected tab, shrinks while scrolling down, steps aside while typing */
   .tabs{position:fixed;left:14px;right:14px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:40;display:grid;grid-template-columns:repeat(4,1fr);gap:0;
@@ -475,6 +502,8 @@ body.swapping .slot.swapsrc{outline:3px solid #E07A00!important;background:#FFE7
 .card>h2:has(.ib),.subh:has(.ib){display:flex;align-items:center;gap:4px}
 /* tab icons: shown only in the phone bottom bar */
 .tabs .ti,.tabs .ts{display:none}
+.wkc,.minibar{display:none}
+@media (max-width:700px){.wkc,.minibar{display:grid}}
 table.xt td.rooms{white-space:nowrap}
 .rm{min-width:46px;padding:5px 8px;margin:2px;border-radius:8px;font-variant-numeric:tabular-nums}
 .rm[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
@@ -709,11 +738,17 @@ table.grid th,table.grid td{border-color:var(--g-line)}
     <div class="week">
       <button id="prevW" aria-label="שבוע קודם">→ שבוע קודם</button>
       <b id="weekLbl"></b>
+      <label class="wkc" aria-label="בחירת שבוע"><span class="wkc-t"><b id="wkTxt"></b><span class="wkc-c" aria-hidden="true">▾</span></span><input type="date" id="wkDate" tabindex="-1"></label>
       <button id="nextW" aria-label="שבוע הבא">שבוע הבא ←</button>
       <span class="df"><input type="text" class="dtx" id="weekPick" data-iso="" value="" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="בחירת שבוע (dd/mm/yyyy)"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" tabindex="-1" aria-hidden="true"></span>
     </div>
     <span class="status" id="status">טוען…</span>
   </header>
+  <div class="minibar" aria-hidden="true">
+    <button class="mb-p" data-wk="-1" tabindex="-1" aria-label="שבוע קודם">›</button>
+    <button class="mb-t" tabindex="-1"><span>ניהול צוות טכנאים</span><b id="mbTxt"></b></button>
+    <button class="mb-n" data-wk="1" tabindex="-1" aria-label="שבוע הבא">‹</button>
+  </div>
 
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="sched" aria-selected="true" aria-label="סידור ואילוצים"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M7.5 13.5h3M13.5 13.5h3M7.5 17h3"/></svg><span class="tl">סידור ואילוצים</span><span class="ts">סידור</span></button>
@@ -925,7 +960,7 @@ table.grid th,table.grid td{border-color:var(--g-line)}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 19:35";
+const APP_VER="21.10.2026 19:50";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1356,6 +1391,7 @@ function render(){
   const w=W();
   const d0=parseKey(cur),d5=dayDate(5);
   $("#weekLbl").textContent=fmt(d0)+" – "+fmt(d5);
+  $("#wkTxt").textContent=weekSpan();$("#mbTxt").textContent=weekSpan();$("#wkDate").value=cur;
   setDate($("#weekPick"),cur);
   $("#finalBadge").hidden=!w.final;
   $("#finalBtn .lb").textContent=w.final?"בטל סימון סופי":"סמן כסופי";$("#finalBtn").classList.toggle("on",!!w.final);
@@ -1728,6 +1764,19 @@ document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",
 }));
 function shiftWeek(n){const d=parseKey(cur);d.setDate(d.getDate()+7*n);cur=key(d);msgEdited.consMsg={};msgEdited.weekMsg={};render()}
 $("#prevW").onclick=()=>shiftWeek(-1);$("#nextW").onclick=()=>shiftWeek(1);
+/* phone week capsule: the dates slide in from the side you moved to */
+function weekStep(n){haptic();const c=$(".wkc");shiftWeek(n);if(c){c.classList.remove("go-n","go-p");c.classList.add(n>0?"go-n":"go-p");void c.offsetWidth;requestAnimationFrame(()=>c.classList.remove("go-n","go-p"))}}
+$("#prevW").onclick=()=>weekStep(-1);$("#nextW").onclick=()=>weekStep(1);
+$("#wkDate").addEventListener("change",e=>{const v=e.target.value;if(v){cur=key(sundayOf(parseKey(v)));msgEdited.consMsg={};msgEdited.weekMsg={};render()}});
+/* swipe on the capsule: in Hebrew the next week sits to the left, so dragging right brings it in */
+{const wk=$(".week");let x0=null,y0=0;
+  wk.addEventListener("touchstart",e=>{if(!matchMedia("(max-width:700px)").matches)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  wk.addEventListener("touchend",e=>{if(x0===null)return;const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;x0=null;
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){e.preventDefault();weekStep(dx>0?1:-1)}})}
+document.querySelectorAll(".minibar [data-wk]").forEach(b=>b.addEventListener("click",()=>weekStep(+b.dataset.wk)));
+$(".minibar .mb-t").addEventListener("click",()=>scrollTo({top:0,behavior:"smooth"}));
+/* large title → compact bar once the title has scrolled under the status bar */
+if("IntersectionObserver" in window){new IntersectionObserver(([en])=>document.body.classList.toggle("scrolled",!en.isIntersecting&&en.boundingClientRect.top<0),{threshold:0}).observe($("header .week"))}
 $("#weekPick").addEventListener("change",e=>{const v=e.target.dataset.iso;if(v){cur=key(sundayOf(parseKey(v)));render()}});
 $("#genBtn").onclick=()=>{if(!activeEmps().length)return;haptic();generate();changed();render()};
 $("#clearBtn").onclick=()=>{const w=W();S.sites.forEach(s=>w.assign[s.id]={m:DAYS.map(()=>[]),e:DAYS.map(()=>[])});changed();render()};
