@@ -42,6 +42,16 @@ button:not(:disabled):active,a.btn:active{transform:scale(.97)}
 .tools .badge{transition:transform 140ms var(--ease-out)}
 table.sh .slot{transition:background-color 140ms ease}
 table.sh .slot:active{filter:brightness(.94)}
+/* .pressed is set from JS on touch: iPhone ends :active after a few ms on a quick tap, too short to see.
+   Press shows instantly (no transition) and is held ~120ms; release eases back. */
+.pressed{transition-duration:0s!important}
+button.pressed:not(:disabled),a.btn.pressed{transform:scale(.96);filter:brightness(.9)}
+.tabs button.pressed,.subtabs button.pressed{transform:none;filter:none;background:var(--line);border-radius:8px 8px 0 0}
+.tools .tool.pressed{transform:none;filter:none;background:var(--line)}
+.tools .tool.pressed .badge{transform:scale(.9)}
+.cmbl button.pressed{transform:none;filter:none;background:var(--line)}
+summary.pressed{opacity:.55}
+table.sh .slot.pressed,.cst.pressed{filter:brightness(.88)}
 @media (hover:hover) and (pointer:fine){
   .bar .act.soft:hover{background:#E1F2E7}
   .bar .act:not(.primary):not(.soft):hover{background:var(--bg)}
@@ -739,7 +749,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 14:45";
+const APP_VER="21.10.2026 15:20";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1419,6 +1429,13 @@ function cmbToExam(name){if(!CMB)return;const inp=CMB.inp,[k,id]=(inp.dataset.xf
 /* the list scrolls freely with the finger; an item is picked only on a tap (click), never when a scroll starts.
    mousedown is cancelled so the field keeps focus (on iPhone it is sent only for taps, after the finger lifts) */
 let CMB_TOUCH=false;
+/* visible press feedback on touch screens (see .pressed in CSS) */
+{const SEL="button,a.btn,summary,.cst";let el=null,t0=0;
+  const off=()=>{const x=el;el=null;if(!x)return;setTimeout(()=>x.classList.remove("pressed"),Math.max(0,120-(performance.now()-t0)))};
+  document.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse")return;const x=e.target.closest&&e.target.closest(SEL);if(!x||x.disabled)return;
+    el=x;t0=performance.now();x.classList.add("pressed")},{passive:true,capture:true});
+  ["pointerup","pointercancel"].forEach(t=>document.addEventListener(t,off,{passive:true,capture:true}));
+  document.addEventListener("scroll",()=>{if(el){el.classList.remove("pressed");el=null}},{passive:true,capture:true})}
 document.addEventListener("touchstart",e=>{CMB_TOUCH=!!e.target.closest(".cmbl")},{passive:true,capture:true});
 document.addEventListener("touchend",()=>{setTimeout(()=>{CMB_TOUCH=false},450)},{passive:true,capture:true});
 document.addEventListener("mousedown",e=>{if(e.target.closest(".cmbl,[data-cmb]"))e.preventDefault()},true);
