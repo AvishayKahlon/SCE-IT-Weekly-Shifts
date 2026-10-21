@@ -866,6 +866,16 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 .fp-x{font-size:13px}
 .fp-save{font-size:13.5px;font-weight:700;background:var(--accent)!important;color:var(--accent-ink)}
 .fp-t{margin:0;font-size:12.5px;color:var(--muted)}
+
+/* exams & events: the name is the card's title */
+:is(#exT,#evT,#ecT) td:is([data-l="מבחן"],[data-l="שם האירוע"],[data-l="שם המבחן"]) input{font-weight:700}
+@media (max-width:700px){
+  :is(#exT,#evT,#ecT) td:is([data-l="מבחן"],[data-l="שם האירוע"],[data-l="שם המבחן"]){order:-1;grid-column:1/-1;padding-bottom:8px!important;margin-bottom:2px;border-bottom:.5px solid var(--g-line,var(--line))!important}
+  :is(#exT,#evT,#ecT) td:is([data-l="מבחן"],[data-l="שם האירוע"],[data-l="שם המבחן"])::before{display:none!important}
+  :is(#exT,#evT,#ecT) td:is([data-l="מבחן"],[data-l="שם האירוע"],[data-l="שם המבחן"]) input{font-size:21px;font-weight:800;letter-spacing:-.2px;background:transparent!important;box-shadow:none!important;padding:4px 2px!important;padding-inline-end:34px!important}
+  :is(#exT,#evT,#ecT) td:is([data-l="מבחן"],[data-l="שם האירוע"],[data-l="שם המבחן"]) input:focus{background:var(--g-ctl)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 28%,transparent)!important;border-radius:12px}
+  :is(#exT,#evT,#ecT) td:is([data-l="מבחן"],[data-l="שם האירוע"],[data-l="שם המבחן"]) input::placeholder{font-weight:600;color:var(--muted)}
+}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1102,7 +1112,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 22:30";
+const APP_VER="21.10.2026 22:40";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
