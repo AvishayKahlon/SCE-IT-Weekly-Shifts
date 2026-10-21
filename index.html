@@ -140,13 +140,13 @@ table.sh .nbtn{flex:none;border:0;background:#1E8E4E;color:#fff;border-radius:6p
 
 .export table.sh .slot{cursor:default}
 /* exported file (image / PDF / print): larger type for reading on a phone; long text still shrinks to fit */
-.export table.sh td,.export table.sh th{height:46px;font-size:22px}
-.export table.sh .site{font-size:28px;height:52px}
-.export table.sh .lbl{font-size:19px}
-.export table.sh .date{font-size:23px}
-.export table.sh .dname{font-size:25px}
-.export table.sh .off{font-size:23px}
-.export table.sh .note{font-size:15px}
+.export table.sh td,.export table.sh th{height:58px;font-size:28px}
+.export table.sh .site{font-size:34px;height:62px}
+.export table.sh .lbl{font-size:24px;width:180px}
+.export table.sh .date{font-size:28px}
+.export table.sh .dname{font-size:31px}
+.export table.sh .off{font-size:28px}
+.export table.sh .note{font-size:20px}
 .export table.sh{border-width:.5px}
 .export table.sh td,.export table.sh th{border-width:.5px}
 .export .note input{display:none}
@@ -205,6 +205,7 @@ details.cons:not([open])>summary::before{content:"◂"}
 table.fair{border-collapse:collapse;min-width:520px;width:100%}
 table.fair th,table.fair td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:center;font-variant-numeric:tabular-nums}
 table.fair th{font-size:13px;color:var(--muted);font-weight:500}
+table.fair td.fmiss{background:var(--warn-bg);font-weight:700}
 table.fair td:first-child,table.fair th:first-child{text-align:right;font-weight:700}
 
 /* staff & settings */
@@ -580,7 +581,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
     <div class="card">
       <h2>סיכום משמרות</h2>
       <div class="scroll"><table class="fair" id="fair"></table></div>
-      <p class="hint" style="margin-top:8px">"שישי מצטבר" סופר את כל השבועות שסומנו כסופיים, כדי שהסבב בשישי יתחלק בין כולם לאורך זמן.</p>
+      <p class="hint" style="margin-top:8px">"שישי ב[חודש]" סופר את ימי השישי של העובד בחודש הקלנדרי של השבוע המוצג (שבועות אחרים נספרים כשהם מסומנים כסופיים), ומתאפס כשיום השישי עובר לחודש חדש. בשבוע האחרון של החודש, מי שעדיין על 0 מסומן בצהוב.</p>
     </div>
   </section>
 
@@ -738,7 +739,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 14:15";
+const APP_VER="21.10.2026 14:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1245,12 +1246,21 @@ $("#evDate").addEventListener("change",()=>{msgEdited.evMsg={};renderMsgs()});
 document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{const id=b.dataset.copy,ta=$("#"+id),note=document.querySelector(`[data-copied="${id}"]`);
   const done=()=>{note.textContent="הועתק";setTimeout(()=>note.textContent="",2000)};
   try{navigator.clipboard.writeText(ta.value).then(done,()=>{ta.select();note.textContent="סמנו והעתיקו ידנית"})}catch(e){ta.select();note.textContent="סמנו והעתיקו ידנית"}}));
+/* Fridays per calendar month: the month is the one this week's Friday falls in, so the count restarts
+   with the first week whose Friday is in a new month. Other weeks count only once marked final. */
+function friMonth(wk){const f=parseKey(wk);f.setDate(f.getDate()+5);return f.getFullYear()+"-"+(f.getMonth()+1)}
+function monthFris(wk){const m=friMonth(wk),n={};S.employees.forEach(e=>n[e.id]=0);
+  Object.entries(S.weeks).forEach(([k,w])=>{if(k===wk||!w.final||friMonth(k)!==m)return;
+    Object.values(w.assign).forEach(a=>((a.m||[])[5]||[]).concat((a.e||[])[5]||[]).forEach(id=>{if(id in n)n[id]++}))});
+  return n}
+const HE_MONTHS=["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
 function renderFair(w){
-  const c=weekCounts(w),h=history(cur),C=weekCap();
+  const c=weekCounts(w),h=history(cur),C=weekCap(),mf=monthFris(cur),fd=parseKey(cur);fd.setDate(fd.getDate()+5);
+  const mName=HE_MONTHS[fd.getMonth()],lastWk=friMonth(addW(cur,1))!==friMonth(cur);   /* last Friday of the month: anyone still at 0 is flagged */
   const nfCls=(n,id)=>{const k=empCap(id,C.cap);return !C.cap?"":n>k?"over":n===k?"eq":""};
-  const rows=activeEmps().map(e=>{const nf=c[e.id].tot-c[e.id].fri;return `<tr><td>${esc(e.name)}</td><td class="${nfCls(nf,e.id)}">${nf}</td><td>${c[e.id].tot}</td><td>${c[e.id].tot-c[e.id].eve}</td><td>${c[e.id].eve}</td><td>${c[e.id].fri}</td><td>${h[e.id].fri+c[e.id].fri}</td></tr>`}).join("");
+  const rows=activeEmps().map(e=>{const nf=c[e.id].tot-c[e.id].fri;return `<tr><td>${esc(e.name)}</td><td class="${nfCls(nf,e.id)}">${nf}</td><td>${c[e.id].tot}</td><td>${c[e.id].tot-c[e.id].eve}</td><td>${c[e.id].eve}</td><td>${c[e.id].fri}</td><td class="${lastWk&&hasAssign(w)&&!(mf[e.id]+c[e.id].fri)?"fmiss":""}">${mf[e.id]+c[e.id].fri}</td></tr>`}).join("");
   const bk=backupEmps().filter(e=>c[e.id]&&c[e.id].tot).map(e=>`<tr class="bkrow"><td>${esc(e.name)} <span class="hint">(גיבוי)</span></td><td>${c[e.id].tot-c[e.id].fri}</td><td>${c[e.id].tot}</td><td>${c[e.id].tot-c[e.id].eve}</td><td>${c[e.id].eve}</td><td>${c[e.id].fri}</td><td>—</td></tr>`).join("");
-  $("#fair").innerHTML=`<tr><th>עובד/ת</th><th>ראשון–חמישי</th><th>סה"כ השבוע</th><th>בקרים</th><th>ערבים</th><th>שישי השבוע</th><th>שישי מצטבר</th></tr>`+(rows||`<tr><td colspan="7" class="empty">הוסיפו עובדים בלשונית "עובדים"</td></tr>`)+bk;
+  $("#fair").innerHTML=`<tr><th>עובד/ת</th><th>ראשון–חמישי</th><th>סה"כ השבוע</th><th>בקרים</th><th>ערבים</th><th>שישי השבוע</th><th>שישי ב${mName}</th></tr>`+(rows||`<tr><td colspan="7" class="empty">הוסיפו עובדים בלשונית "עובדים"</td></tr>`)+bk;
 }
 /* constraints grid with the Excel status column (✔ ✘ ⚠) and cell states */
 function renderCons(w){
