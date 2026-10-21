@@ -1327,6 +1327,19 @@ td.dragghost{display:flex;align-items:center;justify-content:center;background:v
 body.dragging{-webkit-user-select:none;user-select:none}
 button.dragghost{display:inline-flex!important;align-items:center;gap:8px;flex-wrap:nowrap;white-space:nowrap}
 body.dragging .tabs,body.dragging .minibar{opacity:0;pointer-events:none;transition:opacity 200ms ease}
+
+/* Friday rotation drag */
+.rgrip{display:inline-grid;grid-template-columns:repeat(2,3px);gap:3px 3px;padding:6px 5px;cursor:grab;touch-action:none;align-self:center;flex:none;border-radius:8px}
+.rgrip i{width:3px;height:3px;border-radius:50%;background:var(--muted);opacity:.7}
+.rgrip{grid-template-rows:repeat(3,3px);grid-auto-flow:column}
+#friSet td[data-rk]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform 220ms var(--spring,ease)}
+#friSet .rc{display:flex;align-items:center;gap:4px}
+@media (max-width:400px){#friSet table.rotT .rc{grid-template-columns:auto 1fr 1fr}#friSet table.rotT .rc .rgrip{grid-row:1/3}#friSet table.rotT .rc select{grid-column:2/-1}}
+@media (max-width:700px){#friSet .rc .rgrip{padding:8px 6px}}
+.rotghost{position:fixed;z-index:90;pointer-events:none;display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:16px;font-weight:700;font-size:16px;white-space:nowrap;
+  background:var(--glass-bg,var(--surface));color:var(--ink);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
+  box-shadow:0 18px 40px rgba(0,0,0,.28),0 4px 10px rgba(0,0,0,.15),inset 0 1px 0 var(--glass-edge,#fff);transform:translate(-50%,-50%)}
+#friSet td.dropon{outline:3px solid var(--accent);outline-offset:-3px;transform:scale(1.04)}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1569,7 +1582,7 @@ body.dragging .tabs,body.dragging .minibar{opacity:0;pointer-events:none;transit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 03:55";
+const APP_VER="22.10.2026 04:15";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2283,7 +2296,7 @@ function renderFriSet(){
   for(let i=0;i<rows;i++){
     h+=`<tr>`+sites.map(s=>{const r=S.friRule[s.id];if(i>=r.list.length)return `<td></td>`;
       const isT=rotTurn(r,cur)===i;
-      return `<td class="${isT?"now":""}"><div class="rc"><select data-rsel="${s.id}|${i}" aria-label="${esc(s.name)} מקום ${i+1}">${opts(r.list[i])}</select><button data-rnow="${s.id}|${i}" title="התור שלו השבוע" aria-label="התור שלו השבוע" ${isT?"disabled":""}>◉</button><button data-rrm="${s.id}|${i}" title="הסר מהסבב" aria-label="הסר מהסבב">✕</button></div></td>`}).join("")+`</tr>`;
+      return `<td class="${isT?"now":""}" data-rk="${s.id}|${i}"><div class="rc"><span class="rgrip" aria-hidden="true" title="גררו כדי להחליף"><i></i><i></i><i></i><i></i><i></i><i></i></span><select data-rsel="${s.id}|${i}" aria-label="${esc(s.name)} מקום ${i+1}">${opts(r.list[i])}</select><button data-rnow="${s.id}|${i}" title="התור שלו השבוע" aria-label="התור שלו השבוע" ${isT?"disabled":""}>◉</button><button data-rrm="${s.id}|${i}" title="הסר מהסבב" aria-label="הסר מהסבב">✕</button></div></td>`}).join("")+`</tr>`;
   }
   h+=`<tr>${sites.map(s=>`<td><button data-radd="${s.id}">+ שורה</button></td>`).join("")}</tr>`;
   /* summary rows: the caption sits inside each cell, so no label column is needed */
@@ -2632,6 +2645,36 @@ function startSwap(k){const a=slotRef(k);if(!a.arr[a.idx])return;SWAP=k;document
   document.addEventListener("touchmove",e=>{if(D)e.preventDefault()},{passive:false});
   document.addEventListener("click",e=>{if(skip){skip=false;e.stopPropagation();e.preventDefault()}},true);
   document.addEventListener("contextmenu",e=>{if(e.target.closest&&e.target.closest("#sheet .slot,#days .slot"))e.preventDefault()})}
+
+/* Friday rotation: drag a name (by its grip, or long-press the cell) onto another spot to swap them — same lift / follow / drop as the schedule */
+{let st=null,D=null,t=null,skip=false;const SPR="cubic-bezier(.3,1.25,.45,1)";
+  const cellAt=(x,y)=>{const el=document.elementFromPoint(x,y);const c=el&&el.closest&&el.closest("#friSet td[data-rk]");return c&&c!==D.src?c:null};
+  const get=k=>{const[sid,i]=k.split("|");return{r:S.friRule[sid],i:+i}};
+  const vis=k=>document.querySelector(`#friSet td[data-rk="${k}"] .rc`);
+  function lift(){const src=st.td,r=src.getBoundingClientRect(),{r:R,i}=get(src.dataset.rk);
+    const g=document.createElement("div");g.className="rotghost";g.innerHTML=`<span class="rgrip"><i></i><i></i><i></i><i></i><i></i><i></i></span>${esc(empName(R.list[i]))}`;
+    g.style.cssText=`left:${r.left+r.width/2}px;top:${r.top+r.height/2}px`;document.body.appendChild(g);
+    src.classList.add("draghole");document.body.classList.add("dragging");D={src,g,over:null,r0:r};haptic();
+    g.animate([{transform:"translate(-50%,-50%) scale(.9)",opacity:.6},{transform:"translate(-50%,-50%) scale(1.08)",opacity:1}],{duration:280,easing:SPR,fill:"forwards"})}
+  function move(x,y){D.g.style.left=x+"px";D.g.style.top=y+"px";const o=cellAt(x,y);
+    if(o!==D.over){D.over&&D.over.classList.remove("dropon");D.over=o;if(o){o.classList.add("dropon");haptic()}}}
+  function drop(){const{src,g,over}=D;document.body.classList.remove("dragging");src.classList.remove("draghole");over&&over.classList.remove("dropon");const gr=g.getBoundingClientRect();
+    if(!over){g.animate([{left:g.style.left,top:g.style.top},{left:(D.r0.left+D.r0.width/2)+"px",top:(D.r0.top+D.r0.height/2)+"px",opacity:.4}],{duration:360,easing:SPR}).onfinish=()=>g.remove();D=null;return}
+    const k1=src.dataset.k||src.dataset.rk,k2=over.dataset.rk,a=get(k1),b=get(k2),or=over.getBoundingClientRect();
+    [a.r.list[a.i],b.r.list[b.i]]=[b.r.list[b.i],a.r.list[a.i]];changed();render();haptic();
+    requestAnimationFrame(()=>{const n2=vis(k2),n1=vis(k1);
+      if(n2){const r=n2.getBoundingClientRect();n2.animate([{transform:`translate(${gr.left+gr.width/2-(r.left+r.width/2)}px,${gr.top+gr.height/2-(r.top+r.height/2)}px) scale(1.08)`},{transform:"none"}],{duration:520,easing:SPR})}
+      if(n1){const r=n1.getBoundingClientRect();n1.animate([{transform:`translate(${or.left-r.left}px,${or.top-r.top}px)`,opacity:.6},{transform:"none",opacity:1}],{duration:560,easing:SPR})}
+      g.remove()});D=null}
+  document.addEventListener("pointerdown",e=>{if(e.button>0)return;const td=e.target.closest&&e.target.closest("#friSet td[data-rk]");if(!td)return;
+    st={td,x:e.clientX,y:e.clientY,id:e.pointerId};
+    if(e.target.closest(".rgrip")){e.preventDefault();lift();move(e.clientX,e.clientY);return}
+    if(e.target.closest("select,button"))return;clearTimeout(t);t=setTimeout(()=>{if(st){lift();move(st.x,st.y);skip=true}},430)},true);
+  document.addEventListener("pointermove",e=>{if(!st||e.pointerId!==st.id)return;if(!D){if(Math.hypot(e.clientX-st.x,e.clientY-st.y)>8){clearTimeout(t);st=null}return}move(e.clientX,e.clientY)},true);
+  const up=()=>{clearTimeout(t);if(D)drop();st=null};
+  document.addEventListener("pointerup",up,true);document.addEventListener("pointercancel",up,true);
+  document.addEventListener("touchmove",e=>{if(D)e.preventDefault()},{passive:false});
+  document.addEventListener("click",e=>{if(skip){skip=false;e.stopPropagation();e.preventDefault()}},true)}
 function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();haptic();if(a.arr===b.arr&&a.idx===b.idx)return;
   const x=a.arr[a.idx],y=b.arr[b.idx];if(!x)return;
   if(y){a.arr[a.idx]=y;b.arr[b.idx]=x}
