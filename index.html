@@ -352,6 +352,17 @@ table.sh .an2{display:block;line-height:1.05}
   #staffRows .row input[type=text]{grid-column:1/-1;width:100%}
   #staffRows .row button{justify-self:end}
 }
+/* event / exam chips in the schedule with a small send button */
+table.sh .note .nw{flex-wrap:wrap;justify-content:center;gap:3px}
+table.sh .note .nw input{flex:1 1 60px}
+.ich{display:inline-flex;align-items:center;gap:3px;background:#FFF8E1;border:1px solid #E9D48F;border-radius:6px;padding:0 0 0 2px;padding-inline-start:6px;font-size:12px;font-weight:700;color:#3F3F3F;white-space:nowrap;max-width:100%}
+.wab{flex:none;display:inline-grid;place-items:center;width:22px;height:22px;padding:0;border:0;border-radius:6px;background:#1E8E4E;color:#fff;cursor:pointer}
+.wab svg{width:14px;height:14px}
+.dnote .wab{width:36px;height:36px;border-radius:8px}.dnote .wab svg{width:20px;height:20px}
+.dauto{display:flex;flex-wrap:wrap;gap:6px}
+.dauto .ich{font-size:13px;padding:3px 3px 3px 3px;padding-inline-start:8px}.dauto .wab{width:28px;height:28px}.dauto .wab svg{width:16px;height:16px}
+@media (hover:hover) and (pointer:fine){.wab:hover{background:#166C3B}}
+.export table.sh .note.multi{line-height:1.15;padding-block:3px}
 /* exams & events */
 #exT td.xdel{white-space:nowrap;width:80px}
 .xexp{padding:5px 9px;margin-inline-end:4px}
@@ -383,9 +394,9 @@ table.xt input[type=text],table.xt select{width:100%;min-width:0}
 table.xt td{vertical-align:middle}
 table.xt tr.past td{opacity:.5}
 table.xt td.xdel{width:44px}
-.dauto{display:grid;gap:3px;font-size:13px;color:var(--ink)}
-.dauto span{background:#FFF8E1;border:1px solid #F0DFA6;border-radius:6px;padding:3px 8px}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dauto span{background:#2E2A1C;border-color:#5A4E2A}}
+
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dauto .ich{background:#2E2A1C;border-color:#5A4E2A;color:var(--ink)}}
 @media (max-width:700px){
   /* each row becomes a small card on phones */
   table.cal.xt{min-width:0}
@@ -675,7 +686,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 08:10";
+const APP_VER="21.10.2026 08:35";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -962,7 +973,7 @@ function fitCells(root){if(!root)return;root.querySelectorAll("table.sh td").for
   td.style.cssText="";const over=()=>td.scrollWidth>td.clientWidth+1;if(!over())return;   /* fits: leave exactly as designed */
   const h0=td.offsetHeight;let f=parseFloat(getComputedStyle(td).fontSize);
   /* names and notes may use a second line (row height stays the same), then shrink to fit */
-  if(td.classList.contains("slot")||td.classList.contains("note")){
+  if(td.classList.contains("slot")||(td.classList.contains("note")&&!td.classList.contains("multi"))){
     td.style.whiteSpace="normal";td.style.lineHeight="1.05";
     const tooBig=()=>over()||td.offsetHeight>h0+0.5;
     while(f>9&&tooBig()){f-=0.5;td.style.fontSize=f+"px"}
@@ -978,11 +989,24 @@ function plainNames(w,sid,sh,d,wk){return (w.assign[sid]?.[sh]?.[d]||[]).map(id=
 /* note row text = holiday name(s) + the manual note, like the Excel note formula */
 /* events / exams of a given day at a site (campus "שניהם" = both sites) */
 function siteMatch(campus,sid){if(!campus||campus==="שניהם")return true;const s=S.sites.find(x=>x.id===sid);return !!s&&(s.name===campus||s.name.includes(campus)||campus.includes(s.name))}
-function dayItems(dt,sid){const k=key(dt),out=[];
-  (S.events||[]).forEach(e=>{if(e.date===k&&e.name&&siteMatch(e.campus,sid))out.push([e.name,e.time].filter(Boolean).join(" | "))});
-  (S.exams||[]).forEach(e=>{if(e.date===k&&e.name&&siteMatch(e.campus,sid))out.push([e.name,e.time].filter(Boolean).join(" | "))});
+function dayItemObjs(dt,sid){const k=key(dt),out=[];
+  ["events","exams"].forEach(kind=>(S[kind]||[]).filter(e=>e.date===k&&e.name&&siteMatch(e.campus,sid)).sort((a,b)=>(a.time||"").localeCompare(b.time||"")||HE.compare(a.name,b.name))
+    .forEach(e=>out.push({kind,id:e.id,text:[e.name,e.time].filter(Boolean).join(" | ")})));
   return out}
-function noteText(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,...dayItems(dt,sid),((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean).join(" · ")}
+function dayItems(dt,sid){return dayItemObjs(dt,sid).map(x=>x.text)}
+/* small WhatsApp send button (generic chat icon) */
+const WA_ICO=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01" stroke-width="2.8"/></svg>`;
+function waBtn(attr,label){return `<button class="wab" ${attr} title="${esc(label)}" aria-label="${esc(label)}">${WA_ICO}</button>`}
+function itemChips(d,sid){return dayItemObjs(dayDate(d),sid).map(x=>`<span class="ich">${esc(x.text)}${waBtn(`data-xwa="${x.kind}|${x.id}|${sid}|${d}"`,"שליחה לוואטסאפ: "+x.text)}</span>`).join("")}
+/* WhatsApp text for one event / exam, with who is on shift at that campus */
+function itemText(kind,id,sid,d){const r=(S[kind]||[]).find(x=>x.id===id);if(!r)return "";const w=W(),s=S.sites.find(x=>x.id===sid);
+  const m=namesAt(w,sid,"m",d),e=namesAt(w,sid,"e",d),L=[`תזכורת ליום ${DAYS[d]} ${dot(dayDate(d))}:`];
+  if(kind==="exams"){L.push(`📝 מבחן: ${r.name}${r.time?` | ${r.time}`:""}`);L.push(`📍 ${s?s.name:""}${r.room?` | כיתה ${r.room}`:""}`);
+    if(r.software)L.push(`💻 תוכנה: ${r.software}`);if(r.lecturer)L.push(`👤 מרצה: ${r.lecturer}`);if(r.notes)L.push(`⚠️ ${r.notes}`)}
+  else{L.push(`📅 ${r.name}${r.time?` | ${r.time}`:""}`);L.push(`📍 ${s?s.name:""}`);if(r.needs)L.push(`🛠️ ${r.needs}`)}
+  L.push(`בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`);return L.join("\n")}
+function noteLines(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,...dayItems(dt,sid),((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean)}
+function noteText(w,sid,d,wk){return noteLines(w,sid,d,wk).join(" · ")}
 function sheetHTML(w,exportMode){
   const pr=exportMode?null:problems(w);
   const parts=[];
@@ -1024,7 +1048,7 @@ function sheetHTML(w,exportMode){
     });
     h+=`</tr>`;
     // notes
-    h+=`<tr><td class="lbl">הערות ואירועים</td>${DAYS.map((_,d)=>{const hn=[...dm(d).names,...dayItems(dayDate(d),s.id)].join(" · ");return `<td class="note" colspan="2">${exportMode?esc(noteText(w,s.id,d)):`<div class="nw">${hn?`<span class="hol">${esc(hn)}</span>`:""}<input data-note="${s.id}|${d}" value="${esc(w.notes[s.id][d])}" aria-label="הערה ${DAYS[d]} ${esc(s.name)}">${(w.notes[s.id][d]||"").trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}" title="שליחת תזכורת לוואטסאפ" aria-label="שליחת תזכורת על האירוע">וואטסאפ</button>`:""}</div>`}</td>`}).join("")}</tr>`;
+    h+=`<tr><td class="lbl">הערות ואירועים</td>${DAYS.map((_,d)=>{const hn=dm(d).names.join(" · ");return `<td class="note${noteLines(w,s.id,d).length>1?" multi":""}" colspan="2">${exportMode?noteLines(w,s.id,d).map(esc).join("<br>"):`<div class="nw">${hn?`<span class="hol">${esc(hn)}</span>`:""}${itemChips(d,s.id)}<input data-note="${s.id}|${d}" value="${esc(w.notes[s.id][d])}" aria-label="הערה ${DAYS[d]} ${esc(s.name)}">${(w.notes[s.id][d]||"").trim()?waBtn(`data-evmsg="${s.id}|${d}"`,"שליחת ההערה לוואטסאפ"):""}</div>`}</td>`}).join("")}</tr>`;
     if(!exportMode)h+=`<tr class="prow"><td class="lbl">⭐ טכנאי מועדף</td>${DAYS.map((_,d)=>`<td class="pref" colspan="2">${prefSel(w,s.id,d)}</td>`).join("")}</tr>`;
     h+=`</table>`;parts.push(h);
   });
@@ -1044,10 +1068,10 @@ function daysHTML(w){
       let m="";if(nm||A.m[d].length){m=chip(s.id,"m",d,0,A.m[d].slice(0,1),nm);if(nm>1||A.m[d].length>1)m+=chip(s.id,"m",d,1,A.m[d].slice(1),nm)}else m=`<span class="chip off">${md.off?"פגרה":"—"}</span>`;
       let e="";if(ne||A.e[d].length)e=chip(s.id,"e",d,0,A.e[d],ne);else e=`<span class="chip off">${d===5?"שבת שלום":md.off?"פגרה":md.noEve?"סיום ב-16:00":"—"}</span>`;
       const note=w.notes[s.id][d]||"",auto=dayItems(dayDate(d),s.id);
-      return `<div class="dsite"><b>${esc(s.name)}</b>${auto.length?`<div class="dauto">${auto.map(x=>`<span>📌 ${esc(x)}</span>`).join("")}</div>`:""}
+      return `<div class="dsite"><b>${esc(s.name)}</b>${auto.length?`<div class="dauto">${itemChips(d,s.id)}</div>`:""}
         <div class="dl"><span class="t">בוקר</span><div class="chips">${m}</div></div>
         <div class="dl"><span class="t">ערב</span><div class="chips">${e}</div></div>
-        <div class="dnote"><input type="text" data-note="${s.id}|${d}" value="${esc(note)}" placeholder="הערות ואירועים" aria-label="הערה ${dn} ${esc(s.name)}">${note.trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}">וואטסאפ</button>`:""}</div><div class="dnote"><span class="t">⭐ מועדף</span>${prefSel(w,s.id,d)}</div></div>`}).join("");
+        <div class="dnote"><input type="text" data-note="${s.id}|${d}" value="${esc(note)}" placeholder="הערות ואירועים" aria-label="הערה ${dn} ${esc(s.name)}">${note.trim()?waBtn(`data-evmsg="${s.id}|${d}"`,"שליחת ההערה לוואטסאפ"):""}</div><div class="dnote"><span class="t">⭐ מועדף</span>${prefSel(w,s.id,d)}</div></div>`}).join("");
     const hn=md.names.join(" · ");
     return `<div class="dcard"><div class="dh">${dn}${hn?` <span class="hn">${esc(hn)}</span>`:""}<span>${fmt(dayDate(d)).slice(0,5)}</span></div>${sites}</div>`}).join("");
 }
@@ -1099,6 +1123,7 @@ function renderMsgs(){
 }
 ["consMsg","evMsg","weekMsg"].forEach(id=>$("#"+id).addEventListener("input",()=>{msgEdited[id]=Object.assign(msgEdited[id]||{},{dirty:true});const link={consMsg:"#consWa",evMsg:"#evWa",weekMsg:"#weekWa"}[id];$(link).href=wa($("#"+id).value)}));
 document.addEventListener("click",ev=>{
+  const x=ev.target.closest("[data-xwa]");if(x){ev.stopPropagation();const[k,id,sid,d]=x.dataset.xwa.split("|");sendWa(itemText(k,id,sid,+d));return}
   const b=ev.target.closest("[data-evmsg]");if(!b)return;ev.stopPropagation();
   const[sid,d]=b.dataset.evmsg.split("|");sendWa(eventText(sid,+d));
 },true);
