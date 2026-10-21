@@ -1070,6 +1070,22 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
   .duo .ag-site{grid-template-columns:1fr;gap:4px}
   .duo .ag-n{font-size:12.5px}
 }
+
+/* desktop row, tidier: equal-height tiles, same title style, long content scrolls inside its tile */
+@media (min-width:1000px){
+  .duo{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:14px}
+  .duo:has(#agendaBox[hidden]){grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+  .duo>.card,.duo>details.card.cons,.duo>details.card.cons:not([open]){border-radius:24px;padding:14px 16px;align-self:stretch;min-width:0}
+  .duo>.card h2,.duo>details.cons>summary h2{font-size:18px;margin:0}
+  .duo>details.cons>summary,.duo>#agendaBox>h2{min-height:30px;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .duo>details.cons:not([open])>summary{margin-bottom:0}
+  .duo>details.cons>.dbody{max-height:520px;overflow:auto;overscroll-behavior:contain}
+  .duo #agenda{max-height:520px;overflow:auto;overscroll-behavior:contain;padding-inline-end:2px}
+  .duo #agendaBox>.hint{display:none}
+  .duo .ag-day{border-radius:14px}
+  .duo #friSet{display:grid;justify-items:stretch}
+  .duo table.rotT{margin:0}
+}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1308,7 +1324,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 00:10";
+const APP_VER="22.10.2026 00:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
