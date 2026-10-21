@@ -90,7 +90,7 @@ table.sh .slot.pressed,.cst.pressed{filter:brightness(.88)}
 @keyframes pulse{50%{transform:scale(.88)}}
 @media (prefers-reduced-motion:reduce){.tool.busy .badge{animation:none}}
 #finalBtn.on{color:var(--ok);border-color:currentColor}
-.sheetready{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;z-index:40;padding:16px}
+.sheetready{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;z-index:50;padding:16px}
 .sheetready .card{display:grid;gap:10px;min-width:240px;text-align:center}
 .sheetready .wa{background:#1E8E4E;color:#fff;border-color:#1E8E4E;font-weight:700;min-height:46px}
 .toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:14px;z-index:30;max-width:calc(100% - 24px);text-align:center}
@@ -261,8 +261,15 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   .week b{grid-column:1/-1;grid-row:1;text-align:center;font-size:15px}
   .week .df,.week .dtx{min-width:0;width:100%}
   .week button{padding:8px 6px;white-space:nowrap;font-size:14px}
-  .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:0}
-  .tabs button{flex:1 1 auto;padding:10px 4px;font-size:14px;white-space:nowrap}
+  /* bottom tab bar, within thumb reach */
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--surface);border-top:1px solid var(--line);border-bottom:0;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.05)}
+  .tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;font-size:11.5px;font-weight:700;border:0;border-radius:10px;white-space:nowrap}
+  .tabs button[aria-selected="true"]{color:var(--accent);border:0}
+  .tabs button .ti{display:block;width:24px;height:24px}.tabs button .tl{display:none}.tabs button .ts{display:block}
+  .tabs button.pressed{border-radius:10px}
+  .wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  body .devbar{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   select{min-height:40px}
   .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .bar .sp{display:none}
@@ -292,7 +299,7 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   table.grid th .sd{display:inline;font-size:15px}
   input[type=text],input[type=number],input[type=date],select{font-size:16px}
   ol.rot li{display:grid;gap:4px}
-  .pop{left:8px!important;right:8px;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:60dvh;transform-origin:bottom center;overscroll-behavior:contain}
+  .pop{z-index:60;left:8px!important;right:8px;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:60dvh;transform-origin:bottom center;overscroll-behavior:contain}
   .pop button{padding:12px 12px;font-size:16px}
 }
 @media (max-width:400px){
@@ -422,6 +429,25 @@ details.sub>summary h3{margin:0;font-size:18px}
 .xsec>summary{align-items:center;padding:2px 0;-webkit-tap-highlight-color:transparent}
 .xcnt{font-size:12px;font-weight:700;color:var(--muted);background:var(--line);border-radius:999px;padding:1px 9px}
 .xcnt:empty{display:none}
+.xcnt.all{background:#C6EFCE;color:#1E6B34}
+/* constraints received */
+.got{width:22px;height:22px;min-width:22px;padding:0;border-radius:50%;border:1.5px solid var(--muted);background:transparent;color:#fff;font-size:13px;font-weight:800;line-height:1;margin-inline-end:6px;vertical-align:middle;display:inline-grid;place-items:center}
+.got.on{background:#2E7D32;border-color:#2E7D32}
+@media (max-width:700px){.got{width:20px;height:20px;min-width:20px;margin-inline-end:3px;font-size:12px}}
+/* quick swap */
+body.swapping table.sh .slot,body.swapping #days .slot{outline:2px dashed var(--accent);outline-offset:-3px}
+body.swapping .slot.swapsrc{outline:3px solid #E07A00!important;background:#FFE7C2!important}
+.swapbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:75;background:#E07A00;color:#fff;border-radius:999px;padding:6px 6px 6px 14px;display:flex;gap:10px;align-items:center;font-weight:700;font-size:14px;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.18);max-width:calc(100vw - 24px)}
+.swapbar button{background:#fff;color:#E07A00;border:0;border-radius:999px;padding:6px 12px;font-weight:800}
+.pop button.swapb{justify-content:center;font-weight:700;color:#B25F00}
+/* info (ⓘ) toggle for long explanations */
+.ib{width:24px;height:24px;min-width:24px;padding:0;border-radius:50%;font-size:14px;font-weight:700;line-height:1;color:var(--muted);background:transparent;border:1px solid var(--line);display:inline-grid;place-items:center;vertical-align:middle;margin-inline-start:6px}
+.ib[aria-expanded="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tip{display:none}
+.tipon>.tip{display:block}
+.card>h2:has(.ib),.subh:has(.ib){display:flex;align-items:center;gap:4px}
+/* tab icons: shown only in the phone bottom bar */
+.tabs .ti,.tabs .ts{display:none}
 table.xt td.rooms{white-space:nowrap}
 .rm{min-width:46px;padding:5px 8px;margin:2px;border-radius:8px;font-variant-numeric:tabular-nums}
 .rm[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
@@ -540,10 +566,10 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
   </header>
 
   <nav class="tabs" role="tablist">
-    <button role="tab" data-tab="sched" aria-selected="true">סידור ואילוצים</button>
-    <button role="tab" data-tab="cal" aria-selected="false">חופשות וחגים</button>
-    <button role="tab" data-tab="ev" aria-selected="false">מבחנים ואירועים</button>
-    <button role="tab" data-tab="set" aria-selected="false">הגדרות</button>
+    <button role="tab" data-tab="sched" aria-selected="true" aria-label="סידור ואילוצים"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M7.5 13.5h3M13.5 13.5h3M7.5 17h3"/></svg><span class="tl">סידור ואילוצים</span><span class="ts">סידור</span></button>
+    <button role="tab" data-tab="cal" aria-selected="false" aria-label="חופשות וחגים"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v2M12 19v2M4.2 7l1.7 1M18.1 16l1.7 1M3 12h2M19 12h2M4.2 17l1.7-1M18.1 8l1.7-1"/><circle cx="12" cy="12" r="4"/></svg><span class="tl">חופשות וחגים</span><span class="ts">חופשות</span></button>
+    <button role="tab" data-tab="ev" aria-selected="false" aria-label="מבחנים ואירועים"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3.5" width="14" height="18" rx="2"/><path d="M9 3.5h6v3H9zM8.5 11h7M8.5 14.5h7M8.5 18h4"/></svg><span class="tl">מבחנים ואירועים</span><span class="ts">מבחנים</span></button>
+    <button role="tab" data-tab="set" aria-selected="false" aria-label="הגדרות"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">הגדרות</span><span class="ts">הגדרות</span></button>
   </nav>
 
   <section class="panel" id="tab-sched">
@@ -567,7 +593,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
       <div id="agenda"></div>
     </section>
     <details class="card cons" id="consBox" open>
-      <summary><h2>אילוצים לשבוע</h2><span class="hint">לחיצה על משבצת מחליפה מצב: זמין ← בוקר ← ערב ← חופש. בשישי: גיבוי לאירוע</span></summary>
+      <summary><h2>אילוצים לשבוע</h2><span class="xcnt" id="gotN"></span><span class="hint">לחיצה על משבצת מחליפה מצב: זמין ← בוקר ← ערב ← חופש. בשישי: גיבוי לאירוע</span></summary>
       <div class="legend" style="margin:10px 0">
         <span><i style="background:#E3F0FF"></i>בוקר</span>
         <span><i style="background:#FFF1D6"></i>ערב</span>
@@ -749,7 +775,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 15:35";
+const APP_VER="21.10.2026 16:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1173,7 +1199,10 @@ function render(){
   $("#finalBtn .lb").textContent=w.final?"בטל סימון סופי":"סמן כסופי";$("#finalBtn").classList.toggle("on",!!w.final);
   $("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);
   const pr=problems(w);
-  const shortInfo=SHORT.length?`<div class="msg info">🏖️ ${SHORT.map(d=>DAYS[d]).join(", ")}: עובד בחופש – בוקר אחד בכל קמפוס, ערב אחד בכל קמפוס.</div>`:"";
+  const emps0=activeEmps(),miss=emps0.filter(e=>!(w.got||{})[e.id]);
+  $("#gotN").textContent=emps0.length?`התקבלו ${emps0.length-miss.length}/${emps0.length}`:"";$("#gotN").classList.toggle("all",emps0.length>0&&!miss.length);
+  const gotInfo=!w.final&&emps0.length&&miss.length&&miss.length<emps0.length?`<div class="msg info">📥 חסרים אילוצים מ: ${miss.map(e=>esc(e.name)).join(", ")}</div>`:"";
+  const shortInfo=gotInfo+(SHORT.length?`<div class="msg info">🏖️ ${SHORT.map(d=>DAYS[d]).join(", ")}: עובד בחופש – בוקר אחד בכל קמפוס, ערב אחד בכל קמפוס.</div>`:"");
   $("#msgs").innerHTML=shortInfo+(!hasAssign(w)?`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`:pr.list.length?(pr.list.every(m=>m.startsWith("ℹ️"))?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"")+pr.list.slice(0,12).map(m=>`<div class="msg${m.startsWith("ℹ️")?" info":""}">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:""));
   fitCells($("#sheet"));
   renderSync();renderAgenda(w);
@@ -1285,7 +1314,8 @@ function renderCons(w){
   const eve3=DAYS.map((_,d)=>d<5&&emps.filter(e=>cons(w,e.id,d)==="E").length>2);
   $("#consGrid").innerHTML=`<tr><th>עובד/ת</th><th>סטטוס</th>${DAYS.map((dn,d)=>`<th><span class="l">${dn}</span><span class="sd">${"אבגדהו"[d]}׳</span><br><span style="font-weight:400;color:var(--muted)">${fmt(dayDate(d)).slice(0,5)}</span></th>`).join("")}</tr>`+
     emps.map(e=>{const es=empStatus(w,e.id);
-      return `<tr><td class="name">${esc(e.name)}</td><td class="stt ${ha?es.st:""}" title="${ha?{ok:"תואם",bad:"יש סתירה",miss:"יש יום שסומן ולא שובץ"}[es.st]:""}">${ha?ST[es.st]:""}</td>${DAYS.map((_,d)=>{
+      const g=!!(w.got||{})[e.id];
+      return `<tr><td class="name"><button class="got${g?" on":""}" data-got="${e.id}" aria-pressed="${g}" title="${g?"האילוצים התקבלו":"סמנו כשהאילוצים התקבלו"}" aria-label="${esc(e.name)}: ${g?"אילוצים התקבלו":"טרם התקבלו אילוצים"}">${g?"✓":""}</button>${esc(e.name)}</td><td class="stt ${ha?es.st:""}" title="${ha?{ok:"תואם",bad:"יש סתירה",miss:"יש יום שסומן ולא שובץ"}[es.st]:""}">${ha?ST[es.st]:""}</td>${DAYS.map((_,d)=>{
         let v,lbl,dis=false;
         if(d===5){v=friCons(w,e.id);lbl=CST_LBL[v];dis=v==="T"||v==="O"}
         else if(dm(d).off){v="O";lbl=CST_LBL.O;dis=true}
@@ -1469,6 +1499,15 @@ function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs 
 document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>openSub(b.dataset.sub)));
 $("#status").addEventListener("click",()=>{if($("#status").classList.contains("warn")){document.querySelector('.tabs button[data-tab="set"]').click();openSub("gen");$("#syncBox").scrollIntoView({block:"center",behavior:"smooth"})}});
 /* collapsible sections start closed; an opened one stays open only for this visit (incl. auto-update reloads) */
+/* long explanations stay hidden behind a small ⓘ next to the section title */
+document.querySelectorAll(".card, details.sub").forEach(c=>{
+  const tips=[...c.children].filter(x=>x.matches("p.hint")&&!x.id),sum=c.querySelector(":scope>summary"),sh=sum&&sum.querySelector(":scope>span.hint");
+  if(sh){const p=document.createElement("p");p.className="hint";p.style.margin="10px 0 0";p.innerHTML=sh.innerHTML;sh.remove();sum.after(p);tips.unshift(p)}
+  const h=c.querySelector(":scope>h2,:scope>h3,:scope>summary>h2,:scope>summary>h3");if(!tips.length||!h)return;
+  tips.forEach(t=>t.classList.add("tip"));
+  const b=document.createElement("button");b.type="button";b.className="ib";b.textContent="i";b.setAttribute("aria-expanded","false");b.setAttribute("aria-label","הסבר");b.title="הסבר";
+  b.addEventListener("click",ev=>{ev.preventDefault();ev.stopPropagation();const on=c.classList.toggle("tipon");b.setAttribute("aria-expanded",on);if(on&&c.tagName==="DETAILS")c.open=true});
+  h.appendChild(b)});
 ["friBox","catBox","exBox","evBox","vacBox","holBox"].forEach(id=>{const b=$("#"+id),k="open-"+id;
   try{if(sessionStorage.getItem(k)==="1")b.open=true}catch(e){}
   b.addEventListener("toggle",()=>{try{sessionStorage.setItem(k,b.open?"1":"0")}catch(e){}})});
@@ -1487,15 +1526,33 @@ $("#clearBtn").onclick=()=>{const w=W();S.sites.forEach(s=>w.assign[s.id]={m:DAY
 $("#finalBtn").onclick=()=>{const w=W();w.final=!w.final;changed();render()};
 
 let pop=null;
+/* quick swap: pick "⇄ החלפה" on one name, then tap any other slot */
+let SWAP=null;
+function slotRef(k){const[sid,sh,d,i]=k.split("|");const arr=W().assign[sid][sh][+d];return{sid,sh,d:+d,arr,idx:sh==="m"?(+i===0?0:1):+i}}
+function endSwap(){SWAP=null;document.body.classList.remove("swapping");document.querySelectorAll(".swapsrc").forEach(x=>x.classList.remove("swapsrc"));document.querySelector(".swapbar")?.remove()}
+function startSwap(k){const a=slotRef(k);if(!a.arr[a.idx])return;SWAP=k;document.body.classList.add("swapping");
+  document.querySelectorAll(`.slot[data-k="${k}"]`).forEach(x=>x.classList.add("swapsrc"));
+  const b=document.createElement("div");b.className="swapbar";b.innerHTML=`<span>⇄ ${esc(empName(a.arr[a.idx]))} – בחרו משבצת</span><button>ביטול</button>`;
+  b.querySelector("button").onclick=ev=>{ev.stopPropagation();endSwap()};document.body.appendChild(b)}
+function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();if(a.arr===b.arr&&a.idx===b.idx)return;
+  const x=a.arr[a.idx],y=b.arr[b.idx];if(!x)return;
+  if(y){a.arr[a.idx]=y;b.arr[b.idx]=x}
+  else{a.arr.splice(a.idx,1);if(b.idx>=b.arr.length)b.arr.push(x);else b.arr.splice(b.idx,0,x)}
+  const w=W(),bad=[[x,b],[y,a]].filter(([e,s])=>e&&!canWork(w,e,s.d,s.sh)).map(([e])=>empName(e));
+  changed();render();toast(y?`הוחלפו: ${empName(x)} ⇄ ${empName(y)}`:`${empName(x)} הועבר/ה`+(bad.length?` · שימו לב לאילוץ של ${bad.join(", ")}`:""))}
 function closePop(){if(pop){const hadNote=!!pop.querySelector("[data-anote]");pop.remove();pop=null;if(hadNote)render()}}
 document.addEventListener("click",e=>{
   const t=e.target.closest(".slot");
-  if(t&&t.closest("#sheet,#days")){e.stopPropagation();openPop(t);return}
+  if(t&&t.closest("#sheet,#days")){e.stopPropagation();if(SWAP){doSwap(t.dataset.k);return}openPop(t);return}
+  if(SWAP&&!e.target.closest(".swapbar")){endSwap();return}
   if(pop&&!e.target.closest(".pop"))closePop();
   const c=e.target.closest("[data-cst]");
   if(c&&!c.disabled){const[eid,d]=c.dataset.cst.split("|");const w=W();w.cons[eid]=w.cons[eid]||DAYS.map(()=>"A");const v=w.cons[eid][+d]||"A";
     /* Sun–Thu cycle זמין → בוקר → ערב → חופש; Friday toggles גיבוי לאירוע */
-    w.cons[eid][+d]=+d===5?(v==="B"?"A":"B"):CST[(Math.max(0,CST.indexOf(v))+1)%4];changed();render();}
+    w.cons[eid][+d]=+d===5?(v==="B"?"A":"B"):CST[(Math.max(0,CST.indexOf(v))+1)%4];
+    w.got=w.got||{};w.got[eid]=true;changed();render();}     /* entering a constraint means they replied */
+  const gb=e.target.closest("[data-got]");
+  if(gb){const w=W();w.got=w.got||{};w.got[gb.dataset.got]=!w.got[gb.dataset.got];changed();render();return}
   const del=e.target.closest("[data-edel]");
   if(del){S.employees=S.employees.filter(x=>x.id!==del.dataset.edel);changed();render()}
   const rb=e.target.closest("[data-rnow],[data-rrm],[data-radd]");
@@ -1526,7 +1583,7 @@ document.addEventListener("click",e=>{
   const sd=e.target.closest("[data-sdel]");
   if(sd){S.sites=S.sites.filter(x=>x.id!==sd.dataset.sdel);changed();render()}
 });
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closePop()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closePop();endSwap()}});
 function openPop(td){
   closePop();
   const[sid,sh,d,i]=td.dataset.k.split("|");const w=W();const arr=w.assign[sid][sh][+d];
@@ -1537,11 +1594,13 @@ function openPop(td){
     return `<button data-pick="${e.id}"><span>${isCur?"✓ ":""}${esc(e.name)}${e.backup?' <span class="tag bk">גיבוי</span>':""}</span><span class="tag ${(!ok||b)?"no":""}">${!ok?"אילוץ":b?"כבר משובץ/ת":"זמין/ה"}</span></button>`}).join("");
   const notes=curIds.map(id=>{const k=`${sid}|${sh}|${d}|${id}`,auto=autoNote(sh,+d),v=(w.anote||{})[k];
     return `<label class="pn"><span>שעות / הערה – ${esc(empName(id))}</span><input type="text" data-anote="${k}" value="${esc(v===undefined?auto:v)}" placeholder="למשל 11:00-19:00"></label>`}).join("");
-  pop.innerHTML=(notes?`<div class="pns">${notes}</div>`:"")+opts+`<button data-pick=""><span>ריק</span><span class="tag">הסר שיבוץ</span></button>`;
+  const canSw=sh==="m"?!!arr[+i===0?0:1]:!!arr[+i];
+  pop.innerHTML=(canSw?`<button class="swapb" data-swap><span>⇄ החלפה עם משבצת אחרת</span></button>`:"")+(notes?`<div class="pns">${notes}</div>`:"")+opts+`<button data-pick=""><span>ריק</span><span class="tag">הסר שיבוץ</span></button>`;
   document.body.appendChild(pop);
   const r=td.getBoundingClientRect();pop.style.top=Math.min(r.bottom+4,innerHeight-pop.offsetHeight-8)+"px";pop.style.left=Math.max(8,Math.min(r.left,innerWidth-pop.offsetWidth-8))+"px";
   pop.addEventListener("keydown",ev=>{if(ev.key==="Enter"&&ev.target.dataset.anote){closePop();render()}});
-  pop.addEventListener("click",ev=>{const b=ev.target.closest("[data-pick]");if(!b)return;const id=b.dataset.pick;
+  pop.addEventListener("click",ev=>{if(ev.target.closest("[data-swap]")){ev.stopPropagation();closePop();startSwap(td.dataset.k);return}
+    const b=ev.target.closest("[data-pick]");if(!b)return;const id=b.dataset.pick;
     let list=arr.slice();
     if(sh==="m"){if(+i===0){list=id?[id,...list.slice(1).filter(x=>x!==id)]:list.slice(1)}else{list=list.slice(0,1);if(id&&list[0]!==id)list.push(id)}}
     else list=id?[id]:[];
