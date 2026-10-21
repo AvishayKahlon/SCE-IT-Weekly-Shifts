@@ -705,7 +705,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 09:50";
+const APP_VER="21.10.2026 10:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -773,8 +773,18 @@ function onVac(eid,dt){const k=key(dt);return (S.vac||[]).some(v=>v.emp===eid&&v
 function countFris(a,b){if(!a||!b||b<a)return 0;let n=0;const d=parseKey(a),e=parseKey(b);while(d<=e){if(d.getDay()===5)n++;d.setDate(d.getDate()+1)}return n}
 /* effective staffing need for the current week: holidays close a whole day or its evening */
 let NEED={},CAPX=true,EC={},PREF=[],CURW={pref:{}};
-function calcNeed(){NEED={};const md=DAYS.map((_,d)=>dm(d));
-  S.sites.forEach(s=>{NEED[s.id]={m:DAYS.map((_,d)=>md[d].off?0:(s.req.m||[])[d]||0),e:DAYS.map((_,d)=>md[d].off||md[d].noEve?0:(s.req.e||[])[d]||0)}})}
+let SHORT=[];   /* days whose mornings were reduced because staff is away */
+function calcNeed(){NEED={};SHORT=[];const md=DAYS.map((_,d)=>dm(d));
+  S.sites.forEach(s=>{NEED[s.id]={m:DAYS.map((_,d)=>md[d].off?0:(s.req.m||[])[d]||0),e:DAYS.map((_,d)=>md[d].off||md[d].noEve?0:(s.req.e||[])[d]||0)}});
+  /* rule: when someone is on vacation (fewer people than shifts that day), mornings drop to one per campus;
+     evenings always stay – one in every campus */
+  const w=S.weeks[cur];
+  for(let d=0;d<5;d++){
+    const avail=activeEmps().filter(e=>!(onVac(e.id,dayDate(d))||(w&&cons(w,e.id,d)==="X"))).length;
+    let total=S.sites.reduce((a,s)=>a+NEED[s.id].m[d]+NEED[s.id].e[d],0);if(!total||avail>=total)continue;
+    let cut=false;
+    while(total>avail){const s=S.sites.filter(x=>NEED[x.id].m[d]>1).sort((a,b)=>NEED[b.id].m[d]-NEED[a.id].m[d])[0];if(!s)break;NEED[s.id].m[d]--;total--;cut=true}
+    if(cut)SHORT.push(d)}}
 /* Sun–Thu target per employee, capped by the open days and by the available slots in holiday weeks */
 function weekCap(){const T=+S.target||0;if(!T)return{cap:0,exact:false};let open=0,slots=0;
   for(let d=0;d<5;d++){let o=false;S.sites.forEach(s=>{const x=NEED[s.id].m[d]+NEED[s.id].e[d];slots+=x;if(x)o=true});if(o)open++}
@@ -879,7 +889,7 @@ function generate(){
     /* manual placements of backup staff stay where they are and fill that slot */
     S.sites.forEach(s=>["m","e"].forEach(sh=>w.assign[s.id][sh].forEach((arr,d)=>arr.forEach(e=>{if(isBackup(e)&&!out[s.id][sh][d].includes(e))out[s.id][sh][d].push(e)}))));
     S.sites.forEach(s=>w.assign[s.id].m[5].slice(1).forEach(e=>{if(emps.includes(e)&&cons(w,e,5)==="B"&&!day[e].has(5)){out[s.id].m[5].push(e);day[e].add(5)}}));
-    const order=freeSlots.map(x=>({...x,r:Math.random(),cand:emps.filter(e=>canWork(w,e,x.d,x.sh)).length})).sort((a,b)=>a.cand-b.cand||a.r-b.r);
+    const order=freeSlots.map(x=>({...x,r:Math.random(),cand:emps.filter(e=>canWork(w,e,x.d,x.sh)).length-(x.sh==="e"?0.5:0)})).sort((a,b)=>a.cand-b.cand||a.r-b.r);   /* evenings first */
     let unfilled=0;
     for(const sl of order){
       let pick=null,ps=Infinity;
@@ -919,7 +929,7 @@ function prefList(w){const l=[];Object.entries(w.pref||{}).forEach(([sid,arr])=>
 function prefPen(out,w){return prefList(w).reduce((a,p)=>a+((out[p.sid]?.[p.sh]?.[p.d]||[]).includes(p.e)?0:2500),0)}
 function planScore(out,emps,hist,T){
   const nf={},eve={},fri={};emps.forEach(e=>{nf[e]=0;eve[e]=0;fri[e]=0});let unfilled=0;
-  S.sites.forEach(s=>["m","e"].forEach(sh=>DAYS.forEach((_,d)=>{const need=NEED[s.id][sh][d];const a=out[s.id][sh][d];unfilled+=Math.max(0,need-a.length);a.forEach(e=>{if(!(e in nf))return;if(d<5)nf[e]++;if(sh==="e")eve[e]++;if(d===5)fri[e]++})})));
+  S.sites.forEach(s=>["m","e"].forEach(sh=>DAYS.forEach((_,d)=>{const need=NEED[s.id][sh][d];const a=out[s.id][sh][d];unfilled+=Math.max(0,need-a.length)*(sh==="e"?3:1);a.forEach(e=>{if(!(e in nf))return;if(d<5)nf[e]++;if(sh==="e")eve[e]++;if(d===5)fri[e]++})})));
   return unfilled*10000+coverEval(out,emps).pen+prefPen(out,CURW)+(T?emps.reduce((a,e)=>a+(CAPX?Math.abs(nf[e]-EC[e]):Math.max(0,nf[e]-EC[e])),0)*500:0)
     +Math.round((variance(emps.map(e=>nf[e]))*20+variance(emps.map(e=>eve[e]))*15+variance(emps.map(e=>fri[e]+hist[e].fri))*10)*100)/100;
 }
@@ -952,7 +962,7 @@ function problems(w){
   const list=[],bad=new Set();
   S.sites.forEach(s=>DAYS.forEach((dn,d)=>["m","e"].forEach(sh=>{
     const need=NEED[s.id][sh][d],have=w.assign[s.id][sh][d].length;
-    if(have<need)list.push(`${s.name}, ${dn} ${sh==="m"?"בוקר":"ערב"}: חסר${need-have>1?"ים":""} ${need-have}`);
+    if(have<need)list.push(`${s.name}, ${dn} ${sh==="m"?"בוקר":"ערב"}: חסר${need-have>1?"ים":""} ${need-have}${sh==="e"?" (משמרת ערב חובה)":""}`);
     if(!need&&have&&((s.req[sh]||[])[d]||0)>0){const md=dm(d);w.assign[s.id][sh][d].forEach((_,i)=>bad.add(`${s.id}|${sh}|${d}|${i}`));list.push(`${s.name}, ${dn} ${sh==="m"?"בוקר":"ערב"}: יש שיבוץ אבל ${md.off?"זה יום פגרה":"היום מסתיים ב-16:00"}`)}
     w.assign[s.id][sh][d].forEach((id,i)=>{if(!canWork(w,id,d,sh)){bad.add(`${s.id}|${sh}|${d}|${i}`);list.push(`${empName(id)} שובץ/ה ב${dn} ${sh==="m"?"בוקר":"ערב"} למרות אילוץ`)}});
   })));
@@ -1106,7 +1116,8 @@ function render(){
   $("#finalBtn .lb").textContent=w.final?"בטל סימון סופי":"סמן כסופי";$("#finalBtn").classList.toggle("on",!!w.final);
   $("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);
   const pr=problems(w);
-  $("#msgs").innerHTML=!hasAssign(w)?`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`:pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"");
+  const shortInfo=SHORT.length?`<div class="msg info">🏖️ ${SHORT.map(d=>DAYS[d]).join(", ")}: עובד בחופש – בוקר אחד בכל קמפוס, ערב אחד בכל קמפוס.</div>`:"";
+  $("#msgs").innerHTML=shortInfo+(!hasAssign(w)?`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`:pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:""));
   fitCells($("#sheet"));
   renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderStaff();renderSettings();renderMsgs();
 }
