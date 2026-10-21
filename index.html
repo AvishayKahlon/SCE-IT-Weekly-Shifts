@@ -620,6 +620,15 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 .tabs{view-transition-name:tabbar}
 ::view-transition-group(tabbar),::view-transition-old(tabbar),::view-transition-new(tabbar){animation:none}   /* the dock never moves during page changes */
 #tab-sched:not([hidden]),#tab-cal:not([hidden]),#tab-ev:not([hidden]),#tab-set:not([hidden]){view-transition-name:tabpage}
+html[data-vt="sub"]::view-transition-old(tabpage),html[data-vt="sub"]::view-transition-new(tabpage),html[data-vt="sub"]::view-transition-group(tabpage){animation:none}
+#tab-set .subtabs{view-transition-name:subbar}
+#sub-gen:not([hidden]),#sub-staff:not([hidden]),#sub-msg:not([hidden]){view-transition-name:subpage}
+::view-transition-group(subbar),::view-transition-old(subbar),::view-transition-new(subbar){animation:none}
+::view-transition-group(subpage){animation-duration:440ms;animation-timing-function:cubic-bezier(.32,.72,0,1)}
+::view-transition-old(subpage){animation:440ms cubic-bezier(.32,.72,0,1) both vt-out-r}
+::view-transition-new(subpage){animation:440ms cubic-bezier(.32,.72,0,1) both vt-in-l}
+html[data-dir="back"]::view-transition-old(subpage){animation-name:vt-out-l}
+html[data-dir="back"]::view-transition-new(subpage){animation-name:vt-in-r}
 ::view-transition-old(root),::view-transition-new(root){animation:none}
 ::view-transition-group(tabpage){animation-duration:440ms;animation-timing-function:cubic-bezier(.32,.72,0,1)}
 ::view-transition-old(tabpage){animation:440ms cubic-bezier(.32,.72,0,1) both vt-out-r}
@@ -1604,7 +1613,7 @@ html,body{min-height:100%}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 05:05";
+const APP_VER="22.10.2026 05:15";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2499,7 +2508,15 @@ if(window.visualViewport){visualViewport.addEventListener("resize",()=>{if(CMB)c
 /* ---------- settings categories ---------- */
 function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.sub===k));
   {const bs=[...document.querySelectorAll(".subtabs button")];$(".subtabs").style.setProperty("--si",Math.max(0,bs.findIndex(x=>x.dataset.sub===k)))}
-  ["gen","staff","msg"].forEach(t=>{$("#sub-"+t).hidden=t!==k});try{sessionStorage.setItem("shift-sub",k)}catch(e){}}
+  subSwap(k,true);try{sessionStorage.setItem("shift-sub",k)}catch(e){}}
+/* settings pages slide in from the side you move to, like the main tabs */
+const SUBS=["gen","staff","msg"];
+function subSwap(k,anim){const now=SUBS.find(t=>$("#sub-"+t)&&!$("#sub-"+t).hidden);if(now===k)return;
+  const upd=()=>SUBS.forEach(t=>{$("#sub-"+t).hidden=t!==k});
+  if(!anim||!now||$("#tab-set").hidden||matchMedia("(prefers-reduced-motion:reduce)").matches){upd();return}
+  document.documentElement.dataset.dir=SUBS.indexOf(k)>SUBS.indexOf(now)?"fwd":"back";document.documentElement.dataset.vt="sub";
+  if(document.startViewTransition){try{const v=document.startViewTransition(upd);v.finished.finally(()=>{document.documentElement.dataset.vt=""});return}catch(e){}}
+  upd();const p=$("#sub-"+k);p.classList.remove("peek");void p.offsetWidth;p.classList.add("peek")}
 document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>{if(skipSub)return;if(b.getAttribute("aria-selected")!=="true")haptic();openSub(b.dataset.sub)}));
 /* settings categories: same glass bar as the dock — slide a finger along it and the lens follows, the page under it shows */
 let skipSub=false;
@@ -2510,7 +2527,7 @@ let skipSub=false;
     if(!st.moved){st.moved=true;bar.classList.add("drag");try{bar.setPointerCapture(e.pointerId)}catch(_){}}
     const r=bar.getBoundingClientRect(),f=Math.max(0,Math.min(N-1,(r.right-e.clientX)/(r.width/N)-.5));bar.style.setProperty("--si",f.toFixed(3));
     const i=at(e.clientX);if(i!==st.i){st.i=i;btns.forEach((b,k)=>b.classList.toggle("hov",k===i));
-      ["gen","staff","msg"].forEach(t=>{const p=$("#sub-"+t);if(p)p.hidden=t!==btns[i].dataset.sub});haptic()}});
+      subSwap(btns[i].dataset.sub,true);haptic()}});
   const end=()=>{if(!st)return;const s0=st;st=null;bar.classList.remove("drag");btns.forEach(b=>b.classList.remove("hov"));
     if(s0.moved){openSub(btns[s0.i].dataset.sub);skipSub=true;setTimeout(()=>skipSub=false,350)}};
   bar.addEventListener("pointerup",end);bar.addEventListener("pointercancel",end)}
@@ -2584,7 +2601,7 @@ function swapPanel(t,anim,top){
   const upd=()=>{TABS.forEach(k=>{const p=$("#tab-"+k);if(p)p.hidden=k!==t});if(top)scrollTo({top:0});if(t==="sched")fitCells($("#sheet"))};
   const calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
   if(!anim||calm){upd();return}
-  document.documentElement.dataset.dir=TABS.indexOf(t)>TABS.indexOf(now)?"fwd":"back";
+  document.documentElement.dataset.dir=TABS.indexOf(t)>TABS.indexOf(now)?"fwd":"back";document.documentElement.dataset.vt="tab";
   if(document.startViewTransition){try{document.startViewTransition(upd);return}catch(e){}}
   upd();const p=$("#tab-"+t);p.classList.remove("peek");void p.offsetWidth;p.classList.add("peek")}
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",ev=>{
