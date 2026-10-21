@@ -324,11 +324,12 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   .tabs button.pressed .ti{transform:scale(.84)}
   /* compact while scrolling down (like iOS), back on scroll up */
   .tabs{touch-action:none}
-  .tabs.drag::before{transform:translateX(calc(var(--ti) * -100%)) scale(1.1,1.16);background:color-mix(in srgb,var(--glass-pill) 70%,var(--glass-edge));transition:transform 260ms cubic-bezier(.3,1.3,.45,1)}
+  .tabs.drag::before{transform:translateX(calc(var(--ti) * -100%)) scale(1.1,1.16);background:color-mix(in srgb,var(--glass-pill) 70%,var(--glass-edge));transition:transform 70ms linear}   /* the lens rides the finger */
   .tabs.drag{transform:scale(1.02)}
   .tabs button.hov{color:var(--accent);opacity:1}
 
-  .tabs.mini{transform:translateY(8px) scale(.8)}
+  .tabs{transform-origin:50% 100%}
+  .tabs.mini{transform:scale(.82)}
   .tabs.mini .ts{opacity:0}.tabs.mini .ti{transform:translateY(7px) scale(1.06)}
   body.kb .tabs{transform:translateY(calc(100% + 30px));opacity:0;pointer-events:none}
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabs{background:var(--surface)}}
@@ -617,6 +618,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 
 /* tab page transitions */
 .tabs{view-transition-name:tabbar}
+::view-transition-group(tabbar),::view-transition-old(tabbar),::view-transition-new(tabbar){animation:none}   /* the dock never moves during page changes */
 #tab-sched:not([hidden]),#tab-cal:not([hidden]),#tab-ev:not([hidden]),#tab-set:not([hidden]){view-transition-name:tabpage}
 ::view-transition-old(root),::view-transition-new(root){animation:none}
 ::view-transition-group(tabpage){animation-duration:440ms;animation-timing-function:cubic-bezier(.32,.72,0,1)}
@@ -1585,7 +1587,7 @@ body.dragging .tabs,body.dragging .minibar{opacity:0;pointer-events:none;transit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 04:35";
+const APP_VER="22.10.2026 04:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2431,7 +2433,8 @@ let CMB_TOUCH=false;
   bar.addEventListener("pointermove",e=>{if(!st||e.pointerId!==st.id)return;
     if(!st.moved&&Math.abs(e.clientX-st.x)<10)return;
     if(!st.moved){st.moved=true;bar.classList.add("drag");bar.classList.remove("mini");try{bar.setPointerCapture(e.pointerId)}catch(_){}}
-    const i=idxAt(e.clientX);if(i!==st.i){st.i=i;bar.style.setProperty("--ti",i);btns.forEach((b,k)=>b.classList.toggle("hov",k===i));previewTab(btns[i].dataset.tab);haptic()}});
+    const rr=bar.getBoundingClientRect(),f=Math.max(0,Math.min(btns.length-1,(rr.right-e.clientX)/(rr.width/btns.length)-.5));bar.style.setProperty("--ti",f.toFixed(3));
+    const i=idxAt(e.clientX);if(i!==st.i){st.i=i;btns.forEach((b,k)=>b.classList.toggle("hov",k===i));previewTab(btns[i].dataset.tab);haptic()}});
   /* show the page under the finger without committing to it */
   const previewTab=t=>swapPanel(t,true,true);
   const end=e=>{if(!st)return;const s0=st;st=null;bar.classList.remove("drag");btns.forEach(b=>b.classList.remove("hov"));
