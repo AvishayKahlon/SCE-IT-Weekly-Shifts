@@ -371,7 +371,11 @@ table.sh .note .nw input{flex:1 1 60px}
 .cmbl{position:fixed;z-index:45;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:4px;overflow:auto;display:grid;max-width:calc(100vw - 16px);transition:opacity 120ms var(--ease-out),transform 120ms var(--ease-out);transform-origin:top}
 @starting-style{.cmbl{opacity:0;transform:scale(.98) translateY(-3px)}}
 .cmbl button{border:0;background:none;text-align:right;padding:9px 12px;border-radius:7px;font-size:15px;white-space:nowrap}
-.cmbl button.hl{background:var(--bg)}
+.cmbl button.hl{background:#E8F3DF;color:#1b2a12}
+.cmbl button b{font-weight:800;color:var(--accent)}
+.cmb-none{padding:9px 12px;color:var(--muted);font-size:14px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cmbl button.hl{background:#24331D;color:var(--ink)}}
+@media (max-width:700px){.cmbl button{padding:12px 14px;font-size:16px}}
 @media (hover:hover) and (pointer:fine){.cmbl button:hover{background:var(--bg)}}
 /* exams & events */
 #exT td.xdel{white-space:nowrap;width:80px}
@@ -698,7 +702,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 09:00";
+const APP_VER="21.10.2026 09:15";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1264,7 +1268,7 @@ function renderEv(){
         return `<td data-l="${l}" class="rooms">${opts.length?opts.map(o=>`<button type="button" class="rm" data-xroom="${kind}|${r.id}|${o}" aria-pressed="${sel.includes(o)}">${esc(o)}</button>`).join(""):`<span class="hint">בחרו קמפוס</span>`}</td>`}
       if(t==="d")return `<td data-l="${l}">${dateField(at,v,l)}</td>`;
       if(t==="c")return `<td data-l="${l}"><select ${at} aria-label="${l}"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v?"selected":""}>${esc(c)}</option>`).join("")}</select></td>`;
-      if(dl)return `<td data-l="${l}"><div class="cmb"><input type="text" ${at} value="${esc(v)}" aria-label="${l}" data-dl="${dl}" autocomplete="off"${f==="name"?` placeholder="${l}"`:""}><button type="button" class="cmb-b" data-cmb tabindex="-1" aria-label="פתיחת רשימת ${l}">▾</button></div></td>`;
+      if(dl)return `<td data-l="${l}"><div class="cmb"><input type="text" ${at} value="${esc(v)}" aria-label="${l}" data-dl="${dl}" autocomplete="off" enterkeyhint="done"${f==="name"?` placeholder="${l} – לחצו לבחירה"`:""}><button type="button" class="cmb-b" data-cmb tabindex="-1" aria-label="פתיחת רשימת ${l}">▾</button></div></td>`;
       return `<td data-l="${l}"><input type="text" ${at} value="${esc(v)}" aria-label="${l}"${t==="h"?' placeholder="שעה" dir="ltr"':f==="name"?` placeholder="${l}"`:""}></td>`};
     $(cfg.tbl).innerHTML=`<thead><tr>${cfg.cols.map(c=>`<th>${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>`+
       (list.length?list.map(r=>{const open=XOPEN.has(r.id),sum=cfg.det?[r.software,r.lecturer,r.notes].filter(Boolean).join(" · "):"";
@@ -1306,34 +1310,46 @@ function renderSettings(){
     </table></div></div>`).join("");
 }
 
-/* ---------- pick-list for exam / lecturer / software / event names: ▾ or focusing an empty field shows the whole list ---------- */
+/* ---------- pick-list for exam / lecturer / software / event names ----------
+   tap anywhere on the field = full list (א-ב); typing filters it and highlights the best match; Enter / tap picks */
 let CMB=null;
 function cmbClose(){if(CMB){CMB.el.remove();CMB=null}}
-function cmbOpen(inp,all){const dl=document.getElementById(inp.dataset.dl);if(!dl)return;
-  const vals=[...dl.options].map(o=>o.value),q=all?"":inp.value.trim(),list=q?vals.filter(v=>v.includes(q)):vals;
-  if(CMB&&CMB.inp!==inp)cmbClose();
-  if(!list.length){cmbClose();return}
-  const el=CMB?CMB.el:document.createElement("div");el.className="cmbl";el.setAttribute("role","listbox");
-  el.innerHTML=list.map((v,i)=>`<button type="button" role="option" data-cv="${esc(v)}"${i===0&&q?' class="hl"':""}>${esc(v)}</button>`).join("");
-  if(!CMB){document.body.appendChild(el);CMB={el,inp}}
-  const r=inp.getBoundingClientRect();el.style.minWidth=Math.max(200,r.width)+"px";
-  const below=innerHeight-r.bottom;el.style.maxHeight=Math.max(160,Math.min(320,(below>220?below:r.top)-16))+"px";
-  el.style.top=(below>220?r.bottom+4:Math.max(8,r.top-4-el.offsetHeight))+"px";
+function cmbPlace(){if(!CMB)return;const{el,inp}=CMB,r=inp.getBoundingClientRect(),vv=window.visualViewport,vh=vv?vv.height:innerHeight,vt=vv?vv.offsetTop:0;
+  el.style.minWidth=Math.max(200,r.width)+"px";el.style.width=innerWidth<700?r.width+"px":"";
+  const below=vt+vh-r.bottom,above=r.top-vt,down=below>=180||below>=above;
+  el.style.maxHeight=Math.max(140,Math.min(320,(down?below:above)-12))+"px";
+  el.style.top=(down?r.bottom+4:Math.max(vt+8,r.top-4-el.offsetHeight))+"px";
   el.style.left=Math.max(8,Math.min(r.right-el.offsetWidth,innerWidth-el.offsetWidth-8))+"px"}
+function cmbOpen(inp,all){const dl=document.getElementById(inp.dataset.dl);if(!dl)return;
+  const vals=[...dl.options].map(o=>o.value),q=all?"":inp.value.trim(),ql=q.toLowerCase();
+  /* matches that start with the text come first */
+  const list=q?vals.filter(v=>v.toLowerCase().includes(ql)).sort((a,b)=>(b.toLowerCase().startsWith(ql))-(a.toLowerCase().startsWith(ql))||HE.compare(a,b)):vals;
+  if(CMB&&CMB.inp!==inp)cmbClose();
+  const el=CMB?CMB.el:document.createElement("div");el.className="cmbl";el.setAttribute("role","listbox");
+  const mark=v=>{if(!q)return esc(v);const k=v.toLowerCase().indexOf(ql);return esc(v.slice(0,k))+"<b>"+esc(v.slice(k,k+q.length))+"</b>"+esc(v.slice(k+q.length))};
+  el.innerHTML=list.length?list.map((v,i)=>`<button type="button" role="option" data-cv="${esc(v)}"${(q&&i===0)||(!q&&v===inp.value.trim())?' class="hl"':""}>${mark(v)}</button>`).join("")
+    :`<div class="cmb-none">${q?"אין התאמה – יישמר כחדש":"הרשימה ריקה"}</div>`;
+  if(!CMB){document.body.appendChild(el);CMB={el,inp}}
+  cmbPlace();el.querySelector(".hl")?.scrollIntoView({block:"nearest"})}
 function cmbPick(v){if(!CMB)return;const inp=CMB.inp;cmbClose();inp.value=v;inp.dispatchEvent(new Event("input",{bubbles:true}));cmbClose();inp.blur();inp.dispatchEvent(new Event("change",{bubbles:true}))}
-document.addEventListener("mousedown",e=>{if(e.target.closest(".cmbl"))e.preventDefault()},true);   /* keep focus in the field */
-document.addEventListener("click",e=>{
-  const o=e.target.closest(".cmbl [data-cv]");if(o){cmbPick(o.dataset.cv);return}
-  const b=e.target.closest("[data-cmb]");if(b){const inp=b.parentNode.querySelector("input");if(CMB&&CMB.inp===inp)cmbClose();else{inp.focus();cmbOpen(inp,true)}return}
+/* pick on pointerdown: on iPhone this happens before the keyboard closes and the field loses focus */
+document.addEventListener("pointerdown",e=>{const o=e.target.closest(".cmbl [data-cv]");if(o){e.preventDefault();cmbPick(o.dataset.cv);return}
+  if(e.target.closest(".cmbl")){e.preventDefault();return}
+  const b=e.target.closest("[data-cmb]");if(b){e.preventDefault();const inp=b.parentNode.querySelector("input");if(CMB&&CMB.inp===inp)cmbClose();else{inp.focus();cmbOpen(inp,true)}return}
   if(CMB&&!e.target.closest(".cmb"))cmbClose()},true);
-document.addEventListener("focusin",e=>{const t=e.target;if(t.dataset&&t.dataset.dl&&!t.value.trim())cmbOpen(t,true)});
-document.addEventListener("focusout",e=>{if(CMB&&e.target===CMB.inp)setTimeout(()=>{if(CMB&&document.activeElement!==CMB.inp)cmbClose()},150)});
-document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&t.dataset.dl)cmbOpen(t,false)});
+/* tapping the field itself (empty or not) opens the full list */
+document.addEventListener("click",e=>{const t=e.target;if(t.dataset&&t.dataset.dl&&!CMB)cmbOpen(t,true)},true);
+document.addEventListener("focusin",e=>{const t=e.target;if(t.dataset&&t.dataset.dl&&!CMB)cmbOpen(t,true)});
+document.addEventListener("focusout",e=>{if(CMB&&e.target===CMB.inp)setTimeout(()=>{if(CMB&&document.activeElement!==CMB.inp)cmbClose()},250)});
+document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&t.dataset.dl&&document.activeElement===t)cmbOpen(t,!t.value.trim())});
 document.addEventListener("keydown",e=>{if(!CMB||e.target!==CMB.inp)return;const items=[...CMB.el.querySelectorAll("[data-cv]")];let i=items.findIndex(x=>x.classList.contains("hl"));
-  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();items[i]?.classList.remove("hl");i=e.key==="ArrowDown"?Math.min(items.length-1,i+1):Math.max(0,i-1);items[i].classList.add("hl");items[i].scrollIntoView({block:"nearest"})}
-  else if(e.key==="Enter"&&i>=0){e.preventDefault();cmbPick(items[i].dataset.cv)}
+  if((e.key==="ArrowDown"||e.key==="ArrowUp")&&items.length){e.preventDefault();items[i]?.classList.remove("hl");i=e.key==="ArrowDown"?Math.min(items.length-1,i+1):Math.max(0,i-1);items[i].classList.add("hl");items[i].scrollIntoView({block:"nearest"})}
+  else if(e.key==="Enter"){e.preventDefault();if(i>=0)cmbPick(items[i].dataset.cv);else{const inp=CMB.inp;cmbClose();inp.blur()}}
   else if(e.key==="Escape"){cmbClose()}});
-window.addEventListener("scroll",()=>{if(CMB)cmbClose()},{passive:true});
+/* keep the list attached to its field while the page or the iPhone keyboard moves (don't close it) */
+window.addEventListener("scroll",()=>{if(CMB)cmbPlace()},{passive:true});
+window.addEventListener("resize",()=>{if(CMB)cmbPlace()});
+if(window.visualViewport){visualViewport.addEventListener("resize",()=>{if(CMB)cmbPlace()});visualViewport.addEventListener("scroll",()=>{if(CMB)cmbPlace()})}
 /* ---------- settings categories ---------- */
 function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.sub===k));
   ["gen","staff","msg"].forEach(t=>{$("#sub-"+t).hidden=t!==k});try{localStorage.setItem("shift-sub",k)}catch(e){}}
@@ -1435,7 +1451,10 @@ document.addEventListener("change",e=>{
   if(t.dataset.pref){const[sid,d]=t.dataset.pref.split("|"),w=W();w.pref[sid]=w.pref[sid]||DAYS.map(()=>null);const[e,sh]=(t.value||"|").split("|");w.pref[sid][+d]=e?{e,sh}:null;changed();render()}
   if(t.dataset.rsel){const[sid,i]=t.dataset.rsel.split("|"),r=S.friRule[sid];if(r){r.list[+i]=t.value;changed();render()}}
   if(t.dataset.xf){const[k,id,f]=t.dataset.xf.split("|"),r=S[k].find(x=>x.id===id);if(r){let txt=t.type==="text"&&!t.classList.contains("dtx");r[f]=txt?t.value.trim():t.classList.contains("dtx")?t.dataset.iso:t.value;
-    if(k==="exams"&&f==="name"){applyCat(r);txt=false}           /* known exam: fill the row, so redraw it */
+    if(k==="exams"&&f==="name"){
+      /* switched to another exam from the bank: replace its details instead of keeping the previous exam's */
+      if(t.defaultValue&&t.defaultValue.trim()!==r.name&&S.examCat.some(c=>c.name.trim()===r.name)){["software","lecturer","campus","time","notes"].forEach(x=>r[x]="")}
+      applyCat(r);const ok=roomsFor(r.campus);r.room=splitL(r.room).filter(x=>ok.includes(x)).join(", ");txt=false}   /* known exam: fill the row, so redraw it */
     if(k==="exams"&&f==="campus"){const ok=roomsFor(r.campus);r.room=splitL(r.room).filter(x=>ok.includes(x)).join(", ")}
     if(k==="exams")learnExam(r);
     if(k==="events"&&f==="name"){applyEvent(r);txt=false}
