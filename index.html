@@ -749,7 +749,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 15:20";
+const APP_VER="21.10.2026 15:35";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1239,7 +1239,12 @@ function consText(){const nx=consWeek(),dl=(S.consDeadline||"יום חמישי �
 function eventText(sid,d){const w=W(),s=S.sites.find(x=>x.id===sid),n=(w.notes[sid][d]||"").trim();
   const m=namesAt(w,sid,"m",d),e=namesAt(w,sid,"e",d);
   return `תזכורת ליום ${DAYS[d]} ${dot(dayDate(d))}:\n📍 ${s?s.name:""}: ${n}\n   בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`}
-$("#askConsBtn").onclick=()=>sendWa(consText());
+/* same as "העתק ופתח את הקבוצה" in Settings → Messages: copy the (possibly edited) text, open the group */
+$("#askConsBtn").onclick=()=>{
+  const g=(S.groupLink||"").trim(),text=($("#consMsg")&&$("#consMsg").value.trim())||consText();
+  if(!groupOk(g)){sendWa(text);return}     /* no group link saved yet: previous behaviour */
+  try{navigator.clipboard.writeText(text).then(()=>toast("ההודעה הועתקה, הדביקו בקבוצה ושלחו"),()=>toast("לא הצלחתי להעתיק. העתיקו מהגדרות ← הודעות"))}catch(e){toast("לא הצלחתי להעתיק. העתיקו מהגדרות ← הודעות")}
+  openUrl(g)};
 function renderGroup(){
   if(document.activeElement!==$("#mailTo"))$("#mailTo").value=S.mailTo||"";
   const u=(S.groupLink||"").trim();if(document.activeElement!==$("#groupLink"))$("#groupLink").value=u;
