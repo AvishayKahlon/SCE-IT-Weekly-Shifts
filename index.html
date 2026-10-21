@@ -368,9 +368,10 @@ table.sh .note .nw input{flex:1 1 60px}
 .cmb input{flex:1;min-width:0;padding-inline-end:30px!important}
 .cmb-b{position:absolute;inset-inline-end:3px;top:50%;transform:translateY(-50%);width:26px;height:26px;padding:0;border:0;background:none;color:var(--muted);font-size:13px;border-radius:6px}
 .cmb-b:active{transform:translateY(-50%) scale(.92)}
-.cmbl{position:fixed;z-index:45;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:4px;overflow:auto;display:grid;max-width:calc(100vw - 16px);transition:opacity 120ms var(--ease-out),transform 120ms var(--ease-out);transform-origin:top}
+.cmbl{position:fixed;z-index:45;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:4px;overflow:auto;display:grid;max-width:calc(100vw - 16px);transition:opacity 120ms var(--ease-out),transform 120ms var(--ease-out);transform-origin:top}
 @starting-style{.cmbl{opacity:0;transform:scale(.98) translateY(-3px)}}
-.cmbl button{border:0;background:none;text-align:right;padding:9px 12px;border-radius:7px;font-size:15px;white-space:nowrap}
+.cmbl button{border:0;background:none;text-align:right;padding:9px 12px;border-radius:7px;font-size:15px;white-space:nowrap;touch-action:pan-y}
+.cmbl button:active{transform:none;background:var(--bg)}
 .cmbl button.hl{background:#E8F3DF;color:#1b2a12}
 .cmbl button b{font-weight:800;color:var(--accent)}
 .cmb-none{padding:9px 12px;color:var(--muted);font-size:14px}
@@ -704,7 +705,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 09:25";
+const APP_VER="21.10.2026 09:35";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1337,19 +1338,25 @@ function cmbOpen(inp,all){const dl=document.getElementById(inp.dataset.dl);if(!d
   if(!CMB){document.body.appendChild(el);CMB={el,inp}}
   cmbPlace();el.querySelector(".hl")?.scrollIntoView({block:"nearest"})}
 function cmbPick(v){if(!CMB)return;const inp=CMB.inp;cmbClose();inp.value=v;inp.dispatchEvent(new Event("input",{bubbles:true}));cmbClose();inp.blur();inp.dispatchEvent(new Event("change",{bubbles:true}))}
-/* pick on pointerdown: on iPhone this happens before the keyboard closes and the field loses focus */
 function cmbToExam(name){if(!CMB)return;const inp=CMB.inp,[k,id]=(inp.dataset.xf||"").split("|");cmbClose();inp.blur();
   const ev=S.events.find(x=>x.id===id),r={id:uid(),date:(ev&&ev.date)||cur,name};applyCat(r);S.exams.push(r);if(ev)S.events=S.events.filter(x=>x!==ev);changed();render();
   toast(`${name} נוסף לטבלת המבחנים`);setTimeout(()=>document.querySelector(`[data-xf="exams|${r.id}|date"]`)?.closest("tr")?.scrollIntoView({block:"center",behavior:"smooth"}),60)}
-document.addEventListener("pointerdown",e=>{const x=e.target.closest(".cmbl [data-cx]");if(x){e.preventDefault();cmbToExam(x.dataset.cx);return}
+/* the list scrolls freely with the finger; an item is picked only on a tap (click), never when a scroll starts.
+   mousedown is cancelled so the field keeps focus (on iPhone it is sent only for taps, after the finger lifts) */
+let CMB_TOUCH=false;
+document.addEventListener("touchstart",e=>{CMB_TOUCH=!!e.target.closest(".cmbl")},{passive:true,capture:true});
+document.addEventListener("touchend",()=>{setTimeout(()=>{CMB_TOUCH=false},450)},{passive:true,capture:true});
+document.addEventListener("mousedown",e=>{if(e.target.closest(".cmbl,[data-cmb]"))e.preventDefault()},true);
+document.addEventListener("click",e=>{
+  const x=e.target.closest(".cmbl [data-cx]");if(x){e.preventDefault();cmbToExam(x.dataset.cx);return}
   const o=e.target.closest(".cmbl [data-cv]");if(o){e.preventDefault();cmbPick(o.dataset.cv);return}
-  if(e.target.closest(".cmbl")){e.preventDefault();return}
+  if(e.target.closest(".cmbl"))return;
   const b=e.target.closest("[data-cmb]");if(b){e.preventDefault();const inp=b.parentNode.querySelector("input");if(CMB&&CMB.inp===inp)cmbClose();else{inp.focus();cmbOpen(inp,true)}return}
   if(CMB&&!e.target.closest(".cmb"))cmbClose()},true);
 /* tapping the field itself (empty or not) opens the full list */
 document.addEventListener("click",e=>{const t=e.target;if(t.dataset&&t.dataset.dl&&!CMB)cmbOpen(t,true)},true);
 document.addEventListener("focusin",e=>{const t=e.target;if(t.dataset&&t.dataset.dl&&!CMB)cmbOpen(t,true)});
-document.addEventListener("focusout",e=>{if(CMB&&e.target===CMB.inp)setTimeout(()=>{if(CMB&&document.activeElement!==CMB.inp)cmbClose()},250)});
+document.addEventListener("focusout",e=>{if(CMB&&e.target===CMB.inp)setTimeout(()=>{if(CMB&&!CMB_TOUCH&&document.activeElement!==CMB.inp)cmbClose()},400)});
 document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&t.dataset.dl&&document.activeElement===t)cmbOpen(t,!t.value.trim())});
 document.addEventListener("keydown",e=>{if(!CMB||e.target!==CMB.inp)return;const items=[...CMB.el.querySelectorAll("[data-cv],[data-cx]")];let i=items.findIndex(x=>x.classList.contains("hl"));
   if((e.key==="ArrowDown"||e.key==="ArrowUp")&&items.length){e.preventDefault();items[i]?.classList.remove("hl");i=e.key==="ArrowDown"?Math.min(items.length-1,i+1):Math.max(0,i-1);items[i].classList.add("hl");items[i].scrollIntoView({block:"nearest"})}
