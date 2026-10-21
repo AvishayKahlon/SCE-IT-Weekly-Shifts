@@ -544,7 +544,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
       <button class="act" id="finalBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5"/></svg><span class="lb">סמן כסופי</span></button>
     </div>
     <section class="card" id="agendaBox" hidden>
-      <h2>מה יש השבוע בכל קמפוס</h2>
+      <h2 id="agendaTitle">הערות ואירועים</h2>
       <p class="hint" style="margin:-4px 0 10px">מבחנים, אירועים, חגים והערות לפי יום וקמפוס. ⭐ בוחרים כאן טכנאי מועדף לפני "צור סידור אוטומטי".</p>
       <div id="agenda"></div>
     </section>
@@ -731,7 +731,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 11:40";
+const APP_VER="21.10.2026 11:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1019,6 +1019,7 @@ function problems(w){
 /* week overview: what is on at each campus, with the preferred-technician picker next to it */
 function renderAgenda(w){
   const days=DAYS.map((dn,d)=>({dn,d,sites:S.sites.map(s=>({s,lines:noteLines(w,s.id,d)})).filter(x=>x.lines.length)})).filter(x=>x.sites.length);
+  $("#agendaTitle").textContent="הערות ואירועים "+weekSpan();
   $("#agendaBox").hidden=!days.length;if(!days.length){$("#agenda").innerHTML="";return}
   $("#agenda").innerHTML=days.map(({dn,d,sites})=>`<div class="ag-day"><div class="ag-h"><b>${dn}</b> <span>${dot(dayDate(d))}</span></div>`+
     sites.map(({s,lines})=>`<div class="ag-site"><div class="ag-n">${esc(s.name)}</div><div class="ag-l">${lines.map(l=>`<span>${esc(l)}</span>`).join("")}</div>
