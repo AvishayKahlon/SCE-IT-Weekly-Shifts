@@ -508,7 +508,7 @@ body.swapping .slot.swapsrc{outline:3px solid #E07A00!important;background:#FFE7
 .ib{width:24px;height:24px;min-width:24px;padding:0;border-radius:50%;font-size:14px;font-weight:700;line-height:1;color:var(--muted);background:transparent;border:1px solid var(--line);display:inline-grid;place-items:center;vertical-align:middle;margin-inline-start:6px}
 .ib[aria-expanded="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .tip{display:none}
-.tipon>.tip{display:block}
+.tipon>.tip,.tipon>.dbody>.tip{display:block}
 .card>h2:has(.ib),.subh:has(.ib){display:flex;align-items:center;gap:4px}
 /* tab icons: shown only in the phone bottom bar */
 .tabs .ti,.tabs .ts{display:none}
@@ -750,6 +750,18 @@ table.grid th,table.grid td{border-color:var(--g-line)}
 .pop,.cmbl,.nwp-card,.sheetready .card{-webkit-backdrop-filter:blur(30px) saturate(200%);backdrop-filter:blur(30px) saturate(200%)}
 .tabs{--glass-bg:color-mix(in srgb,var(--g-pop) 80%,transparent)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--g-card:rgba(255,255,255,.85)}}
+
+/* collapsible sections: the tab bar's glass, a capsule when closed, a rounded pane when open */
+details.card.cons{background:var(--glass-bg);-webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);
+  box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-edge),inset 0 -1px 0 var(--glass-rim),inset 0 0 0 .5px var(--glass-edge);
+  border-radius:26px;transition:border-radius 380ms cubic-bezier(.32,.72,0,1),padding 300ms var(--ease-out)}
+details.card.cons:not([open]){border-radius:34px;padding-block:13px}
+details.cons>summary{align-items:center;min-height:34px}
+details.cons>summary::before{content:"";width:9px;height:9px;flex:none;border:solid var(--muted);border-width:0 2px 2px 0;transform:translateY(-2px) rotate(45deg);transition:transform 380ms cubic-bezier(.3,1.3,.45,1);margin-inline:4px 2px}
+details.cons:not([open])>summary::before{content:"";transform:rotate(135deg)}
+details.cons.sub{border:0;margin-top:14px;background:var(--g-field);border-radius:22px;padding:12px 14px;box-shadow:inset 0 0 0 .5px var(--g-line),inset 0 1px 0 var(--g-rim1,#fff);transition:border-radius 380ms cubic-bezier(.32,.72,0,1)}
+details.cons.sub:not([open]){border-radius:30px}
+.dbody{transform-origin:50% 0}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -984,7 +996,7 @@ table.grid th,table.grid td{border-color:var(--g-line)}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 20:45";
+const APP_VER="21.10.2026 21:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1757,6 +1769,32 @@ document.querySelectorAll(".card, details.sub").forEach(c=>{
   const b=document.createElement("button");b.type="button";b.className="ib";b.textContent="i";b.setAttribute("aria-expanded","false");b.setAttribute("aria-label","הסבר");b.title="הסבר";
   b.addEventListener("click",ev=>{ev.preventDefault();ev.stopPropagation();const on=c.classList.toggle("tipon");b.setAttribute("aria-expanded",on);if(on&&c.tagName==="DETAILS")c.open=true});
   h.appendChild(b)});
+/* collapsible sections open and close like a Mac window: open = scale up out of the title bar (macOS "Scale" effect),
+   close = squeeze back into the title like the Dock's Genie effect. The body is wrapped once so it can be animated. */
+document.querySelectorAll("details.cons").forEach(d=>{if(d.querySelector(":scope>.dbody"))return;const b=document.createElement("div");b.className="dbody";
+  [...d.childNodes].filter(n=>n.nodeName!=="SUMMARY").forEach(n=>b.appendChild(n));d.appendChild(b)});
+function toggleSection(d){
+  const body=d.querySelector(":scope>.dbody");if(!body){d.open=!d.open;return}
+  (d._an||[]).forEach(a=>{try{a.cancel()}catch(e){}});d._an=[];d.style.overflow="";
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches||!d.animate){d.open=!d.open;return}
+  haptic();
+  const h0=d.getBoundingClientRect().height;
+  if(!d.open){
+    d.open=true;const h1=d.getBoundingClientRect().height;d.style.overflow="hidden";
+    const a=d.animate([{height:h0+"px"},{height:h1+"px"}],{duration:520,easing:"cubic-bezier(.32,.72,0,1)"});
+    const b=body.animate([{opacity:0,transform:"scale(.9) translateY(-16px)",filter:"blur(8px)"},{opacity:1,transform:"none",filter:"blur(0)"}],{duration:560,easing:"cubic-bezier(.3,1.22,.45,1)"});
+    d._an=[a,b];a.onfinish=()=>{d.style.overflow=""};
+  }else{
+    d.open=false;const h1=d.getBoundingClientRect().height;d.open=true;d.style.overflow="hidden";
+    const a=d.animate([{height:h0+"px"},{height:h1+"px"}],{duration:430,easing:"cubic-bezier(.55,0,.25,1)"});
+    const b=body.animate([
+      {clipPath:"polygon(0% 0%,100% 0%,100% 100%,0% 100%)",transform:"none",opacity:1,filter:"blur(0)"},
+      {clipPath:"polygon(0% 0%,100% 0%,80% 60%,20% 60%)",transform:"scaleY(.72)",opacity:.75,filter:"blur(1px)",offset:.45},
+      {clipPath:"polygon(44% 0%,56% 0%,50.5% 0%,49.5% 0%)",transform:"scaleY(.15) translateY(-24px)",opacity:0,filter:"blur(4px)"}],{duration:430,easing:"cubic-bezier(.55,0,.25,1)"});
+    d._an=[a,b];a.onfinish=()=>{d.open=false;d.style.overflow=""};
+  }}
+document.addEventListener("click",e=>{const s=e.target.closest&&e.target.closest("details.cons>summary");if(!s||e.target.closest(".ib"))return;
+  e.preventDefault();toggleSection(s.parentElement)});
 ["friBox","catBox","exBox","evBox","vacBox","holBox"].forEach(id=>{const b=$("#"+id),k="open-"+id;
   try{if(sessionStorage.getItem(k)==="1")b.open=true}catch(e){}
   b.addEventListener("toggle",()=>{try{sessionStorage.setItem(k,b.open?"1":"0")}catch(e){}})});
