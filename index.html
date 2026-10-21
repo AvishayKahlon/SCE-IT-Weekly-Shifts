@@ -374,6 +374,8 @@ table.sh .note .nw input{flex:1 1 60px}
 .cmbl button.hl{background:#E8F3DF;color:#1b2a12}
 .cmbl button b{font-weight:800;color:var(--accent)}
 .cmb-none{padding:9px 12px;color:var(--muted);font-size:14px}
+.cmb-h{padding:8px 12px 4px;font-size:12px;color:var(--muted);font-weight:700;border-top:1px solid var(--line)}
+.cmb-h:first-child{border-top:0}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cmbl button.hl{background:#24331D;color:var(--ink)}}
 @media (max-width:700px){.cmbl button{padding:12px 14px;font-size:16px}}
 @media (hover:hover) and (pointer:fine){.cmbl button:hover{background:var(--bg)}}
@@ -572,16 +574,16 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 
   <section class="panel" id="tab-ev" hidden>
     <div class="card">
-      <h2>אירועים וכנסים</h2>
-      <p class="hint" style="margin-bottom:10px">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם האירוע | שעה. אירועים שעברו מוצגים באפור.</p>
-      <div class="scroll"><table class="cal xt" id="evT"></table></div>
-      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button></div>
-    </div>
-    <div class="card">
       <h2>מבחנים</h2>
       <p class="hint" style="margin-bottom:10px">מבחן מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם המבחן | שעה.</p>
       <div class="scroll"><table class="cal xt" id="exT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
+    </div>
+    <div class="card">
+      <h2>אירועים וכנסים</h2>
+      <p class="hint" style="margin-bottom:10px">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם האירוע | שעה. אירועים שעברו מוצגים באפור.</p>
+      <div class="scroll"><table class="cal xt" id="evT"></table></div>
+      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button></div>
     </div>
     <details class="card cons" id="catBox" open>
       <summary><h2>מאגר מבחנים קבועים</h2><span class="hint">לחיצה כדי לסגור / לפתוח</span></summary>
@@ -702,7 +704,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 09:15";
+const APP_VER="21.10.2026 09:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1327,13 +1329,20 @@ function cmbOpen(inp,all){const dl=document.getElementById(inp.dataset.dl);if(!d
   if(CMB&&CMB.inp!==inp)cmbClose();
   const el=CMB?CMB.el:document.createElement("div");el.className="cmbl";el.setAttribute("role","listbox");
   const mark=v=>{if(!q)return esc(v);const k=v.toLowerCase().indexOf(ql);return esc(v.slice(0,k))+"<b>"+esc(v.slice(k,k+q.length))+"</b>"+esc(v.slice(k+q.length))};
-  el.innerHTML=list.length?list.map((v,i)=>`<button type="button" role="option" data-cv="${esc(v)}"${(q&&i===0)||(!q&&v===inp.value.trim())?' class="hl"':""}>${mark(v)}</button>`).join("")
-    :`<div class="cmb-none">${q?"אין התאמה – יישמר כחדש":"הרשימה ריקה"}</div>`;
+  /* typing an exam name in the events table: offer it as an exam (moves the row to the exams table) */
+  const ex=inp.dataset.dl==="dlEvent"&&q?S.examCat.map(c=>c.name).filter(v=>v&&v.toLowerCase().includes(ql)).sort(HE.compare):[];
+  el.innerHTML=(list.length?list.map((v,i)=>`<button type="button" role="option" data-cv="${esc(v)}"${(q&&i===0)||(!q&&v===inp.value.trim())?' class="hl"':""}>${mark(v)}</button>`).join("")
+    :ex.length?"":`<div class="cmb-none">${q?"אין התאמה – יישמר כחדש":inp.dataset.dl==="dlEvent"?"עוד אין אירועים קודמים. הקלידו שם חדש":"הרשימה ריקה"}</div>`)
+    +(ex.length?`<div class="cmb-h">מבחן מהמאגר – יעבור לטבלת המבחנים</div>`+ex.map((v,i)=>`<button type="button" role="option" data-cx="${esc(v)}"${!list.length&&i===0?' class="hl"':""}>📝 ${mark(v)}</button>`).join(""):"");
   if(!CMB){document.body.appendChild(el);CMB={el,inp}}
   cmbPlace();el.querySelector(".hl")?.scrollIntoView({block:"nearest"})}
 function cmbPick(v){if(!CMB)return;const inp=CMB.inp;cmbClose();inp.value=v;inp.dispatchEvent(new Event("input",{bubbles:true}));cmbClose();inp.blur();inp.dispatchEvent(new Event("change",{bubbles:true}))}
 /* pick on pointerdown: on iPhone this happens before the keyboard closes and the field loses focus */
-document.addEventListener("pointerdown",e=>{const o=e.target.closest(".cmbl [data-cv]");if(o){e.preventDefault();cmbPick(o.dataset.cv);return}
+function cmbToExam(name){if(!CMB)return;const inp=CMB.inp,[k,id]=(inp.dataset.xf||"").split("|");cmbClose();inp.blur();
+  const ev=S.events.find(x=>x.id===id),r={id:uid(),date:(ev&&ev.date)||cur,name};applyCat(r);S.exams.push(r);if(ev)S.events=S.events.filter(x=>x!==ev);changed();render();
+  toast(`${name} נוסף לטבלת המבחנים`);setTimeout(()=>document.querySelector(`[data-xf="exams|${r.id}|date"]`)?.closest("tr")?.scrollIntoView({block:"center",behavior:"smooth"}),60)}
+document.addEventListener("pointerdown",e=>{const x=e.target.closest(".cmbl [data-cx]");if(x){e.preventDefault();cmbToExam(x.dataset.cx);return}
+  const o=e.target.closest(".cmbl [data-cv]");if(o){e.preventDefault();cmbPick(o.dataset.cv);return}
   if(e.target.closest(".cmbl")){e.preventDefault();return}
   const b=e.target.closest("[data-cmb]");if(b){e.preventDefault();const inp=b.parentNode.querySelector("input");if(CMB&&CMB.inp===inp)cmbClose();else{inp.focus();cmbOpen(inp,true)}return}
   if(CMB&&!e.target.closest(".cmb"))cmbClose()},true);
@@ -1342,9 +1351,9 @@ document.addEventListener("click",e=>{const t=e.target;if(t.dataset&&t.dataset.d
 document.addEventListener("focusin",e=>{const t=e.target;if(t.dataset&&t.dataset.dl&&!CMB)cmbOpen(t,true)});
 document.addEventListener("focusout",e=>{if(CMB&&e.target===CMB.inp)setTimeout(()=>{if(CMB&&document.activeElement!==CMB.inp)cmbClose()},250)});
 document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&t.dataset.dl&&document.activeElement===t)cmbOpen(t,!t.value.trim())});
-document.addEventListener("keydown",e=>{if(!CMB||e.target!==CMB.inp)return;const items=[...CMB.el.querySelectorAll("[data-cv]")];let i=items.findIndex(x=>x.classList.contains("hl"));
+document.addEventListener("keydown",e=>{if(!CMB||e.target!==CMB.inp)return;const items=[...CMB.el.querySelectorAll("[data-cv],[data-cx]")];let i=items.findIndex(x=>x.classList.contains("hl"));
   if((e.key==="ArrowDown"||e.key==="ArrowUp")&&items.length){e.preventDefault();items[i]?.classList.remove("hl");i=e.key==="ArrowDown"?Math.min(items.length-1,i+1):Math.max(0,i-1);items[i].classList.add("hl");items[i].scrollIntoView({block:"nearest"})}
-  else if(e.key==="Enter"){e.preventDefault();if(i>=0)cmbPick(items[i].dataset.cv);else{const inp=CMB.inp;cmbClose();inp.blur()}}
+  else if(e.key==="Enter"){e.preventDefault();if(i>=0){if(items[i].dataset.cx)cmbToExam(items[i].dataset.cx);else cmbPick(items[i].dataset.cv)}else{const inp=CMB.inp;cmbClose();inp.blur()}}
   else if(e.key==="Escape"){cmbClose()}});
 /* keep the list attached to its field while the page or the iPhone keyboard moves (don't close it) */
 window.addEventListener("scroll",()=>{if(CMB)cmbPlace()},{passive:true});
