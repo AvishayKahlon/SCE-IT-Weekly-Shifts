@@ -1028,6 +1028,17 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 :root[data-theme="dark"] .pop .tag.bk{background:rgba(255,255,255,.1);color:#B0BEC5}
 :root[data-theme="dark"] .nwp-ic{background:rgba(110,200,120,.16);color:#9BE3A8}
 
+
+/* desktop: two compact tiles side by side */
+.duo{display:grid;gap:16px;align-items:start}
+@media (min-width:1000px){
+  .duo{grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
+  .duo>.card{padding:12px 14px}
+  .duo #agenda{display:grid;gap:8px}
+  .duo .ag-site{padding-block:5px}
+  .duo .card h2{font-size:18px}
+  .duo details.card.cons:not([open]){align-self:start}
+}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1074,11 +1085,13 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
       </div>
       <button class="act" id="finalBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5"/></svg><span class="lb">סמן כסופי</span></button>
     </div>
+    <div class="duo" id="duo">
     <section class="card" id="agendaBox" hidden>
       <h2 id="agendaTitle">הערות ואירועים</h2>
       <p class="hint" style="margin:-4px 0 10px">מבחנים, אירועים, חגים והערות לפי יום וקמפוס. ⭐ בוחרים כאן טכנאי מועדף לפני "צור סידור אוטומטי".</p>
       <div id="agenda"></div>
     </section>
+    </div>
     <details class="card cons" id="consBox" open>
       <summary><h2>אילוצים לשבוע</h2><span class="xcnt" id="gotN"></span><span class="hint">לחיצה על משבצת מחליפה מצב: זמין ← בוקר ← ערב ← חופש. בשישי: גיבוי לאירוע</span></summary>
       <div class="legend" style="margin:10px 0">
@@ -1264,7 +1277,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 23:45";
+const APP_VER="21.10.2026 23:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2091,6 +2104,9 @@ document.querySelectorAll(".card, details.sub").forEach(c=>{
   const b=document.createElement("button");b.type="button";b.className="ib";b.textContent="i";b.setAttribute("aria-expanded","false");b.setAttribute("aria-label","הסבר");b.title="הסבר";
   b.addEventListener("click",ev=>{ev.preventDefault();ev.stopPropagation();const on=c.classList.toggle("tipon");b.setAttribute("aria-expanded",on);if(on&&c.tagName==="DETAILS")c.open=true});
   h.appendChild(b)});
+/* computer: "notes & events of the week" and "Friday on-call" side by side; phone: Friday stays under the constraints */
+{const mq=matchMedia("(min-width:1000px)"),place=()=>{const f=$("#friBox");if(mq.matches)$("#duo").appendChild(f);else $("#consBox").after(f)};
+  place();mq.addEventListener?mq.addEventListener("change",place):mq.addListener(place)}
 /* collapsible sections open and close like a Mac window: open = scale up out of the title bar (macOS "Scale" effect),
    close = squeeze back into the title like the Dock's Genie effect. The body is wrapped once so it can be animated. */
 document.querySelectorAll("details.cons").forEach(d=>{if(d.querySelector(":scope>.dbody"))return;const b=document.createElement("div");b.className="dbody";
