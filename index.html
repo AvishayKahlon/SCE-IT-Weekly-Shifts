@@ -71,7 +71,7 @@ table.sh .slot.pressed,.cst.pressed{filter:brightness(.88)}
 @starting-style{.pop{opacity:0;transform:scale(.97) translateY(-4px)}}
 .toast{transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out)}
 @starting-style{.toast{opacity:0;transform:translate(-50%,8px)}}
-@media (prefers-reduced-motion:reduce){.tabs,.tabs::before,.tabs .ti,.tabs .ts{transition:none!important}}
+@media (prefers-reduced-motion:reduce){.tabs,.tabs::before,.tabs .ti,.tabs .ts{transition:none!important}.panel.peek{animation:none}}
 @media (prefers-reduced-motion:reduce){button,a.btn,.pop,.toast,.tools .badge{transition:opacity 150ms ease}button:active,a.btn:active{transform:none}}
 /* inputs at 16px on touch screens so iOS doesn't zoom the page on focus */
 @media (pointer:coarse){input,select,textarea,.psel,.pop .pn input{font-size:16px}}
@@ -288,6 +288,8 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   .tabs.drag::before{transform:translateX(calc(var(--ti) * -100%)) scale(1.1,1.16);background:color-mix(in srgb,var(--glass-pill) 70%,var(--glass-edge));transition:transform 260ms cubic-bezier(.3,1.3,.45,1)}
   .tabs.drag{transform:scale(1.02)}
   .tabs button.hov{color:var(--accent);opacity:1}
+  .panel.peek{animation:peek 220ms var(--ease-out)}
+  @keyframes peek{from{opacity:.35;transform:translateY(6px)}}
   .tabs.mini{left:22%;right:22%;padding:3px}
   .tabs.mini::before{top:3px;bottom:3px;right:3px;width:calc((100% - 6px)/4)}
   .tabs.mini button{padding:6px 2px}.tabs.mini .ts{max-height:0;opacity:0}.tabs.mini .ti{transform:scale(.9)}
@@ -865,7 +867,7 @@ textarea{padding:10px 12px;border-radius:14px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 17:55";
+const APP_VER="21.10.2026 18:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1565,8 +1567,11 @@ let CMB_TOUCH=false;
   bar.addEventListener("pointermove",e=>{if(!st||e.pointerId!==st.id)return;
     if(!st.moved&&Math.abs(e.clientX-st.x)<10)return;
     if(!st.moved){st.moved=true;bar.classList.add("drag");bar.classList.remove("mini");try{bar.setPointerCapture(e.pointerId)}catch(_){}}
-    const i=idxAt(e.clientX);if(i!==st.i){st.i=i;bar.style.setProperty("--ti",i);btns.forEach((b,k)=>b.classList.toggle("hov",k===i));haptic()}});
+    const i=idxAt(e.clientX);if(i!==st.i){st.i=i;bar.style.setProperty("--ti",i);btns.forEach((b,k)=>b.classList.toggle("hov",k===i));previewTab(btns[i].dataset.tab);haptic()}});
+  /* show the page under the finger without committing to it */
+  const previewTab=t=>{["sched","cal","ev","set"].forEach(k=>{const p=$("#tab-"+k);if(p){p.hidden=k!==t;if(k===t){p.classList.remove("peek");void p.offsetWidth;p.classList.add("peek")}}});scrollTo({top:0})};
   const end=e=>{if(!st)return;const s0=st;st=null;bar.classList.remove("drag");btns.forEach(b=>b.classList.remove("hov"));
+    if(s0.moved){const cur0=btns.find(b=>b.getAttribute("aria-selected")==="true");if(btns[s0.i]===cur0)previewTab(cur0.dataset.tab)}
     if(s0.moved){const b=btns[s0.i];
       if(b.getAttribute("aria-selected")==="true")bar.style.setProperty("--ti",s0.i);else{b.click();scrollTo({top:0})}
       skipClick=true;setTimeout(()=>skipClick=false,350)}};   /* swallow the click the browser fires after the drag */
@@ -1628,12 +1633,10 @@ document.querySelectorAll(".card, details.sub").forEach(c=>{
 /* ---------- interactions ---------- */
 /* haptic tick. Android: vibrate(). iPhone (iOS 18+): Safari has no vibrate API, but toggling a native switch
    control gives the system "tick" — so a hidden switch is flipped. Works only from a touch/click. */
-const haptic=(()=>{let lbl=null;
-  return()=>{try{if(navigator.vibrate){navigator.vibrate(8);return}
-    if(!lbl){const id="hapt-sw";lbl=document.createElement("label");lbl.htmlFor=id;lbl.setAttribute("aria-hidden","true");
-      lbl.style.cssText="position:fixed;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;left:-9px;top:0";
-      const i=document.createElement("input");i.type="checkbox";i.id=id;i.setAttribute("switch","");i.tabIndex=-1;lbl.appendChild(i);document.body.appendChild(lbl)}
-    lbl.click()}catch(e){}}})();
+const haptic=()=>{try{if(navigator.vibrate){navigator.vibrate(8);return}
+  /* a fresh, never-rendered switch each time (same approach as the ios-haptics library) */
+  const lbl=document.createElement("label"),i=document.createElement("input");lbl.setAttribute("aria-hidden","true");lbl.style.display="none";
+  i.type="checkbox";i.setAttribute("switch","");lbl.appendChild(i);document.head.appendChild(lbl);lbl.click();lbl.remove()}catch(e){}};
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",ev=>{
   if(ev.isTrusted&&b.getAttribute("aria-selected")!=="true")haptic();
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
