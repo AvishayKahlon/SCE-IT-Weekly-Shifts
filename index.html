@@ -738,7 +738,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 13:10";
+const APP_VER="21.10.2026 13:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -805,7 +805,7 @@ function dm(d){return dayMode(dayDate(d))}
 function onVac(eid,dt){const k=key(dt);return (S.vac||[]).some(v=>v.emp===eid&&v.from&&v.from<=k&&k<=(v.to||v.from))}
 function countFris(a,b){if(!a||!b||b<a)return 0;let n=0;const d=parseKey(a),e=parseKey(b);while(d<=e){if(d.getDay()===5)n++;d.setDate(d.getDate()+1)}return n}
 /* effective staffing need for the current week: holidays close a whole day or its evening */
-let NEED={},CAPX=true,EC={},PREF=[],CURW={pref:{}};
+let NEED={},CAPX=true,EC={},PREF=[],CURW={pref:{}},DEBT={};
 let SHORT=[];   /* days whose mornings were reduced because staff is away */
 function calcNeed(){NEED={};SHORT=[];const md=DAYS.map((_,d)=>dm(d));
   S.sites.forEach(s=>{NEED[s.id]={m:DAYS.map((_,d)=>md[d].off?0:(s.req.m||[])[d]||0),e:DAYS.map((_,d)=>md[d].off||md[d].noEve?0:(s.req.e||[])[d]||0)}});
@@ -903,7 +903,7 @@ function generate(){
   const w=W(),emps=activeEmps().map(e=>e.id),hist=history(cur);
   const slots=[];
   S.sites.forEach(s=>DAYS.forEach((_,d)=>["m","e"].forEach(sh=>{const n=NEED[s.id][sh][d];for(let i=0;i<n;i++)slots.push({s:s.id,d,sh})})));
-  const C=weekCap(),T=C.cap;CAPX=C.exact;CURW=w;PREF=prefList(w).filter(p=>emps.includes(p.e));EC={};emps.forEach(e=>EC[e]=empCap(e,T));
+  const C=weekCap(),T=C.cap;CAPX=C.exact;CURW=w;DEBT=coverDebt(cur);PREF=prefList(w).filter(p=>emps.includes(p.e));EC={};emps.forEach(e=>EC[e]=empCap(e,T));
   const fp=friPlan(w,cur);Object.keys(fp).forEach(k=>{if(!emps.includes(fp[k]))delete fp[k]});const lockedFri=new Set(Object.keys(fp));
   /* slots already filled by backup staff are not generated */
   const bkUsed={};S.sites.forEach(s=>["m","e"].forEach(sh=>w.assign[s.id][sh].forEach((arr,d)=>{const n=arr.filter(isBackup).length;if(n)bkUsed[s.id+"|"+sh+"|"+d]=n})));
@@ -943,6 +943,15 @@ function generate(){
 /* coverage rules, Sun–Thu: each employee gets at least N mornings / evenings at a site.
    When the week has fewer slots than people (holiday weeks), only as many people as fit are expected. */
 const COVER_W={m:3000,e:1200};
+/* fairness across weeks: in recent finished weeks, how often did each person miss a coverage rule
+   (e.g. no בני ברית morning in a short holiday week)? Those people get first claim next time. */
+function coverDebt(before){const d={};
+  Object.keys(S.weeks).filter(k=>k<before&&S.weeks[k].final).sort().slice(-8).forEach(k=>{const w=S.weeks[k];
+    const worked=new Set();S.sites.forEach(s=>["m","e"].forEach(sh=>((w.assign[s.id]||{})[sh]||[]).forEach(a=>a.forEach(e=>worked.add(e)))));
+    S.sites.forEach(s=>["m","e"].forEach(sh=>{const min=+((S.cover||{})[s.id]||{})[sh]||0;if(!min)return;
+      worked.forEach(e=>{const n=((w.assign[s.id]||{})[sh]||[]).reduce((a,arr,dd)=>a+(dd<5&&arr.includes(e)?1:0),0);
+        if(n<min){const kk=s.id+"|"+sh+"|"+e;d[kk]=(d[kk]||0)+1}})}))});
+  return d}
 function coverEval(out,emps){
   const res={pen:0,gaps:[],short:[]};
   S.sites.forEach(s=>["m","e"].forEach(sh=>{const min=+((S.cover||{})[s.id]||{})[sh]||0;if(!min||!emps.length)return;
@@ -950,7 +959,7 @@ function coverEval(out,emps){
     const target=Math.min(emps.length,Math.floor(slots/min));if(target<emps.length)res.short.push([s.id,sh,slots]);
     const cnt=e=>out[s.id][sh].reduce((a,arr,d)=>a+(d<5&&arr.includes(e)?1:0),0);
     const lack=emps.filter(e=>cnt(e)<min);res.pen+=Math.max(0,target-(emps.length-lack.length))*COVER_W[sh];
-    lack.forEach(e=>res.gaps.push([e,s.id,sh]))}));
+    lack.forEach(e=>{res.gaps.push([e,s.id,sh]);res.pen+=(DEBT[s.id+"|"+sh+"|"+e]||0)*300})}));
   return res}
 /* preferred technician per site/day/shift (exams, events) */
 function prefList(w){const l=[];Object.entries(w.pref||{}).forEach(([sid,arr])=>{if(!S.sites.some(s=>s.id===sid))return;(arr||[]).forEach((p,d)=>{if(p&&p.e)l.push({sid,d,e:p.e,sh:p.sh||"m"})})});return l}
@@ -1006,7 +1015,8 @@ function problems(w){
     S.sites.forEach(s=>{if(fp[s.id]&&!w.assign[s.id].m[5].includes(fp[s.id]))list.push(`שישי ב${s.name}: לפי הסבב צריך להיות ${empName(fp[s.id])}`)});
     activeEmps().forEach(e=>{if(cons(w,e.id,5)==="B"&&friCons(w,e.id)==="B"&&!onShift(w,e.id,5,"m"))list.push(`${e.name}: מסומן גיבוי לאירוע בשישי אבל לא שובץ`)});
     const ids=activeEmps().map(e=>e.id),ce=coverEval(w.assign,ids),SN=sid=>(S.sites.find(x=>x.id===sid)||{}).name||"";
-    ce.short.forEach(([sid,sh,n])=>list.push(`השבוע יש רק ${n} ${sh==="m"?"בקרים":"ערבים"} ב${SN(sid)} ל-${ids.length} עובדים, לא כולם יכולים לקבל`));
+    ce.short.forEach(([sid,sh,n])=>{const miss=ce.gaps.filter(g=>g[1]===sid&&g[2]===sh).map(g=>empName(g[0]));
+      list.push(`ℹ️ שבוע מקוצר: יש רק ${n} ${sh==="m"?"בקרים":"ערבים"} ב${SN(sid)} ל-${ids.length} עובדים, חולק כמה שיותר שווה.${miss.length?` לא קיבלו השבוע: ${miss.join(", ")} – יקבלו עדיפות בפעם הבאה.`:""}`)});
     /* explain gaps: can this person work any such shift this week at all? */
     const can=(e,sid,sh)=>DAYS.some((_,d)=>d<5&&NEED[sid][sh][d]>0&&canWork(w,e,d,sh));
     /* evening coverage is only an aim: when someone works more than 2 evenings, the others' gaps are expected */
@@ -1153,7 +1163,7 @@ function render(){
   $("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);
   const pr=problems(w);
   const shortInfo=SHORT.length?`<div class="msg info">🏖️ ${SHORT.map(d=>DAYS[d]).join(", ")}: עובד בחופש – בוקר אחד בכל קמפוס, ערב אחד בכל קמפוס.</div>`:"";
-  $("#msgs").innerHTML=shortInfo+(!hasAssign(w)?`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`:pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:""));
+  $("#msgs").innerHTML=shortInfo+(!hasAssign(w)?`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`:pr.list.length?(pr.list.every(m=>m.startsWith("ℹ️"))?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"")+pr.list.slice(0,12).map(m=>`<div class="msg${m.startsWith("ℹ️")?" info":""}">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:""));
   fitCells($("#sheet"));
   renderSync();renderAgenda(w);
   renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderStaff();renderSettings();renderMsgs();
