@@ -28,6 +28,10 @@
   --bg:#141714; --surface:#1D211D; --ink:#E9ECE7; --muted:#A4ACA4; --line:#323832; --accent:#8DBF5E; --accent-ink:#10140E; --warn:#F28B82; --warn-bg:#3A1F1C; --ok:#81C995; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141714; --surface:#1D211D; --ink:#E9ECE7; --muted:#A4ACA4; --line:#323832; --accent:#8DBF5E; --accent-ink:#10140E; --warn:#F28B82; --warn-bg:#3A1F1C; --ok:#81C995; color-scheme:dark}
+/* liquid-glass material for the phone tab bar */
+:root{--glass-bg:rgba(250,251,249,.58);--glass-edge:rgba(255,255,255,.75);--glass-rim:rgba(0,0,0,.06);--glass-pill:rgba(30,35,32,.075);--glass-shadow:0 10px 30px rgba(20,30,20,.14),0 2px 6px rgba(20,30,20,.06)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--glass-bg:rgba(36,40,36,.55);--glass-edge:rgba(255,255,255,.16);--glass-rim:rgba(0,0,0,.4);--glass-pill:rgba(255,255,255,.12);--glass-shadow:0 10px 30px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.3)}}
+:root[data-theme="dark"]{--glass-bg:rgba(36,40,36,.55);--glass-edge:rgba(255,255,255,.16);--glass-rim:rgba(0,0,0,.4);--glass-pill:rgba(255,255,255,.12);--glass-shadow:0 10px 30px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.3)}
 *{box-sizing:border-box}
 /* ===== interaction polish & mobile baseline ===== */
 :root{--ease-out:cubic-bezier(.23,1,.32,1)}
@@ -67,6 +71,7 @@ table.sh .slot.pressed,.cst.pressed{filter:brightness(.88)}
 @starting-style{.pop{opacity:0;transform:scale(.97) translateY(-4px)}}
 .toast{transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out)}
 @starting-style{.toast{opacity:0;transform:translate(-50%,8px)}}
+@media (prefers-reduced-motion:reduce){.tabs,.tabs::before,.tabs .ti,.tabs .ts{transition:none!important}}
 @media (prefers-reduced-motion:reduce){button,a.btn,.pop,.toast,.tools .badge{transition:opacity 150ms ease}button:active,a.btn:active{transform:none}}
 /* inputs at 16px on touch screens so iOS doesn't zoom the page on focus */
 @media (pointer:coarse){input,select,textarea,.psel,.pop .pn input{font-size:16px}}
@@ -261,15 +266,32 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   .week b{grid-column:1/-1;grid-row:1;text-align:center;font-size:15px}
   .week .df,.week .dtx{min-width:0;width:100%}
   .week button{padding:8px 6px;white-space:nowrap;font-size:14px}
-  /* bottom tab bar, within thumb reach */
-  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--surface);border-top:1px solid var(--line);border-bottom:0;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.05)}
-  .tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;font-size:11.5px;font-weight:700;border:0;border-radius:10px;white-space:nowrap}
-  .tabs button[aria-selected="true"]{color:var(--accent);border:0}
-  .tabs button .ti{display:block;width:24px;height:24px}.tabs button .tl{display:none}.tabs button .ts{display:block}
-  .tabs button.pressed{border-radius:10px}
-  .wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
-  .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
-  body .devbar{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  /* floating liquid-glass tab bar: translucent capsule, blurred content behind, a lens-like pill that glides to the
+     selected tab, shrinks while scrolling down, steps aside while typing */
+  .tabs{position:fixed;left:14px;right:14px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:40;display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    padding:5px;border:0;border-radius:999px;background:var(--glass-bg);
+    -webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);
+    box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-edge),inset 0 -1px 0 var(--glass-rim),inset 0 0 0 .5px var(--glass-edge);
+    transition:transform 420ms cubic-bezier(.32,1.25,.5,1),padding 300ms var(--ease-out),left 300ms var(--ease-out),right 300ms var(--ease-out),opacity 200ms ease;--ti:0}
+  .tabs::before{content:"";position:absolute;top:5px;bottom:5px;right:5px;width:calc((100% - 10px)/4);border-radius:999px;background:var(--glass-pill);
+    box-shadow:inset 0 1px 0 var(--glass-edge),inset 0 0 0 .5px var(--glass-edge);transform:translateX(calc(var(--ti) * -100%));
+    transition:transform 480ms cubic-bezier(.3,1.35,.45,1)}
+  .tabs button{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 2px 6px;font-size:11px;font-weight:700;letter-spacing:.1px;border:0;border-radius:999px;background:none;white-space:nowrap;color:var(--ink);opacity:.72;transition:color 200ms ease,opacity 200ms ease}
+  .tabs button[aria-selected="true"]{color:var(--accent);opacity:1;border:0}
+  .tabs button .ti{display:block;width:25px;height:25px;transition:transform 380ms cubic-bezier(.3,1.5,.5,1)}.tabs button .tl{display:none}
+  .tabs button .ts{display:block;max-height:16px;overflow:hidden;transition:max-height 260ms var(--ease-out),opacity 200ms ease}
+  .tabs button[aria-selected="true"] .ti{stroke-width:2.2}
+  .tabs button.pressed{background:none;filter:none;transform:none}
+  .tabs button.pressed .ti{transform:scale(.84)}
+  /* compact while scrolling down (like iOS), back on scroll up */
+  .tabs.mini{left:22%;right:22%;padding:3px}
+  .tabs.mini::before{top:3px;bottom:3px;right:3px;width:calc((100% - 6px)/4)}
+  .tabs.mini button{padding:6px 2px}.tabs.mini .ts{max-height:0;opacity:0}.tabs.mini .ti{transform:scale(.9)}
+  body.kb .tabs{transform:translateY(calc(100% + 30px));opacity:0;pointer-events:none}
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabs{background:var(--surface)}}
+  .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  body .devbar{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
   select{min-height:40px}
   .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .bar .sp{display:none}
@@ -775,7 +797,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 16:45";
+const APP_VER="21.10.2026 17:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1467,6 +1489,12 @@ function cmbToExam(name){if(!CMB)return;const inp=CMB.inp,[k,id]=(inp.dataset.xf
 /* the list scrolls freely with the finger; an item is picked only on a tap (click), never when a scroll starts.
    mousedown is cancelled so the field keeps focus (on iPhone it is sent only for taps, after the finger lifts) */
 let CMB_TOUCH=false;
+/* tab bar: compact on scroll down, full on scroll up / near the top; hidden while the keyboard is up */
+{let y0=scrollY,acc=0;addEventListener("scroll",()=>{const y=scrollY,dy=y-y0;y0=y;acc=(Math.sign(dy)===Math.sign(acc)?acc:0)+dy;
+    const t=$(".tabs");if(y<40||acc<-24)t.classList.remove("mini");else if(acc>24)t.classList.add("mini")},{passive:true});
+  const isField=el=>el&&(el.tagName==="TEXTAREA"||(el.tagName==="INPUT"&&!["checkbox","radio","button","date"].includes(el.type)));
+  document.addEventListener("focusin",e=>{if(isField(e.target))document.body.classList.add("kb")});
+  document.addEventListener("focusout",()=>setTimeout(()=>{if(!isField(document.activeElement))document.body.classList.remove("kb")},80))}
 /* visible press feedback on touch screens (see .pressed in CSS) */
 {const SEL="button,a.btn,summary,.cst";let el=null,t0=0;
   const off=()=>{const x=el;el=null;if(!x)return;setTimeout(()=>x.classList.remove("pressed"),Math.max(0,120-(performance.now()-t0)))};
@@ -1517,6 +1545,7 @@ document.querySelectorAll(".card, details.sub").forEach(c=>{
 /* ---------- interactions ---------- */
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  $(".tabs").style.setProperty("--ti",[...document.querySelectorAll(".tabs button")].indexOf(b));
   ["sched","cal","ev","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
   try{sessionStorage.setItem("shift-tab",b.dataset.tab)}catch(e){}
   fitCells($("#sheet"));
