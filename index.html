@@ -568,7 +568,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
       </div>
       <div class="scroll"><table class="grid" id="consGrid"></table></div>
     </details>
-    <details class="card cons" id="friBox" open>
+    <details class="card cons" id="friBox">
       <summary><h2>כוננות שישי</h2><span class="hint">הסבב מתקדם שבוע בכל שישי. שישי של פגרה לא תופס תור. ◉ קובע של מי התור השבוע</span></summary>
       <div class="scroll" id="friSet" style="margin-top:10px"></div>
     </details>
@@ -586,36 +586,36 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 
 
   <section class="panel" id="tab-cal" hidden>
-    <div class="card">
-      <h2>יומן חופשות טכנאים</h2>
-      <p class="hint" style="margin-bottom:10px">חופשה מסמנת "חופש" אוטומטית בימים ראשון–חמישי שבטווח. ● אדום = החופשה הסתיימה לפני השבוע המוצג.</p>
+    <details class="card cons xsec" id="vacBox">
+      <summary><h2>יומן חופשות טכנאים</h2><span class="xcnt" id="vacN"></span></summary>
+      <p class="hint" style="margin:10px 0">חופשה מסמנת "חופש" אוטומטית בימים ראשון–חמישי שבטווח. ● אדום = החופשה הסתיימה לפני השבוע המוצג.</p>
       <div class="scroll"><table class="cal" id="vacT"></table></div>
       <div class="row" style="margin-top:10px"><button id="addVac" class="primary">+ הוסף חופשה</button></div>
-    </div>
-    <div class="card">
-      <h2>לוח חגים</h2>
-      <p class="hint" style="margin-bottom:10px"><b>פגרה</b>: לא עובדים, כל היום סגור, ושישי של פגרה לא תופס תור בסבב. <b>סיום ב-16:00</b>: אין משמרת ערב. <b>סיום ב-19:00</b>: המשמרות כרגיל, מופיע כהערה. שם החג מופיע אוטומטית בשורת ההערות.</p>
+    </details>
+    <details class="card cons xsec" id="holBox">
+      <summary><h2>לוח חגים</h2><span class="xcnt" id="holN"></span></summary>
+      <p class="hint" style="margin:10px 0"><b>פגרה</b>: לא עובדים, כל היום סגור, ושישי של פגרה לא תופס תור בסבב. <b>סיום ב-16:00</b>: אין משמרת ערב. <b>סיום ב-19:00</b>: המשמרות כרגיל, מופיע כהערה. שם החג מופיע אוטומטית בשורת ההערות.</p>
       <div class="scroll"><table class="cal" id="holT"></table></div>
       <div class="row" style="margin-top:10px"><button id="addHol" class="primary">+ הוסף חג</button></div>
-    </div>
+    </details>
   </section>
 
 
 
   <section class="panel" id="tab-ev" hidden>
-    <details class="card cons xsec" id="exBox" open>
+    <details class="card cons xsec" id="exBox">
       <summary><h2>מבחנים</h2><span class="xcnt" id="exN"></span></summary>
       <p class="hint" style="margin:10px 0">מבחן מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם המבחן | שעה.</p>
       <div class="scroll"><table class="cal xt" id="exT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
-      <details class="cons xsec sub" id="catBox" open>
+      <details class="cons xsec sub" id="catBox">
         <summary><h3>מאגר מבחנים קבועים</h3><span class="xcnt" id="ecN"></span></summary>
         <p class="hint" style="margin:10px 0">ממוין לפי א-ב. בחירת שם מבחן בטבלה למעלה ממלאת אוטומטית תוכנה, מרצה, קמפוס, שעה והערות. מבחן או מרצה חדשים שמוסיפים למעלה נשמרים כאן לפעם הבאה.</p>
         <div class="scroll"><table class="cal xt" id="ecT"></table></div>
         <div class="row" style="margin-top:10px"><button data-xadd="examCat">+ הוסף למאגר</button></div>
       </details>
     </details>
-    <details class="card cons xsec" id="evBox" open>
+    <details class="card cons xsec" id="evBox">
       <summary><h2>אירועים וכנסים</h2><span class="xcnt" id="evN"></span></summary>
       <p class="hint" style="margin:10px 0">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם האירוע | שעה. אירועים שעברו מוצגים באפור.</p>
       <div class="scroll"><table class="cal xt" id="evT"></table></div>
@@ -738,7 +738,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 13:25";
+const APP_VER="21.10.2026 13:40";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1349,6 +1349,8 @@ function renderEv(){
 let CAL_KEEP=false;
 function renderCal(){if(CAL_KEEP)return;
   if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#tab-cal")&&document.activeElement.type==="text"&&!document.activeElement.classList.contains("dtx"))return;
+  {const t=key(new Date()),nv=S.vac.filter(v=>!v.to||v.to>=t).length,nh=S.holidays.filter(h=>(h.to||h.from||"9")>=t).length;
+    $("#vacN").textContent=nv?nv+" קרובות":"";$("#holN").textContent=nh?nh+" קרובים":""}
   const opts=sel=>S.employees.map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
   $("#vacT").innerHTML=`<tr><th></th><th>טכנאי</th><th>מתאריך</th><th>עד תאריך</th><th>סה"כ ימים</th><th>מטרת החופש</th><th>קמפוס</th><th></th></tr>`+
     (S.vac.length?S.vac.map(v=>{const days=v.from&&v.to&&v.to>=v.from?Math.round((parseKey(v.to)-parseKey(v.from))/864e5)+1:"";const old=v.to&&v.to<cur;
@@ -1431,17 +1433,18 @@ window.addEventListener("resize",()=>{if(CMB)cmbPlace()});
 if(window.visualViewport){visualViewport.addEventListener("resize",()=>{if(CMB)cmbPlace()});visualViewport.addEventListener("scroll",()=>{if(CMB)cmbPlace()})}
 /* ---------- settings categories ---------- */
 function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.sub===k));
-  ["gen","staff","msg"].forEach(t=>{$("#sub-"+t).hidden=t!==k});try{localStorage.setItem("shift-sub",k)}catch(e){}}
+  ["gen","staff","msg"].forEach(t=>{$("#sub-"+t).hidden=t!==k});try{sessionStorage.setItem("shift-sub",k)}catch(e){}}
 document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>openSub(b.dataset.sub)));
 $("#status").addEventListener("click",()=>{if($("#status").classList.contains("warn")){document.querySelector('.tabs button[data-tab="set"]').click();openSub("gen");$("#syncBox").scrollIntoView({block:"center",behavior:"smooth"})}});
-[["catBox","cat-open"],["exBox","ex-open"],["evBox","ev-open"]].forEach(([id,k])=>{const b=$("#"+id);
-  try{if(localStorage.getItem(k)==="0")b.open=false}catch(e){}
-  b.addEventListener("toggle",()=>{try{localStorage.setItem(k,b.open?"1":"0")}catch(e){}})});
+/* collapsible sections start closed; an opened one stays open only for this visit (incl. auto-update reloads) */
+["friBox","catBox","exBox","evBox","vacBox","holBox"].forEach(id=>{const b=$("#"+id),k="open-"+id;
+  try{if(sessionStorage.getItem(k)==="1")b.open=true}catch(e){}
+  b.addEventListener("toggle",()=>{try{sessionStorage.setItem(k,b.open?"1":"0")}catch(e){}})});
 /* ---------- interactions ---------- */
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
   ["sched","cal","ev","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
-  try{localStorage.setItem("shift-tab",b.dataset.tab)}catch(e){}
+  try{sessionStorage.setItem("shift-tab",b.dataset.tab)}catch(e){}
   fitCells($("#sheet"));
 }));
 function shiftWeek(n){const d=parseKey(cur);d.setDate(d.getDate()+7*n);cur=key(d);msgEdited.consMsg={};msgEdited.weekMsg={};render()}
@@ -1831,7 +1834,7 @@ function devToggle(){const b=document.createElement("nav");b.className="devbar";
 (async()=>{
   setTimeout(checkUpdate,1500);setInterval(()=>{if(document.visibilityState==="visible")checkUpdate()},30000);   /* new versions appear within ~30 seconds */document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate()});
   if(DEV_DATA){load(JSON.stringify(devFixture(DEV_DATA)));if(DEV_DATA==="worst"||DEV_DATA==="many"){const g=generate;try{g()}catch(e){}}render();setStatus("מצב בדיקה – לא נשמר");devToggle();return}
-  try{let t=localStorage.getItem("shift-tab"),u=localStorage.getItem("shift-sub");
+  try{let t=sessionStorage.getItem("shift-tab"),u=sessionStorage.getItem("shift-sub");   /* new visit opens on סידור ואילוצים */
     if(t==="msg"||t==="staff"){u=t;t="set"}      /* old tabs now live inside settings */
     if(t)document.querySelector(`.tabs button[data-tab="${t}"]`)?.click();if(u)openSub(u)}catch(e){}
   render();
