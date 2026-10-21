@@ -1450,7 +1450,7 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 01:00";
+const APP_VER="22.10.2026 01:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1792,7 +1792,14 @@ function itemText(kind,id,sid,d){const r=(S[kind]||[]).find(x=>x.id===id);if(!r)
   if(kind==="exams"){L.push(`📝 מבחן: ${r.name}${r.time?` | ${r.time}`:""}`);L.push(`📍 ${s?s.name:""}${r.room?` | כיתה ${r.room}`:""}`);
     if(r.software)L.push(`💻 תוכנה: ${r.software}`);if(r.lecturer)L.push(`👤 מרצה: ${r.lecturer}`);if(r.notes)L.push(`⚠️ ${r.notes}`)}
   else{L.push(`📅 ${r.name}${r.time?` | ${r.time}`:""}`);L.push(`📍 ${s?s.name:""}`);if(r.needs)L.push(`🛠️ ${r.needs}`)}
-  L.push(`בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`);return L.join("\n")}
+  const on=onDutyAt(r.time,m,e);
+  L.push(on?`👤 בכוננות: ${on}`:`בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`);return L.join("\n")}
+/* who is at that campus when the item happens: compare its time (or time range) with the shift hours */
+function onDutyAt(time,m,e){const mins=t=>{const x=String(t).match(/(\d{1,2}):(\d{2})/);return x?(+x[1])*60+(+x[2]):null};
+  const rng=t=>{const all=[...String(t||"").matchAll(/\d{1,2}:\d{2}/g)].map(x=>mins(x[0]));return all.length?[Math.min(...all),Math.max(...all)]:null};
+  const ev=rng(time);if(!ev)return "";const a=ev[0],b=Math.max(ev[1],ev[0]+1);
+  const names=[];[["m",m],["e",e]].forEach(([sh,list])=>{const r=rng(S.shiftLbl[sh]);if(r&&a<r[1]&&b>r[0])list.forEach(n=>{if(n&&!names.includes(n))names.push(n)})});
+  return names.join(", ")}
 /* "אבישי - חופש" in the day's notes. Campus from the vacation journal; "שניהם" = both.
    No campus: goes to the campus whose notes are emptier that day; a tie goes to ז'בוטינסקי. */
 function vacFreeSite(w,dt,d){const k=key(dt);
