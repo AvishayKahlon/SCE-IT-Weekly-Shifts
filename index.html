@@ -1317,6 +1317,16 @@ header .brand h1{color:#595959;font-weight:600;letter-spacing:-.1px}
 .fdirty .ft{display:grid;gap:1px;flex:1 1 200px}.fdirty .ft b{font-size:15px}.fdirty .ft small{font-size:12.5px;color:var(--muted)}
 .fdirty .fb{display:flex;gap:8px;flex-wrap:wrap}.fdirty .fb button{min-height:38px;font-weight:700}
 @media (max-width:700px){.fdirty .fb{width:100%}.fdirty .fb button{flex:1}}
+
+/* drag to swap */
+#sheet .slot,#days .slot{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.dragghost{border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.28),0 4px 10px rgba(0,0,0,.15)!important;opacity:.96;will-change:transform,left,top}
+td.dragghost{display:flex;align-items:center;justify-content:center;background:var(--sh-cell);color:var(--sh-ink);font-weight:700;font-family:var(--sh-font)}
+.draghole{opacity:.28;transition:opacity 160ms ease}
+.dropon{outline:3px solid var(--accent)!important;outline-offset:-3px;transform:scale(1.05);transition:transform 220ms var(--spring,ease)}
+body.dragging{-webkit-user-select:none;user-select:none}
+button.dragghost{display:inline-flex!important;align-items:center;gap:8px;flex-wrap:nowrap;white-space:nowrap}
+body.dragging .tabs,body.dragging .minibar{opacity:0;pointer-events:none;transition:opacity 200ms ease}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1559,7 +1569,7 @@ header .brand h1{color:#595959;font-weight:600;letter-spacing:-.1px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 03:40";
+const APP_VER="22.10.2026 03:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2586,6 +2596,42 @@ function startSwap(k){const a=slotRef(k);if(!a.arr[a.idx])return;SWAP=k;document
   document.querySelectorAll(`.slot[data-k="${k}"]`).forEach(x=>x.classList.add("swapsrc"));
   const b=document.createElement("div");b.className="swapbar";b.innerHTML=`<span>⇄ ${esc(empName(a.arr[a.idx]))} – בחרו משבצת</span><button>ביטול</button>`;
   b.querySelector("button").onclick=ev=>{ev.stopPropagation();endSwap()};document.body.appendChild(b)}
+
+/* long-press a name, drag it onto another slot, let go: the two swap places (Apple-style lift, follow, drop) */
+{let t=null,st=null,D=null,skip=false;
+  const SPR="cubic-bezier(.3,1.25,.45,1)";
+  const vis=k=>[...document.querySelectorAll(`.slot[data-k="${k}"]`)].find(x=>x.offsetParent);
+  const filled=el=>{const r=slotRef(el.dataset.k);return !!r.arr[r.idx]};
+  const target=(x,y)=>{const el=document.elementFromPoint(x,y);const s=el&&el.closest&&el.closest("#sheet .slot,#days .slot");return s&&s!==D.src?s:null};
+  function lift(){const src=st.el,r=src.getBoundingClientRect();
+    const g=src.cloneNode(true);g.classList.add("dragghost");g.removeAttribute("data-k");
+    g.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;margin:0;z-index:90;pointer-events:none`;
+    document.body.appendChild(g);src.classList.add("draghole");document.body.classList.add("dragging");
+    D={src,g,dx:st.x-r.left,dy:st.y-r.top,over:null,r0:r};haptic();
+    g.animate([{transform:"scale(1)"},{transform:"scale(1.12)"}],{duration:260,easing:SPR,fill:"forwards"})}
+  function move(x,y){D.g.style.left=(x-D.dx)+"px";D.g.style.top=(y-D.dy)+"px";const o=target(x,y);
+    if(o!==D.over){D.over&&D.over.classList.remove("dropon");D.over=o;if(o){o.classList.add("dropon");haptic()}}}
+  function drop(){const {src,g,over}=D;document.body.classList.remove("dragging");src.classList.remove("draghole");over&&over.classList.remove("dropon");
+    const gr=g.getBoundingClientRect();
+    if(!over){g.getAnimations().forEach(a=>a.cancel());
+      g.animate([{left:gr.left+"px",top:gr.top+"px",transform:"scale(1.12)"},{left:D.r0.left+"px",top:D.r0.top+"px",transform:"scale(1)"}],{duration:380,easing:SPR}).onfinish=()=>g.remove();D=null;return}
+    const k1=src.dataset.k,k2=over.dataset.k,or=over.getBoundingClientRect(),hadOther=filled(over);
+    SWAP=k1;doSwap(k2);
+    requestAnimationFrame(()=>{const n2=vis(k2),n1=vis(k1);
+      if(n2){const r=n2.getBoundingClientRect();n2.animate([{transform:`translate(${gr.left-r.left}px,${gr.top-r.top}px) scale(1.12)`},{transform:"none"}],{duration:520,easing:SPR})}
+      if(n1&&hadOther){const r=n1.getBoundingClientRect();n1.animate([{transform:`translate(${or.left-r.left}px,${or.top-r.top}px)`,opacity:.6},{transform:"none",opacity:1}],{duration:560,easing:SPR})}
+      g.remove()});D=null}
+  document.addEventListener("pointerdown",e=>{if(e.button>0||SWAP||document.body.classList.contains("fontedit"))return;
+    const el=e.target.closest&&e.target.closest("#sheet .slot,#days .slot");if(!el||!filled(el))return;
+    st={el,x:e.clientX,y:e.clientY,id:e.pointerId};clearTimeout(t);t=setTimeout(()=>{if(st){lift();skip=true}},430)},true);
+  document.addEventListener("pointermove",e=>{if(!st||e.pointerId!==st.id)return;
+    if(!D){if(Math.hypot(e.clientX-st.x,e.clientY-st.y)>8){clearTimeout(t);st=null}return}move(e.clientX,e.clientY)},true);
+  const up=e=>{clearTimeout(t);if(D)drop();st=null};
+  document.addEventListener("pointerup",up,true);document.addEventListener("pointercancel",e=>{if(D){e.preventDefault()}up(e)},true);
+  /* while dragging the page must not scroll, and the click after a long-press must not open the list */
+  document.addEventListener("touchmove",e=>{if(D)e.preventDefault()},{passive:false});
+  document.addEventListener("click",e=>{if(skip){skip=false;e.stopPropagation();e.preventDefault()}},true);
+  document.addEventListener("contextmenu",e=>{if(e.target.closest&&e.target.closest("#sheet .slot,#days .slot"))e.preventDefault()})}
 function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();haptic();if(a.arr===b.arr&&a.idx===b.idx)return;
   const x=a.arr[a.idx],y=b.arr[b.idx];if(!x)return;
   if(y){a.arr[a.idx]=y;b.arr[b.idx]=x}
