@@ -353,10 +353,32 @@ table.sh .an2{display:block;line-height:1.05}
   #staffRows .row button{justify-self:end}
 }
 /* exams & events */
+#exT td.xdel{white-space:nowrap;width:80px}
+.xexp{padding:5px 9px;margin-inline-end:4px}
+table.cal.xt tr.xdet td{border-bottom:1px solid var(--line);padding-top:0;text-align:right}
+table.cal.xt tr.xdet.sum td{font-size:12px;color:var(--muted);padding:0 8px 6px}
+table.cal.xt tr:has(+ tr.xdet) td{border-bottom:0}
+.xdg{display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px;padding:2px 0 8px}
+.xdg label{display:grid;gap:2px;font-size:11px;color:var(--muted)}
+#catBox>summary{margin-bottom:0}
 table.xt td.rooms{white-space:nowrap}
 .rm{min-width:46px;padding:5px 8px;margin:2px;border-radius:8px;font-variant-numeric:tabular-nums}
 .rm[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
-@media (max-width:700px){table.xt td.rooms,table.xt td[data-l="הערות"]{grid-column:1/-1;white-space:normal}}
+@media (max-width:700px){table.xt td.rooms,table.xt td[data-l="הערות"]{grid-column:1/-1;white-space:normal}
+  table.cal.xt tr.xdet{display:block;border:0!important;padding:0!important;margin:0 0 10px!important}
+  table.cal.xt tr.xdet td{border:0;padding:4px 10px 8px}
+  .xdg{grid-template-columns:1fr 1fr}.xdg label:last-child{grid-column:1/-1}
+  /* compact exam card: [date][time] / [name] / [campus][▾ ✕] / [rooms] */
+  #exT tr:not(.none):not(.xdet){gap:6px 8px;padding:8px}
+  #exT td[data-l]::before{display:none}
+  #exT td[data-l="תאריך"]{order:1}#exT td[data-l="שעה"]{order:2}
+  #exT td[data-l="מבחן"]{order:3;grid-column:1/-1}
+  #exT td[data-l="קמפוס"]{order:4}#exT td.xdel{order:5;grid-column:auto;width:auto;display:flex;gap:6px;justify-content:flex-end}
+  #exT td.rooms{order:6}
+  #exT tr.has-det:not(.xdet){border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0}
+  #exT tr.xdet{border:1px solid var(--line)!important;border-top:0!important;border-radius:0 0 10px 10px;margin:0 0 10px!important;padding:0 8px 8px!important}
+  #exT tr.xdet td{padding:0}
+  #exT tr.xdet.sum td{padding:0 2px}}
 table.xt input[type=text],table.xt select{width:100%;min-width:0}
 table.xt td{vertical-align:middle}
 table.xt tr.past td{opacity:.5}
@@ -534,12 +556,12 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
       <div class="scroll"><table class="cal xt" id="exT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
     </div>
-    <div class="card">
-      <h2>מאגר מבחנים קבועים</h2>
-      <p class="hint" style="margin-bottom:10px">ממוין לפי א-ב. בחירת שם מבחן בטבלה למעלה ממלאת אוטומטית תוכנה, מרצה, קמפוס, שעה והערות. מבחן או מרצה חדשים שמוסיפים למעלה נשמרים כאן לפעם הבאה.</p>
+    <details class="card cons" id="catBox" open>
+      <summary><h2>מאגר מבחנים קבועים</h2><span class="hint">לחיצה כדי לסגור / לפתוח</span></summary>
+      <p class="hint" style="margin:10px 0">ממוין לפי א-ב. בחירת שם מבחן בטבלה למעלה ממלאת אוטומטית תוכנה, מרצה, קמפוס, שעה והערות. מבחן או מרצה חדשים שמוסיפים למעלה נשמרים כאן לפעם הבאה.</p>
       <div class="scroll"><table class="cal xt" id="ecT"></table></div>
       <div class="row" style="margin-top:10px"><button data-xadd="examCat">+ הוסף למאגר</button></div>
-    </div>
+    </details>
     <datalist id="dlExam"></datalist><datalist id="dlLect"></datalist><datalist id="dlSoft"></datalist><datalist id="dlEvent"></datalist>
   </section>
 
@@ -653,7 +675,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 07:55";
+const APP_VER="21.10.2026 08:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1169,7 +1191,8 @@ function renderFriSet(){
 /* vacations journal + holidays table */
 /* exams & events tables */
 const XT={events:{tbl:"#evT",cols:[["date","תאריך","d"],["name","שם האירוע","t"],["time","שעה","h"],["campus","קמפוס","c"],["needs","צרכים והיערכות","t"]]},
-          exams:{tbl:"#exT",cols:[["date","תאריך","d"],["name","שם המבחן","t"],["software","תוכנה","t"],["lecturer","מרצה","t"],["time","שעה","h"],["campus","קמפוס","c"],["room","כיתה","r"],["notes","הערות","t"]]},
+          exams:{tbl:"#exT",cols:[["date","תאריך","d"],["name","מבחן","t"],["time","שעה","h"],["campus","קמפוס","c"],["room","כיתה","r"]],
+                 det:[["software","תוכנה"],["lecturer","מרצה"],["notes","הערות"]]},
           examCat:{tbl:"#ecT",cols:[["name","שם המבחן","t"],["software","תוכנה","t"],["lecturer","מרצה","t"],["campus","קמפוס","c"],["time","שעה","h"],["notes","הערות","t"]]}};
 const DL={events:{name:"dlEvent"},exams:{name:"dlExam",software:"dlSoft",lecturer:"dlLect"},examCat:{software:"dlSoft",lecturer:"dlLect"}};
 /* rooms offered for a campus ("שניהם" = all) */
@@ -1191,7 +1214,7 @@ function learnExam(r){const n=String(r.name||"").trim();if(!n)return;let c=S.exa
   splitL(r.lecturer).forEach(l=>{if(!splitL(c.lecturer).includes(l))c.lecturer=[...splitL(c.lecturer),l].join(" / ")})}
 function applyEvent(r){const prev=S.events.filter(x=>x!==r&&x.name===r.name).sort((a,b)=>(b.date||"").localeCompare(a.date||""))[0];if(!prev)return;
   if(!r.time)r.time=prev.time||"";if(!r.campus)r.campus=prev.campus||"";if(!r.needs)r.needs=prev.needs||""}
-let EV_KEEP=false;
+let EV_KEEP=false;const XOPEN=new Set();
 function renderEv(){
   fillLists();if(EV_KEEP)return;const a=document.activeElement;if(a&&a.closest&&a.closest("#tab-ev")&&a.type==="text"&&!a.classList.contains("dtx"))return;
   const today=key(new Date());
@@ -1202,9 +1225,14 @@ function renderEv(){
         return `<td data-l="${l}" class="rooms">${opts.length?opts.map(o=>`<button type="button" class="rm" data-xroom="${kind}|${r.id}|${o}" aria-pressed="${sel.includes(o)}">${esc(o)}</button>`).join(""):`<span class="hint">בחרו קמפוס</span>`}</td>`}
       if(t==="d")return `<td data-l="${l}">${dateField(at,v,l)}</td>`;
       if(t==="c")return `<td data-l="${l}"><select ${at} aria-label="${l}"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v?"selected":""}>${esc(c)}</option>`).join("")}</select></td>`;
-      return `<td data-l="${l}"><input type="text" ${at} value="${esc(v)}" aria-label="${l}"${dl?` list="${dl}" autocomplete="off"`:""}${t==="h"?' placeholder="שעה" dir="ltr"':""}></td>`};
+      return `<td data-l="${l}"><input type="text" ${at} value="${esc(v)}" aria-label="${l}"${dl?` list="${dl}" autocomplete="off"`:""}${t==="h"?' placeholder="שעה" dir="ltr"':f==="name"?` placeholder="${l}"`:""}></td>`};
     $(cfg.tbl).innerHTML=`<thead><tr>${cfg.cols.map(c=>`<th>${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>`+
-      (list.length?list.map(r=>`<tr class="${r.date&&r.date<today?"past":""}${kind==="examCat"?" cat":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel"><button data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button></td></tr>`).join("")
+      (list.length?list.map(r=>{const open=XOPEN.has(r.id),sum=cfg.det?[r.software,r.lecturer,r.notes].filter(Boolean).join(" · "):"";
+        let h=`<tr class="${r.date&&r.date<today?"past":""}${kind==="examCat"?" cat":""}${open?" open":""}${cfg.det&&(open||sum)?" has-det":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel">${cfg.det?`<button class="xexp" data-xexp="${r.id}" aria-expanded="${open}" title="${esc(sum||"פרטים")}">${open?"▴":"▾"}</button>`:""}<button data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button></td></tr>`;
+        /* details line (software / lecturer / notes): a short summary, or editable fields when opened */
+        if(cfg.det)h+=open?`<tr class="xdet"><td colspan="${cfg.cols.length+1}"><div class="xdg">${cfg.det.map(([f,l])=>`<label><span>${l}</span><input type="text" data-xf="${kind}|${r.id}|${f}" value="${esc(r[f]||"")}"${(DL[kind]||{})[f]?` list="${DL[kind][f]}" autocomplete="off"`:""}></label>`).join("")}</div></td></tr>`
+          :sum?`<tr class="xdet sum"><td colspan="${cfg.cols.length+1}">${esc(sum)}</td></tr>`:"";
+        return h}).join("")
         :`<tr class="none"><td colspan="${cfg.cols.length+1}" class="empty">${kind==="events"?"אין אירועים":"אין מבחנים"}</td></tr>`)+`</tbody>`});
   fillLists();
 }
@@ -1242,6 +1270,8 @@ function renderSettings(){
 function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.sub===k));
   ["gen","staff","msg"].forEach(t=>{$("#sub-"+t).hidden=t!==k});try{localStorage.setItem("shift-sub",k)}catch(e){}}
 document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>openSub(b.dataset.sub)));
+try{if(localStorage.getItem("cat-open")==="0")$("#catBox").open=false}catch(e){}
+$("#catBox").addEventListener("toggle",()=>{try{localStorage.setItem("cat-open",$("#catBox").open?"1":"0")}catch(e){}});
 /* ---------- interactions ---------- */
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
@@ -1278,6 +1308,8 @@ document.addEventListener("click",e=>{
     changed();render();return}
   const xa=e.target.closest("[data-xadd]");
   if(xa){const k=xa.dataset.xadd;S[k].push(k==="examCat"?{id:uid(),name:""}:{id:uid(),date:key(new Date())>cur?key(new Date()):cur});changed();render();return}
+  const xe=e.target.closest("[data-xexp]");
+  if(xe){const id=xe.dataset.xexp;XOPEN.has(id)?XOPEN.delete(id):XOPEN.add(id);renderEv();return}
   const xr=e.target.closest("[data-xroom]");
   if(xr){const[k,id,room]=xr.dataset.xroom.split("|"),r=S[k].find(x=>x.id===id);if(r){const sel=splitL(r.room);r.room=(sel.includes(room)?sel.filter(x=>x!==room):[...sel,room]).sort(HE.compare).join(", ");changed();render()}return}
   const xd=e.target.closest("[data-xdel]");
