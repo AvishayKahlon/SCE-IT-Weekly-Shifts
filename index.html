@@ -280,12 +280,22 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   .wkc.go-n .wkc-t{transform:translateX(-30px);opacity:0;transition:none}
   .wkc.go-p .wkc-t{transform:translateX(30px);opacity:0;transition:none}
   /* compact glass bar that takes over once the large title scrolls away */
-  .minibar{position:fixed;top:0;left:0;right:0;z-index:35;display:grid;grid-template-columns:52px 1fr 52px;align-items:center;
-    padding:calc(env(safe-area-inset-top,0px) + 4px) 8px 6px;background:var(--glass-bg);
+  /* floating glass capsule, the twin of the bottom tab bar: drops in from the top, compacts while scrolling down */
+  .minibar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);left:14px;right:14px;z-index:35;display:grid;grid-template-columns:48px 1fr 48px;align-items:center;
+    padding:4px;border-radius:999px;background:var(--glass-bg);
     -webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);
-    box-shadow:0 .5px 0 var(--g-line,var(--line)),0 6px 20px rgba(20,35,20,.06);
-    transform:translateY(-105%);opacity:0;transition:transform 340ms cubic-bezier(.32,.72,0,1),opacity 220ms ease;pointer-events:none}
+    box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-edge),inset 0 -1px 0 var(--glass-rim),inset 0 0 0 .5px var(--glass-edge);
+    transform:translateY(calc(-100% - 30px)) scale(.92);opacity:0;pointer-events:none;
+    transition:transform 460ms cubic-bezier(.32,1.25,.5,1),opacity 220ms ease,left 300ms var(--ease-out),right 300ms var(--ease-out),padding 300ms var(--ease-out)}
+  .minibar::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+    background:linear-gradient(140deg,var(--g-rim1,#fff) 0%,var(--g-rim2,transparent) 38%,var(--g-rim2,transparent) 62%,var(--g-rim3,#fff) 100%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
   body.scrolled .minibar{transform:none;opacity:1;pointer-events:auto}
+  .minibar .mb-t span{max-height:14px;overflow:hidden;transition:max-height 260ms var(--ease-out),opacity 200ms ease}
+  .minibar.mini{left:18%;right:18%;padding:2px}
+  .minibar.mini .mb-t span{max-height:0;opacity:0}
+  .minibar.mini button{height:34px}
+  .minibar.mini .mb-t b{font-size:15px}
   .minibar button{background:none!important;border:0;box-shadow:none!important;padding:0;height:40px;display:grid;place-items:center}
   .minibar .mb-p,.minibar .mb-n{font-size:26px;color:var(--accent)}
   .minibar .mb-t{display:grid;gap:0;line-height:1.15}
@@ -960,7 +970,7 @@ table.grid th,table.grid td{border-color:var(--g-line)}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 19:55";
+const APP_VER="21.10.2026 20:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1685,7 +1695,7 @@ let CMB_TOUCH=false;
   bar.addEventListener("click",e=>{if(skipClick){e.stopPropagation();e.preventDefault()}},true)}
 /* tab bar: compact on scroll down, full on scroll up / near the top; hidden while the keyboard is up */
 {let y0=scrollY,acc=0;addEventListener("scroll",()=>{const y=scrollY,dy=y-y0;y0=y;acc=(Math.sign(dy)===Math.sign(acc)?acc:0)+dy;
-    const t=$(".tabs");if(y<40||acc<-24)t.classList.remove("mini");else if(acc>24)t.classList.add("mini")},{passive:true});
+    const t=$(".tabs"),m=$(".minibar");if(y<40||acc<-24){t.classList.remove("mini");m&&m.classList.remove("mini")}else if(acc>24){t.classList.add("mini");m&&m.classList.add("mini")}},{passive:true});
   const isField=el=>el&&(el.tagName==="TEXTAREA"||(el.tagName==="INPUT"&&!["checkbox","radio","button","date"].includes(el.type)));
   document.addEventListener("focusin",e=>{if(isField(e.target))document.body.classList.add("kb")});
   document.addEventListener("focusout",()=>setTimeout(()=>{if(!isField(document.activeElement))document.body.classList.remove("kb")},80))}
