@@ -1226,6 +1226,21 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
 .msgprob .msg{background:transparent;padding:0 2px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .msgok b{color:#8FD99A}:root:not([data-theme="light"]) .msgprob{background:rgba(230,90,80,.10)}}
 :root[data-theme="dark"] .msgok b{color:#8FD99A}:root[data-theme="dark"] .msgprob{background:rgba(230,90,80,.10)}
+
+/* bottom of the page: sync cloud + version */
+.foot{display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 0 4px}
+.foot .ver{margin:0}
+@media (max-width:700px){.foot{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}}
+.cloud{width:34px;height:28px;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;display:grid;place-items:center;border-radius:10px!important;cursor:pointer;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.cloud svg{width:30px;height:23px;transition:color 300ms ease}
+.cloud[data-st="ok"]{color:#2E9E4F}
+.cloud[data-st="bad"]{color:#D93025}
+.cloud[data-st="wait"],.cloud[data-st="dev"]{color:var(--muted)}
+.cloud[data-st="wait"] svg{animation:cloudp 1.2s ease-in-out infinite}
+@keyframes cloudp{50%{opacity:.4}}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cloud[data-st="ok"]{color:#5DD07A}:root:not([data-theme="light"]) .cloud[data-st="bad"]{color:#FF6B5E}}
+:root[data-theme="dark"] .cloud[data-st="ok"]{color:#5DD07A}:root[data-theme="dark"] .cloud[data-st="bad"]{color:#FF6B5E}
+@media (prefers-reduced-motion:reduce){.cloud[data-st="wait"] svg{animation:none}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1242,7 +1257,6 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
       <button id="nextW" aria-label="שבוע הבא">שבוע הבא ←</button>
       <span class="df"><input type="text" class="dtx" id="weekPick" data-iso="" value="" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="בחירת שבוע (dd/mm/yyyy)"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" tabindex="-1" aria-hidden="true"></span>
     </div>
-    <span class="status" id="status">טוען…</span>
   </header>
   <div class="minibar" aria-hidden="true">
     <button class="mb-p" data-wk="-1" tabindex="-1" aria-label="שבוע קודם">‹</button>
@@ -1457,7 +1471,7 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
     </div>
   </section>
 </div>
-<p class="ver" id="appVer"></p>
+<div class="foot"><button class="cloud" id="status" data-st="wait" aria-label="טוען…" title="טוען…"></button><p class="ver" id="appVer"></p></div>
 <div id="exportBox"></div>
 <div id="printBox" aria-hidden="true"></div>
 
@@ -1469,7 +1483,7 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 01:50";
+const APP_VER="22.10.2026 02:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2356,7 +2370,7 @@ if(window.visualViewport){visualViewport.addEventListener("resize",()=>{if(CMB)c
 function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.sub===k));
   ["gen","staff","msg"].forEach(t=>{$("#sub-"+t).hidden=t!==k});try{sessionStorage.setItem("shift-sub",k)}catch(e){}}
 document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>{if(b.getAttribute("aria-selected")!=="true")haptic();openSub(b.dataset.sub)}));
-$("#status").addEventListener("click",()=>{if($("#status").classList.contains("warn")){document.querySelector('.tabs button[data-tab="set"]').click();openSub("gen");$("#syncBox").scrollIntoView({block:"center",behavior:"smooth"})}});
+$("#status").addEventListener("click",()=>{toast($("#status").title);if($("#status").classList.contains("warn")){document.querySelector('.tabs button[data-tab="set"]').click();openSub("gen");$("#syncBox").scrollIntoView({block:"center",behavior:"smooth"})}});
 /* collapsible sections start closed; an opened one stays open only for this visit (incl. auto-update reloads) */
 /* long explanations stay hidden behind a small ⓘ next to the section title */
 document.querySelectorAll(".card, details.sub").forEach(c=>{
@@ -2806,7 +2820,13 @@ function renderSync(){const box=$("#syncBox");if(!box)return;
   $("#syncRestore")&&($("#syncRestore").onclick=()=>{if(!confirm("להחליף את הנתונים בענן בנתונים שהיו במכשיר הזה לפני החיבור? (שאר המכשירים יקבלו אותם)"))return;
     try{const raw=localStorage.getItem("shift-state-before-sync");load(raw);changed();localStorage.removeItem("shift-state-before-sync");SYNC_KEY="";render();toast("הנתונים מהמכשיר הזה הועלו לענן")}catch(e){toast("השחזור נכשל")}})}
 /* ---------- persistence ---------- */
-function setStatus(t){const el=$("#status");el.textContent=t;el.classList.toggle("warn",/לא מחובר|נותק|אין הרשאה/.test(t))}
+/* sync state as a small cloud at the bottom of the page: green ↑ = synced, red ↓ = not connected, grey = working / local.
+   Anything else (a library that did not load, a failed download…) still needs to be seen, so it shows as a toast. */
+const CLOUD_SVG=up=>`<svg viewBox="0 0 32 24" aria-hidden="true"><path d="M8.5 21h15.2a5.8 5.8 0 0 0 .9-11.5A8 8 0 0 0 9.3 7.6 6.8 6.8 0 0 0 8.5 21z" fill="currentColor" opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>${up?'<path d="M16 17V10.5m-3 3 3-3 3 3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>':'<path d="M16 10v6.5m-3-3 3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>'}</svg>`;
+function setStatus(t){const el=$("#status");
+  const st=/מסונכרן|^נשמר$|^מוכן$/.test(t)?"ok":/לא מחובר|נותק|אין הרשאה|אין חיבור|שומר במכשיר|במכשיר הזה|בדפדפן הזה/.test(t)?"bad":/שומר…|מתחבר|טוען/.test(t)?"wait":/מצב בדיקה/.test(t)?"dev":null;
+  if(!st){toast(t);return}
+  el.dataset.st=st;el.title=t;el.setAttribute("aria-label",t);el.classList.toggle("warn",st==="bad");el.innerHTML=CLOUD_SVG(st!=="bad")}
 function changed(soft){if(DEV_DATA){setStatus("מצב בדיקה – לא נשמר");return}dirty=true;setStatus("שומר…");clearTimeout(saveTimer);saveTimer=setTimeout(flush,soft?900:300)}
 async function flush(){
   if(!dirty)return;
