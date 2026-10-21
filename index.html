@@ -1450,7 +1450,7 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 01:10";
+const APP_VER="22.10.2026 01:20";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1583,8 +1583,10 @@ function empStatus(w,eid){
     return any?"ok":slots>=activeEmps().length?"miss":""});
   return{st:cells.includes("bad")?"bad":cells.includes("miss")?"miss":"ok",cells}}
 /* regular staff = scheduled automatically; backup staff (e.g. the manager) are only placed by hand */
-function activeEmps(){return S.employees.filter(e=>e.active!==false&&!e.backup)}
-function backupEmps(){return S.employees.filter(e=>e.active!==false&&e.backup)}
+/* people always listed alphabetically (menus, constraint grid, summary…). The Friday rotation keeps its own hand-set order. */
+const byName=(a,b)=>HE.compare(a.name||"",b.name||"");
+function activeEmps(){return S.employees.filter(e=>e.active!==false&&!e.backup).sort(byName)}
+function backupEmps(){return S.employees.filter(e=>e.active!==false&&e.backup).sort(byName)}
 function isBackup(id){const e=S.employees.find(x=>x.id===id);return !!(e&&e.backup)}
 function empName(id){const e=S.employees.find(x=>x.id===id);return e?e.name:"?"}
 
@@ -2211,9 +2213,9 @@ function renderCal(){if(CAL_KEEP)return;
   if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#tab-cal")&&document.activeElement.type==="text"&&!document.activeElement.classList.contains("dtx"))return;
   {const t=key(new Date()),nv=S.vac.filter(v=>!v.to||v.to>=t).length,nh=S.holidays.filter(h=>(h.to||h.from||"9")>=t).length;
     $("#vacN").textContent=nv?nv+" קרובות":"";$("#holN").textContent=nh?nh+" קרובים":""}
-  const opts=sel=>S.employees.map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
+  const opts=sel=>S.employees.slice().sort(byName).map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
   $("#vacT").innerHTML=`<tr><th></th><th>טכנאי</th><th>מתאריך</th><th>עד תאריך</th><th>סה"כ ימים</th><th>מטרת החופש</th><th>קמפוס</th><th></th></tr>`+
-    (S.vac.length?S.vac.map(v=>{const days=v.from&&v.to&&v.to>=v.from?Math.round((parseKey(v.to)-parseKey(v.from))/864e5)+1:"";const old=v.to&&v.to<cur;
+    (S.vac.length?S.vac.slice().sort((a,b)=>(a.from||"9").localeCompare(b.from||"9")||HE.compare(empName(a.emp),empName(b.emp))).map(v=>{const days=v.from&&v.to&&v.to>=v.from?Math.round((parseKey(v.to)-parseKey(v.from))/864e5)+1:"";const old=v.to&&v.to<cur;
       return `<tr><td><span class="dot${old?" old":""}" title="${old?"החופשה הסתיימה":""}">●</span></td>
         <td><select data-vf="${v.id}|emp" aria-label="טכנאי">${opts(v.emp)}</select></td>
         <td>${dateField(`data-vf="${v.id}|from"`,v.from,"מתאריך")}</td>
@@ -2223,7 +2225,7 @@ function renderCal(){if(CAL_KEEP)return;
         <td><select data-vf="${v.id}|campus" aria-label="קמפוס"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v.campus?"selected":""}>${esc(c)}</option>`).join("")}</select></td>
         <td><button data-vdel="${v.id}" aria-label="מחק חופשה">✕</button></td></tr>`}).join(""):`<tr><td colspan="8" class="empty">אין חופשות רשומות</td></tr>`);
   $("#holT").innerHTML=`<tr><th>חג</th><th>מתאריך</th><th>עד תאריך</th><th>מהות</th><th>ימי שישי</th><th></th></tr>`+
-    S.holidays.map(h=>`<tr><td><input type="text" data-hf="${h.id}|name" value="${esc(h.name||"")}" aria-label="שם החג"></td>
+    S.holidays.slice().sort((a,b)=>(a.from||"9").localeCompare(b.from||"9")||HE.compare(a.name||"",b.name||"")).map(h=>`<tr><td><input type="text" data-hf="${h.id}|name" value="${esc(h.name||"")}" aria-label="שם החג"></td>
       <td>${dateField(`data-hf="${h.id}|from"`,h.from,"מתאריך")}</td>
       <td>${dateField(`data-hf="${h.id}|to"`,h.to,"עד תאריך")}</td>
       <td><select data-hf="${h.id}|type" aria-label="מהות">${Object.entries(HOL_T).map(([k,l])=>`<option value="${k}" ${k===h.type?"selected":""}>${esc(l)}</option>`).join("")}</select></td>
