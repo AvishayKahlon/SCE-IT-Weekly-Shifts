@@ -738,7 +738,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 13:40";
+const APP_VER="21.10.2026 14:15";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1631,7 +1631,7 @@ $("#mailBtn").onclick=()=>busy($("#mailBtn"),async()=>{
   const pdf=await sheetPdf();if(!pdf)return;
   const name=fileBase(),fname=name+".pdf",to=(S.mailTo||"").split(/[,;\s]+/).filter(Boolean).join(", ");
   const f=new File([pdf],fname,{type:"application/pdf"});
-  if(canShare&&navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name,text:mailText()});const m=markSent();if(m)toast("נשלח"+m);return}catch(e){if(e&&e.name==="AbortError")return}}
+  if(canShare&&navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name,text:name+"\n\n"+mailText()});   /* Outlook on iPhone uses the first line as the subject */const m=markSent();if(m)toast("נשלח"+m);return}catch(e){if(e&&e.name==="AbortError")return}}
   const html=`<div dir="rtl" style="font-family:Calibri,Arial,sans-serif;font-size:11pt">${esc(mailText()).replace(/\n/g,"<br>")}<br><br></div>`;
   await saveFile(name+".eml",new Blob([emlDraft(to,name,html,fname,await blobB64(pdf))],{type:"message/rfc822"}));
   toast("נוצר מייל עם ה-PDF מצורף. פתחו את הקובץ "+name+".eml – תיפתח טיוטה ב-Outlook"+markSent())});
