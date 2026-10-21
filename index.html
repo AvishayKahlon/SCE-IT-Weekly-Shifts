@@ -775,7 +775,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 16:10";
+const APP_VER="21.10.2026 16:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1211,7 +1211,10 @@ function render(){
 
 /* ---------- WhatsApp messages ---------- */
 const msgEdited={};
-const wa=t=>"https://wa.me/?text="+encodeURIComponent(t);
+/* WhatsApp on Windows garbles emoji that arrive inside a link (shows ◆?), so links carry the text without emoji.
+   Copy-and-paste and the phone share sheet keep them. */
+const noEmoji=t=>String(t).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu,"").replace(/[ \t]+\n/g,"\n").replace(/[ \t]{2,}/g," ");
+const wa=t=>"https://wa.me/?text="+encodeURIComponent(noEmoji(t));
 function setMsg(id,text){
   const ta=$("#"+id),st=msgEdited[id]||(msgEdited[id]={});
   if(!st.dirty)ta.value=text;
