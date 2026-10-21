@@ -520,13 +520,13 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
   <section class="panel" id="tab-ev" hidden>
     <div class="card">
       <h2>אירועים וכנסים</h2>
-      <p class="hint" style="margin-bottom:10px">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו. אירועים שעברו מוצגים באפור.</p>
+      <p class="hint" style="margin-bottom:10px">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם האירוע | שעה. אירועים שעברו מוצגים באפור.</p>
       <div class="scroll"><table class="cal xt" id="evT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button></div>
     </div>
     <div class="card">
       <h2>מבחנים</h2>
-      <p class="hint" style="margin-bottom:10px">מבחן מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו, עם החדר והשעה.</p>
+      <p class="hint" style="margin-bottom:10px">מבחן מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם המבחן | שעה.</p>
       <div class="scroll"><table class="cal xt" id="exT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
     </div>
@@ -642,7 +642,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 07:20";
+const APP_VER="21.10.2026 07:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -933,7 +933,7 @@ function plainNames(w,sid,sh,d,wk){return (w.assign[sid]?.[sh]?.[d]||[]).map(id=
 function siteMatch(campus,sid){if(!campus||campus==="שניהם")return true;const s=S.sites.find(x=>x.id===sid);return !!s&&(s.name===campus||s.name.includes(campus)||campus.includes(s.name))}
 function dayItems(dt,sid){const k=key(dt),out=[];
   (S.events||[]).forEach(e=>{if(e.date===k&&e.name&&siteMatch(e.campus,sid))out.push([e.name,e.time].filter(Boolean).join(" | "))});
-  (S.exams||[]).forEach(e=>{if(e.date===k&&e.name&&siteMatch(e.campus,sid))out.push(["מבחן "+e.name,e.room?"חדר "+e.room:"",e.time].filter(Boolean).join(" | "))});
+  (S.exams||[]).forEach(e=>{if(e.date===k&&e.name&&siteMatch(e.campus,sid))out.push([e.name,e.time].filter(Boolean).join(" | "))});
   return out}
 function noteText(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,...dayItems(dt,sid),((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean).join(" · ")}
 function sheetHTML(w,exportMode){
