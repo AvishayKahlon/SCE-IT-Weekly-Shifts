@@ -1107,6 +1107,46 @@ details.sub>summary h3{font-weight:600}
 .st.warn .st-v{color:var(--warn)}
 .st.amber .st-v{color:var(--amber)}
 @media (min-width:1100px){.stats{grid-template-columns:repeat(3,minmax(0,220px))}}
+/* a tile with a problem is a button: tap → glass sheet with the details */
+button.st{font:inherit;color:inherit;text-align:right;border:0;cursor:pointer;position:relative;transition:transform 140ms var(--ease-out),box-shadow 200ms ease}
+button.st:active{transform:scale(.97)}
+button.st:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.st-go{font-size:11px;font-weight:700;color:var(--muted)}
+button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber)}
+@media (hover:hover) and (pointer:fine){button.st:hover{box-shadow:var(--st-sh),0 0 0 1.5px color-mix(in srgb,var(--accent) 35%,transparent)}}
+.st-scrim{position:fixed;inset:0;z-index:58;background:rgba(20,23,20,.22);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.st-scrim[hidden],.stpop[hidden]{display:none}
+.stpop{position:fixed;z-index:60;width:min(380px,calc(100vw - 16px));max-height:min(70vh,520px);overflow:auto;overscroll-behavior:contain;display:grid;gap:6px;padding:12px;
+  border-radius:24px;background:var(--g-pop);color:var(--ink);-webkit-backdrop-filter:blur(30px) saturate(200%);backdrop-filter:blur(30px) saturate(200%);
+  box-shadow:0 18px 50px rgba(0,0,0,.2),inset 0 1px 0 var(--g-hi),inset 0 0 0 .5px var(--g-line);transform-origin:top right;
+  transition:transform 380ms var(--spring),opacity 180ms ease}
+@starting-style{.stpop{transform:scale(.94) translateY(-6px);opacity:0}}
+.stp-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 4px 4px}
+.stp-h h2{margin:0;font-size:18px;font-weight:600}
+.stp-x{width:32px;height:32px;min-height:0;padding:0!important;border-radius:999px;display:grid;place-items:center;flex:none;color:var(--muted);background:var(--g-field)!important;box-shadow:none!important}
+.stp-x svg{width:15px;height:15px}
+.stp-l{display:grid;gap:2px}
+.stp-r{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:52px;padding:8px 10px!important;border-radius:14px!important;text-align:right;
+  background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;font-weight:400}
+.stp-r:active{transform:none;background:var(--g-field)!important}
+@media (hover:hover) and (pointer:fine){.stp-r:hover{background:var(--g-field)!important}}
+.stp-i{width:28px;height:28px;border-radius:999px;display:grid;place-items:center;color:var(--warn);background:var(--warn-bg)}
+.stpop.clash .stp-i{color:var(--amber);background:var(--amber-bg)}
+.stp-i svg{width:15px;height:15px}
+.stp-t{display:grid;line-height:1.3;min-width:0}
+.stp-t b{font-size:15px;font-weight:700}
+.stp-t span{font-size:13px;color:var(--muted)}
+.stp-c{color:var(--muted);font-size:18px}
+@media (max-width:700px){
+  .stpop{left:8px;right:8px!important;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:auto;max-height:65dvh;border-radius:30px;padding:14px 12px;transform-origin:bottom center}
+  @starting-style{.stpop{transform:translateY(24px);opacity:0}}
+  .stp-r{min-height:58px}
+}
+/* the day a detail row points to glows once */
+.dcard{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 64px)}
+.dcard.flash{animation:dflash 1.2s var(--ease-out)}
+@keyframes dflash{0%,30%{box-shadow:var(--glass-shadow),0 0 0 3px color-mix(in srgb,var(--accent) 55%,transparent)}}
+@media (prefers-reduced-motion:reduce){.stpop{transition:opacity 150ms ease}.dcard.flash{animation:none}}
 @media (max-width:700px){.stats{gap:8px}.st{padding:10px 12px;border-radius:18px;-webkit-backdrop-filter:none;backdrop-filter:none}
   .st-v{font-size:22px;line-height:26px}.st-l{font-size:12px}.st-s{font-size:11px}}
 
@@ -1216,6 +1256,8 @@ details.sub>summary h3{font-weight:600}
       <button class="act" id="finalBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5"/></svg><span class="lb">סמן כסופי</span></button>
     </div>
     <div class="stats" id="stats" hidden></div>
+    <div class="st-scrim" id="stScrim" hidden></div>
+    <div class="stpop" id="stPop" role="dialog" aria-modal="true" aria-labelledby="stPopT" hidden></div>
     <div class="duo" id="duo">
     <section class="card" id="agendaBox" hidden>
       <h2 id="agendaTitle">הערות ואירועים</h2>
@@ -1408,7 +1450,7 @@ details.sub>summary h3{font-weight:600}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 01:30";
+const APP_VER="22.10.2026 01:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1852,14 +1894,39 @@ function dayPill(w,pr,d){if(!hasAssign(w))return "";const st=dayState(w,pr,d);if
   if(st.miss)return `<span class="dpill warn">${ICO_INFO}חסר ${st.miss}</span>`;
   if(st.clash)return `<span class="dpill amber">${ICO_WARN}התנגשות</span>`;
   return `<span class="dpill ok">${ICO_OK}מאויש</span>`}
+/* the week's issues, one row each: missing slots and clashes (who, where, why) – feeds the tiles and their glass detail sheet */
+function weekIssues(w,pr){
+  const SN=sid=>(S.sites.find(x=>x.id===sid)||{}).name||"",SH=sh=>sh==="m"?"בוקר":"ערב",miss=[],clash=[];
+  DAYS.forEach((dn,d)=>S.sites.forEach(s=>["m","e"].forEach(sh=>{const n=NEED[s.id][sh][d],a=w.assign[s.id][sh][d];
+    if(a.length<n)miss.push({d,t:`${dn} · ${SH(sh)}`,s:`${SN(s.id)} – חסר${n-a.length>1?"ים":""} ${n-a.length}`});
+    a.forEach((id,i)=>{if(!pr.bad.has(`${s.id}|${sh}|${d}|${i}`))return;
+      const twice=S.sites.reduce((x,t)=>x+["m","e"].reduce((y,h)=>y+w.assign[t.id][h][d].filter(e=>e===id).length,0),0)>1;
+      const why=!canWork(w,id,d,sh)?(cons(w,id,d)==="X"?"שובץ למרות חופש / לא יכול":`שובץ ל${SH(sh)} למרות שביקש ${sh==="m"?"ערב":"בוקר"}`)
+        :twice?"משובץ פעמיים באותו יום":n===0?(dm(d).off?"שיבוץ ביום פגרה":"שיבוץ ערב ביום שמסתיים ב-16:00"):"התנגשות";
+      clash.push({d,t:`${empName(id)} · ${dn} ${SH(sh)}`,s:`${SN(s.id)} – ${why}`})})})));
+  return{miss,clash}}
 function statsHTML(w,pr){
-  let need=0,have=0,clash=0;const missDays=[],clashNames=new Set();
-  DAYS.forEach((dn,d)=>{const st=dayState(w,pr,d);need+=st.need;have+=st.have;clash+=st.clash;if(st.miss)missDays.push(dn)});
-  pr.bad.forEach(k=>{const [sid,sh,d,i]=k.split("|"),id=w.assign[sid]?.[sh]?.[+d]?.[+i];if(id)clashNames.add(empName(id))});
-  const pct=need?Math.round(have/need*100):100,miss=need-have,cn=[...clashNames];
-  return `<div class="st"><span class="st-l">כיסוי משמרות</span><span class="st-v">${have}<small>/${need}</small></span><span class="st-bar" role="img" aria-label="${pct}% מאויש"><i style="width:${pct}%"></i></span></div>
-    <div class="st${miss?" warn":""}"><span class="st-l">חסרים</span><span class="st-v">${miss}</span><span class="st-s">${miss?esc(missDays.join(", ")):"הכול מאויש"}</span></div>
-    <div class="st${clash?" amber":""}"><span class="st-l">התנגשויות</span><span class="st-v">${clash}</span><span class="st-s">${clash?esc(cn.slice(0,2).join(", ")+(cn.length>2?` +${cn.length-2}`:"")):"אין"}</span></div>`}
+  const iss=weekIssues(w,pr),full=DAYS.filter((_,d)=>!dayState(w,pr,d).miss).length,nd=DAYS.length;   /* 6 work days: Sunday–Friday */
+  const missDays=[...new Set(iss.miss.map(x=>DAYS[x.d]))],cn=[...new Set(iss.clash.map(x=>x.t.split(" · ")[0]))],pct=Math.round(full/nd*100);
+  const tile=(kind,on,cls,inner)=>on?`<button class="st${cls}" data-st="${kind}" aria-haspopup="dialog">${inner}<span class="st-go" aria-hidden="true">פרטים ‹</span></button>`:`<div class="st${cls}">${inner}</div>`;
+  return tile("days",full<nd,"",`<span class="st-l">כיסוי ימי עבודה</span><span class="st-v">${full}<small>/${nd}</small></span><span class="st-bar" role="img" aria-label="${full} מתוך ${nd} ימים מאוישים"><i style="width:${pct}%"></i></span>`)
+    +tile("miss",iss.miss.length>0,iss.miss.length?" warn":"",`<span class="st-l">חסרים</span><span class="st-v">${iss.miss.length}</span><span class="st-s">${iss.miss.length?esc(missDays.join(", ")):"הכול מאויש"}</span>`)
+    +tile("clash",iss.clash.length>0,iss.clash.length?" amber":"",`<span class="st-l">התנגשויות</span><span class="st-v">${iss.clash.length}</span><span class="st-s">${iss.clash.length?esc(cn.slice(0,2).join(", ")+(cn.length>2?` +${cn.length-2}`:"")):"אין"}</span>`)}
+/* tap a tile → a glass sheet that says what the problem is (bottom sheet on the phone, popover under the tile on desktop) */
+function openStatSheet(kind,tile){
+  const w=W(),pr=problems(w),iss=weekIssues(w,pr);
+  const rows=kind==="clash"?iss.clash:kind==="miss"?iss.miss
+    :DAYS.map((dn,d)=>({d,dn,m:iss.miss.filter(x=>x.d===d)})).filter(x=>x.m.length).map(x=>({d:x.d,t:x.dn,s:x.m.map(y=>y.t.split(" · ")[1]+" ב"+y.s.split(" – ")[0]).join(", ")}));
+  const title={days:"ימים שלא מאוישים במלואם",miss:"משבצות חסרות",clash:"התנגשויות"}[kind],ic=kind==="clash"?ICO_WARN:ICO_INFO;
+  const p=$("#stPop");p.className="stpop "+kind;
+  p.innerHTML=`<div class="stp-h"><h2 id="stPopT">${title}</h2><button class="stp-x" aria-label="סגירה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="stp-l">${rows.map(r=>`<button class="stp-r" data-day="${r.d}"><span class="stp-i">${ic}</span><span class="stp-t"><b>${esc(r.t)}</b><span>${esc(r.s)}</span></span><span class="stp-c" aria-hidden="true">‹</span></button>`).join("")||`<p class="hint">הכול תקין</p>`}</div>`;
+  const wide=matchMedia("(min-width:701px)").matches;p.style.top=p.style.right="";
+  if(wide&&tile){const r=tile.getBoundingClientRect();p.style.top=Math.min(r.bottom+8,innerHeight-120)+"px";p.style.right=Math.max(8,innerWidth-r.right)+"px"}
+  p.hidden=false;$("#stScrim").hidden=false;document.body.classList.add("sharing");p.querySelector(".stp-x").focus({preventScroll:true});
+  statTile=tile}
+let statTile=null;
+function closeStatSheet(){const p=$("#stPop");if(p.hidden)return;p.hidden=true;$("#stScrim").hidden=true;document.body.classList.remove("sharing");statTile?.focus?.({preventScroll:true});statTile=null}
 
 /* ---------- font editor for the sent schedule ----------
    Tap a cell type in the full table to see and change its size / bold. Sizes are the ones in the exported image / PDF / print
@@ -2340,6 +2407,15 @@ $("#wkDate").addEventListener("change",e=>{const v=e.target.value;if(v){cur=key(
     if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){e.preventDefault();weekStep(dx>0?1:-1)}})}
 document.querySelectorAll(".minibar [data-wk]").forEach(b=>b.addEventListener("click",()=>weekStep(+b.dataset.wk)));
 $(".minibar .mb-t").addEventListener("click",()=>scrollTo({top:0,behavior:"smooth"}));
+/* summary tiles: tap one with a problem → glass sheet with the details; tap a row → that day */
+$("#stats").addEventListener("click",e=>{const t=e.target.closest("[data-st]");if(t)openStatSheet(t.dataset.st,t)});
+$("#stScrim").addEventListener("click",closeStatSheet);
+$("#stPop").addEventListener("click",e=>{if(e.target.closest(".stp-x"))return closeStatSheet();const r=e.target.closest(".stp-r");if(!r)return;
+  const d=+r.dataset.day;statTile=null;closeStatSheet();
+  const card=getComputedStyle($("#days")).display!=="none"&&document.querySelectorAll("#days .dcard")[d],tgt=card||$("#sheetScroll");
+  tgt?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"});
+  if(card){card.classList.remove("flash");void card.offsetWidth;card.classList.add("flash")}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeStatSheet()});
 /* phone: the five export tools live in one share sheet (same buttons, same ids – only where they show changes) */
 (()=>{const bar=$("#tab-sched .bar"),btn=$("#shareBtn"),scr=$("#shareScrim");
   const set=on=>{bar.classList.toggle("share-open",on);document.body.classList.toggle("sharing",on);btn.setAttribute("aria-expanded",on);scr.hidden=!on};
