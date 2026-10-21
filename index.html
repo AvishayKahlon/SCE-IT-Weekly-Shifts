@@ -975,6 +975,59 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 :root[data-theme="dark"] .msg{background:rgba(230,90,80,.12);color:#F4A79F}:root[data-theme="dark"] .msg.info,:root[data-theme="dark"] .msg.ok{background:transparent}:root[data-theme="dark"] .msg.info{color:var(--muted)}:root[data-theme="dark"] .msg.ok{color:#8FD99A}
 :root[data-theme="dark"] #sheetScroll{box-shadow:0 14px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 .5px rgba(255,255,255,.1)}
 
+
+@media (prefers-color-scheme: dark){
+/* Friday rotation */
+:root:not([data-theme="light"]) table.rotT th{background:rgba(255,255,255,.08);color:var(--ink)}
+:root:not([data-theme="light"]) table.rotT td.now{background:rgba(120,190,80,.26);color:#EAF6E1;box-shadow:inset 0 0 0 .5px rgba(150,220,110,.4)}
+:root:not([data-theme="light"]) table.rotT tr.cur td{background:rgba(140,200,95,.18);color:#D8EDC8}
+:root:not([data-theme="light"]) table.rotT tr.nxt td{color:var(--muted)}
+:root:not([data-theme="light"]) ol.rot .turn{background:rgba(140,200,95,.22);color:#D8EDC8}
+/* vacation / holiday / exam table headers */
+:root:not([data-theme="light"]) table.cal th{background:rgba(140,200,95,.16);color:#D8EDC8}
+/* constraint cells: same meaning, dark-friendly tints with light text */
+:root:not([data-theme="light"]) .cst[data-v="M"]{background:rgba(90,150,255,.20);color:#BFD6FF}
+:root:not([data-theme="light"]) .cst[data-v="E"]{background:rgba(255,170,60,.20);color:#FFD49A}
+:root:not([data-theme="light"]) .cst[data-v="X"],:root:not([data-theme="light"]) .cst[data-v="V"]{background:rgba(240,110,100,.18);color:#F6B4AC}
+:root:not([data-theme="light"]) .cst[data-v="T"],:root:not([data-theme="light"]) .cst[data-v="B"]{background:rgba(140,200,95,.18);color:#D8EDC8}
+:root:not([data-theme="light"]) .cst[data-s="ok"]{background:rgba(90,200,110,.22);color:#A8EBB5}
+:root:not([data-theme="light"]) .cst[data-s="bad"]{background:rgba(240,90,100,.24);color:#FFB3BB}
+:root:not([data-theme="light"]) .cst[data-s="miss"]{background:rgba(240,200,60,.22);color:#FFE08A}
+:root:not([data-theme="light"]) .cst[data-v="O"]{background:rgba(255,255,255,.06);color:var(--muted)}
+:root:not([data-theme="light"]) .cst.ev3{background:rgba(180,130,220,.26)!important;color:#E3CCF5!important}
+:root:not([data-theme="light"]) .legend i{filter:saturate(.8) brightness(.55)}
+/* quick-swap source, small tags */
+:root:not([data-theme="light"]) body.swapping .slot.swapsrc{background:rgba(224,122,0,.32)!important}
+:root:not([data-theme="light"]) .dcard .dh .hn{background:rgba(255,255,255,.14);color:var(--ink)}
+:root:not([data-theme="light"]) .pop .tag.bk{background:rgba(255,255,255,.1);color:#B0BEC5}
+:root:not([data-theme="light"]) .nwp-ic{background:rgba(110,200,120,.16);color:#9BE3A8}
+}
+
+/* Friday rotation */
+:root[data-theme="dark"] table.rotT th{background:rgba(255,255,255,.08);color:var(--ink)}
+:root[data-theme="dark"] table.rotT td.now{background:rgba(120,190,80,.26);color:#EAF6E1;box-shadow:inset 0 0 0 .5px rgba(150,220,110,.4)}
+:root[data-theme="dark"] table.rotT tr.cur td{background:rgba(140,200,95,.18);color:#D8EDC8}
+:root[data-theme="dark"] table.rotT tr.nxt td{color:var(--muted)}
+:root[data-theme="dark"] ol.rot .turn{background:rgba(140,200,95,.22);color:#D8EDC8}
+/* vacation / holiday / exam table headers */
+:root[data-theme="dark"] table.cal th{background:rgba(140,200,95,.16);color:#D8EDC8}
+/* constraint cells: same meaning, dark-friendly tints with light text */
+:root[data-theme="dark"] .cst[data-v="M"]{background:rgba(90,150,255,.20);color:#BFD6FF}
+:root[data-theme="dark"] .cst[data-v="E"]{background:rgba(255,170,60,.20);color:#FFD49A}
+:root[data-theme="dark"] .cst[data-v="X"],:root[data-theme="dark"] .cst[data-v="V"]{background:rgba(240,110,100,.18);color:#F6B4AC}
+:root[data-theme="dark"] .cst[data-v="T"],:root[data-theme="dark"] .cst[data-v="B"]{background:rgba(140,200,95,.18);color:#D8EDC8}
+:root[data-theme="dark"] .cst[data-s="ok"]{background:rgba(90,200,110,.22);color:#A8EBB5}
+:root[data-theme="dark"] .cst[data-s="bad"]{background:rgba(240,90,100,.24);color:#FFB3BB}
+:root[data-theme="dark"] .cst[data-s="miss"]{background:rgba(240,200,60,.22);color:#FFE08A}
+:root[data-theme="dark"] .cst[data-v="O"]{background:rgba(255,255,255,.06);color:var(--muted)}
+:root[data-theme="dark"] .cst.ev3{background:rgba(180,130,220,.26)!important;color:#E3CCF5!important}
+:root[data-theme="dark"] .legend i{filter:saturate(.8) brightness(.55)}
+/* quick-swap source, small tags */
+:root[data-theme="dark"] body.swapping .slot.swapsrc{background:rgba(224,122,0,.32)!important}
+:root[data-theme="dark"] .dcard .dh .hn{background:rgba(255,255,255,.14);color:var(--ink)}
+:root[data-theme="dark"] .pop .tag.bk{background:rgba(255,255,255,.1);color:#B0BEC5}
+:root[data-theme="dark"] .nwp-ic{background:rgba(110,200,120,.16);color:#9BE3A8}
+
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1211,7 +1264,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 23:35";
+const APP_VER="21.10.2026 23:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
