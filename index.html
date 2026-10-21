@@ -1339,6 +1339,9 @@ body.dragging .tabs,body.dragging .minibar{opacity:0;pointer-events:none;transit
 .rotghost{position:fixed;z-index:90;pointer-events:none;display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:16px;font-weight:700;font-size:16px;white-space:nowrap;
   background:var(--glass-bg,var(--surface));color:var(--ink);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
   box-shadow:0 18px 40px rgba(0,0,0,.28),0 4px 10px rgba(0,0,0,.15),inset 0 1px 0 var(--glass-edge,#fff);transform:translate(-50%,-50%)}
+/* while holding: the cell slowly sinks, so you can feel the second counting down */
+#friSet td.arming .rc{animation:arming 1000ms cubic-bezier(.4,0,.2,1) both}
+@keyframes arming{to{transform:scale(.94);opacity:.75}}
 #friSet td.dropon{outline:3px solid var(--accent);outline-offset:-3px;transform:scale(1.04)}
 </style></head><body>
 
@@ -1582,7 +1585,7 @@ body.dragging .tabs,body.dragging .minibar{opacity:0;pointer-events:none;transit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 04:15";
+const APP_VER="22.10.2026 04:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2668,10 +2671,11 @@ function startSwap(k){const a=slotRef(k);if(!a.arr[a.idx])return;SWAP=k;document
       g.remove()});D=null}
   document.addEventListener("pointerdown",e=>{if(e.button>0)return;const td=e.target.closest&&e.target.closest("#friSet td[data-rk]");if(!td)return;
     st={td,x:e.clientX,y:e.clientY,id:e.pointerId};
-    if(e.target.closest(".rgrip")){e.preventDefault();lift();move(e.clientX,e.clientY);return}
-    if(e.target.closest("select,button"))return;clearTimeout(t);t=setTimeout(()=>{if(st){lift();move(st.x,st.y);skip=true}},430)},true);
-  document.addEventListener("pointermove",e=>{if(!st||e.pointerId!==st.id)return;if(!D){if(Math.hypot(e.clientX-st.x,e.clientY-st.y)>8){clearTimeout(t);st=null}return}move(e.clientX,e.clientY)},true);
-  const up=()=>{clearTimeout(t);if(D)drop();st=null};
+    if(e.target.closest("select,button"))return;if(e.target.closest(".rgrip"))e.preventDefault();
+    /* hold for a full second before it lifts, so a casual touch never moves anyone */
+    clearTimeout(t);td.classList.add("arming");t=setTimeout(()=>{td.classList.remove("arming");if(st){lift();move(st.x,st.y);skip=true}},1000)},true);
+  document.addEventListener("pointermove",e=>{if(!st||e.pointerId!==st.id)return;if(!D){if(Math.hypot(e.clientX-st.x,e.clientY-st.y)>8){clearTimeout(t);st.td.classList.remove("arming");st=null}return}move(e.clientX,e.clientY)},true);
+  const up=()=>{clearTimeout(t);if(st)st.td.classList.remove("arming");if(D)drop();st=null};
   document.addEventListener("pointerup",up,true);document.addEventListener("pointercancel",up,true);
   document.addEventListener("touchmove",e=>{if(D)e.preventDefault()},{passive:false});
   document.addEventListener("click",e=>{if(skip){skip=false;e.stopPropagation();e.preventDefault()}},true)}
