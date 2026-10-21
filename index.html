@@ -167,7 +167,7 @@ table.sh .nbtn{flex:none;border:0;background:#1E8E4E;color:#fff;border-radius:6p
 .export .note input{display:none}
 #exportBox{position:fixed;left:-99999px;top:0;width:1500px}
 /* print version = the Excel print area: SCE logo banner + the site tables, A4 landscape */
-.export .logo{display:block;width:100%;height:auto;margin:0}
+.export .logo{display:block;width:100%;max-width:1500px;height:auto;margin:0 auto}
 .export .doc-head{text-align:center;font-family:var(--sh-font);color:#3F3F3F;margin:-6px 0 2px}
 .export .doc-title{font-size:26px;font-weight:700;letter-spacing:.2px}
 .export .doc-sub{font-size:16px;color:#595959;margin-top:2px}
@@ -1115,7 +1115,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 22:50";
+const APP_VER="21.10.2026 23:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2187,8 +2187,14 @@ async function sheetCanvas(){
   const box=$("#exportBox");calcNeed();box.innerHTML=`<div class="export" style="min-width:0;padding:20px;display:grid;gap:22px;background:#FFFFFF">${sheetHTML(W(),true)}</div>`;
   try{await document.fonts.ready}catch(e){}
   await Promise.all([...box.querySelectorAll("img")].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));
-  fitCells(box);
-  const canvas=await html2canvas(box.firstChild,{backgroundColor:"#FFFFFF",scale:2});
+  /* keep the sent image wide and low (≈ 2.25 : 1, like the original Excel-sized sheet) whatever the font sizes:
+     widen the page instead of letting rows get tall; the label column grows with its font so times never get cut */
+  const lblW=Math.max(150,Math.round(fontOf("lbl").s*9));
+  box.querySelectorAll("table.sh colgroup col:first-child").forEach(c=>c.style.width=lblW+"px");
+  const RATIO=2.25;let W0=1500;
+  for(let i=0;i<4;i++){box.style.width=W0+"px";fitCells(box);const r=box.firstChild.getBoundingClientRect();
+    if(r.width/r.height>=RATIO-0.02||W0>=2800)break;W0=Math.min(2800,Math.ceil(RATIO*r.height))}
+  const canvas=await html2canvas(box.firstChild,{backgroundColor:"#FFFFFF",scale:2});box.style.width="";
   box.innerHTML="";
   return canvas;
 }
