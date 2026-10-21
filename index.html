@@ -1289,7 +1289,10 @@ header .brand h1{color:#595959;font-weight:600;letter-spacing:-.1px}
 .pop button.dim .pav{opacity:.45}.pop button.dim>.pr>span:last-child{opacity:.6}
 .pop .tag.ok{color:var(--ok,#2E7D32)}
 @media (max-width:700px){
-  .popscrim{position:fixed;inset:0;z-index:59;background:rgba(10,14,10,.28);animation:scrimin 260ms ease both}
+  .poplayer{position:fixed;left:0;top:0;width:100vw;height:100dvh;z-index:59;transform-origin:0 0;pointer-events:none}
+  .poplayer>*{pointer-events:auto}
+  .poplayer .pop{position:absolute}
+  .popscrim{position:absolute;inset:0;z-index:59;background:rgba(10,14,10,.28);animation:scrimin 260ms ease both}
   .popscrim.out{animation:scrimout 240ms ease both}
   @keyframes scrimin{from{opacity:0}}@keyframes scrimout{to{opacity:0}}
   .pop{left:8px!important;right:8px!important;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:70dvh;overflow:auto;
@@ -1547,7 +1550,7 @@ header .brand h1{color:#595959;font-weight:600;letter-spacing:-.1px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 03:15";
+const APP_VER="22.10.2026 03:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2576,13 +2579,13 @@ function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();haptic();if(a.
 /* iPhone: briefly lock the viewport scale — Safari jumps back to 100% — then restore (pinch-zoom still works) */
 function unzoom(){const m=$("#vp");if(!m)return;const c=m.content;m.content=c+",maximum-scale=1,user-scalable=no";setTimeout(()=>{m.content=c},350)}
 function closePop(){if(pop){const p=pop,hadNote=!!p.querySelector("[data-anote]");pop=null;
-  if(p._scrim){const sc=p._scrim;p.classList.add("out");sc.classList.add("out");setTimeout(()=>{p.remove();sc.remove()},280)}else p.remove();
+  if(p._scrim){const sc=p._scrim,ly=p._layer;p.classList.add("out");sc.classList.add("out");setTimeout(()=>{p.remove();sc.remove();if(ly){ly._off();ly.remove()}},280)}else p.remove();
   if(hadNote)render()}}
 document.addEventListener("click",e=>{
   const t=e.target.closest(".slot");
   if(t&&t.closest("#sheet,#days")){e.stopPropagation();if(SWAP){doSwap(t.dataset.k);return}
     /* zoomed in (pinch): snap back to normal size first, then open the list at its proper size */
-    if(window.visualViewport&&visualViewport.scale>1.02){document.activeElement&&document.activeElement.blur&&document.activeElement.blur();unzoom();setTimeout(()=>openPop(t),380);return}
+    if(window.visualViewport&&visualViewport.scale>1.02&&document.activeElement&&document.activeElement.blur)document.activeElement.blur();
     openPop(t);return}
   if(SWAP&&!e.target.closest(".swapbar")){endSwap();return}
   if(pop&&!e.target.closest(".pop"))closePop();
@@ -2639,7 +2642,14 @@ function openPop(td){
   pop.innerHTML=head+(canSw?`<button class="swapb" data-swap><span>⇄ החלפה עם משבצת אחרת</span></button>`:"")+(notes?`<div class="pns">${notes}</div>`:"")+opts+`<button data-pick=""><span>ריק</span><span class="tag">הסר שיבוץ</span></button>`;
   document.body.appendChild(pop);
   if(matchMedia("(max-width:700px)").matches){
-    const sc=document.createElement("div");sc.className="popscrim";sc.addEventListener("click",()=>closePop());document.body.insertBefore(sc,pop);pop._scrim=sc;
+    /* the sheet lives in a layer pinned to what you actually see: if the page is pinch-zoomed the layer is scaled back,
+       so the sheet opens at its normal size without jumping the page (Safari cannot animate its own zoom) */
+    const lay=document.createElement("div");lay.className="poplayer";document.body.appendChild(lay);
+    const fit=()=>{const v=window.visualViewport;if(!v){lay.style.cssText="";return}const k=v.scale||1;
+      lay.style.width=v.width*k+"px";lay.style.height=v.height*k+"px";lay.style.transform=`translate(${v.offsetLeft}px,${v.offsetTop}px) scale(${1/k})`};
+    fit();if(window.visualViewport){visualViewport.addEventListener("resize",fit);visualViewport.addEventListener("scroll",fit)}
+    lay._off=()=>{if(window.visualViewport){visualViewport.removeEventListener("resize",fit);visualViewport.removeEventListener("scroll",fit)}};
+    const sc=document.createElement("div");sc.className="popscrim";sc.addEventListener("click",()=>closePop());lay.appendChild(sc);lay.appendChild(pop);pop._scrim=sc;pop._layer=lay;
     /* drag the sheet down to dismiss */
     let y0=null,dy=0;const h=pop.querySelector(".ph");
     h.addEventListener("touchstart",ev=>{y0=ev.touches[0].clientY;dy=0;pop.style.transition="none"},{passive:true});
