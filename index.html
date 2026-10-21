@@ -429,6 +429,10 @@ table.xt td.xdel{width:44px}
   table.xt td.xdel{grid-column:1/-1;width:auto;text-align:left}
   table.xt .df,table.xt .df .dtx{width:100%}
 }
+/* sync */
+.status.warn{color:var(--warn);cursor:pointer;text-decoration:underline dotted}
+.sync-on{color:var(--ok)}
+#syncBox input{font-size:16px}
 /* "new version" bar */
 .upd{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:70;background:#2E7D32;color:#fff;border:0;border-radius:999px;padding:10px 16px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.2);max-width:calc(100% - 24px)}
 @starting-style{.upd{opacity:0;transform:translate(-50%,-8px)}}
@@ -603,6 +607,10 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
     </nav>
     <div class="panel" id="sub-gen">
       <div class="card">
+        <h2>סנכרון בין מכשירים</h2>
+        <div id="syncBox"></div>
+      </div>
+      <div class="card">
         <h2>שעות משמרת</h2>
         <div class="row">
           <label>בוקר <input type="text" id="lblM" style="width:150px"></label>
@@ -705,7 +713,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 10:15";
+const APP_VER="21.10.2026 10:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1119,6 +1127,7 @@ function render(){
   const shortInfo=SHORT.length?`<div class="msg info">🏖️ ${SHORT.map(d=>DAYS[d]).join(", ")}: עובד בחופש – בוקר אחד בכל קמפוס, ערב אחד בכל קמפוס.</div>`:"";
   $("#msgs").innerHTML=shortInfo+(!hasAssign(w)?`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`:pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:""));
   fitCells($("#sheet"));
+  renderSync();
   renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderStaff();renderSettings();renderMsgs();
 }
 
@@ -1384,6 +1393,7 @@ if(window.visualViewport){visualViewport.addEventListener("resize",()=>{if(CMB)c
 function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.sub===k));
   ["gen","staff","msg"].forEach(t=>{$("#sub-"+t).hidden=t!==k});try{localStorage.setItem("shift-sub",k)}catch(e){}}
 document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>openSub(b.dataset.sub)));
+$("#status").addEventListener("click",()=>{if($("#status").classList.contains("warn")){document.querySelector('.tabs button[data-tab="set"]').click();openSub("gen");$("#syncBox").scrollIntoView({block:"center",behavior:"smooth"})}});
 try{if(localStorage.getItem("cat-open")==="0")$("#catBox").open=false}catch(e){}
 $("#catBox").addEventListener("toggle",()=>{try{localStorage.setItem("cat-open",$("#catBox").open?"1":"0")}catch(e){}});
 /* ---------- interactions ---------- */
@@ -1655,16 +1665,53 @@ $("#xlsBtn").onclick=async()=>{
   saveFile(fileBase()+".xlsx",new Blob([buf]));
 };
 
+/* ---------- cloud sync (Firebase): same data on iPhone and computer ----------
+   GitHub serves only the code; the data lives in one Firestore document (app/state) that only the
+   signed-in owner may read or write (see the Firestore rules). The browser keeps a local copy as cache. */
+const FB_CONFIG=null;   /* filled with the project's firebaseConfig */
+const FB_VER="10.12.2";
+let fbAuth=null,fbUser=null,fbUnsub=null;
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+async function fbInit(){
+  if(!FB_CONFIG||DEV_DATA)return false;
+  try{for(const m of ["app","auth","firestore"])await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${m}-compat.js`)}
+  catch(e){setStatus("אין חיבור לסנכרון – שומר במכשיר");return false}
+  firebase.initializeApp(FB_CONFIG);fbAuth=firebase.auth();
+  fbAuth.onAuthStateChanged(u=>{fbUser=u;renderSync();if(u)fbAttach();else fbDetach()});
+  return true}
+function fbDetach(){if(fbUnsub){fbUnsub();fbUnsub=null}ref=null;setStatus(FB_CONFIG?"לא מחובר – שמירה במכשיר הזה בלבד":"שמירה בדפדפן הזה בלבד")}
+function fbAttach(){
+  fbDetach();ref=firebase.firestore().doc("app/state");let first=true;setStatus("מתחבר…");
+  fbUnsub=ref.onSnapshot(snap=>{
+    if(first){first=false;
+      if(!snap.exists){dirty=true;flush();toast("הנתונים מהמכשיר הזה הועלו לענן");return}   /* first device: upload */
+      try{const cur0=localStorage.getItem("shift-state");if(cur0&&!localStorage.getItem("shift-state-before-sync"))localStorage.setItem("shift-state-before-sync",cur0)}catch(e){}}
+    if(snap.exists&&!snap.metadata.hasPendingWrites){const d=snap.data();
+      if(d.client!==clientId&&(d.ts||0)>=lastTs&&!dirty){load(d.state);lastTs=d.ts||0;try{localStorage.setItem("shift-state",d.state)}catch(e){}render()}
+      setStatus("מסונכרן ✓")}
+  },e=>{setStatus(e&&e.code==="permission-denied"?"אין הרשאה לנתונים בענן – בדקו את המייל בהרשאות":"החיבור לסנכרון נותק");ref=null})}
+async function fbSignIn(email,pass){const n=$("#syncMsg");try{n.textContent="מתחבר…";await fbAuth.signInWithEmailAndPassword(email.trim(),pass);n.textContent=""}
+  catch(e){n.textContent={"auth/invalid-credential":"מייל או סיסמה שגויים","auth/wrong-password":"סיסמה שגויה","auth/user-not-found":"המשתמש לא קיים","auth/too-many-requests":"יותר מדי ניסיונות, נסו שוב בעוד כמה דקות","auth/network-request-failed":"אין חיבור לאינטרנט","auth/unauthorized-domain":"הכתובת לא אושרה ב-Firebase (Authorized domains)"}[e.code]||("ההתחברות נכשלה: "+(e.code||e.message))}}
+function renderSync(){const box=$("#syncBox");if(!box)return;
+  if(!FB_CONFIG){box.innerHTML=`<p class="hint">הסנכרון עוד לא הוגדר. כרגע הנתונים נשמרים בכל מכשיר בנפרד.</p>`;return}
+  box.innerHTML=fbUser?`<div class="row"><span class="sync-on">✓ מחובר: <b dir="ltr">${esc(fbUser.email||"")}</b></span><button id="syncOut">התנתק</button></div>
+      <p class="hint" style="margin-top:6px">כל שינוי נשמר בענן ומופיע תוך שניות בכל מכשיר שמחובר עם אותו משתמש.</p>`
+    :`<form id="syncForm" class="row" autocomplete="on"><input type="email" id="syncEmail" placeholder="מייל" dir="ltr" autocomplete="username" required style="flex:1;min-width:180px">
+      <input type="password" id="syncPass" placeholder="סיסמה" dir="ltr" autocomplete="current-password" required style="flex:1;min-width:140px"><button class="primary">התחבר</button></form>
+      <p class="hint" id="syncMsg" style="margin-top:6px">התחברו פעם אחת בכל מכשיר (אייפון ומחשב) עם המשתמש שיצרתם ב-Firebase.</p>`;
+  $("#syncOut")&&($("#syncOut").onclick=()=>fbAuth.signOut());
+  $("#syncForm")&&($("#syncForm").onsubmit=e=>{e.preventDefault();fbSignIn($("#syncEmail").value,$("#syncPass").value)})}
 /* ---------- persistence ---------- */
-function setStatus(t){$("#status").textContent=t}
+function setStatus(t){const el=$("#status");el.textContent=t;el.classList.toggle("warn",/לא מחובר|נותק|אין הרשאה/.test(t))}
 function changed(soft){if(DEV_DATA){setStatus("מצב בדיקה – לא נשמר");return}dirty=true;setStatus("שומר…");clearTimeout(saveTimer);saveTimer=setTimeout(flush,soft?900:300)}
 async function flush(){
   if(!dirty)return;
   if(saving){clearTimeout(saveTimer);saveTimer=setTimeout(flush,400);return}
   dirty=false;lastTs=Date.now();
   const body={state:JSON.stringify(S),ts:lastTs,client:clientId};
-  if(ref){saving=true;try{await ref.set(body);setStatus("נשמר")}catch(e){setStatus(e&&e.code==="invalid_argument"?"אין הרשאה לשמור":"השמירה נכשלה, ננסה שוב");if(e&&e.code!=="invalid_argument"){dirty=true;saveTimer=setTimeout(flush,2500)}}saving=false}
-  else{try{localStorage.setItem("shift-state",body.state);setStatus("נשמר בדפדפן הזה בלבד")}catch(e){setStatus("לא נשמר")}}
+  try{localStorage.setItem("shift-state",body.state)}catch(e){}   /* local cache (also used offline) */
+  if(ref){saving=true;try{await ref.set(body);setStatus(fbUser?"מסונכרן ✓":"נשמר")}catch(e){setStatus(e&&e.code==="invalid_argument"?"אין הרשאה לשמור":"השמירה נכשלה, ננסה שוב");if(e&&e.code!=="invalid_argument"&&e.code!=="permission-denied"){dirty=true;saveTimer=setTimeout(flush,2500)}}saving=false}
+  else setStatus(FB_CONFIG?(fbUser?"שומר במכשיר – מתחבר לענן…":"לא מחובר – שמירה במכשיר הזה בלבד"):"שמירה בדפדפן הזה בלבד");
 }
 function load(raw){try{const o=JSON.parse(raw);S=Object.assign(defaultState(),o);S.shiftLbl=Object.assign(defaultState().shiftLbl,o.shiftLbl||{});const v=S.friVer;ensureData();if(v!==S.friVer)setTimeout(()=>changed(),0)}catch(e){}}
 
@@ -1740,6 +1787,7 @@ function devToggle(){const b=document.createElement("nav");b.className="devbar";
     render();
     setStatus("שמירה בדפדפן הזה בלבד");
     nextWeekPrompt();
+    fbInit().then(ok=>{if(ok&&!fbUser)setStatus("לא מחובר – שמירה במכשיר הזה בלבד")});
   }
   if(window.claude&&claude.use){
     try{claude.use("downloads").then(x=>{dl=x},()=>{})}catch(e){}
