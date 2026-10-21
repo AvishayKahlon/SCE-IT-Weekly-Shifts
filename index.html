@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F3F0">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141714">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#E9EFE5">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111511">
 <meta name="color-scheme" content="light dark">
 <!-- home-screen app (iPhone "Add to Home Screen" / Android install) -->
 <link rel="manifest" href="manifest.webmanifest">
@@ -705,12 +705,17 @@ textarea{padding:10px 12px;border-radius:14px}
 :root[data-theme="dark"]{--g-card:rgba(44,50,44,.36);--g-ctl:rgba(255,255,255,.09);--g-field:rgba(255,255,255,.07);--g-pop:rgba(38,44,38,.55);
   --g-rim1:rgba(255,255,255,.38);--g-rim2:rgba(255,255,255,.03);--g-rim3:rgba(255,255,255,.16);--g-glow:rgba(255,255,255,.05);
   --g-blob1:rgba(100,170,60,.30);--g-blob2:rgba(40,130,125,.28);--g-blob3:rgba(170,120,50,.18);--g-blob4:rgba(70,90,170,.20);--g-base:linear-gradient(160deg,#121612,#0E120F 50%,#141310)}
-body{background:var(--g-base) fixed}
+/* one continuous backdrop: a fixed layer (iPhone ignores background-attachment:fixed), and the same base colour on
+   <html> so the status-bar area, the bounce when pulling past the top/bottom, and app launch are never white */
+html{background:#E9EFE5}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"]){background:#111511}}
+html[data-theme="dark"]{background:#111511}
+body{background:transparent}
 body::before{background:
   radial-gradient(42vmax 36vmax at 88% 6%,var(--g-blob1),transparent 68%),
   radial-gradient(40vmax 34vmax at 6% 38%,var(--g-blob2),transparent 68%),
   radial-gradient(38vmax 32vmax at 78% 70%,var(--g-blob3),transparent 68%),
-  radial-gradient(34vmax 30vmax at 18% 96%,var(--g-blob4),transparent 68%)}
+  radial-gradient(34vmax 30vmax at 18% 96%,var(--g-blob4),transparent 68%),var(--g-base)}
 /* panes: real blur everywhere (phones included), inner glow, and a rim that catches light top-left */
 .card{position:relative;isolation:isolate;-webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);
   box-shadow:0 1px 1px rgba(20,35,20,.04),0 12px 36px rgba(20,35,20,.10),inset 0 0 22px var(--g-glow),inset 0 1px 0 var(--g-rim1)}
@@ -970,7 +975,7 @@ table.grid th,table.grid td{border-color:var(--g-line)}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 20:15";
+const APP_VER="21.10.2026 20:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
