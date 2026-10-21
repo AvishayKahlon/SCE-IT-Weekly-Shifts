@@ -366,6 +366,8 @@ table.sh .note .nw input{flex:1 1 60px}
 /* exams & events */
 #exT td.xdel{white-space:nowrap;width:80px}
 .xexp{padding:5px 9px;margin-inline-end:4px}
+.xuse{padding:5px 10px;margin-inline-end:4px;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:800}
+#ecT td.xdel{white-space:nowrap;width:84px}
 table.cal.xt tr.xdet td{border-bottom:1px solid var(--line);padding-top:0;text-align:right}
 table.cal.xt tr.xdet.sum td{font-size:12px;color:var(--muted);padding:0 8px 6px}
 table.cal.xt tr:has(+ tr.xdet) td{border-bottom:0}
@@ -686,7 +688,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 08:35";
+const APP_VER="21.10.2026 08:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1231,7 +1233,9 @@ function fillLists(){
   $("#dlEvent").innerHTML=opt(uniq(S.events.map(x=>x.name)))}
 /* picking a known exam fills the empty fields; new exams / lecturers are learned into the bank */
 function applyCat(r){const c=S.examCat.find(x=>x.name.trim()===String(r.name||"").trim());if(!c)return;
-  if(!r.software)r.software=c.software||"";if(!r.lecturer&&splitL(c.lecturer).length===1)r.lecturer=c.lecturer;
+  if(!r.software)r.software=c.software||"";
+  if(!r.lecturer){if(splitL(c.lecturer).length===1)r.lecturer=c.lecturer;
+    else{const prev=S.exams.filter(x=>x!==r&&x.name===r.name&&x.lecturer).sort((a,b)=>(b.date||"").localeCompare(a.date||""))[0];if(prev)r.lecturer=prev.lecturer}}  /* last lecturer used for this exam */
   if(!r.campus)r.campus=c.campus||"";if(!r.time)r.time=c.time||"";if(!r.notes)r.notes=c.notes||""}
 function learnExam(r){const n=String(r.name||"").trim();if(!n)return;let c=S.examCat.find(x=>x.name.trim()===n);
   if(!c){S.examCat.push({id:uid(),name:n,software:r.software||"",lecturer:r.lecturer||"",campus:r.campus||"",time:"",notes:r.notes||""});return}
@@ -1253,7 +1257,7 @@ function renderEv(){
       return `<td data-l="${l}"><input type="text" ${at} value="${esc(v)}" aria-label="${l}"${dl?` list="${dl}" autocomplete="off"`:""}${t==="h"?' placeholder="שעה" dir="ltr"':f==="name"?` placeholder="${l}"`:""}></td>`};
     $(cfg.tbl).innerHTML=`<thead><tr>${cfg.cols.map(c=>`<th>${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>`+
       (list.length?list.map(r=>{const open=XOPEN.has(r.id),sum=cfg.det?[r.software,r.lecturer,r.notes].filter(Boolean).join(" · "):"";
-        let h=`<tr class="${r.date&&r.date<today?"past":""}${kind==="examCat"?" cat":""}${open?" open":""}${cfg.det&&(open||sum)?" has-det":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel">${cfg.det?`<button class="xexp" data-xexp="${r.id}" aria-expanded="${open}" title="${esc(sum||"פרטים")}">${open?"▴":"▾"}</button>`:""}<button data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button></td></tr>`;
+        let h=`<tr class="${r.date&&r.date<today?"past":""}${kind==="examCat"?" cat":""}${open?" open":""}${cfg.det&&(open||sum)?" has-det":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel">${kind==="examCat"&&r.name?`<button class="xuse" data-xuse="${r.id}" title="הוספת מבחן ${esc(r.name)} לטבלת המבחנים" aria-label="הוספת מבחן ${esc(r.name)}">+</button>`:""}${cfg.det?`<button class="xexp" data-xexp="${r.id}" aria-expanded="${open}" title="${esc(sum||"פרטים")}">${open?"▴":"▾"}</button>`:""}<button data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button></td></tr>`;
         /* details line (software / lecturer / notes): a short summary, or editable fields when opened */
         if(cfg.det)h+=open?`<tr class="xdet"><td colspan="${cfg.cols.length+1}"><div class="xdg">${cfg.det.map(([f,l])=>`<label><span>${l}</span><input type="text" data-xf="${kind}|${r.id}|${f}" value="${esc(r[f]||"")}"${(DL[kind]||{})[f]?` list="${DL[kind][f]}" autocomplete="off"`:""}></label>`).join("")}</div></td></tr>`
           :sum?`<tr class="xdet sum"><td colspan="${cfg.cols.length+1}">${esc(sum)}</td></tr>`:"";
@@ -1333,6 +1337,11 @@ document.addEventListener("click",e=>{
     changed();render();return}
   const xa=e.target.closest("[data-xadd]");
   if(xa){const k=xa.dataset.xadd;S[k].push(k==="examCat"?{id:uid(),name:""}:{id:uid(),date:key(new Date())>cur?key(new Date()):cur});changed();render();return}
+  const xu=e.target.closest("[data-xuse]");
+  if(xu){const c=S.examCat.find(x=>x.id===xu.dataset.xuse);if(c){const t=key(new Date()),r={id:uid(),date:t>cur?t:cur,name:c.name};applyCat(r);S.exams.push(r);changed();render();
+    /* bring the new row into view and open its date for editing */
+    setTimeout(()=>{const el=document.querySelector(`[data-xf="exams|${r.id}|date"]`);if(el){el.closest("tr").scrollIntoView({block:"center",behavior:"smooth"});el.focus();el.select()}
+      toast(`נוסף מבחן ${c.name} – בחרו תאריך וכיתה`)},50)}return}
   const xe=e.target.closest("[data-xexp]");
   if(xe){const id=xe.dataset.xexp;XOPEN.has(id)?XOPEN.delete(id):XOPEN.add(id);renderEv();return}
   const xr=e.target.closest("[data-xroom]");
