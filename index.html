@@ -1469,7 +1469,7 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 01:35";
+const APP_VER="22.10.2026 01:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2241,7 +2241,7 @@ function renderCal(){if(CAL_KEEP)return;
   if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#tab-cal")&&document.activeElement.type==="text"&&!document.activeElement.classList.contains("dtx"))return;
   {const t=key(new Date()),nv=S.vac.filter(v=>!v.to||v.to>=t).length,nh=S.holidays.filter(h=>(h.to||h.from||"9")>=t).length;
     $("#vacN").textContent=nv?nv+" קרובות":"";$("#holN").textContent=nh?nh+" קרובים":""}
-  const opts=sel=>S.employees.slice().sort(byName).map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
+  const opts=sel=>`<option value="" ${sel?"":"selected"} disabled>בחרו טכנאי</option>`+S.employees.slice().sort(byName).map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
   $("#vacT").innerHTML=`<tr><th></th><th>טכנאי</th><th>מתאריך</th><th>עד תאריך</th><th>סה"כ ימים</th><th>מטרת החופש</th><th>קמפוס</th><th></th></tr>`+
     (S.vac.length?S.vac.slice().sort((a,b)=>(a.from||"9").localeCompare(b.from||"9")||HE.compare(empName(a.emp),empName(b.emp))).map(v=>{const days=v.from&&v.to&&v.to>=v.from?Math.round((parseKey(v.to)-parseKey(v.from))/864e5)+1:"";const old=v.to&&v.to<cur;
       return `<tr><td><span class="dot${old?" old":""}" title="${old?"החופשה הסתיימה":""}">●</span></td>
@@ -2591,7 +2591,7 @@ document.addEventListener("change",e=>{
   if(t.dataset.req||t.dataset.ename||t.dataset.sname||["lblM","lblE","h19Eve","sheetTitle","targetN"].includes(t.id))render();
 });
 $("#addEmp").onclick=()=>{const v=$("#newEmp").value.trim();if(!v)return;S.employees.push({id:uid(),name:v,active:true});$("#newEmp").value="";changed();render()};
-$("#addVac").onclick=()=>{const e=activeEmps()[0];if(!e)return;const d=parseKey(cur);d.setDate(d.getDate()+4);S.vac.push({id:uid(),emp:e.id,from:cur,to:key(d),purpose:"",campus:""});changed();render()};
+$("#addVac").onclick=()=>{if(!S.employees.length)return;const d=parseKey(cur);d.setDate(d.getDate()+4);S.vac.push({id:uid(),emp:"",from:cur,to:key(d),purpose:"",campus:""});changed();render()};   /* technician left empty: you pick */
 $("#addHol").onclick=()=>{S.holidays.push({id:uid(),name:"",from:cur,to:cur,type:"off"});changed();render()};
 $("#newEmp").addEventListener("keydown",e=>{if(e.key==="Enter")$("#addEmp").click()});
 $("#addSite").onclick=()=>{const v=$("#newSite").value.trim();if(!v)return;S.sites.push({id:uid(),name:v,req:{m:[1,1,1,1,1,1],e:[1,1,1,1,1,0]}});$("#newSite").value="";changed();render()};
