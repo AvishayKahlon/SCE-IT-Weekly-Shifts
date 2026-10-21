@@ -13,8 +13,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>ניהול צוות טכנאים – SCE</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap">
 <style>
 /* Layout: tool header with week nav, tabs (schedule / constraints / staff / settings); the schedule tab renders a sheet that mirrors the team's printed format */
 :root{
@@ -24,7 +22,7 @@
   /* exact values from the Excel theme: Text1 +35% / Accent6 +40% / Accent6 +60% */
   --sh-dark:#595959; --sh-darker:#3F3F3F; --sh-date:#A9D18E; --sh-cell:#A9D18E; --sh-cell2:#A9D18E; --sh-eve:#C5E0B4; --sh-note:#F2F2F2; --sh-ink:#000000; --sh-line:#000000;
   --sh-font:Calibri,Carlito,Arial,sans-serif; --sh-grid:#000000; --sh-frame:#000000;
-  --font:"Heebo",Arial,sans-serif;
+  --font:Calibri,Carlito,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#141714; --surface:#1D211D; --ink:#E9ECE7; --muted:#A4ACA4; --line:#323832; --accent:#8DBF5E; --accent-ink:#10140E; --warn:#F28B82; --warn-bg:#3A1F1C; --ok:#81C995; color-scheme:dark}}
@@ -86,20 +84,21 @@ table.sh .slot:active{filter:brightness(.94)}
 .sheetready .card{display:grid;gap:10px;min-width:240px;text-align:center}
 .sheetready .wa{background:#1E8E4E;color:#fff;border-color:#1E8E4E;font-weight:700;min-height:46px}
 .toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:14px;z-index:30;max-width:calc(100% - 24px);text-align:center}
-body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;direction:rtl;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;direction:rtl;margin:0}
 .wrap{max-width:1560px;margin:0 auto;padding-block:18px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:16px}
 header{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
-h1{font-size:22px;font-weight:800;margin:0}
+h1{font-size:27px;font-weight:700;margin:0}
 .week{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .week b{font-variant-numeric:tabular-nums;min-width:190px;text-align:center}
 .status{font-size:13px;color:var(--muted)}
 .final-badge{font-size:12px;font-weight:700;color:var(--ok);border:1px solid currentColor;border-radius:999px;padding:1px 8px}
-button,.btn{font:inherit;font-size:14px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer}
+select,textarea{font-family:inherit}
+button,.btn{font:inherit;font-size:15px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer}
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
 button:disabled{opacity:.5;cursor:default}
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 14px;font-weight:700;color:var(--muted)}
+.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 14px;font-weight:700;font-size:17px;color:var(--muted)}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 .panel{display:grid;gap:14px}
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -110,7 +109,7 @@ button:disabled{opacity:.5;cursor:default}
 .msg.info{background:transparent;color:var(--muted);padding:0}
 .scroll{overflow-x:auto;max-width:100%}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
-.card h2{font-size:16px;margin:0 0 10px}
+.card h2{font-size:20px;font-weight:700;margin:0 0 10px}
 .hint{color:var(--muted);font-size:13px;margin:0}
 
 /* ===== sheet (mirrors the printed format) ===== */
@@ -242,8 +241,9 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
 .dnote .nbtn{border:0;background:#1E8E4E;color:#fff;border-radius:8px;padding:8px 10px;font-size:13px;font-weight:700}
 .sd{display:none}
 @media (max-width:700px){
-  h1{font-size:19px}.week b{min-width:0}
+  h1{font-size:22px}.week b{min-width:0}
   body{font-size:16px}
+  .card h2{font-size:19px}
   .wrap{gap:12px;padding-block:12px 40px}
   header{gap:8px}
   .week{width:100%;display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:6px}
@@ -316,7 +316,7 @@ table.sh .an2{display:block;line-height:1.05}
 @starting-style{.nwp-card{transform:scale(.96);opacity:0}}
 .nwp-ic{width:52px;height:52px;border-radius:14px;background:#EEF8F1;color:#2E7D32;display:grid;place-items:center;margin:0 auto 4px}
 .nwp-ic svg{width:28px;height:28px}
-.nwp h2{font-size:19px;margin:0}
+.nwp h2{font-size:21px;margin:0}
 .nwp-week{margin:0;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)}
 .nwp-st{margin:0 0 8px;color:var(--muted);font-size:14px}
 .nwp-go{min-height:48px;font-size:15px;border-radius:10px;text-wrap:balance}
@@ -405,7 +405,7 @@ table.cal.xt tr:has(+ tr.xdet) td{border-bottom:0}
 .xdg label{display:grid;gap:2px;font-size:11px;color:var(--muted)}
 #catBox>summary{margin-bottom:0}
 details.sub{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
-details.sub>summary h3{margin:0;font-size:16px}
+details.sub>summary h3{margin:0;font-size:18px}
 .xsec>summary{align-items:center;padding:2px 0;-webkit-tap-highlight-color:transparent}
 .xcnt{font-size:12px;font-weight:700;color:var(--muted);background:var(--line);border-radius:999px;padding:1px 9px}
 .xcnt:empty{display:none}
@@ -736,7 +736,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 12:50";
+const APP_VER="21.10.2026 13:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
