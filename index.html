@@ -925,7 +925,7 @@ table.grid th,table.grid td{border-color:var(--g-line)}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 19:05";
+const APP_VER="21.10.2026 19:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1268,7 +1268,12 @@ function itemText(kind,id,sid,d){const r=(S[kind]||[]).find(x=>x.id===id);if(!r)
     if(r.software)L.push(`💻 תוכנה: ${r.software}`);if(r.lecturer)L.push(`👤 מרצה: ${r.lecturer}`);if(r.notes)L.push(`⚠️ ${r.notes}`)}
   else{L.push(`📅 ${r.name}${r.time?` | ${r.time}`:""}`);L.push(`📍 ${s?s.name:""}`);if(r.needs)L.push(`🛠️ ${r.needs}`)}
   L.push(`בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`);return L.join("\n")}
-function noteLines(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,...dayItems(dt,sid),((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean)}
+/* "אבישי - חופש" in the day's notes. Shown at the campus written in the vacation journal; with no campus (or "שניהם") at both */
+function vacLine(dt,sid,d){if(d>4||dayMode(dt).off)return "";const k=key(dt),site=(S.sites.find(x=>x.id===sid)||{}).name||"";
+  const n=(S.vac||[]).filter(v=>v.emp&&v.from&&v.from<=k&&k<=(v.to||v.from)&&(!v.campus||v.campus==="שניהם"||v.campus===site))
+    .map(v=>empName(v.emp)).filter((x,i,a)=>x&&a.indexOf(x)===i);
+  return n.length?n.join(", ")+" - חופש":""}
+function noteLines(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,vacLine(dt,sid,d),...dayItems(dt,sid),((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean)}
 function noteText(w,sid,d,wk){return noteLines(w,sid,d,wk).join(" · ")}
 function sheetHTML(w,exportMode){
   const pr=exportMode?null:problems(w);
@@ -1352,7 +1357,7 @@ function render(){
   const emps0=activeEmps(),miss=emps0.filter(e=>!(w.got||{})[e.id]);
   $("#gotN").textContent=emps0.length?`התקבלו ${emps0.length-miss.length}/${emps0.length}`:"";$("#gotN").classList.toggle("all",emps0.length>0&&!miss.length);
   const gotInfo=!w.final&&emps0.length&&miss.length&&miss.length<emps0.length?`<div class="msg info">📥 חסרים אילוצים מ: ${miss.map(e=>esc(e.name)).join(", ")}</div>`:"";
-  const shortInfo=gotInfo+(SHORT.length?`<div class="msg info">🏖️ ${SHORT.map(d=>DAYS[d]).join(", ")}: עובד בחופש – בוקר אחד בכל קמפוס, ערב אחד בכל קמפוס.</div>`:"");
+  const shortInfo=gotInfo;
   $("#msgs").innerHTML=shortInfo+(!hasAssign(w)?`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`:pr.list.length?(pr.list.every(m=>m.startsWith("ℹ️"))?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"")+pr.list.slice(0,12).map(m=>`<div class="msg${m.startsWith("ℹ️")?" info":""}">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:""));
   fitCells($("#sheet"));
   renderSync();renderAgenda(w);
