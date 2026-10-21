@@ -1308,6 +1308,15 @@ header .brand h1{color:#595959;font-weight:600;letter-spacing:-.1px}
   .pop .pav{width:34px;height:34px;font-size:14px}
   @media (prefers-reduced-motion:reduce){.pop,.pop.out,.popscrim,.popscrim.out{animation:none}}
 }
+
+/* edits on a final week */
+.fdirty{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding:12px 14px;border-radius:22px;
+  background:color-mix(in srgb,#E0A800 14%,var(--glass-bg,var(--surface)));-webkit-backdrop-filter:blur(14px) saturate(180%);backdrop-filter:blur(14px) saturate(180%);
+  box-shadow:var(--glass-shadow,0 4px 14px rgba(0,0,0,.08)),inset 0 1px 0 var(--glass-edge,#fff),inset 0 0 0 .5px color-mix(in srgb,#E0A800 45%,transparent)}
+.fdirty .fi{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#E0A800;color:#fff;font-weight:900;flex:none}
+.fdirty .ft{display:grid;gap:1px;flex:1 1 200px}.fdirty .ft b{font-size:15px}.fdirty .ft small{font-size:12.5px;color:var(--muted)}
+.fdirty .fb{display:flex;gap:8px;flex-wrap:wrap}.fdirty .fb button{min-height:38px;font-weight:700}
+@media (max-width:700px){.fdirty .fb{width:100%}.fdirty .fb button{flex:1}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1550,7 +1559,7 @@ header .brand h1{color:#595959;font-weight:600;letter-spacing:-.1px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 03:25";
+const APP_VER="22.10.2026 03:40";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2123,6 +2132,7 @@ function render(){
    else if(probs.length)h=`<div class="msgprob"><div class="msgh">⚠️ ${probs.length===1?"בעיה אחת בסידור":probs.length+" בעיות בסידור"}</div>`+probs.slice(0,12).map(m=>line(m)).join("")+(probs.length>12?line(`ועוד ${probs.length-12}…`):"")+shortInfo+infos.map(m=>line(m,"info")).join("")+`</div>`;
    else{const n=infos.length+(shortInfo?1:0);
      h=`<details class="msgok" ${MSG_OPEN?"open":""}><summary><span class="mk">✓</span><b>הכל משובץ, בלי התנגשויות</b>${n?`<span class="mn">${n} ${n===1?"הערה":"הערות"}</span>`:""}</summary>${n?`<div class="msgd">${shortInfo}${infos.map(m=>line(m,"info")).join("")}</div>`:""}</details>`}
+   if(finalDirty(w))h=`<div class="fdirty"><span class="fi">✎</span><span class="ft"><b>שינויים שלא נשמרו בסידור הסופי</b><small>הסידור שסומן כסופי שמור. אפשר לשמור את השינויים או לחזור אליו.</small></span><span class="fb"><button class="primary" data-fsave>שמור כסופי</button><button data-frevert>חזור לסופי</button></span></div>`+h;
    $("#msgs").innerHTML=h;const d=$("#msgs .msgok");if(d)d.addEventListener("toggle",()=>{MSG_OPEN=d.open})}
   fitCells($("#sheet"));
   renderSync();renderAgenda(w);
@@ -2559,7 +2569,13 @@ if("IntersectionObserver" in window){new IntersectionObserver(([en])=>document.b
 $("#weekPick").addEventListener("change",e=>{const v=e.target.dataset.iso;if(v){cur=key(sundayOf(parseKey(v)));render()}});
 $("#genBtn").onclick=()=>{if(!activeEmps().length)return;haptic();generate();changed();render()};
 $("#clearBtn").onclick=()=>{const w=W();S.sites.forEach(s=>w.assign[s.id]={m:DAYS.map(()=>[]),e:DAYS.map(()=>[])});changed();render()};
-$("#finalBtn").onclick=()=>{const w=W();w.final=!w.final;changed();render()};
+/* a final week keeps a copy of what was marked final: edits can then be saved as the new final, or thrown away */
+const finalPart=w=>JSON.stringify({a:w.assign,n:w.notes,an:w.anote||{},p:w.pref||{}});
+function takeFinal(w){w.finalSnap=finalPart(w)}
+function finalDirty(w){if(!w.final)return false;if(!w.finalSnap){takeFinal(w);return false}return w.finalSnap!==finalPart(w)}
+$("#finalBtn").onclick=()=>{const w=W();w.final=!w.final;if(w.final)takeFinal(w);else delete w.finalSnap;changed();render()};
+function saveFinal(){const w=W();takeFinal(w);changed();render();haptic();toast("השינויים נשמרו כסידור הסופי")}
+function revertFinal(){const w=W();if(!w.finalSnap)return;const o=JSON.parse(w.finalSnap);w.assign=o.a;w.notes=o.n;w.anote=o.an;w.pref=o.p;W();changed();render();haptic();toast("הוחזר לסידור הסופי")}
 
 let pop=null;
 /* quick swap: pick "⇄ החלפה" on one name, then tap any other slot */
@@ -2627,6 +2643,7 @@ document.addEventListener("click",e=>{
   if(sd){S.sites=S.sites.filter(x=>x.id!==sd.dataset.sdel);changed();render()}
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closePop();endSwap()}});
+document.addEventListener("click",e=>{if(e.target.closest("[data-fsave]"))saveFinal();else if(e.target.closest("[data-frevert]")){if(confirm("לבטל את השינויים ולחזור לסידור שסומן כסופי?"))revertFinal()}});
 function openPop(td){
   closePop();
   const[sid,sh,d,i]=td.dataset.k.split("|");const w=W();const arr=w.assign[sid][sh][+d];
@@ -2793,7 +2810,7 @@ $("#mailBtn").onclick=()=>busy($("#mailBtn"),async()=>{
   toast("נוצר מייל עם ה-PDF מצורף. פתחו את הקובץ "+name+".eml – תיפתח טיוטה ב-Outlook"+markSent())});
 function inFrame(){try{return window.self!==window.top}catch(e){return true}}
 /* sending the schedule (WhatsApp image or email) marks the week as final */
-function markSent(){const w=W();if(w.final)return "";w.final=true;changed();render();return " · הסידור סומן כסופי"}
+function markSent(){const w=W();if(w.final){if(finalDirty(w)){takeFinal(w);changed();render();return " · השינויים נשמרו כסופי"}return ""}w.final=true;takeFinal(w);changed();render();return " · הסידור סומן כסופי"}
 function shareReady(f){
   const o=document.createElement("div");o.className="sheetready";
   o.innerHTML=`<div class="card"><b>התמונה מוכנה</b><button class="wa" data-go>📤 שלח לוואטסאפ</button><button data-x>סגור</button></div>`;
