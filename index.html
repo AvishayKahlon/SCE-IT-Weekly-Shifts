@@ -713,7 +713,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 10:45";
+const APP_VER="21.10.2026 11:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1692,17 +1692,20 @@ function fbAttach(){
       if(d.client!==clientId&&(d.ts||0)>=lastTs&&!dirty){load(d.state);lastTs=d.ts||0;try{localStorage.setItem("shift-state",d.state)}catch(e){}render()}
       setStatus("מסונכרן ✓")}
   },e=>{setStatus(e&&e.code==="permission-denied"?"אין הרשאה לנתונים בענן – בדקו את המייל בהרשאות":"החיבור לסנכרון נותק");ref=null})}
-async function fbSignIn(email,pass){const n=$("#syncMsg");try{n.textContent="מתחבר…";await fbAuth.signInWithEmailAndPassword(email.trim(),pass);n.textContent=""}
-  catch(e){n.textContent={"auth/invalid-credential":"מייל או סיסמה שגויים","auth/wrong-password":"סיסמה שגויה","auth/user-not-found":"המשתמש לא קיים","auth/too-many-requests":"יותר מדי ניסיונות, נסו שוב בעוד כמה דקות","auth/network-request-failed":"אין חיבור לאינטרנט","auth/unauthorized-domain":"הכתובת לא אושרה ב-Firebase (Authorized domains)"}[e.code]||("ההתחברות נכשלה: "+(e.code||e.message))}}
+async function fbSignIn(email,pass){const n=$("#syncMsg");try{n.textContent="מתחבר…";await fbAuth.signInWithEmailAndPassword(email.trim().toLowerCase(),pass);n.textContent=""}
+  catch(e){n.textContent=({"auth/invalid-credential":"מייל או סיסמה שגויים (או שהמשתמש לא קיים ב-Firebase)","auth/invalid-email":"כתובת המייל לא תקינה","auth/operation-not-allowed":"התחברות במייל וסיסמה לא הופעלה ב-Firebase (Sign-in method)","auth/user-disabled":"המשתמש מושבת ב-Firebase","auth/wrong-password":"סיסמה שגויה","auth/user-not-found":"המשתמש לא קיים","auth/too-many-requests":"יותר מדי ניסיונות, נסו שוב בעוד כמה דקות","auth/network-request-failed":"אין חיבור לאינטרנט","auth/unauthorized-domain":"הכתובת לא אושרה ב-Firebase (Authorized domains)"}[e.code]||"ההתחברות נכשלה")+(e.code?` [${e.code}]`:"")}}
+async function fbReset(email){const n=$("#syncMsg");email=String(email||"").trim().toLowerCase();if(!email){n.textContent="הקלידו את המייל ואז לחצו שוב על 'שכחתי סיסמה'";return}
+  try{await fbAuth.sendPasswordResetEmail(email);n.textContent="נשלח מייל לאיפוס סיסמה (בדקו גם בספאם)"}catch(e){n.textContent="שליחת המייל נכשלה"+(e.code?` [${e.code}]`:"")}}
 function renderSync(){const box=$("#syncBox");if(!box)return;
   if(!FB_CONFIG){box.innerHTML=`<p class="hint">הסנכרון עוד לא הוגדר. כרגע הנתונים נשמרים בכל מכשיר בנפרד.</p>`;return}
   box.innerHTML=fbUser?`<div class="row"><span class="sync-on">✓ מחובר: <b dir="ltr">${esc(fbUser.email||"")}</b></span><button id="syncOut">התנתק</button></div>
       <p class="hint" style="margin-top:6px">כל שינוי נשמר בענן ומופיע תוך שניות בכל מכשיר שמחובר עם אותו משתמש.</p>`
-    :`<form id="syncForm" class="row" autocomplete="on"><input type="email" id="syncEmail" placeholder="מייל" dir="ltr" autocomplete="username" required style="flex:1;min-width:180px">
-      <input type="password" id="syncPass" placeholder="סיסמה" dir="ltr" autocomplete="current-password" required style="flex:1;min-width:140px"><button class="primary">התחבר</button></form>
+    :`<form id="syncForm" class="row" autocomplete="on"><input type="email" id="syncEmail" placeholder="מייל" dir="ltr" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required style="flex:1;min-width:180px">
+      <input type="password" id="syncPass" placeholder="סיסמה" dir="ltr" autocomplete="current-password" autocapitalize="off" autocorrect="off" required style="flex:1;min-width:140px"><button class="primary">התחבר</button><button type="button" id="syncReset">שכחתי סיסמה</button></form>
       <p class="hint" id="syncMsg" style="margin-top:6px">התחברו פעם אחת בכל מכשיר (אייפון ומחשב) עם המשתמש שיצרתם ב-Firebase.</p>`;
   $("#syncOut")&&($("#syncOut").onclick=()=>fbAuth.signOut());
-  $("#syncForm")&&($("#syncForm").onsubmit=e=>{e.preventDefault();fbSignIn($("#syncEmail").value,$("#syncPass").value)})}
+  $("#syncForm")&&($("#syncForm").onsubmit=e=>{e.preventDefault();fbSignIn($("#syncEmail").value,$("#syncPass").value)});
+  $("#syncReset")&&($("#syncReset").onclick=()=>fbReset($("#syncEmail").value))}
 /* ---------- persistence ---------- */
 function setStatus(t){const el=$("#status");el.textContent=t;el.classList.toggle("warn",/לא מחובר|נותק|אין הרשאה/.test(t))}
 function changed(soft){if(DEV_DATA){setStatus("מצב בדיקה – לא נשמר");return}dirty=true;setStatus("שומר…");clearTimeout(saveTimer);saveTimer=setTimeout(flush,soft?900:300)}
