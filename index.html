@@ -713,7 +713,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 11:00";
+const APP_VER="21.10.2026 11:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1696,16 +1696,22 @@ async function fbSignIn(email,pass){const n=$("#syncMsg");try{n.textContent="מ�
   catch(e){n.textContent=({"auth/invalid-credential":"מייל או סיסמה שגויים (או שהמשתמש לא קיים ב-Firebase)","auth/invalid-email":"כתובת המייל לא תקינה","auth/operation-not-allowed":"התחברות במייל וסיסמה לא הופעלה ב-Firebase (Sign-in method)","auth/user-disabled":"המשתמש מושבת ב-Firebase","auth/wrong-password":"סיסמה שגויה","auth/user-not-found":"המשתמש לא קיים","auth/too-many-requests":"יותר מדי ניסיונות, נסו שוב בעוד כמה דקות","auth/network-request-failed":"אין חיבור לאינטרנט","auth/unauthorized-domain":"הכתובת לא אושרה ב-Firebase (Authorized domains)"}[e.code]||"ההתחברות נכשלה")+(e.code?` [${e.code}]`:"")}}
 async function fbReset(email){const n=$("#syncMsg");email=String(email||"").trim().toLowerCase();if(!email){n.textContent="הקלידו את המייל ואז לחצו שוב על 'שכחתי סיסמה'";return}
   try{await fbAuth.sendPasswordResetEmail(email);n.textContent="נשלח מייל לאיפוס סיסמה (בדקו גם בספאם)"}catch(e){n.textContent="שליחת המייל נכשלה"+(e.code?` [${e.code}]`:"")}}
+let SYNC_KEY="";
 function renderSync(){const box=$("#syncBox");if(!box)return;
+  let hasBk=false;try{hasBk=!!localStorage.getItem("shift-state-before-sync")}catch(e){}
+  const k=[!!FB_CONFIG,fbUser?fbUser.email:"",hasBk].join("|");if(k===SYNC_KEY&&box.childElementCount)return;SYNC_KEY=k;
   if(!FB_CONFIG){box.innerHTML=`<p class="hint">הסנכרון עוד לא הוגדר. כרגע הנתונים נשמרים בכל מכשיר בנפרד.</p>`;return}
   box.innerHTML=fbUser?`<div class="row"><span class="sync-on">✓ מחובר: <b dir="ltr">${esc(fbUser.email||"")}</b></span><button id="syncOut">התנתק</button></div>
-      <p class="hint" style="margin-top:6px">כל שינוי נשמר בענן ומופיע תוך שניות בכל מכשיר שמחובר עם אותו משתמש.</p>`
+      <p class="hint" style="margin-top:6px">כל שינוי נשמר בענן ומופיע תוך שניות בכל מכשיר שמחובר עם אותו משתמש.</p>
+      ${hasBk?`<p class="hint" style="margin-top:8px">הנתונים שהיו במכשיר הזה לפני החיבור נשמרו בצד. אם הם העדכניים: <button type="button" id="syncRestore">העלה אותם לענן</button></p>`:""}`
     :`<form id="syncForm" class="row" autocomplete="on"><input type="email" id="syncEmail" placeholder="מייל" dir="ltr" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required style="flex:1;min-width:180px">
       <input type="password" id="syncPass" placeholder="סיסמה" dir="ltr" autocomplete="current-password" autocapitalize="off" autocorrect="off" required style="flex:1;min-width:140px"><button class="primary">התחבר</button><button type="button" id="syncReset">שכחתי סיסמה</button></form>
       <p class="hint" id="syncMsg" style="margin-top:6px">התחברו פעם אחת בכל מכשיר (אייפון ומחשב) עם המשתמש שיצרתם ב-Firebase.</p>`;
   $("#syncOut")&&($("#syncOut").onclick=()=>fbAuth.signOut());
   $("#syncForm")&&($("#syncForm").onsubmit=e=>{e.preventDefault();fbSignIn($("#syncEmail").value,$("#syncPass").value)});
-  $("#syncReset")&&($("#syncReset").onclick=()=>fbReset($("#syncEmail").value))}
+  $("#syncReset")&&($("#syncReset").onclick=()=>fbReset($("#syncEmail").value));
+  $("#syncRestore")&&($("#syncRestore").onclick=()=>{if(!confirm("להחליף את הנתונים בענן בנתונים שהיו במכשיר הזה לפני החיבור? (שאר המכשירים יקבלו אותם)"))return;
+    try{const raw=localStorage.getItem("shift-state-before-sync");load(raw);changed();localStorage.removeItem("shift-state-before-sync");SYNC_KEY="";render();toast("הנתונים מהמכשיר הזה הועלו לענן")}catch(e){toast("השחזור נכשל")}})}
 /* ---------- persistence ---------- */
 function setStatus(t){const el=$("#status");el.textContent=t;el.classList.toggle("warn",/לא מחובר|נותק|אין הרשאה/.test(t))}
 function changed(soft){if(DEV_DATA){setStatus("מצב בדיקה – לא נשמר");return}dirty=true;setStatus("שומר…");clearTimeout(saveTimer);saveTimer=setTimeout(flush,soft?900:300)}
