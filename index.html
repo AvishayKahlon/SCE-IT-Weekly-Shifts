@@ -416,7 +416,7 @@ table.sh .an2{display:block;line-height:1.05}
 /* app header brand: SCE wordmark | title */
 .brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 /* iPhone home-screen app: iOS blurs the strip under the status bar, so start the header below it */
-@media (display-mode:standalone){.wrap{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}}
+@media (display-mode:standalone){.wrap{padding-top:calc(env(safe-area-inset-top,0px) + 26px)}}   /* title starts just below the top fade */
 .brand-mark{height:21px;width:auto;display:block}
 .brand-sep{width:1px;height:24px;background:var(--line)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .brand-mark{filter:brightness(2.4)}}
@@ -712,7 +712,7 @@ html{background:#E9EFE5}
 :root{--g-top:#E9EFE5}
 /* iOS-style scroll edge: content melts into the status-bar colour instead of being cut off under it */
 @media (max-width:700px){body::after{content:"";position:fixed;top:0;left:0;right:0;z-index:34;pointer-events:none;
-  height:calc(env(safe-area-inset-top,0px) + 34px);
+  height:calc(env(safe-area-inset-top,0px) + 20px);
   background:linear-gradient(180deg,var(--g-top) 0,var(--g-top) env(safe-area-inset-top,0px),color-mix(in srgb,var(--g-top) 70%,transparent) calc(env(safe-area-inset-top,0px) + 10px),transparent 100%)}}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--g-top:#111511}}
 :root[data-theme="dark"]{--g-top:#111511}
@@ -1521,7 +1521,7 @@ header .brand h1{color:#595959;font-weight:600;letter-spacing:-.1px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 02:45";
+const APP_VER="22.10.2026 02:50";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
