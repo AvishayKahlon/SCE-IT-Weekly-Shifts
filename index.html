@@ -332,6 +332,8 @@ table.sh .an2{display:block;line-height:1.05}
 @media (prefers-color-scheme:dark) and (hover:hover) and (pointer:fine){:root:not([data-theme="light"]) .bar .act.soft:hover{background:#22382A}}
 /* app header brand: SCE wordmark | title */
 .brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+/* iPhone home-screen app: iOS blurs the strip under the status bar, so start the header below it */
+@media (display-mode:standalone){.wrap{padding-top:calc(env(safe-area-inset-top,0px) + 46px)}}
 .brand-mark{height:21px;width:auto;display:block}
 .brand-sep{width:1px;height:24px;background:var(--line)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .brand-mark{filter:brightness(2.4)}}
@@ -736,7 +738,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 13:00";
+const APP_VER="21.10.2026 13:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
