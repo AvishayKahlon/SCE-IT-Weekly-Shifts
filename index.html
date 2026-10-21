@@ -705,7 +705,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 10:05";
+const APP_VER="21.10.2026 10:15";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1673,8 +1673,13 @@ async function checkUpdate(){
   if(DEV_DATA||!/^https?:/.test(location.protocol))return;
   try{const r=await fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"});if(!r.ok)return;
     const m=(await r.text()).match(/const APP_VER="([^"]+)"/);if(!m||m[1]===APP_VER||document.querySelector(".upd"))return;
-    const b=document.createElement("button");b.className="upd";b.innerHTML=`יש עדכון לכלי (גרסה ${esc(m[1])}) – לחצו לרענון`;
-    b.onclick=()=>{flush();setTimeout(()=>location.replace(location.pathname+"?v="+encodeURIComponent(m[1])),300)};document.body.appendChild(b)}catch(e){}}
+    const go=()=>{flush();setTimeout(()=>location.replace(location.pathname+"?v="+encodeURIComponent(m[1])),300)};
+    /* reload by itself unless something is being edited right now (typing, open list/popup); then show the bar */
+    const busyNow=()=>{const a=document.activeElement;return (a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))||CMB||pop||document.querySelector(".nwp,.sheetready")};
+    if(!busyNow()){toast("הכלי מתעדכן לגרסה חדשה…");go();return}
+    const b=document.createElement("button");b.className="upd";b.innerHTML=`יש עדכון לכלי (גרסה ${esc(m[1])}) – לחצו לרענון`;b.onclick=go;document.body.appendChild(b);
+    /* try again by itself once editing stops */
+    const t=setInterval(()=>{if(!busyNow()){clearInterval(t);go()}},5000)}catch(e){}}
 /* ---------- from Tuesday: offer to start next week's schedule ---------- */
 function nextWeekPrompt(force){
   const t=new Date(),dow=t.getDay();if(!force&&(dow<2||dow>6))return;          /* Tuesday–Saturday */
@@ -1722,7 +1727,7 @@ function devToggle(){const b=document.createElement("nav");b.className="devbar";
   const opts=[["","Demo data"],["worst","Worst case"],["empty","Empty"],["one","One"],["many","Many"]];
   b.innerHTML=opts.map(([v,l])=>`<a href="?${v?"data="+v:""}" ${v===(DEV_DATA||"")?'aria-current="page"':""}>${l}</a>`).join("");document.body.appendChild(b)}
 (async()=>{
-  setTimeout(checkUpdate,1500);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate()});
+  setTimeout(checkUpdate,1500);setInterval(()=>{if(document.visibilityState==="visible")checkUpdate()},30000);   /* new versions appear within ~30 seconds */document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate()});
   if(DEV_DATA){load(JSON.stringify(devFixture(DEV_DATA)));if(DEV_DATA==="worst"||DEV_DATA==="many"){const g=generate;try{g()}catch(e){}}render();setStatus("מצב בדיקה – לא נשמר");devToggle();return}
   try{let t=localStorage.getItem("shift-tab"),u=localStorage.getItem("shift-sub");
     if(t==="msg"||t==="staff"){u=t;t="set"}      /* old tabs now live inside settings */
