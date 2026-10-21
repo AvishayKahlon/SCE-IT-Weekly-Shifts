@@ -353,6 +353,10 @@ table.sh .an2{display:block;line-height:1.05}
   #staffRows .row button{justify-self:end}
 }
 /* exams & events */
+table.xt td.rooms{white-space:nowrap}
+.rm{min-width:46px;padding:5px 8px;margin:2px;border-radius:8px;font-variant-numeric:tabular-nums}
+.rm[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+@media (max-width:700px){table.xt td.rooms,table.xt td[data-l="הערות"]{grid-column:1/-1;white-space:normal}}
 table.xt input[type=text],table.xt select{width:100%;min-width:0}
 table.xt td{vertical-align:middle}
 table.xt tr.past td{opacity:.5}
@@ -530,6 +534,13 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
       <div class="scroll"><table class="cal xt" id="exT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
     </div>
+    <div class="card">
+      <h2>מאגר מבחנים קבועים</h2>
+      <p class="hint" style="margin-bottom:10px">ממוין לפי א-ב. בחירת שם מבחן בטבלה למעלה ממלאת אוטומטית תוכנה, מרצה, קמפוס, שעה והערות. מבחן או מרצה חדשים שמוסיפים למעלה נשמרים כאן לפעם הבאה.</p>
+      <div class="scroll"><table class="cal xt" id="ecT"></table></div>
+      <div class="row" style="margin-top:10px"><button data-xadd="examCat">+ הוסף למאגר</button></div>
+    </div>
+    <datalist id="dlExam"></datalist><datalist id="dlLect"></datalist><datalist id="dlSoft"></datalist><datalist id="dlEvent"></datalist>
   </section>
 
   <section class="panel" id="tab-set" hidden>
@@ -642,9 +653,17 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 07:30";
+const APP_VER="21.10.2026 07:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
+const EXAM_PRESET=[
+  {name:"TIL",software:"דפדפן",lecturer:"מדור רישום",campus:"בני ברית",time:"09:00",notes:"כיתה 216 או 206, או שתיהן"},
+  {name:"כלי תוכנה",software:"MATLAB",lecturer:"עוזי צ׳סטר / זאב פרדקין",campus:"ז'בוטינסקי",time:"",notes:"לחסום אינטרנט. לפעמים בבני ברית"},
+  {name:"שיטות סימולציה",software:"ARENA",lecturer:"עליסה ווסלינסקי",campus:"ז'בוטינסקי",time:"",notes:"לחסום אינטרנט"},
+  {name:"אנגלית",software:"TextAloud",lecturer:"היחידה לאנגלית",campus:"ז'בוטינסקי",time:"",notes:"לפתוח לפני המבחן את התוכנה עם מספר נבחן פיקטיבי"},
+  {name:"גרפיקה הנדסית",software:"Solidworks",lecturer:"פולינה זק",campus:"ז'בוטינסקי",time:"",notes:"לחסום אינטרנט. לפעמים בבני ברית"},
+  {name:"גרפיקה הנדסית 2",software:"Autocad",lecturer:"מארק",campus:"ז'בוטינסקי",time:"",notes:"לחסום אינטרנט"}];
+const HE=new Intl.Collator("he",{numeric:true,sensitivity:"base"});
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
 const CAMPUS=["בני ברית","ז'בוטינסקי","שניהם"];
 const HOL_PRESET=[["חג ראש השנה","2026-09-11","2026-09-13","off"],["צום יום כיפור","2026-09-20","2026-09-21","off"],["חג סוכות","2026-09-25","2026-09-26","off"],["חול המועד סוכות","2026-09-27","2026-10-01","h16"],["הושענה רבה","2026-10-02","2026-10-02","off"],["שמיני עצרת ושמחת תורה","2026-10-03","2026-10-03","off"],["חג חנוכה","2026-12-06","2026-12-06","off"],["צום תענית אסתר","2027-03-22","2027-03-22","h16"],["חג פורים","2027-03-23","2027-03-23","off"],["ערב ביעור חמץ","2027-04-20","2027-04-20","h16"],["חג פסח","2027-04-21","2027-04-22","off"],["חול המועד פסח","2027-04-23","2027-04-27","h16"],["ערב יום הזיכרון לשואה ולגבורה","2027-05-03","2027-05-03","h19"],["ערב יום הזיכרון לחללי מערכות ישראל","2027-05-10","2027-05-10","h16"],["יום הזיכרון לחללי מערכות ישראל","2027-05-11","2027-05-11","off"],["יום העצמאות","2027-05-12","2027-05-12","off"],["חג שבועות","2027-06-10","2027-06-11","off"],["צום תשעה באב","2027-08-12","2027-08-12","off"]];
@@ -679,6 +698,9 @@ function ensureData(){
   if(!Array.isArray(S.vac))S.vac=[];
   if(!Array.isArray(S.events))S.events=[];
   if(!Array.isArray(S.exams))S.exams=[];
+  /* bank of recurring exams (sorted א-ב on screen) and rooms per campus */
+  if(!Array.isArray(S.examCat))S.examCat=EXAM_PRESET.map(x=>({id:uid(),...x}));
+  if(!S.rooms){S.rooms={};S.sites.forEach(s=>S.rooms[s.id]=s.name.includes("בוטינסקי")?["124","125","140","141","144"]:s.name.includes("בני ברית")?["205","206","216"]:[])}
   if(S.friVer!==2){S.friVer=2;S.friRule=defaultFri()}
   if(!S.friRule)S.friRule={};
   if(!S.bkVer&&S.employees.length){S.bkVer=1;if(!S.employees.some(e=>e.name.trim()==="אבישי"))S.employees.push({id:"av",name:"אבישי",active:true,backup:true})}
@@ -1144,20 +1166,44 @@ function renderFriSet(){
 /* vacations journal + holidays table */
 /* exams & events tables */
 const XT={events:{tbl:"#evT",cols:[["date","תאריך","d"],["name","שם האירוע","t"],["time","שעה","h"],["campus","קמפוס","c"],["needs","צרכים והיערכות","t"]]},
-          exams:{tbl:"#exT",cols:[["date","תאריך","d"],["name","שם המבחן","t"],["software","תוכנה","t"],["lecturer","מרצה","t"],["time","שעה","h"],["campus","קמפוס","c"],["room","מס׳ חדר","r"]]}};
+          exams:{tbl:"#exT",cols:[["date","תאריך","d"],["name","שם המבחן","t"],["software","תוכנה","t"],["lecturer","מרצה","t"],["time","שעה","h"],["campus","קמפוס","c"],["room","כיתה","r"],["notes","הערות","t"]]},
+          examCat:{tbl:"#ecT",cols:[["name","שם המבחן","t"],["software","תוכנה","t"],["lecturer","מרצה","t"],["campus","קמפוס","c"],["time","שעה","h"],["notes","הערות","t"]]}};
+const DL={events:{name:"dlEvent"},exams:{name:"dlExam",software:"dlSoft",lecturer:"dlLect"},examCat:{software:"dlSoft",lecturer:"dlLect"}};
+/* rooms offered for a campus ("שניהם" = all) */
+function roomsFor(campus){const ids=S.sites.filter(s=>siteMatch(campus,s.id)).map(s=>s.id);return [...new Set(ids.flatMap(id=>(S.rooms||{})[id]||[]))]}
+const splitL=v=>String(v||"").split(/\s*[\/,]\s*/).map(x=>x.trim()).filter(Boolean);
+function fillLists(){
+  const uniq=a=>[...new Set(a.filter(Boolean))].sort(HE.compare),opt=a=>a.map(v=>`<option value="${esc(v)}">`).join("");
+  $("#dlExam").innerHTML=opt(uniq(S.examCat.map(x=>x.name)));
+  $("#dlLect").innerHTML=opt(uniq([...S.examCat.flatMap(x=>splitL(x.lecturer)),...S.exams.flatMap(x=>splitL(x.lecturer))]));
+  $("#dlSoft").innerHTML=opt(uniq([...S.examCat.map(x=>x.software),...S.exams.map(x=>x.software)]));
+  $("#dlEvent").innerHTML=opt(uniq(S.events.map(x=>x.name)))}
+/* picking a known exam fills the empty fields; new exams / lecturers are learned into the bank */
+function applyCat(r){const c=S.examCat.find(x=>x.name.trim()===String(r.name||"").trim());if(!c)return;
+  if(!r.software)r.software=c.software||"";if(!r.lecturer&&splitL(c.lecturer).length===1)r.lecturer=c.lecturer;
+  if(!r.campus)r.campus=c.campus||"";if(!r.time)r.time=c.time||"";if(!r.notes)r.notes=c.notes||""}
+function learnExam(r){const n=String(r.name||"").trim();if(!n)return;let c=S.examCat.find(x=>x.name.trim()===n);
+  if(!c){S.examCat.push({id:uid(),name:n,software:r.software||"",lecturer:r.lecturer||"",campus:r.campus||"",time:"",notes:r.notes||""});return}
+  if(!c.software&&r.software)c.software=r.software;
+  splitL(r.lecturer).forEach(l=>{if(!splitL(c.lecturer).includes(l))c.lecturer=[...splitL(c.lecturer),l].join(" / ")})}
+function applyEvent(r){const prev=S.events.filter(x=>x!==r&&x.name===r.name).sort((a,b)=>(b.date||"").localeCompare(a.date||""))[0];if(!prev)return;
+  if(!r.time)r.time=prev.time||"";if(!r.campus)r.campus=prev.campus||"";if(!r.needs)r.needs=prev.needs||""}
 let EV_KEEP=false;
 function renderEv(){
-  if(EV_KEEP)return;const a=document.activeElement;if(a&&a.closest&&a.closest("#tab-ev")&&a.type==="text"&&!a.classList.contains("dtx"))return;
+  fillLists();if(EV_KEEP)return;const a=document.activeElement;if(a&&a.closest&&a.closest("#tab-ev")&&a.type==="text"&&!a.classList.contains("dtx"))return;
   const today=key(new Date());
   Object.entries(XT).forEach(([kind,cfg])=>{
-    const list=S[kind].slice().sort((x,y)=>(x.date||"9").localeCompare(y.date||"9")||(x.time||"").localeCompare(y.time||""));
-    const cell=(r,[f,l,t])=>{const at=`data-xf="${kind}|${r.id}|${f}"`,v=r[f]||"";
+    const list=kind==="examCat"?S[kind].slice().sort((x,y)=>(!x.name)-(!y.name)||HE.compare(x.name||"",y.name||"")):S[kind].slice().sort((x,y)=>(x.date||"9").localeCompare(y.date||"9")||(x.time||"").localeCompare(y.time||"")||HE.compare(x.name||"",y.name||""));
+    const cell=(r,[f,l,t])=>{const at=`data-xf="${kind}|${r.id}|${f}"`,v=r[f]||"",dl=(DL[kind]||{})[f];
+      if(t==="r"){const opts=roomsFor(r.campus),sel=splitL(v);
+        return `<td data-l="${l}" class="rooms">${opts.length?opts.map(o=>`<button type="button" class="rm" data-xroom="${kind}|${r.id}|${o}" aria-pressed="${sel.includes(o)}">${esc(o)}</button>`).join(""):`<span class="hint">בחרו קמפוס</span>`}</td>`}
       if(t==="d")return `<td data-l="${l}">${dateField(at,v,l)}</td>`;
       if(t==="c")return `<td data-l="${l}"><select ${at} aria-label="${l}"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v?"selected":""}>${esc(c)}</option>`).join("")}</select></td>`;
-      return `<td data-l="${l}"><input type="text" ${at} value="${esc(v)}" aria-label="${l}"${t==="h"?' placeholder="08:30-12:00" dir="ltr"':t==="r"?' placeholder="110"':""}></td>`};
+      return `<td data-l="${l}"><input type="text" ${at} value="${esc(v)}" aria-label="${l}"${dl?` list="${dl}" autocomplete="off"`:""}${t==="h"?' placeholder="שעה" dir="ltr"':""}></td>`};
     $(cfg.tbl).innerHTML=`<thead><tr>${cfg.cols.map(c=>`<th>${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>`+
-      (list.length?list.map(r=>`<tr class="${r.date&&r.date<today?"past":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel"><button data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button></td></tr>`).join("")
+      (list.length?list.map(r=>`<tr class="${r.date&&r.date<today?"past":""}${kind==="examCat"?" cat":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel"><button data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button></td></tr>`).join("")
         :`<tr class="none"><td colspan="${cfg.cols.length+1}" class="empty">${kind==="events"?"אין אירועים":"אין מבחנים"}</td></tr>`)+`</tbody>`});
+  fillLists();
 }
 let CAL_KEEP=false;
 function renderCal(){if(CAL_KEEP)return;
@@ -1228,7 +1274,9 @@ document.addEventListener("click",e=>{
     if(ds.radd){const prev=r.list[r.list.length-1],first=(activeEmps()[0]||{}).id;r.list.push(prev||first);if(t!==null)rotSetTurn(r,t);else rotSetTurn(r,0)}
     changed();render();return}
   const xa=e.target.closest("[data-xadd]");
-  if(xa){const k=xa.dataset.xadd;S[k].push({id:uid(),date:key(new Date())>cur?key(new Date()):cur});changed();render();return}
+  if(xa){const k=xa.dataset.xadd;S[k].push(k==="examCat"?{id:uid(),name:""}:{id:uid(),date:key(new Date())>cur?key(new Date()):cur});changed();render();return}
+  const xr=e.target.closest("[data-xroom]");
+  if(xr){const[k,id,room]=xr.dataset.xroom.split("|"),r=S[k].find(x=>x.id===id);if(r){const sel=splitL(r.room);r.room=(sel.includes(room)?sel.filter(x=>x!==room):[...sel,room]).sort(HE.compare).join(", ");changed();render()}return}
   const xd=e.target.closest("[data-xdel]");
   if(xd){const[k,id]=xd.dataset.xdel.split("|");S[k]=S[k].filter(x=>x.id!==id);changed();render();return}
   const vd=e.target.closest("[data-vdel]");
@@ -1278,7 +1326,13 @@ document.addEventListener("change",e=>{
   if(t.dataset.cov){const[sid,sh]=t.dataset.cov.split("|");S.cover[sid]=S.cover[sid]||{m:0,e:0};S.cover[sid][sh]=Math.max(0,Math.min(5,parseInt(t.value)||0));changed();render()}
   if(t.dataset.pref){const[sid,d]=t.dataset.pref.split("|"),w=W();w.pref[sid]=w.pref[sid]||DAYS.map(()=>null);const[e,sh]=(t.value||"|").split("|");w.pref[sid][+d]=e?{e,sh}:null;changed();render()}
   if(t.dataset.rsel){const[sid,i]=t.dataset.rsel.split("|"),r=S.friRule[sid];if(r){r.list[+i]=t.value;changed();render()}}
-  if(t.dataset.xf){const[k,id,f]=t.dataset.xf.split("|"),r=S[k].find(x=>x.id===id);if(r){const txt=t.type==="text"&&!t.classList.contains("dtx");r[f]=txt?t.value.trim():t.classList.contains("dtx")?t.dataset.iso:t.value;changed();
+  if(t.dataset.xf){const[k,id,f]=t.dataset.xf.split("|"),r=S[k].find(x=>x.id===id);if(r){let txt=t.type==="text"&&!t.classList.contains("dtx");r[f]=txt?t.value.trim():t.classList.contains("dtx")?t.dataset.iso:t.value;
+    if(k==="exams"&&f==="name"){applyCat(r);txt=false}           /* known exam: fill the row, so redraw it */
+    if(k==="exams"&&f==="campus"){const ok=roomsFor(r.campus);r.room=splitL(r.room).filter(x=>ok.includes(x)).join(", ")}
+    if(k==="exams")learnExam(r);
+    if(k==="events"&&f==="name"){applyEvent(r);txt=false}
+    if(k==="examCat"&&f==="name")txt=false;                       /* re-sort the bank */
+    changed();
     /* plain text: keep the table as is (focus is moving to the next field), only refresh the schedule */
     if(txt){EV_KEEP=true;render();EV_KEEP=false}else render()}}
   if(t.dataset.vf){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.classList.contains("dtx")?t.dataset.iso:t.value;if(f==="from"&&(!v.to||v.to<v.from))v.to=v.from;changed();if(t.type==="text"&&!t.classList.contains("dtx")){CAL_KEEP=true;render();CAL_KEEP=false}else render()}}
