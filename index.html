@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#E9EFE5">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111511">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07090A">
 <meta name="color-scheme" content="light dark">
 <!-- home-screen app (iPhone "Add to Home Screen" / Android install) -->
 <link rel="manifest" href="manifest.webmanifest">
@@ -879,6 +879,102 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
   :is(#exT,#evT,#ecT) td:is([data-l="מבחן"],[data-l="שם האירוע"],[data-l="שם המבחן"]) input:focus{background:var(--g-ctl)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 28%,transparent)!important;border-radius:12px}
   :is(#exT,#evT,#ecT) td:is([data-l="מבחן"],[data-l="שם האירוע"],[data-l="שם המבחן"]) input::placeholder{font-weight:600;color:var(--muted)}
 }
+
+/* ===== DARK MODE, Apple style ===== */
+@media (prefers-color-scheme: dark){
+/* palette & light: near-black base with deep, saturated light behind the glass (like iOS / macOS dark wallpapers) */
+:root:not([data-theme="light"]){--bg:#07090A;--surface:#14181A;--line:#2A302C;--muted:#9AA39C;--ink:#F1F4EF;--accent:#7CC24E;--accent-ink:#06120A;
+  --g-top:#07090A;--g-base:linear-gradient(165deg,#0A0E0C 0%,#06080A 55%,#0B0A08 100%);
+  --g-blob1:rgba(70,160,60,.42);--g-blob2:rgba(20,120,130,.38);--g-blob3:rgba(150,105,30,.26);--g-blob4:rgba(70,70,190,.30);
+  --g-card:rgba(255,255,255,.055);--g-ctl:rgba(255,255,255,.085);--g-field:rgba(255,255,255,.06);--g-pop:rgba(28,32,30,.62);--g-line:rgba(255,255,255,.09);
+  --g-rim1:rgba(255,255,255,.30);--g-rim2:rgba(255,255,255,.03);--g-rim3:rgba(255,255,255,.12);--g-glow:rgba(255,255,255,.03);
+  --glass-bg:rgba(30,34,32,.52);--glass-edge:rgba(255,255,255,.22);--glass-rim:rgba(0,0,0,.5);--glass-pill:rgba(255,255,255,.14);
+  --glass-shadow:0 14px 40px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.4)}
+:root:not([data-theme="light"]){background:#07090A}
+/* panes */
+:root:not([data-theme="light"]) .card{box-shadow:0 12px 36px rgba(0,0,0,.45),inset 0 1px 0 var(--g-rim1),inset 0 0 0 .5px var(--g-line)}
+:root:not([data-theme="light"]) button.primary:where(:not(:is(#sheet,.export) *)){background:linear-gradient(180deg,#93D865 0%,#6DB43F 60%,#5A9C33 100%);color:#06120A;
+  box-shadow:0 0 0 .5px rgba(255,255,255,.18),0 8px 26px rgba(110,190,70,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+:root:not([data-theme="light"]) .bar .act.soft{background:rgba(70,180,110,.14);color:#9BE3B4;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 .5px rgba(110,220,150,.35)}
+:root:not([data-theme="light"]) .tools .badge{box-shadow:0 0 0 .5px rgba(255,255,255,.18),0 2px 8px rgba(0,0,0,.45)}
+:root:not([data-theme="light"]) .xcnt{background:rgba(255,255,255,.08);color:var(--muted)}
+:root:not([data-theme="light"]) .xcnt.all{background:rgba(110,200,120,.18);color:#9BE3A8}
+/* agenda (notes & events of the week) */
+:root:not([data-theme="light"]) .ag-day{border:0;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 .5px var(--g-line);border-radius:16px}
+:root:not([data-theme="light"]) .ag-h{background:rgba(255,255,255,.07);color:var(--ink)}
+:root:not([data-theme="light"]) .psel{background:rgba(255,255,255,.06);border-color:rgba(230,200,110,.4);color:var(--ink)}
+:root:not([data-theme="light"]) .psel.ok{background:rgba(80,180,90,.16);border-color:#4CAF50}:root:not([data-theme="light"]) .psel.no{background:rgba(220,70,60,.16);border-color:#E06055}
+/* day cards: deep green glass chips with light text */
+:root:not([data-theme="light"]) .chip{background:rgba(120,190,80,.24);color:#E6F5DC;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(150,220,110,.35)}
+:root:not([data-theme="light"]) .chip.c2{background:rgba(120,190,80,.20)}
+:root:not([data-theme="light"]) .chip.ce{background:rgba(110,170,150,.22);color:#DDF2EA;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 .5px rgba(120,200,180,.35)}
+:root:not([data-theme="light"]) .chip.off{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--g-line)}
+:root:not([data-theme="light"]) .chip.empty-need{background:rgba(220,90,80,.12);color:#F2B8B1;box-shadow:inset 0 0 0 1.5px rgba(230,110,100,.6)}
+:root:not([data-theme="light"]) .dcard .dh .hn{background:rgba(255,255,255,.14)}
+/* full table on screen (the sent image keeps its own light palette) */
+:root:not([data-theme="light"]) #sheet table.sh{color:#EAF2E4;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 .5px rgba(255,255,255,.12)}
+:root:not([data-theme="light"]) #sheet table.sh td,:root:not([data-theme="light"]) #sheet table.sh th{border-color:rgba(255,255,255,.08)}
+:root:not([data-theme="light"]) #sheet table.sh .site,:root:not([data-theme="light"]) #sheet table.sh .lbl,:root:not([data-theme="light"]) #sheet table.sh .dname,:root:not([data-theme="light"]) #sheet table.sh .off{background:rgba(255,255,255,.07);color:#F1F4EF}
+:root:not([data-theme="light"]) #sheet table.sh .date{background:rgba(140,200,95,.20);color:#D8EDC8}
+:root:not([data-theme="light"]) #sheet table.sh .c,:root:not([data-theme="light"]) #sheet table.sh .c2{background:rgba(120,190,80,.22);color:#EAF6E1}
+:root:not([data-theme="light"]) #sheet table.sh .ce{background:rgba(110,170,150,.20);color:#E2F3EC}
+:root:not([data-theme="light"]) #sheet table.sh .note{background:rgba(255,255,255,.035);color:#B9C2BA}
+:root:not([data-theme="light"]) #sheet table.sh .pref{background:rgba(230,200,110,.06)}
+:root:not([data-theme="light"]) #sheet table.sh .an{color:#C8D3C6}
+:root:not([data-theme="light"]) #sheet table.sh .slot.empty-need{background:repeating-linear-gradient(135deg,rgba(120,190,80,.18),rgba(120,190,80,.18) 6px,rgba(220,90,80,.18) 6px,rgba(220,90,80,.18) 12px)}
+:root:not([data-theme="light"]) #sheet table.sh .note .hol,:root:not([data-theme="light"]) .dnote .hol{background:rgba(255,255,255,.12);color:var(--ink)}
+/* constraint grid */
+:root:not([data-theme="light"]) table.grid th{background:rgba(255,255,255,.05)}
+:root:not([data-theme="light"]) .msg{background:rgba(230,90,80,.12);color:#F4A79F}:root:not([data-theme="light"]) .msg.info,:root:not([data-theme="light"]) .msg.ok{background:transparent}:root:not([data-theme="light"]) .msg.info{color:var(--muted)}:root:not([data-theme="light"]) .msg.ok{color:#8FD99A}
+:root:not([data-theme="light"]) #sheetScroll{box-shadow:0 14px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 .5px rgba(255,255,255,.1)}
+}
+
+/* palette & light: near-black base with deep, saturated light behind the glass (like iOS / macOS dark wallpapers) */
+:root[data-theme="dark"]{--bg:#07090A;--surface:#14181A;--line:#2A302C;--muted:#9AA39C;--ink:#F1F4EF;--accent:#7CC24E;--accent-ink:#06120A;
+  --g-top:#07090A;--g-base:linear-gradient(165deg,#0A0E0C 0%,#06080A 55%,#0B0A08 100%);
+  --g-blob1:rgba(70,160,60,.42);--g-blob2:rgba(20,120,130,.38);--g-blob3:rgba(150,105,30,.26);--g-blob4:rgba(70,70,190,.30);
+  --g-card:rgba(255,255,255,.055);--g-ctl:rgba(255,255,255,.085);--g-field:rgba(255,255,255,.06);--g-pop:rgba(28,32,30,.62);--g-line:rgba(255,255,255,.09);
+  --g-rim1:rgba(255,255,255,.30);--g-rim2:rgba(255,255,255,.03);--g-rim3:rgba(255,255,255,.12);--g-glow:rgba(255,255,255,.03);
+  --glass-bg:rgba(30,34,32,.52);--glass-edge:rgba(255,255,255,.22);--glass-rim:rgba(0,0,0,.5);--glass-pill:rgba(255,255,255,.14);
+  --glass-shadow:0 14px 40px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.4)}
+:root[data-theme="dark"]{background:#07090A}
+/* panes */
+:root[data-theme="dark"] .card{box-shadow:0 12px 36px rgba(0,0,0,.45),inset 0 1px 0 var(--g-rim1),inset 0 0 0 .5px var(--g-line)}
+:root[data-theme="dark"] button.primary:where(:not(:is(#sheet,.export) *)){background:linear-gradient(180deg,#93D865 0%,#6DB43F 60%,#5A9C33 100%);color:#06120A;
+  box-shadow:0 0 0 .5px rgba(255,255,255,.18),0 8px 26px rgba(110,190,70,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+:root[data-theme="dark"] .bar .act.soft{background:rgba(70,180,110,.14);color:#9BE3B4;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 .5px rgba(110,220,150,.35)}
+:root[data-theme="dark"] .tools .badge{box-shadow:0 0 0 .5px rgba(255,255,255,.18),0 2px 8px rgba(0,0,0,.45)}
+:root[data-theme="dark"] .xcnt{background:rgba(255,255,255,.08);color:var(--muted)}
+:root[data-theme="dark"] .xcnt.all{background:rgba(110,200,120,.18);color:#9BE3A8}
+/* agenda (notes & events of the week) */
+:root[data-theme="dark"] .ag-day{border:0;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 .5px var(--g-line);border-radius:16px}
+:root[data-theme="dark"] .ag-h{background:rgba(255,255,255,.07);color:var(--ink)}
+:root[data-theme="dark"] .psel{background:rgba(255,255,255,.06);border-color:rgba(230,200,110,.4);color:var(--ink)}
+:root[data-theme="dark"] .psel.ok{background:rgba(80,180,90,.16);border-color:#4CAF50}:root[data-theme="dark"] .psel.no{background:rgba(220,70,60,.16);border-color:#E06055}
+/* day cards: deep green glass chips with light text */
+:root[data-theme="dark"] .chip{background:rgba(120,190,80,.24);color:#E6F5DC;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(150,220,110,.35)}
+:root[data-theme="dark"] .chip.c2{background:rgba(120,190,80,.20)}
+:root[data-theme="dark"] .chip.ce{background:rgba(110,170,150,.22);color:#DDF2EA;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 .5px rgba(120,200,180,.35)}
+:root[data-theme="dark"] .chip.off{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--g-line)}
+:root[data-theme="dark"] .chip.empty-need{background:rgba(220,90,80,.12);color:#F2B8B1;box-shadow:inset 0 0 0 1.5px rgba(230,110,100,.6)}
+:root[data-theme="dark"] .dcard .dh .hn{background:rgba(255,255,255,.14)}
+/* full table on screen (the sent image keeps its own light palette) */
+:root[data-theme="dark"] #sheet table.sh{color:#EAF2E4;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 .5px rgba(255,255,255,.12)}
+:root[data-theme="dark"] #sheet table.sh td,:root[data-theme="dark"] #sheet table.sh th{border-color:rgba(255,255,255,.08)}
+:root[data-theme="dark"] #sheet table.sh .site,:root[data-theme="dark"] #sheet table.sh .lbl,:root[data-theme="dark"] #sheet table.sh .dname,:root[data-theme="dark"] #sheet table.sh .off{background:rgba(255,255,255,.07);color:#F1F4EF}
+:root[data-theme="dark"] #sheet table.sh .date{background:rgba(140,200,95,.20);color:#D8EDC8}
+:root[data-theme="dark"] #sheet table.sh .c,:root[data-theme="dark"] #sheet table.sh .c2{background:rgba(120,190,80,.22);color:#EAF6E1}
+:root[data-theme="dark"] #sheet table.sh .ce{background:rgba(110,170,150,.20);color:#E2F3EC}
+:root[data-theme="dark"] #sheet table.sh .note{background:rgba(255,255,255,.035);color:#B9C2BA}
+:root[data-theme="dark"] #sheet table.sh .pref{background:rgba(230,200,110,.06)}
+:root[data-theme="dark"] #sheet table.sh .an{color:#C8D3C6}
+:root[data-theme="dark"] #sheet table.sh .slot.empty-need{background:repeating-linear-gradient(135deg,rgba(120,190,80,.18),rgba(120,190,80,.18) 6px,rgba(220,90,80,.18) 6px,rgba(220,90,80,.18) 12px)}
+:root[data-theme="dark"] #sheet table.sh .note .hol,:root[data-theme="dark"] .dnote .hol{background:rgba(255,255,255,.12);color:var(--ink)}
+/* constraint grid */
+:root[data-theme="dark"] table.grid th{background:rgba(255,255,255,.05)}
+:root[data-theme="dark"] .msg{background:rgba(230,90,80,.12);color:#F4A79F}:root[data-theme="dark"] .msg.info,:root[data-theme="dark"] .msg.ok{background:transparent}:root[data-theme="dark"] .msg.info{color:var(--muted)}:root[data-theme="dark"] .msg.ok{color:#8FD99A}
+:root[data-theme="dark"] #sheetScroll{box-shadow:0 14px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 .5px rgba(255,255,255,.1)}
+
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1115,7 +1211,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 23:15";
+const APP_VER="21.10.2026 23:35";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
