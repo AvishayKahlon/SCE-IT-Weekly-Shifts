@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" id="vp" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#E9EFE5">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07090A">
 <meta name="color-scheme" content="light dark">
@@ -1521,7 +1521,7 @@ header .brand h1{color:#595959;font-weight:600;letter-spacing:-.1px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 02:50";
+const APP_VER="22.10.2026 03:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2547,10 +2547,15 @@ function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();haptic();if(a.
   else{a.arr.splice(a.idx,1);if(b.idx>=b.arr.length)b.arr.push(x);else b.arr.splice(b.idx,0,x)}
   const w=W(),bad=[[x,b],[y,a]].filter(([e,s])=>e&&!canWork(w,e,s.d,s.sh)).map(([e])=>empName(e));
   changed();render();toast(y?`הוחלפו: ${empName(x)} ⇄ ${empName(y)}`:`${empName(x)} הועבר/ה`+(bad.length?` · שימו לב לאילוץ של ${bad.join(", ")}`:""))}
+/* iPhone: briefly lock the viewport scale — Safari jumps back to 100% — then restore (pinch-zoom still works) */
+function unzoom(){const m=$("#vp");if(!m)return;const c=m.content;m.content=c+",user-scalable=no";setTimeout(()=>{m.content=c},320)}
 function closePop(){if(pop){const hadNote=!!pop.querySelector("[data-anote]");pop.remove();pop=null;if(hadNote)render()}}
 document.addEventListener("click",e=>{
   const t=e.target.closest(".slot");
-  if(t&&t.closest("#sheet,#days")){e.stopPropagation();if(SWAP){doSwap(t.dataset.k);return}openPop(t);return}
+  if(t&&t.closest("#sheet,#days")){e.stopPropagation();if(SWAP){doSwap(t.dataset.k);return}
+    /* zoomed in (pinch): snap back to normal size first, then open the list at its proper size */
+    if(window.visualViewport&&visualViewport.scale>1.02){document.activeElement&&document.activeElement.blur&&document.activeElement.blur();unzoom();setTimeout(()=>openPop(t),380);return}
+    openPop(t);return}
   if(SWAP&&!e.target.closest(".swapbar")){endSwap();return}
   if(pop&&!e.target.closest(".pop"))closePop();
   const c=e.target.closest("[data-cst]");
