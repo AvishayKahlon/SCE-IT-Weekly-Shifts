@@ -352,6 +352,27 @@ table.sh .an2{display:block;line-height:1.05}
   #staffRows .row input[type=text]{grid-column:1/-1;width:100%}
   #staffRows .row button{justify-self:end}
 }
+/* exams & events */
+table.xt input[type=text],table.xt select{width:100%;min-width:0}
+table.xt td{vertical-align:middle}
+table.xt tr.past td{opacity:.5}
+table.xt td.xdel{width:44px}
+.dauto{display:grid;gap:3px;font-size:13px;color:var(--ink)}
+.dauto span{background:#FFF8E1;border:1px solid #F0DFA6;border-radius:6px;padding:3px 8px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dauto span{background:#2E2A1C;border-color:#5A4E2A}}
+@media (max-width:700px){
+  /* each row becomes a small card on phones */
+  table.cal.xt{min-width:0}
+  table.xt thead{display:none}
+  table.xt,table.xt tbody,table.xt tr,table.xt td{display:block;width:100%}
+  table.xt tr:not(.none){border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+  table.cal.xt td{border:0;padding:0;text-align:right}
+  table.xt td[data-l="צרכים והיערכות"]{grid-column:1/-1}
+  table.xt td[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+  table.xt td:nth-child(2){grid-column:1/-1}
+  table.xt td.xdel{grid-column:1/-1;width:auto;text-align:left}
+  table.xt .df,table.xt .df .dtx{width:100%}
+}
 /* "new version" bar */
 .upd{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:70;background:#2E7D32;color:#fff;border:0;border-radius:999px;padding:10px 16px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.2);max-width:calc(100% - 24px)}
 @starting-style{.upd{opacity:0;transform:translate(-50%,-8px)}}
@@ -430,6 +451,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="sched" aria-selected="true">סידור ואילוצים</button>
     <button role="tab" data-tab="cal" aria-selected="false">חופשות וחגים</button>
+    <button role="tab" data-tab="ev" aria-selected="false">מבחנים ואירועים</button>
     <button role="tab" data-tab="set" aria-selected="false">הגדרות</button>
   </nav>
 
@@ -494,6 +516,21 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
   </section>
 
 
+
+  <section class="panel" id="tab-ev" hidden>
+    <div class="card">
+      <h2>אירועים וכנסים</h2>
+      <p class="hint" style="margin-bottom:10px">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו. אירועים שעברו מוצגים באפור.</p>
+      <div class="scroll"><table class="cal xt" id="evT"></table></div>
+      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button></div>
+    </div>
+    <div class="card">
+      <h2>מבחנים</h2>
+      <p class="hint" style="margin-bottom:10px">מבחן מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו, עם החדר והשעה.</p>
+      <div class="scroll"><table class="cal xt" id="exT"></table></div>
+      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
+    </div>
+  </section>
 
   <section class="panel" id="tab-set" hidden>
     <nav class="subtabs" role="tablist" aria-label="קטגוריות הגדרות">
@@ -605,7 +642,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 07:00";
+const APP_VER="21.10.2026 07:20";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -640,6 +677,8 @@ function addW(wk,n){const d=parseKey(wk);d.setDate(d.getDate()+7*n);return key(d
 function ensureData(){
   if(!Array.isArray(S.holidays))S.holidays=HOL_PRESET.map(([name,from,to,type])=>({id:uid(),name,from,to,type}));
   if(!Array.isArray(S.vac))S.vac=[];
+  if(!Array.isArray(S.events))S.events=[];
+  if(!Array.isArray(S.exams))S.exams=[];
   if(S.friVer!==2){S.friVer=2;S.friRule=defaultFri()}
   if(!S.friRule)S.friRule={};
   if(!S.bkVer&&S.employees.length){S.bkVer=1;if(!S.employees.some(e=>e.name.trim()==="אבישי"))S.employees.push({id:"av",name:"אבישי",active:true,backup:true})}
@@ -890,7 +929,13 @@ function cellNames(w,sid,sh,d,ids){return ids.map(id=>{const n=aNote(w,sid,sh,d,
   return sh==="m"?`<span class="nm">${esc(empName(id))}</span>${n?`<span class="an an2">(${esc(n)})</span>`:""}`:`${esc(empName(id))}${n?` <span class="an">(${esc(n)})</span>`:""}`}).join(sh==="m"?"":", ")}
 function plainNames(w,sid,sh,d,wk){return (w.assign[sid]?.[sh]?.[d]||[]).map(id=>{const n=aNote(w,sid,sh,d,id,wk);return empName(id)+(n?` (${n})`:"")})}
 /* note row text = holiday name(s) + the manual note, like the Excel note formula */
-function noteText(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean).join(" · ")}
+/* events / exams of a given day at a site (campus "שניהם" = both sites) */
+function siteMatch(campus,sid){if(!campus||campus==="שניהם")return true;const s=S.sites.find(x=>x.id===sid);return !!s&&(s.name===campus||s.name.includes(campus)||campus.includes(s.name))}
+function dayItems(dt,sid){const k=key(dt),out=[];
+  (S.events||[]).forEach(e=>{if(e.date===k&&e.name&&siteMatch(e.campus,sid))out.push([e.name,e.time].filter(Boolean).join(" | "))});
+  (S.exams||[]).forEach(e=>{if(e.date===k&&e.name&&siteMatch(e.campus,sid))out.push(["מבחן "+e.name,e.room?"חדר "+e.room:"",e.time].filter(Boolean).join(" | "))});
+  return out}
+function noteText(w,sid,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d);return [...dayMode(dt).names,...dayItems(dt,sid),((w.notes?.[sid]||[])[d]||"").trim()].filter(Boolean).join(" · ")}
 function sheetHTML(w,exportMode){
   const pr=exportMode?null:problems(w);
   const parts=[];
@@ -932,7 +977,7 @@ function sheetHTML(w,exportMode){
     });
     h+=`</tr>`;
     // notes
-    h+=`<tr><td class="lbl">הערות ואירועים</td>${DAYS.map((_,d)=>{const hn=dm(d).names.join(" · ");return `<td class="note" colspan="2">${exportMode?esc(noteText(w,s.id,d)):`<div class="nw">${hn?`<span class="hol">${esc(hn)}</span>`:""}<input data-note="${s.id}|${d}" value="${esc(w.notes[s.id][d])}" aria-label="הערה ${DAYS[d]} ${esc(s.name)}">${(w.notes[s.id][d]||"").trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}" title="שליחת תזכורת לוואטסאפ" aria-label="שליחת תזכורת על האירוע">וואטסאפ</button>`:""}</div>`}</td>`}).join("")}</tr>`;
+    h+=`<tr><td class="lbl">הערות ואירועים</td>${DAYS.map((_,d)=>{const hn=[...dm(d).names,...dayItems(dayDate(d),s.id)].join(" · ");return `<td class="note" colspan="2">${exportMode?esc(noteText(w,s.id,d)):`<div class="nw">${hn?`<span class="hol">${esc(hn)}</span>`:""}<input data-note="${s.id}|${d}" value="${esc(w.notes[s.id][d])}" aria-label="הערה ${DAYS[d]} ${esc(s.name)}">${(w.notes[s.id][d]||"").trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}" title="שליחת תזכורת לוואטסאפ" aria-label="שליחת תזכורת על האירוע">וואטסאפ</button>`:""}</div>`}</td>`}).join("")}</tr>`;
     if(!exportMode)h+=`<tr class="prow"><td class="lbl">⭐ טכנאי מועדף</td>${DAYS.map((_,d)=>`<td class="pref" colspan="2">${prefSel(w,s.id,d)}</td>`).join("")}</tr>`;
     h+=`</table>`;parts.push(h);
   });
@@ -951,8 +996,8 @@ function daysHTML(w){
     const sites=S.sites.map(s=>{const A=w.assign[s.id],nm=NEED[s.id].m[d],ne=NEED[s.id].e[d];
       let m="";if(nm||A.m[d].length){m=chip(s.id,"m",d,0,A.m[d].slice(0,1),nm);if(nm>1||A.m[d].length>1)m+=chip(s.id,"m",d,1,A.m[d].slice(1),nm)}else m=`<span class="chip off">${md.off?"פגרה":"—"}</span>`;
       let e="";if(ne||A.e[d].length)e=chip(s.id,"e",d,0,A.e[d],ne);else e=`<span class="chip off">${d===5?"שבת שלום":md.off?"פגרה":md.noEve?"סיום ב-16:00":"—"}</span>`;
-      const note=w.notes[s.id][d]||"";
-      return `<div class="dsite"><b>${esc(s.name)}</b>
+      const note=w.notes[s.id][d]||"",auto=dayItems(dayDate(d),s.id);
+      return `<div class="dsite"><b>${esc(s.name)}</b>${auto.length?`<div class="dauto">${auto.map(x=>`<span>📌 ${esc(x)}</span>`).join("")}</div>`:""}
         <div class="dl"><span class="t">בוקר</span><div class="chips">${m}</div></div>
         <div class="dl"><span class="t">ערב</span><div class="chips">${e}</div></div>
         <div class="dnote"><input type="text" data-note="${s.id}|${d}" value="${esc(note)}" placeholder="הערות ואירועים" aria-label="הערה ${dn} ${esc(s.name)}">${note.trim()?`<button class="nbtn" data-evmsg="${s.id}|${d}">וואטסאפ</button>`:""}</div><div class="dnote"><span class="t">⭐ מועדף</span>${prefSel(w,s.id,d)}</div></div>`}).join("");
@@ -972,7 +1017,7 @@ function render(){
   const pr=problems(w);
   $("#msgs").innerHTML=!hasAssign(w)?`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמנו אילוצים ולחצו "צור סידור אוטומטי".</div>`:pr.list.length?pr.list.slice(0,12).map(m=>`<div class="msg">${esc(m)}</div>`).join("")+(pr.list.length>12?`<div class="msg">ועוד ${pr.list.length-12}…</div>`:""):(hasAssign(w)?`<div class="msg ok">✓ כל המשבצות מאוישות, בלי התנגשויות</div>`:"");
   fitCells($("#sheet"));
-  renderFair(w);renderCons(w);renderFriSet();renderCal();renderStaff();renderSettings();renderMsgs();
+  renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderStaff();renderSettings();renderMsgs();
 }
 
 /* ---------- WhatsApp messages ---------- */
@@ -1000,7 +1045,7 @@ function renderMsgs(){
   setMsg("evMsg",lines.length?`תזכורת ליום ${DAYS[di]} ${dot(ed)}:\n${lines.join("\n")}`:"");
   // week as text
   const w=W(),out=[`סידור עבודה ${weekSpan()}`];
-  DAYS.forEach((dn,d)=>{const md=dm(d);out.push(`\n*${dn} ${dot(dayDate(d))}*${md.names.length?` (${md.names.join(", ")}${md.off?" – פגרה":md.noEve?" – סיום ב-16:00":""})`:""}`);if(md.off&&!S.sites.some(s=>namesAt(w,s.id,"m",d).length))return;S.sites.forEach(s=>{const m=namesAt(w,s.id,"m",d),e=namesAt(w,s.id,"e",d),n=(w.notes[s.id][d]||"").trim();
+  DAYS.forEach((dn,d)=>{const md=dm(d);out.push(`\n*${dn} ${dot(dayDate(d))}*${md.names.length?` (${md.names.join(", ")}${md.off?" – פגרה":md.noEve?" – סיום ב-16:00":""})`:""}`);if(md.off&&!S.sites.some(s=>namesAt(w,s.id,"m",d).length))return;S.sites.forEach(s=>{const m=namesAt(w,s.id,"m",d),e=namesAt(w,s.id,"e",d),n=[...dayItems(dayDate(d),s.id),(w.notes[s.id][d]||"").trim()].filter(Boolean).join(" · ");
     if(!m.length&&!e.length&&!n)return;out.push(`${s.name}: בוקר ${m.join(", ")||"—"}${(d<5&&!md.noEve)||e.length?` | ערב ${e.join(", ")||"—"}`:""}${n?` (${n})`:""}`)})});
   setMsg("weekMsg",out.join("\n"));
   renderGroup();
@@ -1097,7 +1142,25 @@ function renderFriSet(){
   $("#friSet").innerHTML=h;
 }
 /* vacations journal + holidays table */
-function renderCal(){
+/* exams & events tables */
+const XT={events:{tbl:"#evT",cols:[["date","תאריך","d"],["name","שם האירוע","t"],["time","שעה","h"],["campus","קמפוס","c"],["needs","צרכים והיערכות","t"]]},
+          exams:{tbl:"#exT",cols:[["date","תאריך","d"],["name","שם המבחן","t"],["software","תוכנה","t"],["lecturer","מרצה","t"],["time","שעה","h"],["campus","קמפוס","c"],["room","מס׳ חדר","r"]]}};
+let EV_KEEP=false;
+function renderEv(){
+  if(EV_KEEP)return;const a=document.activeElement;if(a&&a.closest&&a.closest("#tab-ev")&&a.type==="text"&&!a.classList.contains("dtx"))return;
+  const today=key(new Date());
+  Object.entries(XT).forEach(([kind,cfg])=>{
+    const list=S[kind].slice().sort((x,y)=>(x.date||"9").localeCompare(y.date||"9")||(x.time||"").localeCompare(y.time||""));
+    const cell=(r,[f,l,t])=>{const at=`data-xf="${kind}|${r.id}|${f}"`,v=r[f]||"";
+      if(t==="d")return `<td data-l="${l}">${dateField(at,v,l)}</td>`;
+      if(t==="c")return `<td data-l="${l}"><select ${at} aria-label="${l}"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v?"selected":""}>${esc(c)}</option>`).join("")}</select></td>`;
+      return `<td data-l="${l}"><input type="text" ${at} value="${esc(v)}" aria-label="${l}"${t==="h"?' placeholder="08:30-12:00" dir="ltr"':t==="r"?' placeholder="110"':""}></td>`};
+    $(cfg.tbl).innerHTML=`<thead><tr>${cfg.cols.map(c=>`<th>${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>`+
+      (list.length?list.map(r=>`<tr class="${r.date&&r.date<today?"past":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel"><button data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button></td></tr>`).join("")
+        :`<tr class="none"><td colspan="${cfg.cols.length+1}" class="empty">${kind==="events"?"אין אירועים":"אין מבחנים"}</td></tr>`)+`</tbody>`});
+}
+let CAL_KEEP=false;
+function renderCal(){if(CAL_KEEP)return;
   if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#tab-cal")&&document.activeElement.type==="text"&&!document.activeElement.classList.contains("dtx"))return;
   const opts=sel=>S.employees.map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
   $("#vacT").innerHTML=`<tr><th></th><th>טכנאי</th><th>מתאריך</th><th>עד תאריך</th><th>סה"כ ימים</th><th>מטרת החופש</th><th>קמפוס</th><th></th></tr>`+
@@ -1133,7 +1196,7 @@ document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("clic
 /* ---------- interactions ---------- */
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
-  ["sched","cal","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
+  ["sched","cal","ev","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
   try{localStorage.setItem("shift-tab",b.dataset.tab)}catch(e){}
   fitCells($("#sheet"));
 }));
@@ -1164,6 +1227,10 @@ document.addEventListener("click",e=>{
     if(ds.rrm){r.list.splice(i,1);if(r.list.length&&t!==null)rotSetTurn(r,i<t?t-1:i===t?t%r.list.length:t)}
     if(ds.radd){const prev=r.list[r.list.length-1],first=(activeEmps()[0]||{}).id;r.list.push(prev||first);if(t!==null)rotSetTurn(r,t);else rotSetTurn(r,0)}
     changed();render();return}
+  const xa=e.target.closest("[data-xadd]");
+  if(xa){const k=xa.dataset.xadd;S[k].push({id:uid(),date:key(new Date())>cur?key(new Date()):cur});changed();render();return}
+  const xd=e.target.closest("[data-xdel]");
+  if(xd){const[k,id]=xd.dataset.xdel.split("|");S[k]=S[k].filter(x=>x.id!==id);changed();render();return}
   const vd=e.target.closest("[data-vdel]");
   if(vd){S.vac=S.vac.filter(x=>x.id!==vd.dataset.vdel);changed();render();return}
   const hd=e.target.closest("[data-hdel]");
@@ -1201,6 +1268,7 @@ document.addEventListener("input",e=>{
   if(t.dataset.sname){const s=S.sites.find(x=>x.id===t.dataset.sname);if(s){s.name=t.value;changed(true)}}
   if(t.dataset.req){const[sid,sh,d]=t.dataset.req.split("|");const s=S.sites.find(x=>x.id===sid);if(s){s.req[sh]=s.req[sh]||DAYS.map(()=>0);s.req[sh][+d]=Math.max(0,Math.min(6,parseInt(t.value)||0));changed(true)}}
   if(t.id==="targetN"){S.target=Math.max(0,Math.min(6,parseInt(t.value)||0));changed(true)}
+  if(t.dataset.xf&&t.type==="text"&&!t.classList.contains("dtx")){const[k,id,f]=t.dataset.xf.split("|"),r=S[k].find(x=>x.id===id);if(r){r[f]=t.value;changed(true)}}
   if(t.dataset.vf&&t.type==="text"&&!t.classList.contains("dtx")){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.value;changed(true)}}
   if(t.dataset.hf&&t.type==="text"&&!t.classList.contains("dtx")){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.value;changed(true)}}
   if(t.id==="lblM"){S.shiftLbl.m=t.value;changed(true)} if(t.id==="lblE"){S.shiftLbl.e=t.value;changed(true)} if(t.id==="h19Eve"){S.h19Eve=t.value.trim();changed(true)} if(t.id==="sheetTitle"){S.title=t.value;changed(true)}
@@ -1210,8 +1278,11 @@ document.addEventListener("change",e=>{
   if(t.dataset.cov){const[sid,sh]=t.dataset.cov.split("|");S.cover[sid]=S.cover[sid]||{m:0,e:0};S.cover[sid][sh]=Math.max(0,Math.min(5,parseInt(t.value)||0));changed();render()}
   if(t.dataset.pref){const[sid,d]=t.dataset.pref.split("|"),w=W();w.pref[sid]=w.pref[sid]||DAYS.map(()=>null);const[e,sh]=(t.value||"|").split("|");w.pref[sid][+d]=e?{e,sh}:null;changed();render()}
   if(t.dataset.rsel){const[sid,i]=t.dataset.rsel.split("|"),r=S.friRule[sid];if(r){r.list[+i]=t.value;changed();render()}}
-  if(t.dataset.vf){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.classList.contains("dtx")?t.dataset.iso:t.value;if(f==="from"&&(!v.to||v.to<v.from))v.to=v.from;changed();render()}}
-  if(t.dataset.hf){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.classList.contains("dtx")?t.dataset.iso:t.value;if(f==="from"&&(!h.to||h.to<h.from))h.to=h.from;if(f!=="name")S.holidays.sort((a,b)=>(a.from||"9").localeCompare(b.from||"9"));changed();render()}}
+  if(t.dataset.xf){const[k,id,f]=t.dataset.xf.split("|"),r=S[k].find(x=>x.id===id);if(r){const txt=t.type==="text"&&!t.classList.contains("dtx");r[f]=txt?t.value.trim():t.classList.contains("dtx")?t.dataset.iso:t.value;changed();
+    /* plain text: keep the table as is (focus is moving to the next field), only refresh the schedule */
+    if(txt){EV_KEEP=true;render();EV_KEEP=false}else render()}}
+  if(t.dataset.vf){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.classList.contains("dtx")?t.dataset.iso:t.value;if(f==="from"&&(!v.to||v.to<v.from))v.to=v.from;changed();if(t.type==="text"&&!t.classList.contains("dtx")){CAL_KEEP=true;render();CAL_KEEP=false}else render()}}
+  if(t.dataset.hf){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.classList.contains("dtx")?t.dataset.iso:t.value;if(f==="from"&&(!h.to||h.to<h.from))h.to=h.from;if(f!=="name")S.holidays.sort((a,b)=>(a.from||"9").localeCompare(b.from||"9"));changed();if(t.type==="text"&&!t.classList.contains("dtx")){CAL_KEEP=true;render();CAL_KEEP=false}else render()}}
   if(t.dataset.ebk){const em=S.employees.find(x=>x.id===t.dataset.ebk);if(em){em.backup=t.checked;changed();render()}}
   if(t.dataset.eact){const em=S.employees.find(x=>x.id===t.dataset.eact);if(em){em.active=t.checked;changed();render()}}
   if(t.dataset.req||t.dataset.ename||t.dataset.sname||["lblM","lblE","h19Eve","sheetTitle","targetN"].includes(t.id))render();
