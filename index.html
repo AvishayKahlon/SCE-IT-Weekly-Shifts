@@ -739,7 +739,7 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 14:30";
+const APP_VER="21.10.2026 14:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1652,17 +1652,19 @@ function shareReady(f){
   const o=document.createElement("div");o.className="sheetready";
   o.innerHTML=`<div class="card"><b>התמונה מוכנה</b><button class="wa" data-go>📤 שלח לוואטסאפ</button><button data-x>סגור</button></div>`;
   document.body.appendChild(o);
-  o.querySelector("[data-go]").onclick=()=>{navigator.share({files:[f]}).then(()=>{const m=markSent();if(m)toast("נשלח"+m)},()=>{});o.remove()};
+  o.querySelector("[data-go]").onclick=()=>{copyName();navigator.share({files:[f]}).then(()=>{const m=markSent();if(m)toast("נשלח"+m)},()=>{});o.remove()};
   o.querySelector("[data-x]").onclick=()=>o.remove();
 }
 async function busy(btn,fn){btn.classList.add("busy");btn.setAttribute("aria-busy","true");try{return await fn()}finally{btn.classList.remove("busy");btn.removeAttribute("aria-busy")}}
+/* file name on the clipboard, to paste as the WhatsApp caption. Must run inside the tap (before any await) for iPhone to allow it */
+function copyName(){try{const p=navigator.clipboard&&navigator.clipboard.writeText(fileBase());if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 $("#shareImgBtn").onclick=async()=>{
-  const btn=$("#shareImgBtn");
+  const btn=$("#shareImgBtn");if(canShare)copyName();
   let b=null;b=await busy(btn,sheetBlob);
   if(!b)return;
   const f=new File([b],fileBase()+".png",{type:"image/png"});
   if(!inFrame()&&navigator.canShare&&navigator.canShare({files:[f]})){
-    try{await navigator.share({files:[f]});const m=markSent();if(m)toast("נשלח"+m);return}
+    try{await navigator.share({files:[f]});const m=markSent();toast("שם הקובץ הועתק – הדביקו ככיתוב לתמונה"+m);return}
     catch(e){if(e&&e.name==="AbortError")return;if(e&&e.name==="NotAllowedError"){shareReady(f);return}}
   }
   const g=(S.groupLink||"").trim();
