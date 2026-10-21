@@ -1345,6 +1345,11 @@ body.dragging .tabs,body.dragging .minibar{opacity:0;pointer-events:none;transit
 #friSet td.arming .rc{animation:arming 1000ms cubic-bezier(.4,0,.2,1) both}
 @keyframes arming{to{transform:scale(.94);opacity:.75}}
 #friSet td.dropon{outline:3px solid var(--accent);outline-offset:-3px;transform:scale(1.04)}
+
+/* iPhone home-screen app: on a page shorter than the screen (חופשות, מבחנים) iOS lays fixed bars out against a different
+   viewport, so the dock sat higher than on long pages. Every page is now at least one screen tall, so it is always the same. */
+html,body{min-height:100%}
+@media (max-width:700px){body{min-height:calc(100lvh + env(safe-area-inset-top,0px) + 1px)}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1587,7 +1592,7 @@ body.dragging .tabs,body.dragging .minibar{opacity:0;pointer-events:none;transit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 04:45";
+const APP_VER="22.10.2026 04:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
