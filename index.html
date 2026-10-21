@@ -284,6 +284,10 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
   .tabs button.pressed{background:none;filter:none;transform:none}
   .tabs button.pressed .ti{transform:scale(.84)}
   /* compact while scrolling down (like iOS), back on scroll up */
+  .tabs{touch-action:none}
+  .tabs.drag::before{transform:translateX(calc(var(--ti) * -100%)) scale(1.1,1.16);background:color-mix(in srgb,var(--glass-pill) 70%,var(--glass-edge));transition:transform 260ms cubic-bezier(.3,1.3,.45,1)}
+  .tabs.drag{transform:scale(1.02)}
+  .tabs button.hov{color:var(--accent);opacity:1}
   .tabs.mini{left:22%;right:22%;padding:3px}
   .tabs.mini::before{top:3px;bottom:3px;right:3px;width:calc((100% - 6px)/4)}
   .tabs.mini button{padding:6px 2px}.tabs.mini .ts{max-height:0;opacity:0}.tabs.mini .ti{transform:scale(.9)}
@@ -861,7 +865,7 @@ textarea{padding:10px 12px;border-radius:14px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 17:30";
+const APP_VER="21.10.2026 17:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1553,6 +1557,21 @@ function cmbToExam(name){if(!CMB)return;const inp=CMB.inp,[k,id]=(inp.dataset.xf
 /* the list scrolls freely with the finger; an item is picked only on a tap (click), never when a scroll starts.
    mousedown is cancelled so the field keeps focus (on iPhone it is sent only for taps, after the finger lifts) */
 let CMB_TOUCH=false;
+/* slide a finger along the phone tab bar: the pill follows, a tick at each tab, lift to open it */
+{const bar=$(".tabs"),btns=[...bar.querySelectorAll("button")];let st=null,skipClick=false;
+  const idxAt=x=>{const r=bar.getBoundingClientRect();return Math.max(0,Math.min(btns.length-1,Math.floor((r.right-x)/(r.width/btns.length))))};
+  bar.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"||!matchMedia("(max-width:700px)").matches)return;
+    st={x:e.clientX,i:btns.findIndex(b=>b.getAttribute("aria-selected")==="true"),moved:false,id:e.pointerId}},{passive:true});
+  bar.addEventListener("pointermove",e=>{if(!st||e.pointerId!==st.id)return;
+    if(!st.moved&&Math.abs(e.clientX-st.x)<10)return;
+    if(!st.moved){st.moved=true;bar.classList.add("drag");bar.classList.remove("mini");try{bar.setPointerCapture(e.pointerId)}catch(_){}}
+    const i=idxAt(e.clientX);if(i!==st.i){st.i=i;bar.style.setProperty("--ti",i);btns.forEach((b,k)=>b.classList.toggle("hov",k===i));haptic()}});
+  const end=e=>{if(!st)return;const s0=st;st=null;bar.classList.remove("drag");btns.forEach(b=>b.classList.remove("hov"));
+    if(s0.moved){const b=btns[s0.i];
+      if(b.getAttribute("aria-selected")==="true")bar.style.setProperty("--ti",s0.i);else{b.click();scrollTo({top:0})}
+      skipClick=true;setTimeout(()=>skipClick=false,350)}};   /* swallow the click the browser fires after the drag */
+  bar.addEventListener("pointerup",end);bar.addEventListener("pointercancel",end);
+  bar.addEventListener("click",e=>{if(skipClick){e.stopPropagation();e.preventDefault()}},true)}
 /* tab bar: compact on scroll down, full on scroll up / near the top; hidden while the keyboard is up */
 {let y0=scrollY,acc=0;addEventListener("scroll",()=>{const y=scrollY,dy=y-y0;y0=y;acc=(Math.sign(dy)===Math.sign(acc)?acc:0)+dy;
     const t=$(".tabs");if(y<40||acc<-24)t.classList.remove("mini");else if(acc>24)t.classList.add("mini")},{passive:true});
@@ -1591,7 +1610,7 @@ if(window.visualViewport){visualViewport.addEventListener("resize",()=>{if(CMB)c
 /* ---------- settings categories ---------- */
 function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.sub===k));
   ["gen","staff","msg"].forEach(t=>{$("#sub-"+t).hidden=t!==k});try{sessionStorage.setItem("shift-sub",k)}catch(e){}}
-document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>openSub(b.dataset.sub)));
+document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>{if(b.getAttribute("aria-selected")!=="true")haptic();openSub(b.dataset.sub)}));
 $("#status").addEventListener("click",()=>{if($("#status").classList.contains("warn")){document.querySelector('.tabs button[data-tab="set"]').click();openSub("gen");$("#syncBox").scrollIntoView({block:"center",behavior:"smooth"})}});
 /* collapsible sections start closed; an opened one stays open only for this visit (incl. auto-update reloads) */
 /* long explanations stay hidden behind a small ⓘ next to the section title */
@@ -1607,7 +1626,16 @@ document.querySelectorAll(".card, details.sub").forEach(c=>{
   try{if(sessionStorage.getItem(k)==="1")b.open=true}catch(e){}
   b.addEventListener("toggle",()=>{try{sessionStorage.setItem(k,b.open?"1":"0")}catch(e){}})});
 /* ---------- interactions ---------- */
-document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
+/* haptic tick. Android: vibrate(). iPhone (iOS 18+): Safari has no vibrate API, but toggling a native switch
+   control gives the system "tick" — so a hidden switch is flipped. Works only from a touch/click. */
+const haptic=(()=>{let lbl=null;
+  return()=>{try{if(navigator.vibrate){navigator.vibrate(8);return}
+    if(!lbl){const id="hapt-sw";lbl=document.createElement("label");lbl.htmlFor=id;lbl.setAttribute("aria-hidden","true");
+      lbl.style.cssText="position:fixed;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;left:-9px;top:0";
+      const i=document.createElement("input");i.type="checkbox";i.id=id;i.setAttribute("switch","");i.tabIndex=-1;lbl.appendChild(i);document.body.appendChild(lbl)}
+    lbl.click()}catch(e){}}})();
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",ev=>{
+  if(ev.isTrusted&&b.getAttribute("aria-selected")!=="true")haptic();
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
   $(".tabs").style.setProperty("--ti",[...document.querySelectorAll(".tabs button")].indexOf(b));
   ["sched","cal","ev","set"].forEach(t=>{const p=$("#tab-"+t);if(p)p.hidden=t!==b.dataset.tab});
@@ -1617,7 +1645,7 @@ document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",
 function shiftWeek(n){const d=parseKey(cur);d.setDate(d.getDate()+7*n);cur=key(d);msgEdited.consMsg={};msgEdited.weekMsg={};render()}
 $("#prevW").onclick=()=>shiftWeek(-1);$("#nextW").onclick=()=>shiftWeek(1);
 $("#weekPick").addEventListener("change",e=>{const v=e.target.dataset.iso;if(v){cur=key(sundayOf(parseKey(v)));render()}});
-$("#genBtn").onclick=()=>{if(!activeEmps().length)return;generate();changed();render()};
+$("#genBtn").onclick=()=>{if(!activeEmps().length)return;haptic();generate();changed();render()};
 $("#clearBtn").onclick=()=>{const w=W();S.sites.forEach(s=>w.assign[s.id]={m:DAYS.map(()=>[]),e:DAYS.map(()=>[])});changed();render()};
 $("#finalBtn").onclick=()=>{const w=W();w.final=!w.final;changed();render()};
 
@@ -1630,7 +1658,7 @@ function startSwap(k){const a=slotRef(k);if(!a.arr[a.idx])return;SWAP=k;document
   document.querySelectorAll(`.slot[data-k="${k}"]`).forEach(x=>x.classList.add("swapsrc"));
   const b=document.createElement("div");b.className="swapbar";b.innerHTML=`<span>⇄ ${esc(empName(a.arr[a.idx]))} – בחרו משבצת</span><button>ביטול</button>`;
   b.querySelector("button").onclick=ev=>{ev.stopPropagation();endSwap()};document.body.appendChild(b)}
-function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();if(a.arr===b.arr&&a.idx===b.idx)return;
+function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();haptic();if(a.arr===b.arr&&a.idx===b.idx)return;
   const x=a.arr[a.idx],y=b.arr[b.idx];if(!x)return;
   if(y){a.arr[a.idx]=y;b.arr[b.idx]=x}
   else{a.arr.splice(a.idx,1);if(b.idx>=b.arr.length)b.arr.push(x);else b.arr.splice(b.idx,0,x)}
@@ -1646,9 +1674,9 @@ document.addEventListener("click",e=>{
   if(c&&!c.disabled){const[eid,d]=c.dataset.cst.split("|");const w=W();w.cons[eid]=w.cons[eid]||DAYS.map(()=>"A");const v=w.cons[eid][+d]||"A";
     /* Sun–Thu cycle זמין → בוקר → ערב → חופש; Friday toggles גיבוי לאירוע */
     w.cons[eid][+d]=+d===5?(v==="B"?"A":"B"):CST[(Math.max(0,CST.indexOf(v))+1)%4];
-    w.got=w.got||{};w.got[eid]=true;changed();render();}     /* entering a constraint means they replied */
+    w.got=w.got||{};w.got[eid]=true;haptic();changed();render();}     /* entering a constraint means they replied */
   const gb=e.target.closest("[data-got]");
-  if(gb){const w=W();w.got=w.got||{};w.got[gb.dataset.got]=!w.got[gb.dataset.got];changed();render();return}
+  if(gb){haptic();const w=W();w.got=w.got||{};w.got[gb.dataset.got]=!w.got[gb.dataset.got];changed();render();return}
   const del=e.target.closest("[data-edel]");
   if(del){S.employees=S.employees.filter(x=>x.id!==del.dataset.edel);changed();render()}
   const rb=e.target.closest("[data-rnow],[data-rrm],[data-radd]");
