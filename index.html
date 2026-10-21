@@ -708,11 +708,16 @@ textarea{padding:10px 12px;border-radius:14px}
 /* one continuous backdrop: a fixed layer (iPhone ignores background-attachment:fixed), and the same base colour on
    <html> so the status-bar area, the bounce when pulling past the top/bottom, and app launch are never white */
 html{background:#E9EFE5}
+:root{--g-top:#E9EFE5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--g-top:#111511}}
+:root[data-theme="dark"]{--g-top:#111511}
 @media (prefers-color-scheme: dark){html:not([data-theme="light"]){background:#111511}}
 html[data-theme="dark"]{background:#111511}
 body{background:transparent}
+/* the top of the screen fades into exactly the status-bar colour, so there is no seam under the clock and battery */
 body::before{background:
-  radial-gradient(42vmax 36vmax at 88% 6%,var(--g-blob1),transparent 68%),
+  linear-gradient(180deg,var(--g-top) 0,var(--g-top) calc(20vmax + env(safe-area-inset-top,0px) + 8px),transparent calc(20vmax + env(safe-area-inset-top,0px) + 150px)),
+  radial-gradient(42vmax 36vmax at 88% 16%,var(--g-blob1),transparent 68%),
   radial-gradient(40vmax 34vmax at 6% 38%,var(--g-blob2),transparent 68%),
   radial-gradient(38vmax 32vmax at 78% 70%,var(--g-blob3),transparent 68%),
   radial-gradient(34vmax 30vmax at 18% 96%,var(--g-blob4),transparent 68%),var(--g-base)}
@@ -975,7 +980,7 @@ table.grid th,table.grid td{border-color:var(--g-line)}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 20:25";
+const APP_VER="21.10.2026 20:35";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
