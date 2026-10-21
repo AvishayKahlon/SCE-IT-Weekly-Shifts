@@ -653,15 +653,15 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 07:45";
+const APP_VER="21.10.2026 07:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
-  {name:"TIL",software:"דפדפן",lecturer:"מדור רישום",campus:"בני ברית",time:"09:00",notes:"כיתה 216 או 206, או שתיהן"},
-  {name:"כלי תוכנה",software:"MATLAB",lecturer:"עוזי צ׳סטר / זאב פרדקין",campus:"ז'בוטינסקי",time:"",notes:"לחסום אינטרנט. לפעמים בבני ברית"},
+  {name:"TIL",software:"דפדפן",lecturer:"מדור רישום",campus:"בני ברית",time:"09:00",notes:""},
+  {name:"כלי תוכנה",software:"MATLAB",lecturer:"עוזי צ׳סטר / זאב פרדקין",campus:"ז'בוטינסקי",time:"",notes:"לחסום אינטרנט"},
   {name:"שיטות סימולציה",software:"ARENA",lecturer:"עליסה ווסלינסקי",campus:"ז'בוטינסקי",time:"",notes:"לחסום אינטרנט"},
   {name:"אנגלית",software:"TextAloud",lecturer:"היחידה לאנגלית",campus:"ז'בוטינסקי",time:"",notes:"לפתוח לפני המבחן את התוכנה עם מספר נבחן פיקטיבי"},
-  {name:"גרפיקה הנדסית",software:"Solidworks",lecturer:"פולינה זק",campus:"ז'בוטינסקי",time:"",notes:"לחסום אינטרנט. לפעמים בבני ברית"},
+  {name:"גרפיקה הנדסית",software:"Solidworks",lecturer:"פולינה זק",campus:"ז'בוטינסקי",time:"",notes:"לחסום אינטרנט"},
   {name:"גרפיקה הנדסית 2",software:"Autocad",lecturer:"מארק",campus:"ז'בוטינסקי",time:"",notes:"לחסום אינטרנט"}];
 const HE=new Intl.Collator("he",{numeric:true,sensitivity:"base"});
 const HOL_T={off:"פגרה",h16:"סיום יום עבודה ב16:00",h19:"סיום יום עבודה ב19:00"};
@@ -700,6 +700,9 @@ function ensureData(){
   if(!Array.isArray(S.exams))S.exams=[];
   /* bank of recurring exams (sorted א-ב on screen) and rooms per campus */
   if(!Array.isArray(S.examCat))S.examCat=EXAM_PRESET.map(x=>({id:uid(),...x}));
+  /* notes hold only what the user wrote: drop the campus remarks added by the first preset */
+  if((S.catVer||0)<2){S.catVer=2;const clean=n=>String(n||"").replace(/\.?\s*לפעמים בבני ברית/g,"").replace(/^כיתה 216 או 206, או שתיהן$/,"").trim();
+    S.examCat.forEach(c=>c.notes=clean(c.notes));S.exams.forEach(e=>e.notes=clean(e.notes))}
   if(!S.rooms){S.rooms={};S.sites.forEach(s=>S.rooms[s.id]=s.name.includes("בוטינסקי")?["124","125","140","141","144"]:s.name.includes("בני ברית")?["205","206","216"]:[])}
   if(S.friVer!==2){S.friVer=2;S.friRule=defaultFri()}
   if(!S.friRule)S.friRule={};
