@@ -842,6 +842,29 @@ html[data-vdir="back"]::view-transition-new(schedview){animation-name:sv-in-zi}
 #sheet table.sh .ce{background:color-mix(in srgb,var(--sh-eve) 78%,transparent)}
 #sheet table.sh .note{background:color-mix(in srgb,#fff 55%,transparent)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #sheet table.sh .note{background:color-mix(in srgb,#fff 82%,transparent)}}
+
+/* font editor */
+.fontbtn{justify-self:start;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700}
+.fontbtn b{font-family:Georgia,serif;font-size:16px}
+.fontbtn[aria-pressed="true"]{background:var(--accent)!important;color:var(--accent-ink)}
+body.fontedit #sheet table.sh td{cursor:pointer}
+body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;position:relative}
+.fontpanel{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:65;width:min(460px,calc(100vw - 24px));
+  padding:12px 14px;border-radius:24px;background:var(--glass-bg);color:var(--ink);
+  -webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);
+  box-shadow:0 18px 50px rgba(0,0,0,.2),inset 0 1px 0 var(--glass-edge),inset 0 0 0 .5px var(--glass-edge);display:grid;gap:8px}
+.fontpanel[hidden]{display:none}
+@starting-style{.fontpanel{opacity:0;transform:translateX(-50%) translateY(16px) scale(.96)}}
+.fontpanel{transition:opacity 220ms ease,transform 420ms var(--spring,cubic-bezier(.3,1.2,.45,1))}
+@media (max-width:700px){.fontpanel{bottom:calc(92px + env(safe-area-inset-bottom,0px))}}
+.fp-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:16px}
+.fp-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fp-r [data-fp="up"],.fp-r [data-fp="dn"]{width:44px;height:44px;padding:0!important;font-size:22px;font-weight:700}
+.fp-s{display:grid;justify-items:center;min-width:56px;line-height:1}.fp-s b{font-size:26px;font-variant-numeric:tabular-nums}.fp-s small{font-size:11px;color:var(--muted)}
+.fp-b{width:44px;height:44px;padding:0!important;font-weight:900;font-size:18px}
+.fp-b[aria-pressed="true"]{background:var(--accent)!important;color:var(--accent-ink)}
+.fp-x{font-size:13px}
+.fp-t{margin:0;font-size:12.5px;color:var(--muted)}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -912,6 +935,8 @@ html[data-vdir="back"]::view-transition-new(schedview){animation-name:sv-in-zi}
     </details>
     <div class="msgs" id="msgs"></div>
     <div class="vt seg" id="viewSeg" role="tablist" aria-label="תצוגת הסידור"><button role="tab" data-v="days" aria-selected="true">לפי ימים</button><button role="tab" data-v="table" aria-selected="false">טבלה מלאה</button></div>
+    <button class="fontbtn" id="fontBtn" aria-pressed="false" title="עריכת גופנים בסידור שנשלח"><b>Aa</b> גופנים</button>
+    <div class="fontpanel" id="fontPanel" hidden role="dialog" aria-label="עריכת גופן"></div>
     <div id="days"></div>
     <div class="scroll" id="sheetScroll"><div id="sheet"></div></div>
     <p class="hint sheethint">לחיצה על משבצת פותחת רשימת עובדים לשיבוץ ידני. בשורת "הערות ואירועים" אפשר להקליד ישירות.</p>
@@ -1076,7 +1101,7 @@ html[data-vdir="back"]::view-transition-new(schedview){animation-name:sv-in-zi}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 22:00";
+const APP_VER="21.10.2026 22:20";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1501,6 +1526,48 @@ function daysHTML(w){
     const hn=md.names.join(" · ");
     return `<div class="dcard"><div class="dh">${dn}${hn?` <span class="hn">${esc(hn)}</span>`:""}<span>${fmt(dayDate(d)).slice(0,5)}</span></div>${sites}</div>`}).join("");
 }
+
+/* ---------- font editor for the sent schedule ----------
+   Tap a cell type in the full table to see and change its size / bold. Sizes are the ones in the exported image / PDF / print
+   (the on-screen table shows the same proportions, smaller). Saved in the data, so it syncs between devices. */
+const FONT_CATS={
+  site:{n:"שם הקמפוס",sel:".site",def:34,b:true,scr:21.6},
+  date:{n:"תאריכים",sel:".date",def:28,b:true,scr:18},
+  dname:{n:"ימים",sel:".dname",def:31,b:true,scr:19.2},
+  lbl:{n:"כותרות שורה ושעות",sel:".lbl",def:24,b:true,scr:15.6},
+  names:{n:"שמות עובדים",sel:"td.slot",def:28,b:true,scr:16.8},
+  off:{n:"תאים סגורים (שבת שלום, פגרה)",sel:".off",def:28,b:true,scr:18},
+  note:{n:"הערות ואירועים",sel:".note",def:20,b:true,scr:12}};
+function fontOf(k){const f=(S.font||{})[k]||{},c=FONT_CATS[k];return{s:+f.s||c.def,b:f.b===undefined?c.b:!!f.b}}
+function applyFonts(){let css="";
+  Object.entries(FONT_CATS).forEach(([k,c])=>{const f=fontOf(k),scr=Math.round(f.s*c.scr/c.def*10)/10,w=f.b?700:400;
+    css+=`html .export table.sh ${c.sel}{font-size:${f.s}px;font-weight:${w}}html .export table.sh ${c.sel} .nm{font-weight:${w}}`;
+    css+=`html #sheet table.sh ${c.sel}{font-size:${scr}px;font-weight:${w}}html #sheet table.sh ${c.sel} :is(.nm,input){font-weight:${w}}`});
+  let el=$("#fontStyle");if(!el){el=document.createElement("style");el.id="fontStyle";document.head.appendChild(el)}el.textContent=css}
+let FONT_SEL=null;
+function catOf(td){return Object.keys(FONT_CATS).find(k=>td.matches(FONT_CATS[k].sel))}
+function markFontCat(){document.querySelectorAll("#sheet .fsel").forEach(x=>x.classList.remove("fsel"));
+  if(FONT_SEL)document.querySelectorAll(`#sheet table.sh ${FONT_CATS[FONT_SEL].sel}`).forEach(x=>x.classList.add("fsel"))}
+function renderFontPanel(){const p=$("#fontPanel");if(!document.body.classList.contains("fontedit")){p.hidden=true;return}p.hidden=false;
+  if(!FONT_SEL){p.innerHTML=`<div class="fp-h"><b>עריכת גופנים</b><button data-fp="done">סיום</button></div><p class="fp-t">לחצו על משבצת בטבלה כדי לראות ולשנות את הגופן שלה. השינוי חל על כל המשבצות מאותו סוג, בקובץ שנשלח לטכנאים.</p>`;return}
+  const c=FONT_CATS[FONT_SEL],f=fontOf(FONT_SEL),changed=f.s!==c.def||f.b!==c.b;
+  p.innerHTML=`<div class="fp-h"><b>${c.n}</b><button data-fp="done">סיום</button></div>
+    <div class="fp-r"><button data-fp="dn" aria-label="הקטנה">−</button><span class="fp-s"><b>${f.s}</b><small>גודל</small></span><button data-fp="up" aria-label="הגדלה">+</button>
+    <button data-fp="bold" class="fp-b" aria-pressed="${f.b}">B</button>${changed?`<button data-fp="reset" class="fp-x">ברירת מחדל (${c.def}${c.b?", מודגש":""})</button>`:""}</div>
+    <p class="fp-t">זה הגודל בתמונה וב-PDF. טקסט ארוך מדי עדיין מתכווץ אוטומטית כדי להיכנס למשבצת.</p>`}
+function setFont(k,patch){S.font=S.font||{};const f=fontOf(k);S.font[k]=Object.assign({s:f.s,b:f.b},patch);applyFonts();changed(true);renderFontPanel();
+  requestAnimationFrame(()=>fitCells($("#sheet")))}
+$("#fontBtn").onclick=()=>{const on=!document.body.classList.contains("fontedit");document.body.classList.toggle("fontedit",on);$("#fontBtn").setAttribute("aria-pressed",on);
+  if(on&&matchMedia("(max-width:700px)").matches&&!document.body.classList.contains("tableview"))document.querySelector('#viewSeg [data-v="table"]').click();
+  FONT_SEL=null;markFontCat();renderFontPanel();haptic()};
+/* in edit mode a tap on the table selects a cell type instead of opening the staff list */
+document.addEventListener("click",e=>{if(!document.body.classList.contains("fontedit"))return;
+  const td=e.target.closest&&e.target.closest("#sheet table.sh td");if(!td)return;const k=catOf(td);if(!k)return;
+  e.preventDefault();e.stopPropagation();FONT_SEL=k;markFontCat();renderFontPanel();haptic()},true);
+$("#fontPanel").addEventListener("click",e=>{const b=e.target.closest("[data-fp]");if(!b)return;const a=b.dataset.fp;
+  if(a==="done"){$("#fontBtn").click();return}if(!FONT_SEL)return;const f=fontOf(FONT_SEL);
+  if(a==="up")setFont(FONT_SEL,{s:Math.min(60,f.s+1)});if(a==="dn")setFont(FONT_SEL,{s:Math.max(8,f.s-1)});
+  if(a==="bold")setFont(FONT_SEL,{b:!f.b});if(a==="reset"){delete S.font[FONT_SEL];applyFonts();changed(true);renderFontPanel();fitCells($("#sheet"))}haptic()});
 /* days ⇄ full table: segmented switch with a gliding pill; the two views cross-morph (View Transitions, GPU only) */
 document.querySelectorAll("#viewSeg button").forEach(b=>b.addEventListener("click",()=>{
   const tbl=b.dataset.v==="table";if(document.body.classList.contains("tableview")===tbl)return;haptic();
@@ -1517,7 +1584,7 @@ function render(){
   setDate($("#weekPick"),cur);
   $("#finalBadge").hidden=!w.final;
   $("#finalBtn .lb").textContent=w.final?"בטל סימון סופי":"סמן כסופי";$("#finalBtn").classList.toggle("on",!!w.final);
-  $("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);
+  applyFonts();$("#sheet").innerHTML=sheetHTML(w,false);$("#days").innerHTML=daysHTML(w);if(FONT_SEL)markFontCat();
   const pr=problems(w);
   const emps0=activeEmps(),miss=emps0.filter(e=>!(w.got||{})[e.id]);
   $("#gotN").textContent=emps0.length?`התקבלו ${emps0.length-miss.length}/${emps0.length}`:"";$("#gotN").classList.toggle("all",emps0.length>0&&!miss.length);
