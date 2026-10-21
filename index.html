@@ -783,18 +783,29 @@ details.card.cons{transition:none}
   -webkit-backdrop-filter:blur(14px) saturate(180%);backdrop-filter:blur(14px) saturate(180%);
   box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-edge),inset 0 0 0 .5px var(--glass-edge)}
 .seg::before{content:"";position:absolute;top:4px;bottom:4px;right:4px;width:calc(50% - 4px);border-radius:999px;background:var(--accent);
-  box-shadow:0 3px 10px color-mix(in srgb,var(--accent) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.3);transition:transform 440ms cubic-bezier(.3,1.25,.45,1);will-change:transform}
+  box-shadow:0 3px 10px color-mix(in srgb,var(--accent) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.3);transition:transform 560ms var(--spring);will-change:transform}
 .seg.on2::before{transform:translateX(-100%)}
 .seg button{position:relative;border:0!important;background:none!important;box-shadow:none!important;padding:8px 10px;font-weight:700;font-size:14px;color:var(--muted);border-radius:999px;transition:color 220ms ease}
 .seg button[aria-selected="true"]{color:var(--accent-ink)}
 @media (max-width:700px){.seg{display:grid}
   body:not(.tableview) #days{view-transition-name:schedview}
   body.tableview #sheetScroll{view-transition-name:schedview}}
-::view-transition-group(schedview){animation-duration:460ms;animation-timing-function:cubic-bezier(.32,.72,0,1)}
-::view-transition-old(schedview){animation:300ms cubic-bezier(.4,0,1,1) both sv-out}
-::view-transition-new(schedview){animation:460ms cubic-bezier(.32,1.1,.45,1) both sv-in}
-@keyframes sv-out{to{opacity:0;transform:scale(.94)}}
-@keyframes sv-in{from{opacity:0;transform:scale(1.04)}}
+/* iOS-style zoom between the two views, like Photos switching Days ⇄ Months:
+   to the full table = zoom out (days shrink away, the table settles from slightly larger);
+   back to days = zoom in. Driven by a real spring curve (response .5 s, damping .82) and only
+   transform + opacity on GPU snapshots, so it holds 120 Hz. The group does not animate size (that would be layout). */
+:root{--spring:cubic-bezier(.3,1.15,.45,1);--spring:linear(0, 0.033, 0.114, 0.220, 0.335, 0.449, 0.556, 0.650, 0.732, 0.800, 0.856, 0.900, 0.934, 0.960, 0.979, 0.992, 1.001, 1.006, 1.009, 1.011, 1.011, 1.011, 1.010, 1.008, 1.007, 1.006, 1.005, 1.004, 1)}
+::view-transition-group(schedview){animation:none}
+::view-transition-image-pair(schedview){isolation:auto}
+::view-transition-old(schedview),::view-transition-new(schedview){height:auto;transform-origin:50% 0;mix-blend-mode:normal;will-change:transform,opacity}
+::view-transition-old(schedview){animation:260ms cubic-bezier(.4,0,.6,1) both sv-out-z}
+::view-transition-new(schedview){animation:620ms var(--spring) both sv-in-z;animation-delay:40ms}
+html[data-vdir="back"]::view-transition-old(schedview){animation-name:sv-out-zi}
+html[data-vdir="back"]::view-transition-new(schedview){animation-name:sv-in-zi}
+@keyframes sv-out-z{to{opacity:0;transform:scale(.88)}}
+@keyframes sv-in-z{from{opacity:0;transform:scale(1.08)}}
+@keyframes sv-out-zi{to{opacity:0;transform:scale(1.1)}}
+@keyframes sv-in-zi{from{opacity:0;transform:scale(.9)}}
 @media (prefers-reduced-motion:reduce){::view-transition-old(schedview),::view-transition-new(schedview),::view-transition-group(schedview){animation:none}}
 /* day cards */
 .dcard{border:0;border-radius:26px;overflow:hidden;background:var(--glass-bg);
@@ -1065,7 +1076,7 @@ details.card.cons{transition:none}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 21:45";
+const APP_VER="21.10.2026 22:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
