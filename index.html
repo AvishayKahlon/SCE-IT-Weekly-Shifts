@@ -654,6 +654,49 @@ textarea{padding:10px 12px;border-radius:14px}
 .upd,.swapbar{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 10px 28px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.3)}
 .xcnt{background:var(--g-field);box-shadow:inset 0 0 0 .5px var(--g-line)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.pop,.cmbl,.nwp-card,.sheetready .card{background:var(--surface)}}
+
+/* ===== deeper glass (round 2): clearer panes, stronger blur, light-catching rims, richer light behind ===== */
+:root{--g-card:rgba(255,255,255,.34);--g-ctl:rgba(255,255,255,.46);--g-field:rgba(255,255,255,.38);--g-pop:rgba(250,252,249,.56);
+  --g-rim1:rgba(255,255,255,.95);--g-rim2:rgba(255,255,255,.12);--g-rim3:rgba(255,255,255,.55);--g-glow:rgba(255,255,255,.35);
+  --g-blob1:rgba(120,190,80,.48);--g-blob2:rgba(80,170,165,.36);--g-blob3:rgba(240,200,120,.34);--g-blob4:rgba(150,170,230,.28);
+  --g-base:linear-gradient(160deg,#EDF2E8 0%,#E4EBE1 45%,#F0EEE4 100%)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--g-card:rgba(44,50,44,.36);--g-ctl:rgba(255,255,255,.09);--g-field:rgba(255,255,255,.07);--g-pop:rgba(38,44,38,.55);
+  --g-rim1:rgba(255,255,255,.38);--g-rim2:rgba(255,255,255,.03);--g-rim3:rgba(255,255,255,.16);--g-glow:rgba(255,255,255,.05);
+  --g-blob1:rgba(100,170,60,.30);--g-blob2:rgba(40,130,125,.28);--g-blob3:rgba(170,120,50,.18);--g-blob4:rgba(70,90,170,.20);--g-base:linear-gradient(160deg,#121612,#0E120F 50%,#141310)}}
+:root[data-theme="dark"]{--g-card:rgba(44,50,44,.36);--g-ctl:rgba(255,255,255,.09);--g-field:rgba(255,255,255,.07);--g-pop:rgba(38,44,38,.55);
+  --g-rim1:rgba(255,255,255,.38);--g-rim2:rgba(255,255,255,.03);--g-rim3:rgba(255,255,255,.16);--g-glow:rgba(255,255,255,.05);
+  --g-blob1:rgba(100,170,60,.30);--g-blob2:rgba(40,130,125,.28);--g-blob3:rgba(170,120,50,.18);--g-blob4:rgba(70,90,170,.20);--g-base:linear-gradient(160deg,#121612,#0E120F 50%,#141310)}
+body{background:var(--g-base) fixed}
+body::before{background:
+  radial-gradient(42vmax 36vmax at 88% 6%,var(--g-blob1),transparent 68%),
+  radial-gradient(40vmax 34vmax at 6% 38%,var(--g-blob2),transparent 68%),
+  radial-gradient(38vmax 32vmax at 78% 70%,var(--g-blob3),transparent 68%),
+  radial-gradient(34vmax 30vmax at 18% 96%,var(--g-blob4),transparent 68%)}
+/* panes: real blur everywhere (phones included), inner glow, and a rim that catches light top-left */
+.card{position:relative;isolation:isolate;-webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);
+  box-shadow:0 1px 1px rgba(20,35,20,.04),0 12px 36px rgba(20,35,20,.10),inset 0 0 22px var(--g-glow),inset 0 1px 0 var(--g-rim1)}
+.card::after,.tools::after,.tabs::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(140deg,var(--g-rim1) 0%,var(--g-rim2) 38%,var(--g-rim2) 62%,var(--g-rim3) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.tools{position:relative}
+.card .card{-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:inset 0 0 0 .5px var(--g-line)}
+.card .card::after{display:none}
+/* controls on top of the page get their own blur */
+:is(.week,.bar,header) :is(button,.btn):not(.primary),.tools,.subtabs{-webkit-backdrop-filter:blur(16px) saturate(180%);backdrop-filter:blur(16px) saturate(180%)}
+:is(button,.btn):where(:not(:is(.slot,.cst,.got,.ib,.rm,.wab,.cmb-b,.nbtn,.xexp,.xuse,.upd))):where(:not(:is(#sheet,.export,#printBox,.pop,.tabs,.subtabs,.tools,.cmbl,.swapbar,.devbar) *)){
+  box-shadow:0 1px 2px rgba(20,35,20,.08),0 4px 14px rgba(20,35,20,.06),inset 0 1px 0 var(--g-rim1),inset 0 -1px 0 rgba(0,0,0,.03),inset 0 0 0 .5px var(--g-rim3)}
+button.primary:where(:not(:is(#sheet,.export) *)){background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 80%,#fff) 0%,var(--accent) 55%,color-mix(in srgb,var(--accent) 88%,#000) 100%);
+  box-shadow:0 2px 4px rgba(0,0,0,.12),0 8px 22px color-mix(in srgb,var(--accent) 38%,transparent),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.12)}
+:is(input[type=text],input[type=number],input[type=date],input[type=email],input[type=password],select,textarea):where(:not(:is(#sheet,.export) *)){
+  box-shadow:inset 0 1px 2px rgba(20,35,20,.06),inset 0 0 0 .5px var(--g-line)}
+/* tables inside glass: let the pane show through */
+table.grid th{background:color-mix(in srgb,var(--surface) 35%,transparent)}
+table.grid th,table.grid td{border-color:var(--g-line)}
+.cst:not([data-s]):not([data-v="M"]):not([data-v="E"]):not([data-v="X"]):not([data-v="V"]):not([data-v="B"]):not([data-v="T"]):not(:disabled){background:color-mix(in srgb,var(--surface) 55%,transparent)}
+/* floating layers: clearer */
+.pop,.cmbl,.nwp-card,.sheetready .card{-webkit-backdrop-filter:blur(30px) saturate(200%);backdrop-filter:blur(30px) saturate(200%)}
+.tabs{--glass-bg:color-mix(in srgb,var(--g-pop) 80%,transparent)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--g-card:rgba(255,255,255,.85)}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -882,7 +925,7 @@ textarea{padding:10px 12px;border-radius:14px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 18:25";
+const APP_VER="21.10.2026 19:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
