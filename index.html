@@ -864,6 +864,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 .fp-b{width:44px;height:44px;padding:0!important;font-weight:900;font-size:18px}
 .fp-b[aria-pressed="true"]{background:var(--accent)!important;color:var(--accent-ink)}
 .fp-x{font-size:13px}
+.fp-save{font-size:13.5px;font-weight:700;background:var(--accent)!important;color:var(--accent-ink)}
 .fp-t{margin:0;font-size:12.5px;color:var(--muted)}
 </style></head><body>
 
@@ -1101,7 +1102,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="21.10.2026 22:20";
+const APP_VER="21.10.2026 22:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1538,7 +1539,9 @@ const FONT_CATS={
   names:{n:"שמות עובדים",sel:"td.slot",def:28,b:true,scr:16.8},
   off:{n:"תאים סגורים (שבת שלום, פגרה)",sel:".off",def:28,b:true,scr:18},
   note:{n:"הערות ואירועים",sel:".note",def:20,b:true,scr:12}};
-function fontOf(k){const f=(S.font||{})[k]||{},c=FONT_CATS[k];return{s:+f.s||c.def,b:f.b===undefined?c.b:!!f.b}}
+/* three layers: the current tweak (S.font) → your saved default (S.fontDef) → the original sizes */
+function fontBase(k){const f=(S.fontDef||{})[k]||{},c=FONT_CATS[k];return{s:+f.s||c.def,b:f.b===undefined?c.b:!!f.b}}
+function fontOf(k){const f=(S.font||{})[k]||{},d=fontBase(k);return{s:+f.s||d.s,b:f.b===undefined?d.b:!!f.b}}
 function applyFonts(){let css="";
   Object.entries(FONT_CATS).forEach(([k,c])=>{const f=fontOf(k),scr=Math.round(f.s*c.scr/c.def*10)/10,w=f.b?700:400;
     css+=`html .export table.sh ${c.sel}{font-size:${f.s}px;font-weight:${w}}html .export table.sh ${c.sel} .nm{font-weight:${w}}`;
@@ -1550,10 +1553,12 @@ function markFontCat(){document.querySelectorAll("#sheet .fsel").forEach(x=>x.cl
   if(FONT_SEL)document.querySelectorAll(`#sheet table.sh ${FONT_CATS[FONT_SEL].sel}`).forEach(x=>x.classList.add("fsel"))}
 function renderFontPanel(){const p=$("#fontPanel");if(!document.body.classList.contains("fontedit")){p.hidden=true;return}p.hidden=false;
   if(!FONT_SEL){p.innerHTML=`<div class="fp-h"><b>עריכת גופנים</b><button data-fp="done">סיום</button></div><p class="fp-t">לחצו על משבצת בטבלה כדי לראות ולשנות את הגופן שלה. השינוי חל על כל המשבצות מאותו סוג, בקובץ שנשלח לטכנאים.</p>`;return}
-  const c=FONT_CATS[FONT_SEL],f=fontOf(FONT_SEL),changed=f.s!==c.def||f.b!==c.b;
+  const c=FONT_CATS[FONT_SEL],f=fontOf(FONT_SEL),d=fontBase(FONT_SEL),changed=f.s!==d.s||f.b!==d.b,custom=d.s!==c.def||d.b!==c.b;
+  const dirty=Object.keys(FONT_CATS).some(k=>{const a=fontOf(k),b=fontBase(k);return a.s!==b.s||a.b!==b.b});
   p.innerHTML=`<div class="fp-h"><b>${c.n}</b><button data-fp="done">סיום</button></div>
     <div class="fp-r"><button data-fp="dn" aria-label="הקטנה">−</button><span class="fp-s"><b>${f.s}</b><small>גודל</small></span><button data-fp="up" aria-label="הגדלה">+</button>
-    <button data-fp="bold" class="fp-b" aria-pressed="${f.b}">B</button>${changed?`<button data-fp="reset" class="fp-x">ברירת מחדל (${c.def}${c.b?", מודגש":""})</button>`:""}</div>
+    <button data-fp="bold" class="fp-b" aria-pressed="${f.b}">B</button>${changed?`<button data-fp="reset" class="fp-x">חזרה לברירת המחדל (${d.s}${d.b?", מודגש":""})</button>`:""}</div>
+    <div class="fp-r">${dirty?`<button data-fp="savedef" class="fp-save">✓ שמור את כל הגדלים כברירת מחדל</button>`:""}${custom||S.fontDef?`<button data-fp="factory" class="fp-x">ערכי מקור</button>`:""}</div>
     <p class="fp-t">זה הגודל בתמונה וב-PDF. טקסט ארוך מדי עדיין מתכווץ אוטומטית כדי להיכנס למשבצת.</p>`}
 function setFont(k,patch){S.font=S.font||{};const f=fontOf(k);S.font[k]=Object.assign({s:f.s,b:f.b},patch);applyFonts();changed(true);renderFontPanel();
   requestAnimationFrame(()=>fitCells($("#sheet")))}
@@ -1567,7 +1572,9 @@ document.addEventListener("click",e=>{if(!document.body.classList.contains("font
 $("#fontPanel").addEventListener("click",e=>{const b=e.target.closest("[data-fp]");if(!b)return;const a=b.dataset.fp;
   if(a==="done"){$("#fontBtn").click();return}if(!FONT_SEL)return;const f=fontOf(FONT_SEL);
   if(a==="up")setFont(FONT_SEL,{s:Math.min(60,f.s+1)});if(a==="dn")setFont(FONT_SEL,{s:Math.max(8,f.s-1)});
-  if(a==="bold")setFont(FONT_SEL,{b:!f.b});if(a==="reset"){delete S.font[FONT_SEL];applyFonts();changed(true);renderFontPanel();fitCells($("#sheet"))}haptic()});
+  if(a==="bold")setFont(FONT_SEL,{b:!f.b});
+  if(a==="savedef"){S.fontDef={};Object.keys(FONT_CATS).forEach(k=>{S.fontDef[k]=fontOf(k)});S.font={};applyFonts();changed(true);renderFontPanel();toast("הגדלים נשמרו כברירת מחדל")}
+  if(a==="factory"){if(!confirm("להחזיר את כל הגדלים לערכי המקור?"))return;S.font={};delete S.fontDef;applyFonts();changed(true);renderFontPanel();fitCells($("#sheet"));toast("הוחזרו ערכי המקור")}if(a==="reset"){delete S.font[FONT_SEL];applyFonts();changed(true);renderFontPanel();fitCells($("#sheet"))}haptic()});
 /* days ⇄ full table: segmented switch with a gliding pill; the two views cross-morph (View Transitions, GPU only) */
 document.querySelectorAll("#viewSeg button").forEach(b=>b.addEventListener("click",()=>{
   const tbl=b.dataset.v==="table";if(document.body.classList.contains("tableview")===tbl)return;haptic();
