@@ -1611,6 +1611,9 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
 .addfab svg{width:26px;height:26px}.addfab.on svg{animation:none}
 .addfab.go svg{animation:gspin 600ms var(--pop)}
 @media (min-width:701px){.genfab{bottom:28px;inset-inline-end:28px}}
+/* the schedule's floating button sits on the right (start side in RTL); the exams/events "+" stays on the left opposite the AI button */
+#genFab{inset-inline-end:auto;inset-inline-start:18px}
+@media (min-width:701px){#genFab{inset-inline-start:28px}}
 @media (prefers-reduced-motion:reduce){.genfab,.genfab.on{transition:opacity 200ms ease;transform:none;filter:none}.genfab svg{animation:none!important}}
 
 /* add buttons at the top of exams / events */
@@ -2074,7 +2077,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 18:55";
+const APP_VER="22.10.2026 19:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
