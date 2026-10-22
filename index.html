@@ -1698,7 +1698,7 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 06:30";
+const APP_VER="22.10.2026 06:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2660,43 +2660,56 @@ function renderEvWeek(){const el=$("#ev-wk");if(!el)return;const w=W();
 
 /* ---------- paste an email → exam / event ----------
    Plain rules, all on this device: date, time (or range), campus, room, exam name from the bank, needs. You check before it is added. */
-function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎‏]/g,""),low=t.toLowerCase(),r={};
-  const p2=n=>String(n).padStart(2,"0"),now=new Date();
-  /* date: 2.11.26 / 02/11/2026 / 2.11 */
+function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎‏‪-‮]/g,""),r={};
+  const p2=n=>String(n).padStart(2,"0"),now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  /* ---- lines: drop greeting / addressee, sign-off and signature ---- */
+  const staff=(S.employees||[]).map(e=>e.name.trim()).filter(Boolean);
+  const GREET=/^(היי|הי|שלום|אהלן|בוקר טוב|ערב טוב|צהריים טובים|hi|hello|dear|לכבוד|שלום רב|היי לכולם|שלום לכולם)[\s,!.:]*/i;
+  const BYE=/^(תודה|תודה רבה|בברכה|בתודה|שבוע טוב|יום טוב|regards|thanks|לטיפולך|לטיפולכם|להיערכותך|להיערכותכם|היערכותך|היערכותכם|לידיעתך|לידיעתכם|בהצלחה)[\s,!.]*/i;
+  let lines=t.split("\n").map(x=>x.trim()).filter(Boolean);
+  const subjRaw=lines.find(x=>/^(נושא|subject)\s*:/i.test(x))||(/^(fw|fwd|re|הועבר|השב)\s*:/i.test(lines[0]||"")?lines[0]:"");
+  const subjLine=subjRaw.replace(/^(נושא|subject)\s*:\s*/i,"").replace(/^((fw|fwd|re|הועבר|השב|הזמנה|accepted|מאושר)\s*:\s*)+/ig,"").trim();
+  const shortName=x=>x.split(/\s+/).length<=2&&x.length<=18&&!/\d/.test(x)&&!/[.:]/.test(x);
+  let body=lines.filter(x=>x!==subjRaw).map(x=>x.replace(GREET,"").trim()).filter(Boolean);
+  if(body.length>1&&(shortName(body[0])&&(staff.some(n=>body[0].startsWith(n.split(" ")[0]))||/,$/.test(body[0])||body[0].split(/\s+/).length===1)))body.shift();   /* "אבישי," */
+  const cut=body.findIndex(x=>BYE.test(x));if(cut>=0)body=body.slice(0,cut);
+  while(body.length>1&&shortName(body[body.length-1]))body.pop();                                            /* signature "מירי" */
+  const all=body.join("\n");
+  /* ---- date: the year that puts it nearest to today ---- */
   for(const m of t.matchAll(/(?<![\d:])(\d{1,2})[.\/-](\d{1,2})(?:[.\/-](\d{2,4}))?(?![\d:])/g)){const d=+m[1],mo=+m[2];if(d<1||d>31||mo<1||mo>12)continue;
-    let y=m[3]?+m[3]:now.getFullYear();if(y<100)y+=2000;let dt=new Date(y,mo-1,d);if(!m[3]&&dt<new Date(now.getFullYear(),now.getMonth(),now.getDate()-1))dt=new Date(y+1,mo-1,d);
+    let dt;if(m[3]){let y=+m[3];if(y<100)y+=2000;dt=new Date(y,mo-1,d)}
+    else{const c=[-1,0,1].map(k=>new Date(now.getFullYear()+k,mo-1,d));dt=c.sort((a,b)=>Math.abs(a-today)-Math.abs(b-today))[0]}
     r.date=key(dt);break}
-  /* time: range first, else "בשעה 10:00", else the first hh:mm */
+  /* ---- time: range, "שעה 09:00", "בשמונה בבוקר" ---- */
   const tm=x=>{const[h,mi]=x.split(":");return p2(+h)+":"+mi};
-  let m=t.match(/(\d{1,2}:\d{2})\s*(?:-|–|—|עד|to)\s*(\d{1,2}:\d{2})/);if(m)r.time=tm(m[1])+"-"+tm(m[2]);
-  else if((m=t.match(/(?:בשעה|שעה|ב-?)\s*(\d{1,2}:\d{2})/))||(m=t.match(/(\d{1,2}:\d{2})/)))r.time=tm(m[1]);
-  /* campus */
-  const zb=/ב?וטינסקי|ז['׳]?בו|אשדוד/.test(t),bb=/בני[\s\-־]*ברית|באר[\s\-־]*שבע|ב["״]ש|ביאליק/.test(t);r.campus=zb&&bb?"שניהם":zb?"ז'בוטינסקי":bb?"בני ברית":"";
-  /* rooms: "חדר 110", "כיתה 205", "אולמות 110, 112" */
-  if((m=t.match(/(?:חדר|חדרים|כיתה|כיתות|אולם|אולמות|room)\s*[:\-]?\s*(\d{2,4}(?:\s*(?:,|ו-?|\/|-)\s*\d{2,4})*)/i)))r.room=m[1].split(/\s*(?:,|ו-?|\/|-)\s*/).filter(Boolean).join(", ");
-  /* a named place instead of a room number: מרכז למידה, ספרייה, אודיטוריום, רחבה… */
-  else if((m=t.match(/(?:^|[\s(])ב?(?:ה)?(מרכז\s+(?:ה)?[א-ת]+|ספרי[יה]+|אודיטוריום|רחבה|לובי|קפיטריה|מעבדת?\s+[א-ת0-9]+|חדר\s+ישיבות(?:\s+[א-ת]+)?|אולם\s+[א-ת]+|בניין\s+\d+)/)))r.room=m[1].replace(/^ה/,"");
-  /* name: the subject line, cleaned */
-  const GREET=/^(היי|הי|שלום|אהלן|בוקר טוב|ערב טוב|צהריים טובים|hi|hello|dear|לכבוד|שלום רב|היי לכולם)[\s,!.:]*$/i,
-        BYE=/^(תודה|תודה רבה|בברכה|בתודה|שבוע טוב|יום טוב|regards|thanks)[\s,!.]*/i;
-  const raw=t.split("\n").map(x=>x.trim()).filter(Boolean);
-  const lines=raw.map(x=>x.replace(/^(היי|הי|שלום|אהלן|בוקר טוב)[\s,!]+/,"")).filter(x=>x&&!GREET.test(x));
-  const body=[];for(const x of lines){if(BYE.test(x))break;body.push(x)}
-  /* an event's name is usually a known phrase: יום פתוח, כנס…, טקס…, הפנינג… */
-  const KNOWN=/(יום\s+פתוח[^,.\n]*?|יום\s+(?:עיון|הסברה|ספורט|כיף|גיבוש)[^,.\n]*?|כנס[^,.\n]*?|טקס[^,.\n]*?|הפנינג[^,.\n]*?|סדנ[הת][^,.\n]*?|הרצא[הת][^,.\n]*?|השתלמות[^,.\n]*?|הגנות[^,.\n]*?|מפגש[^,.\n]*?|ישיב[הת][^,.\n]*?|אירוע\s+[^,.\n]*?|ערב\s+[^,.\n]*?)(?=\s+(?:שי|ש|אשר)?יתקיים|\s+יהיה|\s+ב-?\d|\s+בתאריך|\s+ביום|\s+במרכז|\s+בבני|\s+בז|\s+בקמפוס|\s+בחדר|\s+באולם|[,.\n]|$)/;
-  const subjRaw=raw.find(x=>/^(נושא|subject)\s*:/i.test(x))||(/^(fw|fwd|re|הועבר|השב)\s*:/i.test(raw[0]||"")?raw[0]:"");
-  const subjLine=subjRaw.replace(/^(נושא|subject)\s*:\s*/i,"");
-  const km=(subjLine||body.join("\n")).match(KNOWN)||body.join("\n").match(KNOWN);
-  let subj=subjLine||(km?km[1]:"")||(body[0]||"").split(/[,.]/)[0];
-  if(subjLine&&!/^(fw|fwd|re)/i.test(subjRaw)&&km&&subjLine.length>45)subj=km[1];   /* a long "נושא:" line: keep the event phrase */
-  subj=subj.replace(/^((fw|fwd|re|הועבר|השב|הזמנה|accepted|מאושר)\s*:\s*)+/ig,"").replace(/\s*ב?-?\d{1,2}[.\/]\d{1,2}(?:[.\/]\d{2,4})?/g,"").replace(/\s{2,}/g," ").replace(/\s*[-|–]\s*$/,"").trim();
-  /* exam from the bank (longest name found), else the words מבחן/בחינה */
+  let m=t.match(/(\d{1,2}:\d{2})\s*(?:-|–|—|עד|to)\s*(\d{1,2}:\d{2})/);
+  if(m)r.time=tm(m[1])+"-"+tm(m[2]);else if((m=t.match(/(\d{1,2}:\d{2})/)))r.time=tm(m[1]);
+  else{const W={"אחת":1,"שתיים":2,"שלוש":3,"ארבע":4,"חמש":5,"שש":6,"שבע":7,"שמונה":8,"תשע":9,"עשר":10,"אחת עשרה":11,"שתים עשרה":12};
+    const w=t.match(/(?:ב|בשעה\s+)(אחת עשרה|שתים עשרה|אחת|שתיים|שלוש|ארבע|חמש|שש|שבע|שמונה|תשע|עשר)(\s+וחצי)?(?:\s+(בבוקר|בצהריים|אחה"צ|אחר הצהריים|בערב))?/);
+    if(w){let h=W[w[1]];if(/צהריים|אחה|ערב/.test(w[3]||"")&&h<12)h+=12;else if(!w[3]&&h<7)h+=12;r.time=p2(h)+":"+(w[2]?"30":"00")}}
+  /* ---- rooms: numbers after חדר/כיתה/מעבדה/אולם…, and the campus they belong to ---- */
+  const RM=/(?:חדר|חדרים|כיתה|כיתות|מעבדה|מעבדות|מעבדת|אולם|אולמות|room|rooms)\s*[:\-]?\s*(\d{2,4}(?:\s*(?:,|ו-?|\/|-|\s)\s*\d{2,4})*)/i;
+  if((m=t.match(RM)))r.room=[...new Set(m[1].match(/\d{2,4}/g))].join(", ");
+  else if((m=t.match(/(?:^|[\s(])ב?(?:ה)?((?:מרכז\s+(?:ה)?[א-ת]+|ספרי[יה]+|אודיטוריום|רחבה|לובי|קפיטריה|חדר\s+ישיבות(?:\s+[א-ת]+)?|אולם\s+[א-ת]+|בניין\s+\d+)(?:\s+\d{2,4})?)/)))r.room=m[1].replace(/^ה/,"");
+  /* ---- campus: words first, then which campus owns the rooms ---- */
+  const zb=/ב?וטינסקי|ז['׳]?בו|אשדוד/.test(t),bb=/בני[\s\-־]*ברית|באר[\s\-־]*שבע|ב["״]ש|ביאליק/.test(t);
+  r.campus=zb&&bb?"שניהם":zb?"ז'בוטינסקי":bb?"בני ברית":"";
+  if(!r.campus&&r.room){const nums=r.room.match(/\d+/g)||[];const own=S.sites.filter(s=>nums.some(n=>((S.rooms||{})[s.id]||[]).includes(n)));
+    if(own.length===1)r.campus=CAMPUS.find(c=>own[0].name.includes(c)||c.includes(own[0].name))||own[0].name;else if(own.length>1)r.campus="שניהם"}
+  /* ---- exam from the bank / exam words; event name from known phrases ---- */
   const bank=(S.examCat||[]).filter(c=>c.name&&t.includes(c.name.trim())).sort((a,b)=>b.name.length-a.name.length)[0];
   r.kind=bank||/מבחן|בחינה|בוחן|מועד\s*[אב]/.test(t)?"exams":"events";
-  r.name=bank?bank.name.trim():subj.slice(0,80);
-  /* everything you wrote (minus greeting / sign-off) becomes the notes, one sentence per line */
-  const notes=body.filter(x=>x!==subjRaw&&x!==subjLine).join("\n").split(/(?<=[.!?])\s+|\n/).map(x=>x.trim()).filter(Boolean).join("\n");
-  if(notes)r[r.kind==="events"?"needs":"notes"]=notes.slice(0,600);
+  const KNOWN=/(יום\s+פתוח|יום\s+(?:עיון|הסברה|ספורט|כיף|גיבוש)[^,.\n]*?|כנס[^,.\n]*?|טקס[^,.\n]*?|הפנינג[^,.\n]*?|סדנ[הת][^,.\n]*?|הרצא[הת][^,.\n]*?|השתלמות[^,.\n]*?|הגנות[^,.\n]*?|מצגת[^,.\n]*?|מפגש[^,.\n]*?|ישיב[הת][^,.\n]*?|אירוע\s+[^,.\n]*?|ערב\s+[^,.\n]*?)(?=\s+(?:שי|ש|אשר)?(?:יתקיים|תתקיים)|\s+יהיה|\s+ב-?\d|\s+בתאריך|\s+ביום|\s+במרכז|\s+במעבד|\s+באודיטוריום|\s+בבני|\s+בז|\s+בקמפוס|\s+בחדר|\s+באולם|\s+בשעה|\s+ב(?:שמונה|תשע|עשר)|[,.\n]|$)/;
+  const km=(subjLine||"").match(KNOWN)||all.match(KNOWN);
+  let name=bank?bank.name.trim():subjLine&&!(km&&subjLine.length>45)?subjLine:km?km[1]:(body[0]||"").split(/[,.]/)[0];
+  name=name.replace(/\s*ב?-?\d{1,2}[.\/]\d{1,2}(?:[.\/]\d{2,4})?/g,"").replace(/^(ביום\s+[א-ת]['׳]?\s*)/,"").replace(/^(צריך|צריכה|אני צריך|אני צריכה)\s+(להציג|לקיים|להעביר)\s+/,"").replace(/\s{2,}/g," ").trim();
+  r.name=name.slice(0,80);
+  /* ---- needs: only the requests (what to prepare), not the sentence that just states when/where ---- */
+  const sent=all.split(/(?<=[.!?])\s+|\n/).map(x=>x.trim()).filter(Boolean);
+  const isInfo=x=>(/\d{1,2}[.\/]\d{1,2}|\d{1,2}:\d{2}|יתקיים|תתקיים|יתקיימו|ביום\s/.test(x))&&!/צריך|נא\s|נבקש|אשמח|יש להכין|להכין|לוודא|לבדוק|דרוש|נדרש|לדאוג|להביא|להתקין|לחבר/.test(x);
+  const REQ=/צריך|צריכה|נא\s|נבקש|מבקש|אשמח|יש להכין|להכין|לוודא|לבדוק|דרוש|נדרש|לדאוג|להביא|להתקין|לחבר|מחשב|מקרן|רמקול|מיקרופון|זום|zoom|הקלטה|צילום|ציוד|הגברה|מסך|לפטופ|תוכנ|התקנ|רשת|אינטרנט|wifi|סטנד|כבל|hdmi/i;
+  const needs=sent.filter(x=>!isInfo(x)&&REQ.test(x));
+  if(needs.length)r[r.kind==="events"?"needs":"notes"]=needs.join("\n").slice(0,600);
   return r}
 function openPaste(){const o=document.createElement("div");o.className="pastebox";
   o.innerHTML=`<div class="pcard" role="dialog" aria-label="הדבקה ממייל"><div class="ph2"><b>📋 הדבקה ממייל</b><button data-px aria-label="סגור">✕</button></div>
