@@ -1817,6 +1817,9 @@ td.c-range{display:none}
 .ag-it .wab{width:30px;height:30px;border-radius:7px}.ag-it .wab svg{width:17px;height:17px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ag-it{background:#2E2A1C;border-color:#5A4E2A}}
 :root[data-theme="dark"] .ag-it{background:#2E2A1C;border-color:#5A4E2A}
+
+.plearn{margin:0;padding:8px 12px;border-radius:14px;font-size:13px;background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.plearn button{min-height:0!important;padding:2px 10px!important;font-size:12.5px;border-radius:999px!important}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -2077,7 +2080,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 19:05";
+const APP_VER="22.10.2026 19:20";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3223,7 +3226,31 @@ function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎�
   if(/(?:לפתוח|לפתיחת|פתיחת|פתיחה\s+של)\s+(?:את\s+)?(?:ה)?עמד(?:ת|ות)\s*(?:ה)?(?:מחשב|מרצה)|\bpod\b/i.test(t)){
     const room=(r.room||"").match(/\d{2,4}/);const purpose=r.kind==="events"&&r.name&&!/עמד/.test(r.name)?r.name:"";
     r.kind="events";if(!r.name||/עמד/.test(r.name))r.name=purpose||"פתיחת עמדת מחשב";r.needs="לפתוח POD"+(room?" ב"+room[0]:"")}
+  return applyLearn(r,t)}
+/* ---------- smart create learns from your corrections ----------
+   When a detected value is fixed before adding, the fix is remembered (synced with the rest of the data) and used next time:
+   a name you typed that appears in the mail becomes a known phrase; other name / room / type / campus fixes map old → new. */
+function learnBox(){S.learn=S.learn||{};const L=S.learn;["name","room","kind","roomCampus"].forEach(k=>L[k]=L[k]||{});L.phrases=L.phrases||[];L.places=L.places||[];return L}
+const lk=x=>String(x||"").trim().replace(/\s+/g," ");
+function applyLearn(r,t){const L=S.learn;if(!L)return r;r.learned=[];const text=lk(t);
+  const ph=(L.phrases||[]).filter(p=>p&&text.includes(p)).sort((a,b)=>b.length-a.length)[0];
+  if(ph&&lk(r.name)!==ph&&!(S.examCat||[]).some(c=>lk(c.name)===lk(r.name))){r.name=ph;r.learned.push("name")}
+  else if(L.name&&L.name[lk(r.name)]){r.name=L.name[lk(r.name)];r.learned.push("name")}
+  if(L.kind&&L.kind[lk(r.name)]&&L.kind[lk(r.name)]!==r.kind){r.kind=L.kind[lk(r.name)];r.learned.push("kind")}
+  const pl=(L.places||[]).filter(p=>p&&text.includes(p)).sort((a,b)=>b.length-a.length)[0];
+  if(pl&&lk(r.room)!==pl){r.room=pl;r.learned.push("room")}
+  else if(r.room&&L.room&&L.room[lk(r.room)]){r.room=L.room[lk(r.room)];r.learned.push("room")}
+  if(r.room&&L.roomCampus&&L.roomCampus[lk(r.room)]&&!r.campus){r.campus=L.roomCampus[lk(r.room)];r.learned.push("campus")}
   return r}
+function learnFrom(parsed,fin,text){if(!parsed)return 0;const L=learnBox(),T=lk(text);let n=0;const P=k=>lk(parsed[k]),F=k=>lk(fin[k]);
+  if(F("name")&&F("name")!==P("name")){if(F("name").length>=3&&T.includes(F("name"))){if(!L.phrases.includes(F("name"))){L.phrases.push(F("name"));n++}}
+    else if(P("name")){L.name[P("name")]=F("name");n++}}
+  if(F("kind")&&F("kind")!==P("kind")){L.kind[F("name")]=F("kind");n++}
+  if(F("room")&&F("room")!==P("room")){if(T.includes(F("room"))&&!/^\d/.test(F("room"))){if(!L.places.includes(F("room"))){L.places.push(F("room"));n++}}
+    else if(P("room")){L.room[P("room")]=F("room");n++}}
+  /* a place that isn't in the rooms list: remember which campus it belongs to */
+  if(F("room")&&F("campus")&&F("campus")!=="שניהם"&&!campusOfRoom(F("room"))&&L.roomCampus[F("room")]!==F("campus")){L.roomCampus[F("room")]=F("campus");n++}
+  return n}
 function sheetDrag(sh,close){if(!sh||!matchMedia("(max-width:700px)").matches)return;
   let y0=null,x0=0,dy=0,t0=0,last=0,lastT=0,v=0,armed=false;
   const canStart=ev=>{const t=ev.target;if(t.closest("input,textarea,select,button:not(.shx)"))return t.closest(".shd,.ph")&&!t.closest("input,textarea,select,button");
@@ -3247,7 +3274,8 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
     <div class="row pact"><button class="primary" data-pgo>✨ זיהוי</button></div></div>`;
   document.body.appendChild(o);const ta=o.querySelector(".ptx"),f=o.querySelector(".pform");setTimeout(()=>ta.focus(),50);
   const close=()=>{if(o._closing)return;o._closing=1;o.classList.add("out");setTimeout(()=>o.remove(),320)};sheetDrag(o.querySelector(".pcard"),close);
-  const show=r=>{f.hidden=false;const kind=r.kind;
+  let parsed=null;
+  const show=r=>{parsed={...r};f.hidden=false;const kind=r.kind;
     f.innerHTML=`<div class="pseg"><button data-pk="exams" aria-pressed="${kind==="exams"}">📝 מבחן</button><button data-pk="events" aria-pressed="${kind==="events"}">📅 אירוע</button></div>
       <label>שם<input type="text" data-pf="name" value="${esc(r.name||"")}"></label>
       ${r.dates?`<div class="pdates"><span class="pdl">${r.dates.length} תאריכים – ייווצר ${kind==="exams"?"מבחן":"אירוע"} נפרד לכל תאריך, עם אותם פרטים</span><div class="pdc">${r.dates.map(d=>`<span class="pdchip" data-pd="${d}">${dK(d)}<button type="button" data-pdx aria-label="הסר תאריך">✕</button></span>`).join("")}</div></div>`:""}
@@ -3255,6 +3283,8 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
       <div class="p2"><label>קמפוס<select data-pf="campus"><option value=""></option>${CAMPUS.map(c=>`<option ${c===r.campus?"selected":""}>${esc(c)}</option>`).join("")}</select></label><label>מקום / כיתה<input type="text" data-pf="room" value="${esc(r.room||"")}"></label></div>
       <label>הערות / צרכים והיערכות<textarea class="grow" rows="2" data-pf="needs">${esc(r.needs||r.notes||"")}</textarea></label>`;
     f.querySelectorAll("textarea.grow").forEach(x=>{x.style.height="auto";x.style.height=x.scrollHeight+"px"});
+    if(r.learned&&r.learned.length){const m={name:"השם",room:"המקום",kind:"הסוג",campus:"הקמפוס"};const note=document.createElement("p");note.className="plearn";
+      note.innerHTML=`✨ ${r.learned.map(k=>m[k]).join(", ")} לפי תיקון קודם שלך <button type="button" data-unlearn>שכח</button>`;f.prepend(note)}
     /* reveal: each detected field fades up in turn, filled ones glow */
     [...f.children].forEach((el,i)=>{el.style.animationDelay=(i*70)+"ms";el.classList.add("rev");const inp=el.querySelector("input,select,textarea");if(inp&&inp.value)el.classList.add("pgot")});
     o.querySelector(".pact").innerHTML=`<button data-pgo>✨ זיהוי מחדש</button><button class="primary" data-padd>הוסף</button><button data-padd="cal" title="הוסף גם ליומן">הוסף + ליומן</button>`};
@@ -3269,8 +3299,12 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
         if(amb)setTimeout(()=>askCampus(amb,c=>{const sel=f.querySelector('[data-pf="campus"]');if(sel){sel.value=c;sel.closest("label").classList.add("pgot")}}),650);setTimeout(()=>card.classList.remove("done"),1400)},matchMedia("(prefers-reduced-motion:reduce)").matches?0:900);return}
     const dx=e.target.closest("[data-pdx]");if(dx){const c=dx.closest(".pdchip"),wrap=f.querySelector(".pdc");c.remove();const n=wrap.children.length;
       f.querySelector(".pdl").textContent=n+" תאריכים – ייווצר רשומה נפרדת לכל תאריך";if(n<2){const only=wrap.querySelector(".pdchip");f.querySelector(".pdates").remove();const di=f.querySelector('[data-pf="date"]');if(only)di.value=only.dataset.pd;di.closest("label").hidden=false}return}
+    if(e.target.closest("[data-unlearn]")){if(confirm("לשכוח את כל מה שנלמד מתיקונים קודמים?")){delete S.learn;changed();toast("הזיכרון נמחק");e.target.closest(".plearn").remove()}return}
     const k=e.target.closest("[data-pk]");if(k){f.querySelectorAll("[data-pk]").forEach(b=>b.setAttribute("aria-pressed",b===k));return}
-    if(e.target.closest("[data-padd]")){const alsoCal=e.target.closest("[data-padd]").dataset.padd==="cal",kind=f.querySelector('[data-pk][aria-pressed="true"]').dataset.pk,v=n=>(f.querySelector(`[data-pf="${n}"]`)||{}).value||"";
+    if(e.target.closest("[data-padd]")){
+      {const v0=n=>(f.querySelector(`[data-pf="${n}"]`)||{}).value||"",k0=(f.querySelector('[data-pk][aria-pressed="true"]')||{}).dataset;
+        const nl=learnFrom(parsed,{name:v0("name"),room:v0("room"),campus:v0("campus"),kind:k0&&k0.pk},ta.value);if(nl)setTimeout(()=>toast("למדתי מהתיקון – אשתמש בזה בפעם הבאה ✨"),1600)}
+      const alsoCal=e.target.closest("[data-padd]").dataset.padd==="cal",kind=f.querySelector('[data-pk][aria-pressed="true"]').dataset.pk,v=n=>(f.querySelector(`[data-pf="${n}"]`)||{}).value||"";
       const dates=f.querySelector(".pdc")?[...f.querySelectorAll(".pdchip")].map(c=>c.dataset.pd):[v("date")||cur];
       if(!v("name").trim()){toast("חסר שם");return}
       let rec;dates.forEach(dd=>{rec={id:uid(),date:dd,name:v("name").trim(),time:v("time").trim(),campus:v("campus"),room:v("room").trim()};
