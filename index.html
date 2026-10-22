@@ -882,7 +882,7 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 
 /* exams & events: the name is the card's subtitle (smaller than the section title) */
 :is(#exT,#evT) td[data-l="שעה"]{position:relative}
-:is(#exT,#evT) td[data-l="שעה"]::after{content:"🕐";position:absolute;inset-inline-start:10px;bottom:0;height:var(--th,38px);display:flex;align-items:center;font-size:15px;pointer-events:none}
+:is(#exT,#evT) td[data-l="שעה"]:not(.ro)::after{content:"🕐";position:absolute;inset-inline-start:10px;bottom:0;height:var(--th,38px);display:flex;align-items:center;font-size:15px;pointer-events:none}
 :is(#exT,#evT) td[data-l="שעה"] input{padding-inline-start:34px!important}
 :is(#exT,#evT,#ecT) td:is([data-l="מבחן"],[data-l="שם האירוע"],[data-l="שם המבחן"]) input{font-weight:700}
 @media (max-width:700px){
@@ -1479,8 +1479,8 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 @media (min-width:701px){.aifab{bottom:28px;inset-inline-start:28px}}
 @media (prefers-reduced-motion:reduce){.aifab::before,.aifab::after,.aifab svg{animation:none}}
 /* add-to-calendar buttons */
-.xcal{width:34px;height:34px;padding:0!important;display:inline-grid;place-items:center;flex:none;margin-inline-end:4px}
-.xcal svg{width:18px;height:18px}
+.xcal{width:42px;height:42px;padding:0!important;display:inline-grid;place-items:center;flex:none;margin-inline-end:4px}
+.xcal svg{width:23px;height:23px}
 .ewi .xcal{border-radius:12px!important}
 
 /* add-to-calendar action sheet */
@@ -1497,6 +1497,30 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 .csh .ci.ol{background:#0F6CBD}.csh .ci.gg{background:#fff;color:#1A73E8;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}.csh .ci.ic{background:var(--g-field,var(--line));font-size:18px}
 .csh .cx{justify-content:center;font-weight:700;min-height:48px}
 @media (min-width:701px){.calsheet{place-items:center}}
+
+/* read-only rows; ✎ opens a row for editing */
+td.ro{font-size:15px;padding-top:10px!important;padding-bottom:10px!important}
+td.ro-n{font-weight:700}
+td.ro .rod,tr.ro .rod{color:var(--muted);font-size:.86em;font-weight:600}
+td.ro-t{white-space:pre-wrap}
+tr.ro td{padding-top:10px;padding-bottom:10px}
+.xedit{width:42px;height:42px;padding:0!important;display:inline-grid;place-items:center;flex:none;border-radius:999px}
+.xedit svg{width:20px;height:20px}
+.xedit.on{background:var(--accent)!important;color:var(--accent-ink)!important;border-color:var(--accent)!important;font-size:19px;font-weight:900}
+.xdelb{width:42px;height:42px;padding:0!important;color:#C0392B}
+td.xdel{white-space:nowrap;text-align:left}
+#exT td.xdel,#ecT td.xdel,#evT td.xdel,#vacT td.xdel,#holT td.xdel{width:auto}
+td.xdel>button{vertical-align:middle;margin-inline-start:4px}
+@media (max-width:700px){
+  table.xt td.ro-e{display:none}
+  table.xt td.ro[data-l]::before{display:none}
+  table.xt tr:not(.none):not(.xdet):has(td.ro){align-items:center}
+  #exT td.ro.ro-n,#evT td.ro.ro-n{order:0;grid-column:1/-1;font-size:17px}
+  #evT td.ro[data-l="צרכים והיערכות"]{color:var(--muted);font-size:14px}
+  table.xt td.xdel{display:flex!important;gap:6px;justify-content:flex-end;align-items:center}
+  #exT td.xdel{order:5}
+  td.ro{padding-top:0!important;padding-bottom:0!important}
+}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1752,7 +1776,7 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 11:40";
+const APP_VER="22.10.2026 11:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2514,6 +2538,11 @@ function learnExam(r){const n=String(r.name||"").trim();if(!n)return;let c=S.exa
 function applyEvent(r){const prev=S.events.filter(x=>x!==r&&x.name===r.name).sort((a,b)=>(b.date||"").localeCompare(a.date||""))[0];if(!prev)return;
   if(!r.time)r.time=prev.time||"";if(!r.campus)r.campus=prev.campus||"";if(!r.needs)r.needs=prev.needs||""}
 let EV_KEEP=false;const XOPEN=new Set();
+/* rows are read-only until ✎ is tapped (new rows open in edit mode) */
+const XEDIT=new Set();
+const PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+const edBtn=(id,on)=>on?`<button class="xedit on" data-xedit="${id}" title="סיום עריכה" aria-label="סיום עריכה">✓</button>`:`<button class="xedit" data-xedit="${id}" title="עריכה" aria-label="עריכה">${PEN}</button>`;
+const roD=v=>{if(!v)return "";const d=parseKey(v);return `<span class="rod">${["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"][d.getDay()]}</span> ${esc(dmy(v))}`};
 function renderEv(){
   fillLists();{const t=key(new Date()),up=a=>a.filter(x=>!x.date||x.date>=t).length;
     $("#exN").textContent=up(S.exams)||"";$("#evN").textContent=up(S.events)||"";$("#ecN").textContent=S.examCat.length||""}
@@ -2522,6 +2551,8 @@ function renderEv(){
   Object.entries(XT).forEach(([kind,cfg])=>{
     const list=kind==="examCat"?S[kind].slice().sort((x,y)=>(!x.name)-(!y.name)||HE.compare(x.name||"",y.name||"")):S[kind].slice().sort((x,y)=>(x.date||"9").localeCompare(y.date||"9")||(x.time||"").localeCompare(y.time||"")||HE.compare(x.name||"",y.name||""));
     const cell=(r,[f,l,t])=>{const at=`data-xf="${kind}|${r.id}|${f}"`,v=r[f]||"",dl=(DL[kind]||{})[f];
+      if(!XEDIT.has(r.id)){const txt=t==="d"?roD(v):t==="r"?esc(splitL(v).join(", ")):esc(v);
+        return `<td data-l="${l}" class="ro ro-${t}${t==="r"?" rooms":""}${f==="name"?" ro-n":""}${v?"":" ro-e"}">${t==="r"&&v?`<span class="rod">כיתה</span> `:t==="h"&&v?`<span class="rod">🕐</span> `:""}${txt}</td>`}
       if(t==="r"){const opts=roomsFor(r.campus),sel=splitL(v);
         return `<td data-l="${l}" class="rooms">${opts.length?opts.map(o=>`<button type="button" class="rm" data-xroom="${kind}|${r.id}|${o}" aria-pressed="${sel.includes(o)}">${esc(o)}</button>`).join(""):`<span class="hint">בחרו קמפוס</span>`}</td>`}
       if(t==="d")return `<td data-l="${l}">${dateField(at,v,l)}</td>`;
@@ -2530,8 +2561,8 @@ function renderEv(){
       if(f==="needs")return `<td data-l="${l}"><textarea class="grow" rows="1" ${at} aria-label="${l}">${esc(v)}</textarea></td>`;
       return `<td data-l="${l}"><input type="text" ${at} value="${esc(v)}" aria-label="${l}"${t==="h"?' placeholder="שעה" dir="ltr"':f==="name"?` placeholder="${l}"`:""}></td>`};
     $(cfg.tbl).innerHTML=`<thead><tr>${cfg.cols.map(c=>`<th>${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>`+
-      (list.length?list.map(r=>{const open=XOPEN.has(r.id),sum=cfg.det?[r.software,r.lecturer,r.notes].filter(Boolean).join(" · "):"";
-        let h=`<tr class="${r.date&&r.date<today?"past":""}${kind==="examCat"?" cat":""}${open?" open":""}${cfg.det&&(open||sum)?" has-det":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel">${kind==="examCat"&&r.name?`<button class="xuse" data-xuse="${r.id}" title="הוספת מבחן ${esc(r.name)} לטבלת המבחנים" aria-label="הוספת מבחן ${esc(r.name)}">+</button>`:""}${cfg.det?`<button class="xexp" data-xexp="${r.id}" aria-expanded="${open}" title="${esc(sum||"פרטים")}">${open?"▴":"▾"}</button>`:""}${kind!=="examCat"&&r.date&&r.name?`<button class="xcal" data-ical="${kind}|${r.id}" title="הוספה ליומן" aria-label="הוספה ליומן"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg></button>`:""}<button data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button></td></tr>`;
+      (list.length?list.map(r=>{const ed=XEDIT.has(r.id),open=ed&&!!cfg.det,sum=cfg.det?[r.software,r.lecturer,r.notes].filter(Boolean).join(" · "):"";
+        let h=`<tr class="${r.date&&r.date<today?"past":""}${kind==="examCat"?" cat":""}${open?" open":""}${cfg.det&&(open||sum)?" has-det":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel${ed?" ed":""}">${kind==="examCat"&&r.name&&!ed?`<button class="xuse" data-xuse="${r.id}" title="הוספת מבחן ${esc(r.name)} לטבלת המבחנים" aria-label="הוספת מבחן ${esc(r.name)}">+</button>`:""}${!ed&&kind!=="examCat"&&r.date&&r.name?`<button class="xcal" data-ical="${kind}|${r.id}" title="הוספה ליומן" aria-label="הוספה ליומן"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg></button>`:""}${ed?`<button class="xdelb" data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button>`:""}${edBtn(r.id,ed)}</td></tr>`;
         /* details line (software / lecturer / notes): a short summary, or editable fields when opened */
         if(cfg.det)h+=open?`<tr class="xdet"><td colspan="${cfg.cols.length+1}"><div class="xdg">${cfg.det.map(([f,l])=>`<label><span>${l}</span>${(DL[kind]||{})[f]?`<div class="cmb"><input type="text" data-xf="${kind}|${r.id}|${f}" value="${esc(r[f]||"")}" data-dl="${DL[kind][f]}" autocomplete="off"><button type="button" class="cmb-b" data-cmb tabindex="-1" aria-label="פתיחת רשימת ${l}">▾</button></div>`:`<input type="text" data-xf="${kind}|${r.id}|${f}" value="${esc(r[f]||"")}">`}</label>`).join("")}</div></td></tr>`
           :sum?`<tr class="xdet sum"><td colspan="${cfg.cols.length+1}">${esc(sum)}</td></tr>`:"";
@@ -2547,6 +2578,7 @@ function renderCal(){if(CAL_KEEP)return;
   const opts=sel=>`<option value="" ${sel?"":"selected"} disabled>בחרו טכנאי</option>`+S.employees.slice().sort(byName).map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
   $("#vacT").innerHTML=`<tr><th></th><th>טכנאי</th><th>מתאריך</th><th>עד תאריך</th><th>סה"כ ימים</th><th>מטרת החופש</th><th>קמפוס</th><th></th></tr>`+
     (S.vac.length?S.vac.slice().sort((a,b)=>(a.from||"9").localeCompare(b.from||"9")||HE.compare(empName(a.emp),empName(b.emp))).map(v=>{const days=v.from&&v.to&&v.to>=v.from?Math.round((parseKey(v.to)-parseKey(v.from))/864e5)+1:"";const old=v.to&&v.to<cur;
+      if(!XEDIT.has(v.id))return `<tr class="ro"><td><span class="dot${old?" old":""}">●</span></td><td class="ro-n">${v.emp?esc(empName(v.emp)):""}</td><td>${roD(v.from)}</td><td>${roD(v.to)}</td><td class="num">${days}</td><td>${esc(v.purpose||"")}</td><td>${esc(v.campus||"")}</td><td class="xdel">${edBtn(v.id,false)}</td></tr>`;
       return `<tr><td><span class="dot${old?" old":""}" title="${old?"החופשה הסתיימה":""}">●</span></td>
         <td><select data-vf="${v.id}|emp" aria-label="טכנאי">${opts(v.emp)}</select></td>
         <td>${dateField(`data-vf="${v.id}|from"`,v.from,"מתאריך")}</td>
@@ -2554,14 +2586,14 @@ function renderCal(){if(CAL_KEEP)return;
         <td class="num">${days}</td>
         <td><input type="text" data-vf="${v.id}|purpose" value="${esc(v.purpose||"")}" aria-label="מטרת החופש"></td>
         <td><select data-vf="${v.id}|campus" aria-label="קמפוס"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v.campus?"selected":""}>${esc(c)}</option>`).join("")}</select></td>
-        <td><button data-vdel="${v.id}" aria-label="מחק חופשה">✕</button></td></tr>`}).join(""):`<tr><td colspan="8" class="empty">אין חופשות רשומות</td></tr>`);
+        <td class="xdel ed"><button class="xdelb" data-vdel="${v.id}" aria-label="מחק חופשה">✕</button>${edBtn(v.id,true)}</td></tr>`}).join(""):`<tr><td colspan="8" class="empty">אין חופשות רשומות</td></tr>`);
   $("#holT").innerHTML=`<tr><th>חג</th><th>מתאריך</th><th>עד תאריך</th><th>מהות</th><th>ימי שישי</th><th></th></tr>`+
-    S.holidays.slice().sort((a,b)=>(a.from||"9").localeCompare(b.from||"9")||HE.compare(a.name||"",b.name||"")).map(h=>`<tr><td><input type="text" data-hf="${h.id}|name" value="${esc(h.name||"")}" aria-label="שם החג"></td>
+    S.holidays.slice().sort((a,b)=>(a.from||"9").localeCompare(b.from||"9")||HE.compare(a.name||"",b.name||"")).map(h=>!XEDIT.has(h.id)?`<tr class="ro"><td class="ro-n">${esc(h.name||"")}</td><td>${roD(h.from)}</td><td>${roD(h.to)}</td><td>${esc(HOL_T[h.type]||"")}</td><td class="num">${h.type==="off"?countFris(h.from,h.to||h.from):0}</td><td class="xdel">${edBtn(h.id,false)}</td></tr>`:`<tr><td><input type="text" data-hf="${h.id}|name" value="${esc(h.name||"")}" aria-label="שם החג"></td>
       <td>${dateField(`data-hf="${h.id}|from"`,h.from,"מתאריך")}</td>
       <td>${dateField(`data-hf="${h.id}|to"`,h.to,"עד תאריך")}</td>
       <td><select data-hf="${h.id}|type" aria-label="מהות">${Object.entries(HOL_T).map(([k,l])=>`<option value="${k}" ${k===h.type?"selected":""}>${esc(l)}</option>`).join("")}</select></td>
       <td class="num">${h.type==="off"?countFris(h.from,h.to||h.from):0}</td>
-      <td><button data-hdel="${h.id}" aria-label="מחק חג">✕</button></td></tr>`).join("");
+      <td class="xdel ed"><button class="xdelb" data-hdel="${h.id}" aria-label="מחק חג">✕</button>${edBtn(h.id,true)}</td></tr>`).join("");
 }
 function renderSettings(){
   $("#lblM").value=S.shiftLbl.m;$("#lblE").value=S.shiftLbl.e;$("#h19Eve").value=S.h19Eve||"";$("#sheetTitle").value=S.title||"";$("#targetN").value=S.target??5;$("#coverSet").innerHTML=`<table class="req"><tr><th>אתר</th><th>בקרים</th><th>ערבים</th></tr>${S.sites.map(s=>`<tr><td>${esc(s.name)}</td>${["m","e"].map(sh=>`<td><input type="number" min="0" max="5" data-cov="${s.id}|${sh}" value="${S.cover[s.id][sh]||0}" aria-label="${esc(s.name)} ${sh==="m"?"בקרים":"ערבים"}"></td>`).join("")}</tr>`).join("")}</table>`;
@@ -2597,7 +2629,7 @@ function cmbOpen(inp,all){const dl=document.getElementById(inp.dataset.dl);if(!d
   cmbPlace();el.querySelector(".hl")?.scrollIntoView({block:"nearest"})}
 function cmbPick(v){if(!CMB)return;const inp=CMB.inp;cmbClose();inp.value=v;inp.dispatchEvent(new Event("input",{bubbles:true}));cmbClose();inp.blur();inp.dispatchEvent(new Event("change",{bubbles:true}))}
 function cmbToExam(name){if(!CMB)return;const inp=CMB.inp,[k,id]=(inp.dataset.xf||"").split("|");cmbClose();inp.blur();
-  const ev=S.events.find(x=>x.id===id),r={id:uid(),date:(ev&&ev.date)||cur,name};applyCat(r);S.exams.push(r);if(ev)S.events=S.events.filter(x=>x!==ev);changed();render();
+  const ev=S.events.find(x=>x.id===id),r={id:uid(),date:(ev&&ev.date)||cur,name};applyCat(r);XEDIT.add(r.id);S.exams.push(r);if(ev)S.events=S.events.filter(x=>x!==ev);changed();render();
   toast(`${name} נוסף לטבלת המבחנים`);setTimeout(()=>document.querySelector(`[data-xf="exams|${r.id}|date"]`)?.closest("tr")?.scrollIntoView({block:"center",behavior:"smooth"}),60)}
 /* the list scrolls freely with the finger; an item is picked only on a tap (click), never when a scroll starts.
    mousedown is cancelled so the field keeps focus (on iPhone it is sent only for taps, after the finger lifts) */
@@ -3106,9 +3138,11 @@ document.addEventListener("click",e=>{
     if(ds.radd){const prev=r.list[r.list.length-1],first=(activeEmps()[0]||{}).id;r.list.push(prev||first);if(t!==null)rotSetTurn(r,t);else rotSetTurn(r,0)}
     changed();render();return}
   const xa=e.target.closest("[data-xadd]");
-  if(xa){const k=xa.dataset.xadd;S[k].push(k==="examCat"?{id:uid(),name:""}:{id:uid(),date:key(new Date())>cur?key(new Date()):cur});changed();render();return}
+  if(xa){const k=xa.dataset.xadd,r=k==="examCat"?{id:uid(),name:""}:{id:uid(),date:key(new Date())>cur?key(new Date()):cur};XEDIT.add(r.id);S[k].push(r);changed();render();return}
+  const xed=e.target.closest("[data-xedit]");
+  if(xed){const id=xed.dataset.xedit;haptic();if(XEDIT.has(id)){XEDIT.delete(id);document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}else XEDIT.add(id);render();return}
   const xu=e.target.closest("[data-xuse]");
-  if(xu){const c=S.examCat.find(x=>x.id===xu.dataset.xuse);if(c){const t=key(new Date()),r={id:uid(),date:t>cur?t:cur,name:c.name};applyCat(r);S.exams.push(r);changed();render();
+  if(xu){const c=S.examCat.find(x=>x.id===xu.dataset.xuse);if(c){const t=key(new Date()),r={id:uid(),date:t>cur?t:cur,name:c.name};applyCat(r);XEDIT.add(r.id);S.exams.push(r);changed();render();
     /* bring the new row into view and open its date for editing */
     setTimeout(()=>{const el=document.querySelector(`[data-xf="exams|${r.id}|date"]`);if(el){el.closest("tr").scrollIntoView({block:"center",behavior:"smooth"});el.focus();el.select()}
       toast(`נוסף מבחן ${c.name} – בחרו תאריך וכיתה`)},50)}return}
@@ -3204,8 +3238,8 @@ document.addEventListener("change",e=>{
   if(t.dataset.req||t.dataset.ename||t.dataset.sname||["lblM","lblE","h19Eve","sheetTitle","targetN"].includes(t.id))render();
 });
 $("#addEmp").onclick=()=>{const v=$("#newEmp").value.trim();if(!v)return;S.employees.push({id:uid(),name:v,active:true});$("#newEmp").value="";changed();render()};
-$("#addVac").onclick=()=>{if(!S.employees.length)return;const d=parseKey(cur);d.setDate(d.getDate()+4);S.vac.push({id:uid(),emp:"",from:cur,to:key(d),purpose:"",campus:""});changed();render()};   /* technician left empty: you pick */
-$("#addHol").onclick=()=>{S.holidays.push({id:uid(),name:"",from:cur,to:cur,type:"off"});changed();render()};
+$("#addVac").onclick=()=>{if(!S.employees.length)return;const d=parseKey(cur);d.setDate(d.getDate()+4);{const id=uid();XEDIT.add(id);S.vac.push({id,emp:"",from:cur,to:key(d),purpose:"",campus:""})}changed();render()};   /* technician left empty: you pick */
+$("#addHol").onclick=()=>{{const id=uid();XEDIT.add(id);S.holidays.push({id,name:"",from:cur,to:cur,type:"off"})}changed();render()};
 $("#newEmp").addEventListener("keydown",e=>{if(e.key==="Enter")$("#addEmp").click()});
 $("#addSite").onclick=()=>{const v=$("#newSite").value.trim();if(!v)return;S.sites.push({id:uid(),name:v,req:{m:[1,1,1,1,1,1],e:[1,1,1,1,1,0]}});$("#newSite").value="";changed();render()};
 
