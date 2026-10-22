@@ -1482,6 +1482,21 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 .xcal{width:34px;height:34px;padding:0!important;display:inline-grid;place-items:center;flex:none;margin-inline-end:4px}
 .xcal svg{width:18px;height:18px}
 .ewi .xcal{border-radius:12px!important}
+
+/* add-to-calendar action sheet */
+.calsheet{position:fixed;inset:0;z-index:82;display:grid;place-items:end center;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));background:rgba(10,14,10,.3);animation:scrimin 220ms ease both}
+.calsheet.out{animation:scrimout 220ms ease both}
+.csh{width:min(460px,100%);display:grid;gap:8px;justify-items:stretch;padding:8px 12px 12px;border-radius:30px;background:color-mix(in srgb,var(--surface) 90%,transparent);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);box-shadow:0 24px 60px rgba(0,0,0,.28),inset 0 1px 0 var(--glass-edge,#fff);animation:sheetin 460ms var(--spring,cubic-bezier(.3,1.2,.45,1)) both}
+.calsheet.out .csh{animation:sheetout 220ms ease both}
+.csh>.pgrab{justify-self:center;width:38px;height:5px;border-radius:99px;background:var(--muted);opacity:.35;margin:2px 0 4px}
+.csh>b{text-align:center;font-size:17px}.csh>small{text-align:center;color:var(--muted);margin-top:-6px;margin-bottom:4px}
+.csh button{display:flex;align-items:center;gap:12px;text-align:right;min-height:58px;padding:8px 12px!important;border-radius:18px!important}
+.csh button>span:last-child{display:grid}.csh button small{color:var(--muted);font-size:12.5px;font-weight:500}
+.csh .ci{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-weight:900;color:#fff;flex:none}
+.csh .ci.ol{background:#0F6CBD}.csh .ci.gg{background:#fff;color:#1A73E8;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}.csh .ci.ic{background:var(--g-field,var(--line));font-size:18px}
+.csh .cx{justify-content:center;font-weight:700;min-height:48px}
+@media (min-width:701px){.calsheet{place-items:center}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1737,7 +1752,7 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 07:40";
+const APP_VER="22.10.2026 07:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2809,10 +2824,32 @@ function icsFor(list){const esc2=x=>String(x||"").replace(/\\/g,"\\\\").replace(
     const desc=[x.software?"תוכנה: "+x.software:"",x.lecturer?"מרצה: "+x.lecturer:"",x.needs||"",x.notes||""].filter(Boolean).join("\n");
     return `BEGIN:VEVENT\r\nUID:${x.id}-${d8(x.date)}@sce-team\r\nDTSTAMP:${stamp}\r\n${when}\r\nSUMMARY:${esc2(x.name)}\r\n${loc?`LOCATION:${esc2(loc)}\r\n`:""}${desc?`DESCRIPTION:${esc2(desc)}\r\n`:""}END:VEVENT`}).join("\r\n");
   return `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//SCE IT//Team//HE\r\nCALSCALE:GREGORIAN\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Jerusalem\r\nBEGIN:STANDARD\r\nDTSTART:19701025T020000\r\nTZOFFSETFROM:+0300\r\nTZOFFSETTO:+0200\r\nRRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:19700327T020000\r\nTZOFFSETFROM:+0200\r\nTZOFFSETTO:+0300\r\nRRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1FR\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\n${ev}\r\nEND:VCALENDAR\r\n`}
-function addToCal(list){if(!list.length)return;haptic();const ics=icsFor(list),name=(list.length>1?list[0].name+" ("+list.length+")":list[0].name).replace(/[\\/:*?"<>|]/g," ")+".ics";
-  const isApple=/iPhone|iPad|Macintosh/.test(navigator.userAgent)&&"ontouchend" in document;
-  if(isApple){location.href="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics);return}   /* iOS opens its own "Add to calendar" sheet */
-  saveFile(name,new Blob([ics],{type:"text/calendar;charset=utf-8"}));toast("הקובץ ירד – פתחו אותו כדי להוסיף ליומן")}
+/* where to add: Outlook (the SCE calendar, opens the Outlook app/web with the event filled in), Google, or a calendar file */
+function calTimes(x){const tt=[...String(x.time||"").matchAll(/(\d{1,2}):(\d{2})/g)].map(m=>[+m[1],+m[2]]);const[y,mo,d]=x.date.split("-").map(Number);
+  if(!tt.length)return{allDay:true,start:new Date(y,mo-1,d),end:new Date(y,mo-1,d+1)};
+  const st=new Date(y,mo-1,d,tt[0][0],tt[0][1]),en=tt[1]?new Date(y,mo-1,d,tt[1][0],tt[1][1]):new Date(st.getTime()+36e5);return{allDay:false,start:st,end:en}}
+const calLoc=x=>[x.campus,x.room?(/^\d/.test(x.room)?"כיתה "+x.room:x.room):""].filter(Boolean).join(" · ");
+const calDesc=x=>[x.software?"תוכנה: "+x.software:"",x.lecturer?"מרצה: "+x.lecturer:"",x.needs||"",x.notes||""].filter(Boolean).join("\n");
+function outlookUrl(x){const t=calTimes(x),q=new URLSearchParams({subject:x.name,location:calLoc(x),body:calDesc(x)});
+  if(t.allDay){q.set("allday","true");q.set("startdt",x.date);q.set("enddt",key(t.end))}else{q.set("startdt",t.start.toISOString());q.set("enddt",t.end.toISOString())}
+  return "https://outlook.office.com/calendar/action/compose?"+q.toString()}
+function googleUrl(x){const t=calTimes(x),f=d=>t.allDay?key(d).replace(/-/g,""):key(d).replace(/-/g,"")+"T"+String(d.getHours()).padStart(2,"0")+String(d.getMinutes()).padStart(2,"0")+"00";
+  return "https://calendar.google.com/calendar/render?"+new URLSearchParams({action:"TEMPLATE",text:x.name,dates:f(t.start)+"/"+f(t.end),details:calDesc(x),location:calLoc(x),ctz:"Asia/Jerusalem"}).toString()}
+async function icsOut(list){const ics=icsFor(list),name=(list.length>1?list[0].name+" ("+list.length+")":list[0].name).replace(/[\\/:*?"<>|]/g," ")+".ics",f=new File([ics],name,{type:"text/calendar"});
+  if(canShare&&navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]});return}catch(e){if(e&&e.name==="AbortError")return}}
+  saveFile(name,f);toast("הקובץ ירד – פתחו אותו כדי להוסיף ליומן")}
+function addToCal(list){if(!list.length)return;haptic();
+  const o=document.createElement("div");o.className="calsheet";const many=list.length>1;
+  o.innerHTML=`<div class="csh" role="dialog" aria-label="הוספה ליומן"><span class="pgrab"></span><b>הוספה ליומן</b><small>${esc(list[0].name)}${many?` · ${list.length} מועדים`:""}</small>
+    <button data-cv="outlook"><span class="ci ol">O</span><span><b>Outlook</b><small>${many?"נפתח מועד אחד בכל פעם":"היומן של SCE – נפתח עם כל הפרטים"}</small></span></button>
+    <button data-cv="google"><span class="ci gg">G</span><span><b>Google Calendar</b><small>${many?"נפתח מועד אחד בכל פעם":"נפתח עם כל הפרטים"}</small></span></button>
+    <button data-cv="ics"><span class="ci ic">📅</span><span><b>קובץ ליומן</b><small>${many?"כל המועדים בקובץ אחד":"לפתיחה ביומן האייפון או במחשב"}</small></span></button>
+    <button class="cx" data-cv="x">ביטול</button></div>`;
+  document.body.appendChild(o);const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),240)};let i=0;
+  o.addEventListener("click",e=>{if(e.target===o)return close();const b=e.target.closest("[data-cv]");if(!b)return;const v=b.dataset.cv;
+    if(v==="x")return close();if(v==="ics"){close();icsOut(list);return}
+    const x=list[Math.min(i,list.length-1)];window.open(v==="outlook"?outlookUrl(x):googleUrl(x),"_blank","noopener");
+    if(many&&++i<list.length){b.querySelector("small").textContent=`נפתח ${i} מתוך ${list.length} – לחצו שוב למועד הבא (${dK(list[i].date)})`;return}close()})}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-ical]");if(!b)return;e.stopPropagation();const[k,id]=b.dataset.ical.split("|");
   const r=(S[k]||[]).find(x=>x.id===id);if(r)addToCal([r])},true);
 /* jump to one item in its own list, and flash it */
