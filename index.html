@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" id="vp" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" id="vp" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#E9EFE5">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07090A">
 <meta name="color-scheme" content="light dark">
@@ -81,7 +81,9 @@ table.sh .slot.pressed,.cst.pressed{filter:brightness(.88)}
 @media (prefers-reduced-motion:reduce){.tabs,.tabs::before,.tabs .ti,.tabs .ts{transition:none!important}.panel.peek{animation:none}}
 @media (prefers-reduced-motion:reduce){button,a.btn,.pop,.toast,.tools .badge{transition:opacity 150ms ease}button:active,a.btn:active{transform:none}}
 /* inputs at 16px on touch screens so iOS doesn't zoom the page on focus */
-@media (pointer:coarse){input,select,textarea,.psel,.pop .pn input{font-size:16px}}
+@media (pointer:coarse){input,select,textarea,.psel,.pop .pn input{font-size:16px}
+  /* typing fields: one size everywhere, so the focus zoom is always the same gentle ×1.14 and lands on the field */
+  :is(input:not([type=checkbox],[type=radio],[type=date],[type=time],[type=range],[type=color],[type=button],[type=submit],[type=file]),textarea){font-size:14px!important}}
 [hidden]{display:none!important}
 .nojs{background:#FFF4D6;color:#5A3E00;border-bottom:2px solid #E0B44A;padding:14px 16px;font-size:16px;line-height:1.6}
 /* action bar */
@@ -2054,7 +2056,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 17:35";
+const APP_VER="22.10.2026 17:50";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3011,7 +3013,7 @@ let CMB_TOUCH=false;
   bar.addEventListener("pointerup",end);bar.addEventListener("pointercancel",end);
   bar.addEventListener("click",e=>{if(skipClick){e.stopPropagation();e.preventDefault()}},true)}
 /* tab bar: compact on scroll down, full on scroll up / near the top; hidden while the keyboard is up */
-{let y0=scrollY,acc=0;addEventListener("scroll",()=>{const y=scrollY,dy=y-y0;y0=y;acc=(Math.sign(dy)===Math.sign(acc)?acc:0)+dy;
+{let y0=scrollY,acc=0;addEventListener("scroll",()=>{const y=scrollY,dy=y-y0;y0=y;if(document.body.classList.contains("typing")){acc=0;return}acc=(Math.sign(dy)===Math.sign(acc)?acc:0)+dy;
     const t=$(".tabs"),m=$(".minibar");if(y<40||acc<-24){t.classList.remove("mini");m&&m.classList.remove("mini")}else if(acc>24){t.classList.add("mini");m&&m.classList.add("mini")}},{passive:true});
   const isField=el=>el&&(el.tagName==="TEXTAREA"||(el.tagName==="INPUT"&&!["checkbox","radio","button","date"].includes(el.type)));
   /* the dock is hidden ONLY while the on-screen keyboard is really up, and only while a sheet that replaces it is really open.
@@ -3032,6 +3034,24 @@ let CMB_TOUCH=false;
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout(dockGuard,120)});
   document.addEventListener("touchend",()=>setTimeout(dockGuard,400),{passive:true});
   setInterval(dockGuard,1000)}
+/* typing on the phone: iOS zooms to the field; once the keyboard and zoom settle we centre the field exactly in what is visible,
+   and when typing ends the page returns to its normal scale. Scroll-driven UI (compact dock, floating buttons) pauses meanwhile. */
+{const coarse=matchMedia("(pointer:coarse)").matches,vv=window.visualViewport,vp=document.getElementById("vp");
+  const typing=el=>el&&el.isConnected&&(el.tagName==="TEXTAREA"||(el.tagName==="INPUT"&&!["checkbox","radio","date","time","range","color","button","submit","file"].includes(el.type)));
+  let settle=0,anim=0,unz=0;
+  const centre=()=>{const el=document.activeElement;if(!typing(el)||!vv)return;const r=el.getBoundingClientRect();
+    /* rect is in layout px; the visible area is vv (offsetTop / height, in layout px when zoomed) */
+    const fieldMid=r.top+r.height/2,visMid=vv.offsetTop+vv.height/2,dy=fieldMid-visMid;
+    if(Math.abs(dy)<8)return;cancelAnimationFrame(anim);const y0=scrollY,t0=performance.now(),D=320;
+    const step=now=>{const t=Math.min(1,(now-t0)/D),e=1-Math.pow(1-t,3);scrollTo(scrollX,y0+dy*e);if(t<1)anim=requestAnimationFrame(step)};anim=requestAnimationFrame(step)};
+  const later=()=>{clearTimeout(settle);settle=setTimeout(centre,260)};
+  if(coarse){
+    document.addEventListener("focusin",e=>{if(!typing(e.target))return;clearTimeout(unz);document.body.classList.add("typing");later()});
+    if(vv){vv.addEventListener("resize",()=>{if(document.body.classList.contains("typing"))later()})}
+    document.addEventListener("focusout",()=>{setTimeout(()=>{if(typing(document.activeElement))return;document.body.classList.remove("typing");cancelAnimationFrame(anim);
+      /* back to normal scale: briefly cap the zoom at 1 (iOS animates the zoom-out), then allow pinch-zoom again */
+      if(vp&&vv&&vv.scale>1.01){const c=vp.getAttribute("content").replace(/,\s*maximum-scale=[\d.]+/,"");vp.setAttribute("content",c+",maximum-scale=1");unz=setTimeout(()=>vp.setAttribute("content",c),450)}},90)})}
+}
 /* visible press feedback on touch screens (see .pressed in CSS) */
 {const SEL="button,a.btn,summary,.cst";let el=null,t0=0;
   const off=()=>{const x=el;el=null;if(!x)return;setTimeout(()=>x.classList.remove("pressed"),Math.max(0,120-(performance.now()-t0)))};
@@ -3621,7 +3641,7 @@ function fabMorph(btn,fab,on){const reduce=matchMedia("(prefers-reduced-motion:r
   fab._anim={cancel:()=>{if(done)return;done=true;cancelAnimationFrame(raf);g.remove();btn.style.visibility="";fab.classList.remove("hold","snap");fab._anim=null}};
   frame(t0);haptic()}
 function fabWatch(fab,getBtn,act){FABS.push({fab,getBtn});let state=false,cur=null;
-  const sync=()=>{const b=getBtn();let on=false;if(b&&b.offsetParent){const r=b.getBoundingClientRect();on=state?r.top<76:r.bottom<62}
+  const sync=()=>{if(document.body.classList.contains("typing"))return;const b=getBtn();let on=false;if(b&&b.offsetParent){const r=b.getBoundingClientRect();on=state?r.top<76:r.bottom<62}
     if(b)cur=b;if(on!==state||(on&&fab.dataset.k!==(b&&b.dataset.xadd))){const was=state;state=on;if(b&&b.dataset.xadd){fab.dataset.k=b.dataset.xadd;fab.setAttribute("aria-label",b.dataset.xadd==="exams"?"הוסף מבחן":"הוסף אירוע");fab.title=fab.getAttribute("aria-label")}
       if(was!==on)fabMorph(cur||b,fab,on)}};
   let raf=0;const q=()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;sync()})};
