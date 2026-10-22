@@ -1418,6 +1418,32 @@ tr.flash,tr.flash td{animation:flashrow 1.8s ease}
 .pseg{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pseg button{font-weight:700}.pseg button[aria-pressed="true"]{background:var(--accent)!important;color:var(--accent-ink)}
 .pact{display:flex;gap:8px;justify-content:flex-start;flex-wrap:wrap}
 @media (max-width:700px){.pastebox{place-items:end center;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}}
+
+/* growing text boxes */
+textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height:1.4;font:inherit;padding:8px 10px}
+/* "thinking" glow (Apple-Intelligence style): a soft multicolour light runs around the card while details are detected */
+@property --pa{syntax:"<angle>";inherits:false;initial-value:0deg}
+.pcard{position:relative;isolation:isolate}
+.pcard::before,.pcard::after{content:"";position:absolute;inset:0;border-radius:28px;padding:2.5px;opacity:0;pointer-events:none;z-index:2;
+  background:conic-gradient(from var(--pa),#FF9F0A,#FF375F,#BF5AF2,#5E5CE6,#64D2FF,#30D158,#FF9F0A);transition:opacity 400ms ease;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.pcard::after{padding:10px;filter:blur(10px)}
+.pcard>*{position:relative}
+.pcard{background-clip:padding-box}
+.pcard.thinking::before,.pcard.thinking::after{opacity:1;animation:pspin 1.6s linear infinite}
+.pcard.thinking::after{opacity:.7}
+.pcard.done::before{opacity:0}.pcard.done::after{opacity:0}
+@keyframes pspin{to{--pa:360deg}}
+.pcard.thinking .ptx{animation:pbreathe 900ms ease-in-out infinite alternate}
+@keyframes pbreathe{to{opacity:.55;filter:blur(.6px)}}
+.pthink{font-weight:700;background:linear-gradient(90deg,var(--muted) 0%,var(--ink) 40%,var(--muted) 80%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pshimmer 1.2s linear infinite;padding:8px 2px}
+@keyframes pshimmer{to{background-position:-200% 0}}
+.pform .rev{animation:prev 520ms cubic-bezier(.3,1.2,.45,1) both}
+@keyframes prev{from{opacity:0;transform:translateY(10px);filter:blur(6px)}}
+.pform .pgot :is(input,select,textarea){box-shadow:0 0 0 1.5px color-mix(in srgb,#BF5AF2 45%,transparent),0 0 14px color-mix(in srgb,#5E5CE6 25%,transparent)!important;transition:box-shadow 1.4s ease}
+.pcard:not(.done) .pform .pgot :is(input,select,textarea){box-shadow:inset 0 0 0 .5px var(--g-line,var(--line))!important}
+.pcard.done .pform .pgot :is(input,select,textarea){box-shadow:0 0 0 1.5px color-mix(in srgb,#BF5AF2 45%,transparent),0 0 14px color-mix(in srgb,#5E5CE6 25%,transparent)!important}
+@media (prefers-reduced-motion:reduce){.pcard.thinking::before,.pcard.thinking::after,.pthink,.pform .rev,.pcard.thinking .ptx{animation:none}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1672,7 +1698,7 @@ tr.flash,tr.flash td{animation:flashrow 1.8s ease}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 06:00";
+const APP_VER="22.10.2026 06:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2259,7 +2285,7 @@ function render(){
    $("#msgs").innerHTML=h;const d=$("#msgs .msgok");if(d)d.addEventListener("toggle",()=>{MSG_OPEN=d.open})}
   fitCells($("#sheet"));
   renderSync();renderAgenda(w);
-  renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderCalOv();renderEvWeek();renderStaff();renderSettings();renderMsgs();
+  renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderCalOv();renderEvWeek();requestAnimationFrame(()=>document.querySelectorAll("textarea.grow").forEach(t=>{t.style.height="auto";t.style.height=t.scrollHeight+"px"}));renderStaff();renderSettings();renderMsgs();
 }
 
 /* ---------- WhatsApp messages ---------- */
@@ -2436,7 +2462,7 @@ let EV_KEEP=false;const XOPEN=new Set();
 function renderEv(){
   fillLists();{const t=key(new Date()),up=a=>a.filter(x=>!x.date||x.date>=t).length;
     $("#exN").textContent=up(S.exams)||"";$("#evN").textContent=up(S.events)||"";$("#ecN").textContent=S.examCat.length||""}
-  if(EV_KEEP)return;const a=document.activeElement;if(a&&a.closest&&a.closest("#tab-ev")&&a.type==="text"&&!a.classList.contains("dtx"))return;
+  if(EV_KEEP)return;const a=document.activeElement;if(a&&a.closest&&a.closest("#tab-ev")&&(a.type==="text"||a.tagName==="TEXTAREA")&&!a.classList.contains("dtx"))return;
   const today=key(new Date());
   Object.entries(XT).forEach(([kind,cfg])=>{
     const list=kind==="examCat"?S[kind].slice().sort((x,y)=>(!x.name)-(!y.name)||HE.compare(x.name||"",y.name||"")):S[kind].slice().sort((x,y)=>(x.date||"9").localeCompare(y.date||"9")||(x.time||"").localeCompare(y.time||"")||HE.compare(x.name||"",y.name||""));
@@ -2446,6 +2472,7 @@ function renderEv(){
       if(t==="d")return `<td data-l="${l}">${dateField(at,v,l)}</td>`;
       if(t==="c")return `<td data-l="${l}"><select ${at} aria-label="${l}"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v?"selected":""}>${esc(c)}</option>`).join("")}</select></td>`;
       if(dl)return `<td data-l="${l}"><div class="cmb"><input type="text" ${at} value="${esc(v)}" aria-label="${l}" data-dl="${dl}" autocomplete="off" enterkeyhint="done"${f==="name"?` placeholder="${l} – לחצו לבחירה"`:""}><button type="button" class="cmb-b" data-cmb tabindex="-1" aria-label="פתיחת רשימת ${l}">▾</button></div></td>`;
+      if(f==="needs")return `<td data-l="${l}"><textarea class="grow" rows="1" ${at} aria-label="${l}">${esc(v)}</textarea></td>`;
       return `<td data-l="${l}"><input type="text" ${at} value="${esc(v)}" aria-label="${l}"${t==="h"?' placeholder="שעה" dir="ltr"':f==="name"?` placeholder="${l}"`:""}></td>`};
     $(cfg.tbl).innerHTML=`<thead><tr>${cfg.cols.map(c=>`<th>${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>`+
       (list.length?list.map(r=>{const open=XOPEN.has(r.id),sum=cfg.det?[r.software,r.lecturer,r.notes].filter(Boolean).join(" · "):"";
@@ -2644,42 +2671,62 @@ function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎�
   let m=t.match(/(\d{1,2}:\d{2})\s*(?:-|–|—|עד|to)\s*(\d{1,2}:\d{2})/);if(m)r.time=tm(m[1])+"-"+tm(m[2]);
   else if((m=t.match(/(?:בשעה|שעה|ב-?)\s*(\d{1,2}:\d{2})/))||(m=t.match(/(\d{1,2}:\d{2})/)))r.time=tm(m[1]);
   /* campus */
-  const zb=/בוטינסקי|אשדוד/.test(t),bb=/בני\s*ברית|באר\s*שבע|ב"ש|ביאליק/.test(t);r.campus=zb&&bb?"שניהם":zb?"ז'בוטינסקי":bb?"בני ברית":"";
+  const zb=/ב?וטינסקי|ז['׳]?בו|אשדוד/.test(t),bb=/בני[\s\-־]*ברית|באר[\s\-־]*שבע|ב["״]ש|ביאליק/.test(t);r.campus=zb&&bb?"שניהם":zb?"ז'בוטינסקי":bb?"בני ברית":"";
   /* rooms: "חדר 110", "כיתה 205", "אולמות 110, 112" */
   if((m=t.match(/(?:חדר|חדרים|כיתה|כיתות|אולם|אולמות|room)\s*[:\-]?\s*(\d{2,4}(?:\s*(?:,|ו-?|\/|-)\s*\d{2,4})*)/i)))r.room=m[1].split(/\s*(?:,|ו-?|\/|-)\s*/).filter(Boolean).join(", ");
+  /* a named place instead of a room number: מרכז למידה, ספרייה, אודיטוריום, רחבה… */
+  else if((m=t.match(/(?:^|[\s(])ב?(?:ה)?(מרכז\s+(?:ה)?[א-ת]+|ספרי[יה]+|אודיטוריום|רחבה|לובי|קפיטריה|מעבדת?\s+[א-ת0-9]+|חדר\s+ישיבות(?:\s+[א-ת]+)?|אולם\s+[א-ת]+|בניין\s+\d+)/)))r.room=m[1].replace(/^ה/,"");
   /* name: the subject line, cleaned */
-  const lines=t.split("\n").map(x=>x.trim()).filter(Boolean);
-  let subj=(lines.find(x=>/^(נושא|subject)\s*:/i.test(x))||"").replace(/^(נושא|subject)\s*:\s*/i,"")||lines[0]||"";
+  const GREET=/^(היי|הי|שלום|אהלן|בוקר טוב|ערב טוב|צהריים טובים|hi|hello|dear|לכבוד|שלום רב|היי לכולם)[\s,!.:]*$/i,
+        BYE=/^(תודה|תודה רבה|בברכה|בתודה|שבוע טוב|יום טוב|regards|thanks)[\s,!.]*/i;
+  const raw=t.split("\n").map(x=>x.trim()).filter(Boolean);
+  const lines=raw.map(x=>x.replace(/^(היי|הי|שלום|אהלן|בוקר טוב)[\s,!]+/,"")).filter(x=>x&&!GREET.test(x));
+  const body=[];for(const x of lines){if(BYE.test(x))break;body.push(x)}
+  /* an event's name is usually a known phrase: יום פתוח, כנס…, טקס…, הפנינג… */
+  const KNOWN=/(יום\s+פתוח[^,.\n]*?|יום\s+(?:עיון|הסברה|ספורט|כיף|גיבוש)[^,.\n]*?|כנס[^,.\n]*?|טקס[^,.\n]*?|הפנינג[^,.\n]*?|סדנ[הת][^,.\n]*?|הרצא[הת][^,.\n]*?|השתלמות[^,.\n]*?|הגנות[^,.\n]*?|מפגש[^,.\n]*?|ישיב[הת][^,.\n]*?|אירוע\s+[^,.\n]*?|ערב\s+[^,.\n]*?)(?=\s+(?:שי|ש|אשר)?יתקיים|\s+יהיה|\s+ב-?\d|\s+בתאריך|\s+ביום|\s+במרכז|\s+בבני|\s+בז|\s+בקמפוס|\s+בחדר|\s+באולם|[,.\n]|$)/;
+  const subjRaw=raw.find(x=>/^(נושא|subject)\s*:/i.test(x))||(/^(fw|fwd|re|הועבר|השב)\s*:/i.test(raw[0]||"")?raw[0]:"");
+  const subjLine=subjRaw.replace(/^(נושא|subject)\s*:\s*/i,"");
+  const km=(subjLine||body.join("\n")).match(KNOWN)||body.join("\n").match(KNOWN);
+  let subj=subjLine||(km?km[1]:"")||(body[0]||"").split(/[,.]/)[0];
+  if(subjLine&&!/^(fw|fwd|re)/i.test(subjRaw)&&km&&subjLine.length>45)subj=km[1];   /* a long "נושא:" line: keep the event phrase */
   subj=subj.replace(/^((fw|fwd|re|הועבר|השב|הזמנה|accepted|מאושר)\s*:\s*)+/ig,"").replace(/\s*ב?-?\d{1,2}[.\/]\d{1,2}(?:[.\/]\d{2,4})?/g,"").replace(/\s{2,}/g," ").replace(/\s*[-|–]\s*$/,"").trim();
   /* exam from the bank (longest name found), else the words מבחן/בחינה */
   const bank=(S.examCat||[]).filter(c=>c.name&&t.includes(c.name.trim())).sort((a,b)=>b.name.length-a.name.length)[0];
   r.kind=bank||/מבחן|בחינה|בוחן|מועד\s*[אב]/.test(t)?"exams":"events";
   r.name=bank?bank.name.trim():subj.slice(0,80);
-  if(r.kind==="events"){const need=lines.filter(x=>/מחשב|מקרן|רמקול|מיקרופון|זום|zoom|הקלטה|צילום|ציוד|הגברה|מסך|טוש|לפטופ|מצגת/i.test(x)&&x!==lines[0]).join(" · ");if(need)r.needs=need.slice(0,200)}
+  /* everything you wrote (minus greeting / sign-off) becomes the notes, one sentence per line */
+  const notes=body.filter(x=>x!==subjRaw&&x!==subjLine).join("\n").split(/(?<=[.!?])\s+|\n/).map(x=>x.trim()).filter(Boolean).join("\n");
+  if(notes)r[r.kind==="events"?"needs":"notes"]=notes.slice(0,600);
   return r}
 function openPaste(){const o=document.createElement("div");o.className="pastebox";
   o.innerHTML=`<div class="pcard" role="dialog" aria-label="הדבקה ממייל"><div class="ph2"><b>📋 הדבקה ממייל</b><button data-px aria-label="סגור">✕</button></div>
     <p class="hint">מעתיקים את המייל (נושא + תוכן) ומדביקים כאן. הכלי מזהה תאריך, שעה, קמפוס, כיתה ומבחן מהמאגר. בודקים, מתקנים אם צריך, ומוסיפים.</p>
     <textarea class="ptx" rows="6" placeholder="הדביקו כאן את המייל…"></textarea>
     <div class="pform" hidden></div>
-    <div class="row pact"><button class="primary" data-pgo>זיהוי</button></div></div>`;
+    <div class="row pact"><button class="primary" data-pgo>✨ זיהוי</button></div></div>`;
   document.body.appendChild(o);const ta=o.querySelector(".ptx"),f=o.querySelector(".pform");setTimeout(()=>ta.focus(),50);
   const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),240)};
   const show=r=>{f.hidden=false;const kind=r.kind;
     f.innerHTML=`<div class="pseg"><button data-pk="exams" aria-pressed="${kind==="exams"}">📝 מבחן</button><button data-pk="events" aria-pressed="${kind==="events"}">📅 אירוע</button></div>
       <label>שם<input type="text" data-pf="name" value="${esc(r.name||"")}"></label>
       <div class="p2"><label>תאריך<input type="date" data-pf="date" value="${esc(r.date||"")}"></label><label>שעה<input type="text" data-pf="time" value="${esc(r.time||"")}" placeholder="10:00 או 10:00-12:00"></label></div>
-      <div class="p2"><label>קמפוס<select data-pf="campus"><option value=""></option>${CAMPUS.map(c=>`<option ${c===r.campus?"selected":""}>${esc(c)}</option>`).join("")}</select></label><label>כיתה<input type="text" data-pf="room" value="${esc(r.room||"")}"></label></div>
-      <label data-only="events" ${kind==="events"?"":"hidden"}>צרכים והיערכות<input type="text" data-pf="needs" value="${esc(r.needs||"")}"></label>`;
-    o.querySelector(".pact").innerHTML=`<button data-pgo>זיהוי מחדש</button><button class="primary" data-padd>הוסף</button>`};
+      <div class="p2"><label>קמפוס<select data-pf="campus"><option value=""></option>${CAMPUS.map(c=>`<option ${c===r.campus?"selected":""}>${esc(c)}</option>`).join("")}</select></label><label>מקום / כיתה<input type="text" data-pf="room" value="${esc(r.room||"")}"></label></div>
+      <label>הערות / צרכים והיערכות<textarea class="grow" rows="2" data-pf="needs">${esc(r.needs||r.notes||"")}</textarea></label>`;
+    f.querySelectorAll("textarea.grow").forEach(x=>{x.style.height="auto";x.style.height=x.scrollHeight+"px"});
+    /* reveal: each detected field fades up in turn, filled ones glow */
+    [...f.children].forEach((el,i)=>{el.style.animationDelay=(i*70)+"ms";el.classList.add("rev");const inp=el.querySelector("input,select,textarea");if(inp&&inp.value)el.classList.add("pgot")});
+    o.querySelector(".pact").innerHTML=`<button data-pgo>✨ זיהוי מחדש</button><button class="primary" data-padd>הוסף</button>`};
   o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-px]")){close();return}
-    if(e.target.closest("[data-pgo]")){const r=parseMail(ta.value);if(!ta.value.trim()){toast("הדביקו קודם את המייל");return}show(r);haptic();return}
-    const k=e.target.closest("[data-pk]");if(k){f.querySelectorAll("[data-pk]").forEach(b=>b.setAttribute("aria-pressed",b===k));f.querySelector('[data-only="events"]').hidden=k.dataset.pk!=="events";return}
+    if(e.target.closest("[data-pgo]")){if(!ta.value.trim()){toast("הדביקו קודם את המייל");return}const r=parseMail(ta.value),card=o.querySelector(".pcard");
+      card.classList.add("thinking");f.hidden=true;o.querySelector(".pact").innerHTML=`<span class="pthink">מזהה פרטים…</span>`;haptic();
+      setTimeout(()=>{card.classList.remove("thinking");card.classList.add("done");show(r);setTimeout(()=>card.classList.remove("done"),1400)},matchMedia("(prefers-reduced-motion:reduce)").matches?0:900);return}
+    const k=e.target.closest("[data-pk]");if(k){f.querySelectorAll("[data-pk]").forEach(b=>b.setAttribute("aria-pressed",b===k));return}
     if(e.target.closest("[data-padd]")){const kind=f.querySelector('[data-pk][aria-pressed="true"]').dataset.pk,v=n=>(f.querySelector(`[data-pf="${n}"]`)||{}).value||"";
       const rec={id:uid(),date:v("date")||cur,name:v("name").trim(),time:v("time").trim(),campus:v("campus"),room:v("room").trim()};
       if(!rec.name){toast("חסר שם");return}
       if(kind==="exams"){applyCat(rec);if(v("room").trim())rec.room=v("room").trim();if(v("campus"))rec.campus=v("campus");if(v("time").trim())rec.time=v("time").trim();S.exams.push(rec);learnExam(rec)}
       else{rec.needs=v("needs").trim();applyEvent(rec);S.events.push(rec)}
+      if(kind==="exams"&&v("needs").trim())rec.notes=v("needs").trim();
       changed();render();close();toast((kind==="exams"?"המבחן":"האירוע")+" נוסף");setTimeout(()=>goItem(kind,rec.id),260)}});
   document.addEventListener("keydown",function k(e){if(e.key==="Escape"&&document.body.contains(o)){close();document.removeEventListener("keydown",k)}})}
 document.addEventListener("click",e=>{if(e.target.closest("[data-paste]"))openPaste()});
@@ -2998,7 +3045,8 @@ document.addEventListener("input",e=>{
   if(t.dataset.sname){const s=S.sites.find(x=>x.id===t.dataset.sname);if(s){s.name=t.value;changed(true)}}
   if(t.dataset.req){const[sid,sh,d]=t.dataset.req.split("|");const s=S.sites.find(x=>x.id===sid);if(s){s.req[sh]=s.req[sh]||DAYS.map(()=>0);s.req[sh][+d]=Math.max(0,Math.min(6,parseInt(t.value)||0));changed(true)}}
   if(t.id==="targetN"){S.target=Math.max(0,Math.min(6,parseInt(t.value)||0));changed(true)}
-  if(t.dataset.xf&&t.type==="text"&&!t.classList.contains("dtx")){const[k,id,f]=t.dataset.xf.split("|"),r=S[k].find(x=>x.id===id);if(r){r[f]=t.value;changed(true)}}
+  if(t.classList&&t.classList.contains("grow")){t.style.height="auto";t.style.height=t.scrollHeight+"px"}
+  if(t.dataset.xf&&(t.type==="text"||t.tagName==="TEXTAREA")&&!t.classList.contains("dtx")){const[k,id,f]=t.dataset.xf.split("|"),r=S[k].find(x=>x.id===id);if(r){r[f]=t.value;changed(true)}}
   if(t.dataset.vf&&t.type==="text"&&!t.classList.contains("dtx")){const[id,f]=t.dataset.vf.split("|"),v=S.vac.find(x=>x.id===id);if(v){v[f]=t.value;changed(true)}}
   if(t.dataset.hf&&t.type==="text"&&!t.classList.contains("dtx")){const[id,f]=t.dataset.hf.split("|"),h=S.holidays.find(x=>x.id===id);if(h){h[f]=t.value;changed(true)}}
   if(t.id==="lblM"){S.shiftLbl.m=t.value;changed(true)} if(t.id==="lblE"){S.shiftLbl.e=t.value;changed(true)} if(t.id==="h19Eve"){S.h19Eve=t.value.trim();changed(true)} if(t.id==="sheetTitle"){S.title=t.value;changed(true)}
@@ -3008,7 +3056,7 @@ document.addEventListener("change",e=>{
   if(t.dataset.cov){const[sid,sh]=t.dataset.cov.split("|");S.cover[sid]=S.cover[sid]||{m:0,e:0};S.cover[sid][sh]=Math.max(0,Math.min(5,parseInt(t.value)||0));changed();render()}
   if(t.dataset.pref){const[sid,d]=t.dataset.pref.split("|"),w=W();w.pref[sid]=w.pref[sid]||DAYS.map(()=>null);const[e,sh]=(t.value||"|").split("|");w.pref[sid][+d]=e?{e,sh}:null;changed();render()}
   if(t.dataset.rsel){const[sid,i]=t.dataset.rsel.split("|"),r=S.friRule[sid];if(r){r.list[+i]=t.value;changed();render()}}
-  if(t.dataset.xf){const[k,id,f]=t.dataset.xf.split("|"),r=S[k].find(x=>x.id===id);if(r){let txt=t.type==="text"&&!t.classList.contains("dtx");r[f]=txt?t.value.trim():t.classList.contains("dtx")?t.dataset.iso:t.value;
+  if(t.dataset.xf){const[k,id,f]=t.dataset.xf.split("|"),r=S[k].find(x=>x.id===id);if(r){let txt=(t.type==="text"||t.tagName==="TEXTAREA")&&!t.classList.contains("dtx");r[f]=txt?t.value.trim():t.classList.contains("dtx")?t.dataset.iso:t.value;
     if(k==="exams"&&f==="name"){
       /* switched to another exam from the bank: replace its details instead of keeping the previous exam's */
       if(t.defaultValue&&t.defaultValue.trim()!==r.name&&S.examCat.some(c=>c.name.trim()===r.name)){["software","lecturer","campus","time","notes"].forEach(x=>r[x]="")}
