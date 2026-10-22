@@ -1808,6 +1808,12 @@ td.c-range{display:none}
 .rchip.fresh button{color:var(--accent-ink)!important;background:rgba(255,255,255,.2)!important}
 .rchip.fresh{background:var(--accent)!important;color:var(--accent-ink);animation:freshchip 1.4s var(--ease-out) both}
 @keyframes freshchip{0%{transform:scale(.6);opacity:0}25%{transform:scale(1.12);opacity:1}45%{transform:none}}
+
+.ag-it{display:inline-flex;align-items:center;gap:4px;background:#FFF8E1;border:1px solid #E9D48F;border-radius:8px;padding:2px 3px 2px 3px;padding-inline-start:8px}
+.ag-it .lk{background:none!important;border:0!important;padding:0!important}
+.ag-it .wab{width:30px;height:30px;border-radius:7px}.ag-it .wab svg{width:17px;height:17px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ag-it{background:#2E2A1C;border-color:#5A4E2A}}
+:root[data-theme="dark"] .ag-it{background:#2E2A1C;border-color:#5A4E2A}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -2068,7 +2074,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 18:15";
+const APP_VER="22.10.2026 18:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2379,7 +2385,7 @@ function renderAgenda(w){
   $("#agendaTitle").textContent="הערות ואירועים "+weekSpan();
   $("#agendaBox").hidden=!days.length;if(!days.length){$("#agenda").innerHTML="";return}
   $("#agenda").innerHTML=days.map(({dn,d,sites})=>`<div class="ag-day"><div class="ag-h"><b>${dn}</b> <span>${dot(dayDate(d))}</span></div>`+
-    sites.map(({s,lines})=>{const its=dayItemObjs(dayDate(d),s.id);return `<div class="ag-site"><div class="ag-n">${esc(s.name)}</div><div class="ag-l">${lines.map(l=>{const it=its.find(x=>x.text===l);return it?`<span class="lk" data-goto="${it.kind}|${it.id}">${esc(l)}</span>`:`<span>${esc(l)}</span>`}).join("")}</div>
+    sites.map(({s,lines})=>{const its=dayItemObjs(dayDate(d),s.id);return `<div class="ag-site"><div class="ag-n">${esc(s.name)}</div><div class="ag-l">${lines.map(l=>{const it=its.find(x=>x.text===l);return it?`<span class="ag-it"><span class="lk" data-goto="${it.kind}|${it.id}">${esc(l)}</span>${waBtn(`data-xwa="${it.kind}|${it.id}|${s.id}|${d}"`,"שליחת תזכורת בוואטסאפ: "+l)}</span>`:`<span>${esc(l)}</span>`}).join("")}</div>
       <div class="ag-p">${dm(d).off?"":`<span>⭐</span>${prefSel(w,s.id,d)}`}</div></div>`}).join("")+`</div>`).join("")}
 function prefSel(w,sid,d){const p=(w.pref[sid]||[])[d],v=p?p.e+"|"+p.sh:"",ok=p&&(!hasAssign(w)||(w.assign[sid]?.[p.sh]?.[d]||[]).includes(p.e));   /* red only once a schedule exists and it wasn't honoured */
   return `<select class="psel${p?(ok?" ok":" no"):""}" data-pref="${sid}|${d}" aria-label="טכנאי מועדף ${DAYS[d]}"><option value="">—</option>${activeEmps().map(e=>["m","e"].map(sh=>`<option value="${e.id}|${sh}" ${v===e.id+"|"+sh?"selected":""}>${esc(e.name)} – ${sh==="m"?"בוקר":"ערב"}</option>`).join("")).join("")}</select>`}
@@ -3269,7 +3275,7 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
       else{rec.needs=v("needs").trim();applyEvent(rec);S.events.push(rec)}
       if(kind==="exams"&&v("needs").trim())rec.notes=v("needs").trim()});
       if(alsoCal){const made=(kind==="exams"?S.exams:S.events).filter(x=>dates.includes(x.date)&&x.name===v("name").trim());setTimeout(()=>addToCal(made),300)}
-      changed();render();close();toast(dates.length>1?`נוספו ${dates.length} ${kind==="exams"?"מבחנים":"אירועים"}`:(kind==="exams"?"המבחן":"האירוע")+" נוסף");
+      changed();render();close();if(dates.includes(key(new Date())))setTimeout(maybeToday,600);toast(dates.length>1?`נוספו ${dates.length} ${kind==="exams"?"מבחנים":"אירועים"}`:(kind==="exams"?"המבחן":"האירוע")+" נוסף");
       const first=(kind==="exams"?S.exams:S.events).filter(x=>dates.includes(x.date)&&x.name===v("name").trim()).sort((a,b)=>a.date.localeCompare(b.date))[0];setTimeout(()=>goItem(kind,(first||rec).id),260)}});
   document.addEventListener("keydown",function k(e){if(e.key==="Escape"&&document.body.contains(o)){close();document.removeEventListener("keydown",k)}})}
 document.addEventListener("click",e=>{if(e.target.closest("[data-paste]"))openPaste()});
@@ -3343,14 +3349,16 @@ function openRooms(sid){const site=S.sites.find(x=>x.id===sid);if(!site)return;
 function todayItems(){const k=key(new Date());return [...(S.exams||[]).map(x=>({...x,kind:"exams"})),...(S.events||[]).map(x=>({...x,kind:"events"}))]
   .filter(x=>x.date===k&&x.name).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||HE.compare(a.name,b.name))}
 function todayCtx(fn){const keep=cur;cur=key(sundayOf(new Date()));try{return fn(new Date().getDay())}finally{cur=keep}}
+const tSig=x=>[x.name,x.time,x.campus,x.room,x.needs||"",x.notes||"",x.software||"",x.lecturer||""].join("¦");
 function tState(){let o={};try{o=JSON.parse(localStorage.getItem("today-state")||"{}")}catch(e){}if(o.date!==key(new Date()))o={date:key(new Date()),sent:{},snooze:""};return o}
 function tSave(o){try{localStorage.setItem("today-state",JSON.stringify(o))}catch(e){}}
 const hhmm=d=>String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
 var TODAY_T=0;
 function maybeToday(){clearTimeout(TODAY_T);TODAY_T=setTimeout(()=>{const now=new Date();
   if(now.getHours()<6||document.hidden||document.querySelector(".todaybox,.pastebox,.calsheet,.alertbox,.pop,.itembox,.roombox"))return;
-  const st=tState(),items=todayItems().filter(x=>!st.sent[x.id]);if(!items.length)return;
-  if(st.snooze&&hhmm(now)<st.snooze)return;
+  const st=tState(),items=todayItems().filter(x=>st.sent[x.id]!==tSig(x));if(!items.length)return;
+  const pend=items.map(x=>x.id+"="+tSig(x)).join("|");
+  if(st.snooze&&hhmm(now)<st.snooze&&st.snoozeFor===pend)return;
   if(st.snooze){st.snooze="";tSave(st)}
   openToday(todayItems())},700)}
 function openToday(all){const o=document.createElement("div");o.className="todaybox";const now=new Date(),st=tState();
@@ -3361,7 +3369,7 @@ function openToday(all){const o=document.createElement("div");o.className="today
     const det=[x.software?"💻 "+x.software:"",x.lecturer?"👤 "+x.lecturer:"",x.needs||x.notes?"🛠️ "+(x.needs||x.notes):""].filter(Boolean);
     return {x,duty,txt,det,part}}));
   const WA='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.6-.3z"/></svg>';
-  const sent=id=>!!tState().sent[id];
+  const sent=id=>{const x=all.find(y=>y.id===id);return !!x&&tState().sent[id]===tSig(x)};
   o.innerHTML=`<div class="tdc" role="dialog" aria-label="היום"><div class="tdsheen" aria-hidden="true"></div>
     <div class="tdh"><span class="tdd"><b>${now.getDate()}</b><small>${["ינו׳","פבר׳","מרץ","אפר׳","מאי","יוני","יולי","אוג׳","ספט׳","אוק׳","נוב׳","דצמ׳"][now.getMonth()]}</small></span>
       <span><b>היום יש ${itemsHead(all)}</b><small>יום ${DAYS[now.getDay()]||""}</small></span></div>
@@ -3382,7 +3390,7 @@ function openToday(all){const o=document.createElement("div");o.className="today
       <button type="button" class="tdlater" data-tdlater>עוד לא – תזכיר לי בפעם הבאה</button>`;
     foot.animate([{opacity:0,transform:"translateY(8px)"},{opacity:1,transform:"none"}],{duration:320,easing:EZ.out})};
   main();
-  const mark=(i,on)=>{const st=tState(),x=rows[i].x;if(on)st.sent[x.id]=1;else delete st.sent[x.id];tSave(st);
+  const mark=(i,on)=>{const st=tState(),x=rows[i].x;if(on)st.sent[x.id]=tSig(x);else delete st.sent[x.id];tSave(st);
     const r=o.querySelector(`[data-ti="${i}"]`),b=r.querySelector(".tdsent");r.classList.toggle("sent",on);b.setAttribute("aria-pressed",on);b.querySelector(".tsl").textContent=on?"נשלח":"סמן כנשלח";
     if(on)r.animate([{transform:"scale(1)"},{transform:"scale(.97)"},{transform:"scale(1)"}],{duration:300,easing:EZ.out});
     if(!foot.classList.contains("ask"))main();else if(!pendingN())close()};
@@ -3394,7 +3402,7 @@ function openToday(all){const o=document.createElement("div");o.className="today
     const sb=e.target.closest("[data-tdsent]");if(sb){const i=+sb.dataset.tdsent;mark(i,sb.getAttribute("aria-pressed")!=="true");haptic();return}
     if(e.target.closest("[data-tdyes]")){rows.forEach((r,i)=>{if(!sent(r.x.id))mark(i,true)});toast("סומן כנשלח");close();return}
     if(e.target.closest("[data-tdsnooze]")){const v=o.querySelector("[data-tdtime]").value;if(!v||v<=hhmm(new Date())){toast("בחרו שעה מאוחרת יותר היום");return}
-      const st=tState();st.snooze=v;tSave(st);toast("אזכיר לך שוב ב־"+v);close();return}
+      const st=tState();st.snooze=v;st.snoozeFor=all.filter(x=>st.sent[x.id]!==tSig(x)).map(x=>x.id+"="+tSig(x)).join("|");tSave(st);toast("אזכיר לך שוב ב־"+v);close();return}
     if(e.target.closest("[data-tdlater]")){close();return}});
   document.addEventListener("keydown",function k(e){if(e.key==="Escape"&&document.body.contains(o)){tryClose();if(!document.body.contains(o))document.removeEventListener("keydown",k)}})}
 /* when it comes back: opening the app (first data load), returning to the app, returning to the main screen, or the reminder time */
@@ -3446,7 +3454,8 @@ function openItemSheet(kind,id,seed){const isEx=kind==="exams",old=id?(S[kind]||
     if(e.target.closest("[data-isave]")){const v=n=>((q(n)||{}).value||"").trim();if(!v("name")){toast("חסר שם");q("name").focus();return}if(!v("date")){toast("חסר תאריך");return}
       const rec=old||{id:uid()};Object.assign(rec,{name:v("name"),date:v("date"),time:v("time"),campus,room:v("room")});
       if(isEx){rec.software=v("software");rec.lecturer=v("lecturer");rec.notes=v("notes")}else rec.needs=v("needs");
-      rowsFlip(()=>{if(!old){S[kind].push(rec)}if(isEx)learnExam(rec);XEDIT.delete(rec.id);changed();render()},rec.id);close();haptic();toast(old?"נשמר":(isEx?"המבחן נוסף":"האירוע נוסף"));if(!old)setTimeout(()=>goItem(kind,rec.id),260)}});
+      rowsFlip(()=>{if(!old){S[kind].push(rec)}if(isEx)learnExam(rec);XEDIT.delete(rec.id);changed();render()},rec.id);close();
+      if(rec.date===key(new Date()))setTimeout(maybeToday,450);haptic();toast(old?"נשמר":(isEx?"המבחן נוסף":"האירוע נוסף"));if(!old)setTimeout(()=>goItem(kind,rec.id),260)}});
   document.addEventListener("keydown",function k(e){if(e.key==="Escape"&&document.body.contains(o)){close();document.removeEventListener("keydown",k)}})}
 
 
@@ -3808,7 +3817,7 @@ document.addEventListener("click",e=>{
   if(xa){const k=xa.dataset.xadd,r=k==="examCat"?{id:uid(),name:""}:{id:uid(),date:key(new Date())>cur?key(new Date()):cur};XEDIT.add(r.id);rowsFlip(()=>{S[k].push(r);changed();render()});return}
   const xed=e.target.closest("[data-xedit]");
   if(xed){const row=xed.closest("table");const kk=row&&row.id==="exT"?"exams":row&&row.id==="evT"?"events":"";if(kk&&!XEDIT.has(xed.dataset.xedit)){openItemSheet(kk,xed.dataset.xedit);return}
-    const id=xed.dataset.xedit;haptic();rowsFlip(()=>{if(XEDIT.has(id)){XEDIT.delete(id);document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}else XEDIT.add(id);render()},id);return}
+    const id=xed.dataset.xedit;haptic();rowsFlip(()=>{if(XEDIT.has(id)){XEDIT.delete(id);setTimeout(maybeToday,450);document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}else XEDIT.add(id);render()},id);return}
   const xu=e.target.closest("[data-xuse]");
   if(xu){const c=S.examCat.find(x=>x.id===xu.dataset.xuse);if(c){const t={name:c.name};applyCat(t);openItemSheet("exams",null,t)}return}
   const xr=e.target.closest("[data-xroom]");
