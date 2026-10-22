@@ -2047,7 +2047,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 17:00";
+const APP_VER="22.10.2026 17:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2104,6 +2104,9 @@ function ensureData(){
   if((S.roomsVer||0)<2){S.roomsVer=2;const SEED={"bb": [["מעבדת מחשוב", ["205", "206", "216"]], ["מעבדת בניין", ["255"]], ["מעבדת מכונות", ["158", "159", "251", "256", "257"]], ["תקשורת חזותית (מק)", ["208"]], ["פודיום", ["359", "358", "357", "356", "353", "354", "193", "190", "187", "186", "181", "176", "128", "213", "212", "210", "207", "135", "134", "133", "131", "130", "127", "126", "114"]], ["מרכז למידה", ["מרכז למידה"]]], "zb": [["מעבדת מחשוב", ["124", "125", "140", "141", "144"]], ["מעבדת חשמל", ["112", "108", "103", "0001", "105", "104", "109"]], ["מעבדת פיזיקה", ["0002"]], ["פודיום", ["110", "131", "167", "168", "169", "170", "171", "173", "174", "1001", "1003", "1005", "1006", "1007", "1012", "1013", "1014", "1015", "1016", "2045", "2046"]], ["ספרייה", ["ספרייה"]]]};
     S.sites.forEach(s=>{const k=s.name.includes("בוטינסקי")?"zb":s.name.includes("בני ברית")?"bb":"";if(!k)return;const cur=S.rooms[s.id]||(S.rooms[s.id]=[]);
       SEED[k].forEach(([g,list])=>list.forEach(r=>{if(!cur.includes(r))cur.push(r);S.roomType[s.id+"|"+r]=g}))})}
+  /* auditoriums: ז'בוטינסקי 110, בני ברית 130 + 131 */
+  if((S.roomsVer||0)<3){S.roomsVer=3;S.sites.forEach(s=>{const l=s.name.includes("בוטינסקי")?["110"]:s.name.includes("בני ברית")?["130","131"]:[];
+    l.forEach(r=>{const cur=S.rooms[s.id]||(S.rooms[s.id]=[]);if(!cur.includes(r))cur.push(r);S.roomType[s.id+"|"+r]="אודיטוריום"})})}
   if(S.friVer!==2){S.friVer=2;S.friRule=defaultFri()}
   if(!S.friRule)S.friRule={};
   if(!S.bkVer&&S.employees.length)S.bkVer=1;
@@ -2396,11 +2399,15 @@ function itemChips(d,sid){return dayItemObjs(dayDate(d),sid).map(x=>`<span class
 function itemsHead(list){const ne=list.filter(x=>x.kind==="exams").length,nv=list.length-ne;
   const ex=ne>1?ne+" מבחנים":ne?"מבחן":"",ev=nv>1?nv+" אירועים":nv?"אירוע":"";return ex&&ev?`${ex} ו${nv>1?"־":""}${ev}`:ex||ev}
 /* "כיתה 124" / "כיתות 124, 125"; named places (מרכז למידה, ספרייה) as they are */
-function roomParts(room){const l=splitL(room);if(!l.length)return null;const num=l.every(x=>/^\d/.test(x));return {pre:num?(l.length>1?"כיתות":"כיתה"):"",list:l.join(", ")}}
-function roomLbl(room){const r=roomParts(room);return r?(r.pre?r.pre+" ":"")+r.list:""}
+/* the word before the numbers: auditoriums (by the campus' room list) are "אודיטוריום", the rest "כיתה" */
+function roomParts(room,campus){const l=splitL(room);if(!l.length)return null;const num=l.every(x=>/^\d/.test(x));if(!num)return {pre:"",list:l.join(", ")};
+  const sids=S.sites.filter(s=>campus?siteMatch(campus,s.id):true).map(s=>s.id);
+  const aud=l.every(r=>sids.some(id=>((S.rooms||{})[id]||[]).includes(r)&&roomG(id,r)==="אודיטוריום")&&(campus||!sids.some(id=>((S.rooms||{})[id]||[]).includes(r)&&roomG(id,r)!=="אודיטוריום")));
+  return {pre:aud?(l.length>1?"אודיטוריומים":"אודיטוריום"):(l.length>1?"כיתות":"כיתה"),list:l.join(", ")}}
+function roomLbl(room,campus){const r=roomParts(room,campus);return r?(r.pre?r.pre+" ":"")+r.list:""}
 function itemText(kind,id,sid,d,head=true){const r=(S[kind]||[]).find(x=>x.id===id);if(!r)return "";const w=W(),s=S.sites.find(x=>x.id===sid);
   const m=namesAt(w,sid,"m",d),e=namesAt(w,sid,"e",d),L=head?[`תזכורת ליום ${DAYS[d]} ${dot(dayDate(d))}:`]:[];
-  const place=`📍 ${s?s.name:""}${r.room?` | ${roomLbl(r.room)}`:""}`;
+  const place=`📍 ${s?s.name:""}${r.room?` | ${roomLbl(r.room,r.campus||(s&&s.name))}`:""}`;
   if(kind==="exams"){L.push(`📝 מבחן: ${r.name}${r.time?` | ${r.time}`:""}`);L.push(place);
     if(r.software)L.push(`💻 תוכנה: ${r.software}`);if(r.lecturer)L.push(`👤 מרצה: ${r.lecturer}`);if(r.notes)L.push(`⚠️ ${r.notes}`)}
   else{L.push(`📅 אירוע: ${r.name}${r.time?` | ${r.time}`:""}`);L.push(place);if(r.needs)L.push(`🛠️ ${r.needs}`)}
@@ -2853,7 +2860,7 @@ function renderEv(){
   Object.entries(XT).forEach(([kind,cfg])=>{
     const list=kind==="examCat"?S[kind].slice().sort((x,y)=>(!x.name)-(!y.name)||HE.compare(x.name||"",y.name||"")):S[kind].slice().sort((x,y)=>(x.date||"9").localeCompare(y.date||"9")||(x.time||"").localeCompare(y.time||"")||HE.compare(x.name||"",y.name||""));
     const cell=(r,[f,l,t])=>{const at=`data-xf="${kind}|${r.id}|${f}"`,v=r[f]||"",dl=(DL[kind]||{})[f];
-      if(!XEDIT.has(r.id)){const rp=(t==="r"||t==="x")?roomParts(v):null,txt=t==="d"?roD(v):rp?esc(rp.list):esc(v);
+      if(!XEDIT.has(r.id)){const rp=(t==="r"||t==="x")?roomParts(v,r.campus):null,txt=t==="d"?roD(v):rp?esc(rp.list):esc(v);
         return `<td data-l="${l}" class="ro ro-${t}${t==="r"?" rooms":""}${f==="name"?" ro-n":""}${v?"":" ro-e"}">${rp&&rp.pre?`<span class="rod">${rp.pre}</span> `:t==="h"&&v?`<span class="rod">🕐</span> `:""}${txt}</td>`}
       if(t==="r"){const sel=splitL(v),opts=roomsFor(r.campus).filter(x=>sel.includes(x)||S.sites.some(s=>siteMatch(r.campus,s.id)&&roomG(s.id,x)==="מעבדת מחשוב"));
         return `<td data-l="${l}" class="rooms">${opts.length?opts.map(o=>`<button type="button" class="rm" data-xroom="${kind}|${r.id}|${o}" aria-pressed="${sel.includes(o)}">${esc(o)}</button>`).join(""):`<span class="hint">בחרו קמפוס</span>`}</td>`}
@@ -2906,7 +2913,7 @@ function renderSettings(){
     <button type="button" class="rmopen" data-roomsheet="${s.id}"><span class="rmoi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></svg></span><span class="rmot"><b>כיתות וחדרים</b><small>${((S.rooms||{})[s.id]||[]).length} חדרים · ${roomGroups(s.id).map(x=>x[0]).slice(0,3).join(", ")}${roomGroups(s.id).length>3?"…":""}</small></span><span class="rmoc" aria-hidden="true">‹</span></button>
     </div>`).join("");
 }
-const ROOM_G=["מעבדת מחשוב","פודיום","מעבדת חשמל","מעבדת פיזיקה","מעבדת מכונות","מעבדת בניין","תקשורת חזותית (מק)","מרכז למידה","ספרייה"];
+const ROOM_G=["מעבדת מחשוב","אודיטוריום","פודיום","מעבדת חשמל","מעבדת פיזיקה","מעבדת מכונות","מעבדת בניין","תקשורת חזותית (מק)","מרכז למידה","ספרייה"];
 const roomG=(sid,r)=>(S.roomType||{})[sid+"|"+r]||"אחר";
 /* rooms of a site grouped by type, in a fixed order (computer labs first) */
 function roomGroups(sid){const m=new Map();roomSort((S.rooms||{})[sid]||[]).forEach(r=>{const g=roomG(sid,r);if(!m.has(g))m.set(g,[]);m.get(g).push(r)});
@@ -3080,7 +3087,7 @@ function renderEvWeek(){const el=$("#ev-wk");if(!el)return;const w=W();
   const days=DAYS.map((dn,d)=>{const k=plusD(cur,d);return{dn,d,k,items:all.filter(x=>x.date===k).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||HE.compare(a.name,b.name))}}).filter(x=>x.items.length);
   const row=(x,d)=>{const s=S.sites.find(st=>siteMatch(x.campus,st.id)),duty=s?dutyLines(x.time,namesAt(w,s.id,"m",d),namesAt(w,s.id,"e",d)):[];
     return `<div class="ovr ewi" data-goto="${x.kind}|${x.id}" role="button" tabindex="0"><span class="pav ${x.kind}">${x.kind==="exams"?"📝":"📅"}</span>
-      <span class="ovm"><b>${esc(x.name)}</b><small>${[x.time?"🕐 "+esc(x.time):"",esc(x.campus||""),esc(roomLbl(x.room))].filter(Boolean).join(" · ")}</small>${duty.map(t=>`<small class="duty">👤 ${esc(t)}</small>`).join("")}</span>
+      <span class="ovm"><b>${esc(x.name)}</b><small>${[x.time?"🕐 "+esc(x.time):"",esc(x.campus||""),esc(roomLbl(x.room,x.campus))].filter(Boolean).join(" · ")}</small>${duty.map(t=>`<small class="duty">👤 ${esc(t)}</small>`).join("")}</span>
       <button class="xcal" data-ical="${x.kind}|${x.id}" title="הוספה ליומן" aria-label="הוספה ליומן"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg></button>${s?waBtn(`data-xwa="${x.kind}|${x.id}|${s.id}|${d}"`,"שליחה לוואטסאפ: "+x.name):""}</div>`};
   el.innerHTML=`<section class="card"><div class="ovh"><h2>מבחנים ואירועים ${weekSpan()}</h2></div>
     ${days.length?days.map(({dn,d,k,items})=>`<div class="ovday"><div class="ovdh"><b>${dn}</b><span>${dK(k)}</span></div><div class="ovl">${items.map(x=>row(x,d)).join("")}</div></div>`).join("")
@@ -3118,7 +3125,7 @@ function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎�
     const w=t.match(/(?:ב|בשעה\s+)(אחת עשרה|שתים עשרה|אחת|שתיים|שלוש|ארבע|חמש|שש|שבע|שמונה|תשע|עשר)(\s+וחצי)?(?:\s+(בבוקר|בצהריים|אחה"צ|אחר הצהריים|בערב))?/);
     if(w){let h=W[w[1]];if(/צהריים|אחה|ערב/.test(w[3]||"")&&h<12)h+=12;else if(!w[3]&&h<7)h+=12;r.time=p2(h)+":"+(w[2]?"30":"00")}}
   /* ---- rooms: numbers after חדר/כיתה/מעבדה/אולם…, and the campus they belong to ---- */
-  const RM=/(?:חדר|חדרים|כיתה|כיתות|מעבדה|מעבדות|מעבדת|אולם|אולמות|room|rooms)\s*[:\-]?\s*(\d{2,4}(?:\s*(?:,|ו-?|\/|-|\s)\s*\d{2,4})*)/i;
+  const RM=/(?:חדר|חדרים|כיתה|כיתות|מעבדה|מעבדות|מעבדת|אולם|אולמות|אודיטוריום|אודיטוריומים|room|rooms)\s*[:\-]?\s*(\d{2,4}(?:\s*(?:,|ו-?|\/|-|\s)\s*\d{2,4})*)/i;
   if((m=t.match(RM)))r.room=[...new Set(m[1].match(/\d{2,4}/g))].join(", ");
   else if((m=t.match(/(?:^|[\s(])ב?(?:ה)?((?:מרכז\s+(?:ה)?[א-ת]+|ספרי[יה]+|אודיטוריום|רחבה|לובי|קפיטריה|חדר\s+ישיבות(?:\s+[א-ת]+)?|אולם\s+[א-ת]+|בניין\s+\d+)(?:\s+\d{2,4})?)/)))r.room=m[1].replace(/^ה/,"");
   /* ---- campus: words first, then which campus owns the rooms ---- */
@@ -3260,7 +3267,7 @@ function maybeToday(){clearTimeout(TODAY_T);TODAY_T=setTimeout(()=>{const now=ne
 function openToday(all){const o=document.createElement("div");o.className="todaybox";const now=new Date(),st=tState();
   const rows=todayCtx(d=>all.map(x=>{const s=S.sites.find(st=>siteMatch(x.campus,st.id)),w=W();
     const duty=s?dutyLines(x.time,namesAt(w,s.id,"m",d),namesAt(w,s.id,"e",d)):[];
-    const txt=s?itemText(x.kind,x.id,s.id,d):[x.name,x.time,x.campus,roomLbl(x.room),x.needs||x.notes].filter(Boolean).join("\n");
+    const txt=s?itemText(x.kind,x.id,s.id,d):[x.name,x.time,x.campus,roomLbl(x.room,x.campus),x.needs||x.notes].filter(Boolean).join("\n");
     const part=s?itemText(x.kind,x.id,s.id,d,false):txt;
     const det=[x.software?"💻 "+x.software:"",x.lecturer?"👤 "+x.lecturer:"",x.needs||x.notes?"🛠️ "+(x.needs||x.notes):""].filter(Boolean);
     return {x,duty,txt,det,part}}));
@@ -3270,7 +3277,7 @@ function openToday(all){const o=document.createElement("div");o.className="today
     <div class="tdh"><span class="tdd"><b>${now.getDate()}</b><small>${["ינו׳","פבר׳","מרץ","אפר׳","מאי","יוני","יולי","אוג׳","ספט׳","אוק׳","נוב׳","דצמ׳"][now.getMonth()]}</small></span>
       <span><b>היום יש ${itemsHead(all)}</b><small>יום ${DAYS[now.getDay()]||""}</small></span></div>
     <div class="tdl">${rows.map(({x,duty,det},i)=>`<div class="tdi${sent(x.id)?" sent":""}" data-ti="${i}" style="--i:${i}"><span class="tdk ${x.kind}">${x.kind==="exams"?"📝":"📅"}</span>
-      <div class="tdm"><b>${esc(x.name)}</b><small>${[x.time?"🕐 "+esc(x.time):"",esc(x.campus||""),esc(roomLbl(x.room))].filter(Boolean).join(" · ")}</small>
+      <div class="tdm"><b>${esc(x.name)}</b><small>${[x.time?"🕐 "+esc(x.time):"",esc(x.campus||""),esc(roomLbl(x.room,x.campus))].filter(Boolean).join(" · ")}</small>
         ${det.map(t=>`<small class="tdx">${esc(t)}</small>`).join("")}${duty.map(t=>`<small class="duty">👤 ${esc(t)}</small>`).join("")}
         <button type="button" class="tdsent" data-tdsent="${i}" aria-pressed="${sent(x.id)}"><span class="tck" aria-hidden="true"></span><span class="tsl">${sent(x.id)?"נשלח":"סמן כנשלח"}</span></button></div>
       <button type="button" class="tdwa" data-tdwa="${i}" aria-label="שליחה בוואטסאפ">${WA}<span>וואטסאפ</span></button></div>`).join("")}</div>
@@ -3329,7 +3336,7 @@ function openItemSheet(kind,id,seed){const isEx=kind==="exams",old=id?(S[kind]||
   const rooms=()=>{const box=f.querySelector(".prooms"),sel=splitL(q("room").value);if(!campus){box.innerHTML="";return}
     const sids=S.sites.filter(s=>siteMatch(campus,s.id)).map(s=>s.id),groups=new Map();
     sids.forEach(sid=>roomGroups(sid).forEach(([g,l])=>{if(!groups.has(g))groups.set(g,new Set());l.forEach(x=>groups.get(g).add(x))}));
-    const pri=isEx?["מעבדת מחשוב"]:["פודיום","מרכז למידה","ספרייה","מעבדת מחשוב"];
+    const pri=isEx?["מעבדת מחשוב"]:["אודיטוריום","פודיום","מרכז למידה","ספרייה","מעבדת מחשוב"];
     const show=[...groups.entries()].filter(([g,l])=>allRooms||pri.includes(g)||[...l].some(x=>sel.includes(x)));
     const chip=x=>`<button type="button" class="rm" data-pr="${esc(x)}" aria-pressed="${sel.includes(x)}">${esc(x)}</button>`;
     box.innerHTML=show.map(([g,l])=>`<div class="prg"><span>${esc(g)}</span><div>${[...l].map(chip).join("")}</div></div>`).join("")
@@ -3361,7 +3368,7 @@ function icsFor(list){const esc2=x=>String(x||"").replace(/\\/g,"\\\\").replace(
     let when;if(tt.length){const st=tt[0];let en=tt[1];if(!en){const[h,mi]=st.split(":");en=String(Math.min(23,+h+1)).padStart(2,"0")+":"+mi}
       when=`DTSTART;TZID=Asia/Jerusalem:${d8(x.date)}T${t4(st)}\r\nDTEND;TZID=Asia/Jerusalem:${d8(x.date)}T${t4(en)}`}
     else{const n=parseKey(x.date);n.setDate(n.getDate()+1);when=`DTSTART;VALUE=DATE:${d8(x.date)}\r\nDTEND;VALUE=DATE:${d8(key(n))}`}
-    const loc=[x.campus,roomLbl(x.room)].filter(Boolean).join(" · ");
+    const loc=[x.campus,roomLbl(x.room,x.campus)].filter(Boolean).join(" · ");
     const desc=[x.software?"תוכנה: "+x.software:"",x.lecturer?"מרצה: "+x.lecturer:"",x.needs||"",x.notes||""].filter(Boolean).join("\n");
     return `BEGIN:VEVENT\r\nUID:${x.id}-${d8(x.date)}@sce-team\r\nDTSTAMP:${stamp}\r\n${when}\r\nSUMMARY:${esc2(x.name)}\r\n${loc?`LOCATION:${esc2(loc)}\r\n`:""}${desc?`DESCRIPTION:${esc2(desc)}\r\n`:""}END:VEVENT`}).join("\r\n");
   return `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//SCE IT//Team//HE\r\nCALSCALE:GREGORIAN\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Jerusalem\r\nBEGIN:STANDARD\r\nDTSTART:19701025T020000\r\nTZOFFSETFROM:+0300\r\nTZOFFSETTO:+0200\r\nRRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:19700327T020000\r\nTZOFFSETFROM:+0200\r\nTZOFFSETTO:+0300\r\nRRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1FR\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\n${ev}\r\nEND:VCALENDAR\r\n`}
@@ -3369,7 +3376,7 @@ function icsFor(list){const esc2=x=>String(x||"").replace(/\\/g,"\\\\").replace(
 function calTimes(x){const tt=[...String(x.time||"").matchAll(/(\d{1,2}):(\d{2})/g)].map(m=>[+m[1],+m[2]]);const[y,mo,d]=x.date.split("-").map(Number);
   if(!tt.length)return{allDay:true,start:new Date(y,mo-1,d),end:new Date(y,mo-1,d+1)};
   const st=new Date(y,mo-1,d,tt[0][0],tt[0][1]),en=tt[1]?new Date(y,mo-1,d,tt[1][0],tt[1][1]):new Date(st.getTime()+36e5);return{allDay:false,start:st,end:en}}
-const calLoc=x=>[x.campus,roomLbl(x.room)].filter(Boolean).join(" · ");
+const calLoc=x=>[x.campus,roomLbl(x.room,x.campus)].filter(Boolean).join(" · ");
 const calDesc=x=>[x.software?"תוכנה: "+x.software:"",x.lecturer?"מרצה: "+x.lecturer:"",x.needs||"",x.notes||""].filter(Boolean).join("\n");
 function outlookUrl(x){const t=calTimes(x),q=new URLSearchParams({subject:x.name,location:calLoc(x),body:calDesc(x)});
   if(t.allDay){q.set("allday","true");q.set("startdt",x.date);q.set("enddt",key(t.end))}else{q.set("startdt",t.start.toISOString());q.set("enddt",t.end.toISOString())}
