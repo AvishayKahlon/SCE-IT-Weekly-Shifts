@@ -1403,6 +1403,21 @@ tr.flash,tr.flash td{animation:flashrow 1.8s ease}
 @media (max-width:700px){.ovtiles{gap:10px}.ovt b{font-size:26px}}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ovr .pav.hol{background:rgba(255,255,255,.1)}:root:not([data-theme="light"]) .htag{background:rgba(255,255,255,.1)}}
 :root[data-theme="dark"] .ovr .pav.hol{background:rgba(255,255,255,.1)}:root[data-theme="dark"] .htag{background:rgba(255,255,255,.1)}
+
+/* paste-from-email sheet */
+.pastebox{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:16px;background:rgba(10,14,10,.32);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:scrimin 240ms ease both}
+.pastebox.out{animation:scrimout 220ms ease both}
+.pcard{width:min(560px,100%);max-height:88dvh;overflow:auto;display:grid;gap:10px;padding:16px 18px;border-radius:28px;background:color-mix(in srgb,var(--surface) 90%,transparent);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);box-shadow:0 24px 60px rgba(0,0,0,.28),inset 0 1px 0 var(--glass-edge,#fff);animation:sheetin 480ms var(--spring,cubic-bezier(.3,1.2,.45,1)) both}
+.pastebox.out .pcard{animation:sheetout 220ms ease both}
+@media (min-width:701px){.pcard{animation-name:popin}@keyframes popin{from{opacity:0;transform:scale(.94)}}}
+.ph2{display:flex;justify-content:space-between;align-items:center}.ph2 b{font-size:18px}.ph2 button{width:34px;height:34px;padding:0!important}
+.ptx{width:100%;font:inherit;font-size:15px;resize:vertical;min-height:120px}
+.pform{display:grid;gap:10px}.pform label{display:grid;gap:3px;font-size:12.5px;color:var(--muted)}.pform input,.pform select{width:100%;font-size:16px}
+.p2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pseg{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pseg button{font-weight:700}.pseg button[aria-pressed="true"]{background:var(--accent)!important;color:var(--accent-ink)}
+.pact{display:flex;gap:8px;justify-content:flex-start;flex-wrap:wrap}
+@media (max-width:700px){.pastebox{place-items:end center;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1526,7 +1541,7 @@ tr.flash,tr.flash td{animation:flashrow 1.8s ease}
       <h2>מבחנים</h2>
       <p class="hint" style="margin:10px 0">מבחן מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם המבחן | שעה.</p>
       <div class="scroll"><table class="cal xt" id="exT"></table></div>
-      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
+      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button><button data-paste>📋 הדבקה ממייל</button></div>
       <details class="cons xsec sub" id="catBox">
         <summary><h3>מאגר מבחנים קבועים</h3><span class="xcnt" id="ecN"></span></summary>
         <p class="hint" style="margin:10px 0">ממוין לפי א-ב. בחירת שם מבחן בטבלה למעלה ממלאת אוטומטית תוכנה, מרצה, קמפוס, שעה והערות. מבחן או מרצה חדשים שמוסיפים למעלה נשמרים כאן לפעם הבאה.</p>
@@ -1538,7 +1553,7 @@ tr.flash,tr.flash td{animation:flashrow 1.8s ease}
       <h2>אירועים וכנסים</h2>
       <p class="hint" style="margin:10px 0">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם האירוע | שעה. אירועים שעברו מוצגים באפור.</p>
       <div class="scroll"><table class="cal xt" id="evT"></table></div>
-      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button></div>
+      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button><button data-paste>📋 הדבקה ממייל</button></div>
     </section>
     <datalist id="dlExam"></datalist><datalist id="dlLect"></datalist><datalist id="dlSoft"></datalist><datalist id="dlEvent"></datalist>
   </section>
@@ -1657,7 +1672,7 @@ tr.flash,tr.flash td{animation:flashrow 1.8s ease}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 05:45";
+const APP_VER="22.10.2026 06:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2614,7 +2629,60 @@ function renderEvWeek(){const el=$("#ev-wk");if(!el)return;const w=W();
   el.innerHTML=`<section class="card"><div class="ovh"><h2>מבחנים ואירועים ${weekSpan()}</h2></div>
     ${days.length?days.map(({dn,d,k,items})=>`<div class="ovday"><div class="ovdh"><b>${dn}</b><span>${dK(k)}</span></div><div class="ovl">${items.map(x=>row(x,d)).join("")}</div></div>`).join("")
       :`<p class="ovempty">אין מבחנים או אירועים בשבוע הזה</p>`}
-    <div class="row"><button class="primary" data-ovadd="exams">+ מבחן</button><button data-ovadd="events">+ אירוע</button></div></section>`}
+    <div class="row"><button class="primary" data-ovadd="exams">+ מבחן</button><button data-ovadd="events">+ אירוע</button><button data-paste>📋 הדבקה ממייל</button></div></section>`}
+
+/* ---------- paste an email → exam / event ----------
+   Plain rules, all on this device: date, time (or range), campus, room, exam name from the bank, needs. You check before it is added. */
+function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎‏]/g,""),low=t.toLowerCase(),r={};
+  const p2=n=>String(n).padStart(2,"0"),now=new Date();
+  /* date: 2.11.26 / 02/11/2026 / 2.11 */
+  for(const m of t.matchAll(/(?<![\d:])(\d{1,2})[.\/-](\d{1,2})(?:[.\/-](\d{2,4}))?(?![\d:])/g)){const d=+m[1],mo=+m[2];if(d<1||d>31||mo<1||mo>12)continue;
+    let y=m[3]?+m[3]:now.getFullYear();if(y<100)y+=2000;let dt=new Date(y,mo-1,d);if(!m[3]&&dt<new Date(now.getFullYear(),now.getMonth(),now.getDate()-1))dt=new Date(y+1,mo-1,d);
+    r.date=key(dt);break}
+  /* time: range first, else "בשעה 10:00", else the first hh:mm */
+  const tm=x=>{const[h,mi]=x.split(":");return p2(+h)+":"+mi};
+  let m=t.match(/(\d{1,2}:\d{2})\s*(?:-|–|—|עד|to)\s*(\d{1,2}:\d{2})/);if(m)r.time=tm(m[1])+"-"+tm(m[2]);
+  else if((m=t.match(/(?:בשעה|שעה|ב-?)\s*(\d{1,2}:\d{2})/))||(m=t.match(/(\d{1,2}:\d{2})/)))r.time=tm(m[1]);
+  /* campus */
+  const zb=/בוטינסקי|אשדוד/.test(t),bb=/בני\s*ברית|באר\s*שבע|ב"ש|ביאליק/.test(t);r.campus=zb&&bb?"שניהם":zb?"ז'בוטינסקי":bb?"בני ברית":"";
+  /* rooms: "חדר 110", "כיתה 205", "אולמות 110, 112" */
+  if((m=t.match(/(?:חדר|חדרים|כיתה|כיתות|אולם|אולמות|room)\s*[:\-]?\s*(\d{2,4}(?:\s*(?:,|ו-?|\/|-)\s*\d{2,4})*)/i)))r.room=m[1].split(/\s*(?:,|ו-?|\/|-)\s*/).filter(Boolean).join(", ");
+  /* name: the subject line, cleaned */
+  const lines=t.split("\n").map(x=>x.trim()).filter(Boolean);
+  let subj=(lines.find(x=>/^(נושא|subject)\s*:/i.test(x))||"").replace(/^(נושא|subject)\s*:\s*/i,"")||lines[0]||"";
+  subj=subj.replace(/^((fw|fwd|re|הועבר|השב|הזמנה|accepted|מאושר)\s*:\s*)+/ig,"").replace(/\s*ב?-?\d{1,2}[.\/]\d{1,2}(?:[.\/]\d{2,4})?/g,"").replace(/\s{2,}/g," ").replace(/\s*[-|–]\s*$/,"").trim();
+  /* exam from the bank (longest name found), else the words מבחן/בחינה */
+  const bank=(S.examCat||[]).filter(c=>c.name&&t.includes(c.name.trim())).sort((a,b)=>b.name.length-a.name.length)[0];
+  r.kind=bank||/מבחן|בחינה|בוחן|מועד\s*[אב]/.test(t)?"exams":"events";
+  r.name=bank?bank.name.trim():subj.slice(0,80);
+  if(r.kind==="events"){const need=lines.filter(x=>/מחשב|מקרן|רמקול|מיקרופון|זום|zoom|הקלטה|צילום|ציוד|הגברה|מסך|טוש|לפטופ|מצגת/i.test(x)&&x!==lines[0]).join(" · ");if(need)r.needs=need.slice(0,200)}
+  return r}
+function openPaste(){const o=document.createElement("div");o.className="pastebox";
+  o.innerHTML=`<div class="pcard" role="dialog" aria-label="הדבקה ממייל"><div class="ph2"><b>📋 הדבקה ממייל</b><button data-px aria-label="סגור">✕</button></div>
+    <p class="hint">מעתיקים את המייל (נושא + תוכן) ומדביקים כאן. הכלי מזהה תאריך, שעה, קמפוס, כיתה ומבחן מהמאגר. בודקים, מתקנים אם צריך, ומוסיפים.</p>
+    <textarea class="ptx" rows="6" placeholder="הדביקו כאן את המייל…"></textarea>
+    <div class="pform" hidden></div>
+    <div class="row pact"><button class="primary" data-pgo>זיהוי</button></div></div>`;
+  document.body.appendChild(o);const ta=o.querySelector(".ptx"),f=o.querySelector(".pform");setTimeout(()=>ta.focus(),50);
+  const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),240)};
+  const show=r=>{f.hidden=false;const kind=r.kind;
+    f.innerHTML=`<div class="pseg"><button data-pk="exams" aria-pressed="${kind==="exams"}">📝 מבחן</button><button data-pk="events" aria-pressed="${kind==="events"}">📅 אירוע</button></div>
+      <label>שם<input type="text" data-pf="name" value="${esc(r.name||"")}"></label>
+      <div class="p2"><label>תאריך<input type="date" data-pf="date" value="${esc(r.date||"")}"></label><label>שעה<input type="text" data-pf="time" value="${esc(r.time||"")}" placeholder="10:00 או 10:00-12:00"></label></div>
+      <div class="p2"><label>קמפוס<select data-pf="campus"><option value=""></option>${CAMPUS.map(c=>`<option ${c===r.campus?"selected":""}>${esc(c)}</option>`).join("")}</select></label><label>כיתה<input type="text" data-pf="room" value="${esc(r.room||"")}"></label></div>
+      <label data-only="events" ${kind==="events"?"":"hidden"}>צרכים והיערכות<input type="text" data-pf="needs" value="${esc(r.needs||"")}"></label>`;
+    o.querySelector(".pact").innerHTML=`<button data-pgo>זיהוי מחדש</button><button class="primary" data-padd>הוסף</button>`};
+  o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-px]")){close();return}
+    if(e.target.closest("[data-pgo]")){const r=parseMail(ta.value);if(!ta.value.trim()){toast("הדביקו קודם את המייל");return}show(r);haptic();return}
+    const k=e.target.closest("[data-pk]");if(k){f.querySelectorAll("[data-pk]").forEach(b=>b.setAttribute("aria-pressed",b===k));f.querySelector('[data-only="events"]').hidden=k.dataset.pk!=="events";return}
+    if(e.target.closest("[data-padd]")){const kind=f.querySelector('[data-pk][aria-pressed="true"]').dataset.pk,v=n=>(f.querySelector(`[data-pf="${n}"]`)||{}).value||"";
+      const rec={id:uid(),date:v("date")||cur,name:v("name").trim(),time:v("time").trim(),campus:v("campus"),room:v("room").trim()};
+      if(!rec.name){toast("חסר שם");return}
+      if(kind==="exams"){applyCat(rec);if(v("room").trim())rec.room=v("room").trim();if(v("campus"))rec.campus=v("campus");if(v("time").trim())rec.time=v("time").trim();S.exams.push(rec);learnExam(rec)}
+      else{rec.needs=v("needs").trim();applyEvent(rec);S.events.push(rec)}
+      changed();render();close();toast((kind==="exams"?"המבחן":"האירוע")+" נוסף");setTimeout(()=>goItem(kind,rec.id),260)}});
+  document.addEventListener("keydown",function k(e){if(e.key==="Escape"&&document.body.contains(o)){close();document.removeEventListener("keydown",k)}})}
+document.addEventListener("click",e=>{if(e.target.closest("[data-paste]"))openPaste()});
 /* jump to one item in its own list, and flash it */
 function goItem(kind,id){const tab={vac:"cal",hol:"cal",exams:"ev",events:"ev"}[kind];if(!tab)return;
   const tb=document.querySelector(`.tabs button[data-tab="${tab}"]`);if(tb.getAttribute("aria-selected")!=="true")tb.click();
