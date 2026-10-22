@@ -1867,6 +1867,12 @@ td.c-range{display:none}
 .bar #genBtn:active,.bar #askConsBtn:active{transform:scale(.96)!important}
 @media (min-width:701px){.bar #genBtn{order:-3}.bar #askConsBtn{order:-2}}
 @media (max-width:700px){.bar #genBtn,.bar #askConsBtn{justify-content:center;padding:6px 10px!important;font-size:14px!important}}
+
+.doffp{margin-inline-start:auto;font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--muted)}
+.dcard.doffday{opacity:.85}
+.doffb{padding:2px 4px 6px;color:var(--muted);font-size:14.5px}
+.ag-hol{font-style:normal;font-size:12.5px;font-weight:700;margin-inline-start:auto;padding:2px 10px;border-radius:999px;background:rgba(255,255,255,.18)}
+.ag-h{display:flex;align-items:center;gap:8px}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה ולכן אינו פעיל.</b><br>פתח אותו מהאייקון במסך הבית או מהקישור.</div>
@@ -2125,7 +2131,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 20:40";
+const APP_VER="22.10.2026 20:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2432,10 +2438,11 @@ function problems(w){
 /* ---------- sheet rendering ---------- */
 /* week overview: what is on at each campus, with the preferred-technician picker next to it */
 function renderAgenda(w){
-  const days=DAYS.map((dn,d)=>({dn,d,sites:S.sites.map(s=>({s,lines:noteLines(w,s.id,d)})).filter(x=>x.lines.length)})).filter(x=>x.sites.length);
+  /* holidays belong to the whole day: shown once next to the day, not under every campus */
+  const days=DAYS.map((dn,d)=>{const hol=dm(d).names;return {dn,d,hol,sites:S.sites.map(s=>({s,lines:noteLines(w,s.id,d).filter(l=>!hol.includes(l))})).filter(x=>x.lines.length)}}).filter(x=>x.sites.length||x.hol.length);
   $("#agendaTitle").textContent="אירועי השבוע "+weekSpan();
   $("#agendaBox").hidden=!days.length;if(!days.length){$("#agenda").innerHTML="";return}
-  $("#agenda").innerHTML=days.map(({dn,d,sites})=>`<div class="ag-day"><div class="ag-h"><b>${dn}</b> <span>${dot(dayDate(d))}</span></div>`+
+  $("#agenda").innerHTML=days.map(({dn,d,hol,sites})=>`<div class="ag-day"><div class="ag-h"><b>${dn}</b> <span>${dot(dayDate(d))}</span>${hol.length?`<em class="ag-hol">${esc(hol.join(" · "))}${dm(d).off?" · פגרה":""}</em>`:""}</div>`+
     sites.map(({s,lines})=>{const its=dayItemObjs(dayDate(d),s.id);return `<div class="ag-site"><div class="ag-n">${esc(s.name)}</div><div class="ag-l">${lines.map(l=>{const it=its.find(x=>x.text===l);return it?`<span class="ag-it"><span class="lk" data-goto="${it.kind}|${it.id}">${esc(l)}</span>${waBtn(`data-xwa="${it.kind}|${it.id}|${s.id}|${d}"`,"שליחת תזכורת בוואטסאפ: "+l)}</span>`:`<span>${esc(l)}</span>`}).join("")}</div>
       <div class="ag-p">${dm(d).off?"":`<span>⭐</span>${prefSel(w,s.id,d)}`}</div></div>`}).join("")+`</div>`).join("")}
 function prefSel(w,sid,d){const p=(w.pref[sid]||[])[d],v=p?p.e+"|"+p.sh:"",ok=p&&(!hasAssign(w)||(w.assign[sid]?.[p.sh]?.[d]||[]).includes(p.e));   /* red only once a schedule exists and it wasn't honoured */
@@ -2599,6 +2606,10 @@ function daysHTML(w){
         <div class="dl"><span class="t">ערב<small>${shiftStart("e")}</small></span><div class="chips">${e}</div></div>
         <div class="dnote"><input type="text" data-note="${s.id}|${d}" value="${esc(note)}" placeholder="הערות ואירועים" aria-label="הערה ${dn} ${esc(s.name)}">${note.trim()?waBtn(`data-evmsg="${s.id}|${d}"`,"שליחת ההערה לוואטסאפ"):""}</div><div class="dnote"><span class="t">⭐ מועדף</span>${prefSel(w,s.id,d)}</div></div>`}).join("");
     const hn=md.names.join(" · ");
+    /* a day off for everyone: one line for the day instead of "פגרה" per campus and shift; anything still noted for a campus stays */
+    if(md.off&&!S.sites.some(s=>w.assign[s.id].m[d].length||w.assign[s.id].e[d].length)){
+      const extra=S.sites.map(s=>{const auto=dayItems(dayDate(d),s.id),note=(w.notes[s.id][d]||"").trim();return auto.length||note?`<div class="dsite"><b>${esc(s.name)}</b>${auto.length?`<div class="dauto">${itemChips(d,s.id)}</div>`:""}${note?`<div class="mnote">${esc(note)}</div>`:""}</div>`:""}).join("");
+      return `<details class="dcard cons doffday" data-day="${d}" ${DAY_OPEN.has(d)?"open":""}><summary><div class="dh"><div class="dt"><span class="dn">${dn}</span><span class="dd">${fmt(dayDate(d)).slice(0,5).replace("/",".")}</span>${hn?`<span class="hn">${esc(hn)}</span>`:""}</div><span class="doffp">פגרה</span><span class="dchev" aria-hidden="true"></span></div><div class="dcompact"><div class="dmini"><span class="mnote">יום חופש – לא עובדים</span></div></div></summary><div class="dbody">${extra||`<div class="doffb">יום חופש – לא עובדים</div>`}</div></details>`}
     /* compact line per campus: who is on, plus that day's notes in small type; tap the card for everything */
     const mini=S.sites.map(s=>{const A=w.assign[s.id],nm=NEED[s.id].m[d],ne=NEED[s.id].e[d];
       const who=(sh,arr,need)=>arr.length?arr.map(id=>`<span class="mp ${sh}">${esc(empName(id))}</span>`).join(""):need?`<span class="mp miss">חסר</span>`:"";
