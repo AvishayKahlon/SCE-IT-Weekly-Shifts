@@ -1917,7 +1917,7 @@ td.c-range{display:none}
     <div class="stpop" id="stPop" role="dialog" aria-modal="true" aria-labelledby="stPopT" hidden></div>
     <div class="duo" id="duo">
     <details class="card cons" id="agendaBox" hidden>
-      <summary><h2 id="agendaTitle">הערות ואירועים</h2></summary>
+      <summary><h2 id="agendaTitle">אירועי השבוע</h2></summary>
       <p class="hint" style="margin:10px 0">מבחנים, אירועים, חגים והערות לפי יום וקמפוס. ⭐ טכנאי מועדף נבחר כאן לפני שיבוץ חכם.</p>
       <div id="agenda"></div>
     </details>
@@ -1936,12 +1936,12 @@ td.c-range{display:none}
       <div class="scroll"><table class="grid" id="consGrid"></table></div>
     </details>
     <details class="card cons" id="friBox">
-      <summary><h2>כוננות שישי</h2><span class="hint">הסבב מתקדם שבוע בכל שישי. שישי של פגרה לא תופס תור. ◉ קובע של מי התור השבוע</span></summary>
+      <summary><h2>תורנות שישי</h2><span class="hint">הסבב מתקדם שבוע בכל שישי. שישי של פגרה לא תופס תור. ◉ קובע של מי התור השבוע</span></summary>
       <div class="scroll" id="friSet" style="margin-top:10px"></div>
     </details>
     <div class="msgs" id="msgs"></div>
-    <div class="vt seg" id="viewSeg" role="tablist" aria-label="תצוגת הסידור"><button role="tab" data-v="days" aria-selected="true">לפי ימים</button><button role="tab" data-v="table" aria-selected="false">טבלה מלאה</button></div>
-    <button class="fontbtn" id="fontBtn" aria-pressed="false" title="עריכת גופנים בסידור שנשלח"><b>Aa</b> גופנים</button>
+    <div class="vt seg" id="viewSeg" role="tablist" aria-label="תצוגת הסידור"><button role="tab" data-v="days" aria-selected="true">ימים</button><button role="tab" data-v="table" aria-selected="false">טבלה</button></div>
+    <button class="fontbtn" id="fontBtn" aria-pressed="false" title="גודל הטקסט בסידור שנשלח לטכנאים"><b>Aa</b> גודל טקסט</button>
     <div class="fontpanel" id="fontPanel" hidden role="dialog" aria-label="עריכת גופן"></div>
     <div id="days"></div>
     <div class="scroll" id="sheetScroll"><div id="sheet"></div></div>
@@ -1956,7 +1956,7 @@ td.c-range{display:none}
 
   <section class="panel" id="tab-cal" hidden>
     <nav class="subtabs segbar" data-group="cal" role="tablist" aria-label="חופשות וחגים">
-      <button role="tab" data-panel="cal-ov" aria-selected="true">סקירה</button>
+      <button role="tab" data-panel="cal-ov" aria-selected="true">תמונת מצב</button>
       <button role="tab" data-panel="vacBox" aria-selected="false">חופשות<span class="sbn" id="vacN"></span></button>
       <button role="tab" data-panel="holBox" aria-selected="false">חגים<span class="sbn" id="holN"></span></button>
     </nav>
@@ -1998,7 +1998,7 @@ td.c-range{display:none}
       </details>
     </section>
     <section class="card segp" id="evBox" hidden>
-      <h2>אירועים וכנסים</h2>
+      <h2>אירועים</h2>
       <p class="hint" style="margin:10px 0">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם האירוע | שעה. אירועים שעברו מוצגים באפור.</p>
       <div class="xaddrow"><button class="primary act" data-xadd="events"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lb">הוספת אירוע</span></button></div>
       <div class="scroll"><table class="cal xt" id="evT"></table></div>
@@ -2020,7 +2020,7 @@ td.c-range{display:none}
         <div id="fbUsage"></div>
       </div>
       <div class="card">
-        <h2>שעות משמרת</h2>
+        <h2>הגדרת משמרות</h2>
         <div class="row">
           <label>בוקר <input type="text" id="lblM" style="width:150px"></label>
           <label>ערב <input type="text" id="lblE" style="width:150px"></label>
@@ -2039,7 +2039,7 @@ td.c-range{display:none}
       <div id="sitesSet" class="rows"></div>
       <div class="row"><input type="text" id="newSite" maxlength="60" placeholder="שם אתר חדש" aria-label="שם אתר חדש"><button id="addSite">הוספת אתר</button></div>
       <div class="card">
-        <h2>גיבוי</h2>
+        <h2>גיבוי ושחזור</h2>
         <p class="hint" style="margin-bottom:10px">גיבוי מלא של כל הנתונים לקובץ, ושחזור ממנו.</p>
         <div class="row"><button id="backupBtn">הורדת גיבוי</button><button id="restoreBtn">שחזור מגיבוי</button><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
       </div>
@@ -2063,7 +2063,7 @@ td.c-range{display:none}
         <p class="hint" style="margin-top:8px">"Mail" יוצר מייל עם ה-PDF של הסידור מצורף, והנושא הוא שם הקובץ. במחשב יורד קובץ ‎.eml שנפתח כטיוטה ב-Outlook עם הנמענים האלה; באייפון נפתח תפריט השיתוף.</p>
       </div>
       <div class="card">
-        <h2>קבוצת הוואטסאפ של הצוות</h2>
+        <h2>קבוצת הצוות</h2>
         <div class="row">
           <input type="text" id="groupLink" style="flex:1;min-width:240px" placeholder="https://chat.whatsapp.com/..." aria-label="קישור הזמנה לקבוצה" dir="ltr">
         </div>
@@ -2083,7 +2083,7 @@ td.c-range{display:none}
         </div>
       </div>
       <div class="card">
-        <h2>תזכורת לאירועים</h2>
+        <h2>נוסח תזכורת</h2>
         <div class="row" style="margin-bottom:10px">
           <label>ליום <span class="df"><input type="text" class="dtx" id="evDate" data-iso="" value="" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="תאריך התזכורת (dd/mm/yyyy)"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" tabindex="-1" aria-hidden="true"></span></label>
           <span class="hint" id="evHint"></span>
@@ -2097,7 +2097,7 @@ td.c-range{display:none}
         </div>
       </div>
       <div class="card">
-        <h2>הסידור של השבוע בטקסט</h2>
+        <h2>נוסח הסידור השבועי</h2>
         <textarea id="weekMsg" rows="9" aria-label="הסידור בטקסט"></textarea>
         <div class="row" style="margin-top:10px">
           <a class="btn primary-link grp" data-grp="weekMsg" target="_blank" rel="noopener" hidden>העתקה ופתיחת הקבוצה</a>
@@ -2125,7 +2125,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 20:30";
+const APP_VER="22.10.2026 20:40";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2433,7 +2433,7 @@ function problems(w){
 /* week overview: what is on at each campus, with the preferred-technician picker next to it */
 function renderAgenda(w){
   const days=DAYS.map((dn,d)=>({dn,d,sites:S.sites.map(s=>({s,lines:noteLines(w,s.id,d)})).filter(x=>x.lines.length)})).filter(x=>x.sites.length);
-  $("#agendaTitle").textContent="הערות ואירועים "+weekSpan();
+  $("#agendaTitle").textContent="אירועי השבוע "+weekSpan();
   $("#agendaBox").hidden=!days.length;if(!days.length){$("#agenda").innerHTML="";return}
   $("#agenda").innerHTML=days.map(({dn,d,sites})=>`<div class="ag-day"><div class="ag-h"><b>${dn}</b> <span>${dot(dayDate(d))}</span></div>`+
     sites.map(({s,lines})=>{const its=dayItemObjs(dayDate(d),s.id);return `<div class="ag-site"><div class="ag-n">${esc(s.name)}</div><div class="ag-l">${lines.map(l=>{const it=its.find(x=>x.text===l);return it?`<span class="ag-it"><span class="lk" data-goto="${it.kind}|${it.id}">${esc(l)}</span>${waBtn(`data-xwa="${it.kind}|${it.id}|${s.id}|${d}"`,"שליחת תזכורת בוואטסאפ: "+l)}</span>`:`<span>${esc(l)}</span>`}).join("")}</div>
@@ -2681,7 +2681,7 @@ function catOf(td){return Object.keys(FONT_CATS).find(k=>td.matches(FONT_CATS[k]
 function markFontCat(){document.querySelectorAll("#sheet .fsel").forEach(x=>x.classList.remove("fsel"));
   if(FONT_SEL)document.querySelectorAll(`#sheet table.sh ${FONT_CATS[FONT_SEL].sel}`).forEach(x=>x.classList.add("fsel"))}
 function renderFontPanel(){const p=$("#fontPanel");if(!document.body.classList.contains("fontedit")){p.hidden=true;return}p.hidden=false;
-  if(!FONT_SEL){p.innerHTML=`<div class="fp-h"><b>עריכת גופנים</b><button data-fp="done">סיום</button></div><p class="fp-t">לחץ על משבצת בטבלה כדי לראות ולשנות את הגופן שלה. השינוי חל על כל המשבצות מאותו סוג, בקובץ שנשלח לטכנאים.</p>`;return}
+  if(!FONT_SEL){p.innerHTML=`<div class="fp-h"><b>גודל טקסט</b><button data-fp="done">סיום</button></div><p class="fp-t">לחץ על משבצת בטבלה כדי לראות ולשנות את הגופן שלה. השינוי חל על כל המשבצות מאותו סוג, בקובץ שנשלח לטכנאים.</p>`;return}
   const c=FONT_CATS[FONT_SEL],f=fontOf(FONT_SEL),d=fontBase(FONT_SEL),changed=f.s!==d.s||f.b!==d.b,custom=d.s!==c.def||d.b!==c.b;
   const dirty=Object.keys(FONT_CATS).some(k=>{const a=fontOf(k),b=fontBase(k);return a.s!==b.s||a.b!==b.b});
   p.innerHTML=`<div class="fp-h"><b>${c.n}</b><button data-fp="done">סיום</button></div>
@@ -3332,7 +3332,7 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
       note.innerHTML=`✨ ${r.learned.map(k=>m[k]).join(", ")} לפי תיקון קודם שלך <button type="button" data-unlearn>איפוס</button>`;f.prepend(note)}
     /* reveal: each detected field fades up in turn, filled ones glow */
     [...f.children].forEach((el,i)=>{el.style.animationDelay=(i*70)+"ms";el.classList.add("rev");const inp=el.querySelector("input,select,textarea");if(inp&&inp.value)el.classList.add("pgot")});
-    o.querySelector(".pact").innerHTML=`<button data-pgo>✨ זיהוי מחדש</button><button class="primary" data-padd>הוסף</button><button data-padd="cal" title="הוסף גם ליומן">הוספה + יומן</button>`};
+    o.querySelector(".pact").innerHTML=`<button data-pgo>✨ זיהוי מחדש</button><button class="primary" data-padd>הוסף</button><button data-padd="cal" title="הוספה גם ליומן">הוספה ליומן</button>`};
   o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-px]")){close();return}
     if(e.target.closest("[data-pgo]")){if(!ta.value.trim()){toast("הדבק קודם את המייל");return}const r=parseMail(ta.value),card=o.querySelector(".pcard");
       card.classList.add("thinking");f.hidden=true;
@@ -4307,7 +4307,7 @@ function nextWeekPrompt(force){
   const o=document.createElement("div");o.className="nwp";
   o.innerHTML=`<div class="nwp-card" role="dialog" aria-modal="true" aria-labelledby="nwpT">
     <div class="nwp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13v4M10 15h4"/></svg></div>
-    <h2 id="nwpT">סידור העבודה הבא</h2>
+    <h2 id="nwpT">השבוע הבא</h2>
     <p class="nwp-week">שבוע ${weekSpan(nk)}</p>
     <p class="nwp-st">${has?"יש כבר שיבוצים בטיוטה לשבוע הזה":"עדיין לא התחלת את הסידור לשבוע הזה"}</p>
     <button class="primary nwp-go">מעבר לסידור השבוע הבא</button>
