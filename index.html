@@ -1820,6 +1820,28 @@ td.c-range{display:none}
 
 .plearn{margin:0;padding:8px 12px;border-radius:14px;font-size:13px;background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .plearn button{min-height:0!important;padding:2px 10px!important;font-size:12.5px;border-radius:999px!important}
+
+/* Firebase storage card (iCloud style) */
+.fbh{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;text-align:right}
+.fbu{display:grid;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.fbu-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.fbu-h b{font-size:16px}.fbu-h span{color:var(--muted);font-size:13.5px;font-variant-numeric:tabular-nums}
+.fbu-bar{display:flex;height:22px;border-radius:7px;overflow:hidden;background:color-mix(in srgb,var(--ink) 9%,transparent);box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--ink) 10%,transparent)}
+.fbu-bar i{display:block;height:100%;transform-origin:right center}.fbu-bar i+i{box-shadow:inset -1.5px 0 0 var(--surface)}
+.fbu-leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}.fbu-leg span{display:inline-flex;align-items:center;gap:6px}.fbu-leg i{width:10px;height:10px;border-radius:50%;display:inline-block}.fbu-leg small{color:var(--muted)}
+.fbu .hint{margin:0}
+.fbu-act{display:flex;gap:8px;flex-wrap:wrap}
+/* cleanup sheet */
+.clp{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.clp span{font-size:14px;font-weight:600;color:var(--muted)}
+.clp button{min-height:36px!important;padding:4px 14px!important;border-radius:999px!important;font-size:14.5px}
+.clp button[aria-pressed="true"]{background:var(--accent)!important;color:var(--accent-ink)!important;border-color:var(--accent)!important}
+.cll{display:grid;gap:8px}
+.clr{display:grid!important;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;text-align:right;padding:12px!important;border-radius:18px!important;min-height:0!important}
+.clc{width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--muted);display:grid;place-items:center;transition:background 180ms ease,box-shadow 180ms ease}
+.clr[aria-pressed="true"] .clc{background:var(--accent);box-shadow:none}
+.clr[aria-pressed="true"] .clc::after{content:"";width:9px;height:5px;border:2px solid var(--accent-ink);border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.clt{display:grid;gap:2px}.clt b{font-size:15px}.clt small{font-size:12.5px;color:var(--muted);font-weight:500}
+.clv{font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px;white-space:nowrap}
+.clact{display:grid}.clact button{min-height:50px;font-size:16.5px;font-weight:700}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1971,8 +1993,9 @@ td.c-range{display:none}
     </nav>
     <div class="panel segp" id="sub-gen">
       <div class="card">
-        <h2>סנכרון בין מכשירים</h2>
+        <h2 lang="en" dir="ltr" class="fbh">Firebase</h2>
         <div id="syncBox"></div>
+        <div id="fbUsage"></div>
       </div>
       <div class="card">
         <h2>שעות משמרת</h2>
@@ -2080,7 +2103,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 19:20";
+const APP_VER="22.10.2026 19:40";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2704,7 +2727,7 @@ function render(){if(typeof maybeToday==="function"&&performance.now()<15000)may
    if(finalDirty(w))h=`<div class="fdirty"><span class="fi">✎</span><span class="ft"><b>שינויים שלא נשמרו בסידור הסופי</b><small>הסידור שסומן כסופי שמור. אפשר לשמור את השינויים או לחזור אליו.</small></span><span class="fb"><button class="primary" data-fsave>שמור כסופי</button><button data-frevert>חזור לסופי</button></span></div>`+h;
    $("#msgs").innerHTML=h;const d=$("#msgs .msgok");if(d)d.addEventListener("toggle",()=>{MSG_OPEN=d.open})}
   fitCells($("#sheet"));
-  renderSync();renderAgenda(w);
+  renderSync();renderAgenda(w);if(!$("#tab-set").hidden)renderUsage();
   renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderCalOv();renderEvWeek();requestAnimationFrame(()=>document.querySelectorAll("textarea.grow").forEach(t=>{t.style.height="auto";t.style.height=t.scrollHeight+"px"}));renderStaff();renderSettings();renderMsgs();
 }
 
@@ -3447,6 +3470,64 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)maybeToday
 addEventListener("pageshow",()=>maybeToday());
 document.addEventListener("click",e=>{const t=e.target.closest('.tabs button[data-tab="sched"]');if(t)setTimeout(maybeToday,300)});
 setInterval(()=>{const st=tState();if(st.snooze&&hhmm(new Date())>=st.snooze&&!document.hidden)maybeToday()},30000);
+
+/* ---------- Firebase storage (iCloud-style bar) + cleanup ----------
+   Everything lives in one cloud document; Firestore allows up to 1 MB per document. */
+const FB_LIMIT=1048576;
+const jsize=x=>x==null?0:new Blob([JSON.stringify(x)]).size;
+const kb=n=>n<1024?n+" B":n<1048576?(n/1024).toFixed(n<10240?1:0)+" KB":(n/1048576).toFixed(2)+" MB";
+function usageParts(){const weeks=S.weeks||{},snaps=Object.values(weeks).reduce((a,w)=>a+jsize(w.finalSnap),0),all=jsize(S);
+  const parts=[{k:"weeks",l:"סידורים ואילוצים",c:"#34C759",v:jsize(weeks)-snaps},{k:"snaps",l:"עותקי סידור סופי",c:"#30B0C7",v:snaps},
+    {k:"items",l:"מבחנים ואירועים",c:"#FF9F0A",v:jsize(S.exams)+jsize(S.events)+jsize(S.examCat)},{k:"cal",l:"חופשות וחגים",c:"#FF375F",v:jsize(S.vac)+jsize(S.holidays)},
+    {k:"learn",l:"זיכרון יצירה חכמה",c:"#BF5AF2",v:jsize(S.learn)}];
+  const known=parts.reduce((a,p)=>a+p.v,0);parts.push({k:"other",l:"הגדרות, עובדים וחדרים",c:"#8E8E93",v:Math.max(0,all-known)});return {all,parts}}
+let USAGE_KEY="";
+function renderUsage(){const box=$("#fbUsage");if(!box)return;const {all,parts}=usageParts();const key=all+"|"+parts.map(p=>p.v).join(",");if(key===USAGE_KEY&&box.childElementCount)return;USAGE_KEY=key;
+  const pct=v=>Math.max(v>0?.4:0,v/FB_LIMIT*100);let bk=false;try{bk=!!localStorage.getItem("shift-state-before-cleanup")}catch(e){}
+  box.innerHTML=`<div class="fbu"><div class="fbu-h"><b>אחסון</b><span>${kb(all)} מתוך 1 MB · ${(all/FB_LIMIT*100).toFixed(1)}%</span></div>
+    <div class="fbu-bar" role="img" aria-label="נוצלו ${kb(all)} מתוך 1 MB">${parts.filter(p=>p.v>0).map(p=>`<i style="width:${pct(p.v)}%;background:${p.c}" title="${esc(p.l)} · ${kb(p.v)}"></i>`).join("")}</div>
+    <div class="fbu-leg">${parts.filter(p=>p.v>0).sort((a,b)=>b.v-a.v).map(p=>`<span><i style="background:${p.c}"></i>${esc(p.l)} <small>${kb(p.v)}</small></span>`).join("")}</div>
+    <p class="hint">הכל נשמר במסמך אחד בענן. בקצב השימוש הרגיל זה בערך 150–200 KB בשנה.</p>
+    <div class="fbu-act"><button type="button" class="primary" data-fbclean>ניקוי מידע לא רלוונטי</button>${bk?`<button type="button" data-fbundo>שחזור הניקוי האחרון</button>`:""}</div></div>`;
+  box.querySelectorAll(".fbu-bar i").forEach((el,i)=>el.animate([{transform:"scaleX(0)"},{transform:"none"}],{duration:620,delay:i*60,easing:EZ.out,fill:"backwards"}))}
+/* what can be removed, with how much it frees */
+function cleanPlan(months){const cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-months);const ck=key(cutoff),curWk=key(sundayOf(new Date()));
+  const weeks=S.weeks||{},old=Object.keys(weeks).filter(k=>k<ck);
+  const emptyW=Object.keys(weeks).filter(k=>k<curWk&&!old.includes(k)&&(()=>{const w=weeks[k];return !hasAssign(w)&&!Object.keys(w.cons||{}).length&&!Object.values(w.notes||{}).some(a=>(a||[]).some(x=>String(x||"").trim()))})());
+  const snapW=Object.keys(weeks).filter(k=>k<curWk&&!old.includes(k)&&weeks[k].finalSnap);
+  const oldEx=(S.exams||[]).filter(x=>x.date&&x.date<ck),oldEv=(S.events||[]).filter(x=>x.date&&x.date<ck),oldVac=(S.vac||[]).filter(v=>(v.to||v.from)&&(v.to||v.from)<ck);
+  const oldHol=(S.holidays||[]).filter(h=>(h.to||h.from)&&(h.to||h.from)<ck);
+  return [
+    {k:"old",t:"סידורים ישנים",d:`${old.length} שבועות לפני ${dmy(ck)}`,n:old.length,v:old.reduce((a,k)=>a+jsize(weeks[k])+k.length+4,0),on:true,run:()=>old.forEach(k=>delete S.weeks[k])},
+    {k:"snap",t:"עותקי \"סופי\" של שבועות שעברו",d:`${snapW.length} שבועות – הסידור נשאר, רק אפשרות "ביטול שינויים" נמחקת`,n:snapW.length,v:snapW.reduce((a,k)=>a+jsize(weeks[k].finalSnap),0),on:true,run:()=>snapW.forEach(k=>delete S.weeks[k].finalSnap)},
+    {k:"empty",t:"שבועות ריקים שעברו",d:`${emptyW.length} שבועות בלי סידור, אילוצים או הערות`,n:emptyW.length,v:emptyW.reduce((a,k)=>a+jsize(weeks[k])+k.length+4,0),on:true,run:()=>emptyW.forEach(k=>delete S.weeks[k])},
+    {k:"items",t:"מבחנים ואירועים שעברו",d:`${oldEx.length} מבחנים, ${oldEv.length} אירועים לפני ${dmy(ck)} (מאגר המבחנים נשאר)`,n:oldEx.length+oldEv.length,v:jsize(oldEx)+jsize(oldEv),on:true,run:()=>{S.exams=S.exams.filter(x=>!oldEx.includes(x));S.events=S.events.filter(x=>!oldEv.includes(x))}},
+    {k:"cal",t:"חופשות וחגים שהסתיימו",d:`${oldVac.length} חופשות, ${oldHol.length} חגים לפני ${dmy(ck)}`,n:oldVac.length+oldHol.length,v:jsize(oldVac)+jsize(oldHol),on:true,run:()=>{S.vac=S.vac.filter(x=>!oldVac.includes(x));S.holidays=S.holidays.filter(x=>!oldHol.includes(x))}},
+    {k:"learn",t:"זיכרון יצירה חכמה",d:"תיקונים שנלמדו בהדבקת מיילים",n:S.learn?1:0,v:jsize(S.learn),on:false,run:()=>{delete S.learn}}].filter(x=>x.n>0&&x.v>0)}
+function openClean(){let months=12;const o=document.createElement("div");o.className="pastebox cleanbox";
+  o.innerHTML=`<div class="pcard" role="dialog" aria-label="ניקוי מידע"><div class="shd"><span class="pgrab" aria-hidden="true"></span><b>ניקוי מידע לא רלוונטי</b><small>Firebase</small><button class="shx" data-px aria-label="סגור">✕</button></div>
+    <div class="clp"><span>ישן מ־</span>${[6,12,24].map(m=>`<button type="button" data-cm="${m}" aria-pressed="${m===months}">${m===6?"חצי שנה":m===12?"שנה":"שנתיים"}</button>`).join("")}</div>
+    <div class="cll"></div><div class="pact clact"></div></div>`;
+  document.body.appendChild(o);const close=()=>{if(o._c)return;o._c=1;o.classList.add("out");setTimeout(()=>o.remove(),320)};sheetDrag(o.querySelector(".pcard"),close);
+  let plan=[],sel=new Set();
+  const draw=()=>{plan=cleanPlan(months);sel=new Set(plan.filter(x=>x.on).map(x=>x.k));paint()};
+  const paint=()=>{const tot=plan.filter(x=>sel.has(x.k)).reduce((a,x)=>a+x.v,0);
+    o.querySelector(".cll").innerHTML=plan.length?plan.map(x=>`<button type="button" class="clr" data-ck="${x.k}" aria-pressed="${sel.has(x.k)}"><span class="clc" aria-hidden="true"></span><span class="clt"><b>${esc(x.t)}</b><small>${esc(x.d)}</small></span><span class="clv">${kb(x.v)}</span></button>`).join("")
+      :`<p class="hint" style="text-align:center;padding:14px 0">אין מה לנקות – הכל עדכני ✨</p>`;
+    o.querySelector(".clact").innerHTML=plan.length?`<button type="button" class="primary" data-cgo ${tot?"":"disabled"}>ניקוי ${tot?"· "+kb(tot):""}</button>`:`<button type="button" data-px>סגירה</button>`};
+  draw();
+  o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-px]")){close();return}
+    const cm=e.target.closest("[data-cm]");if(cm){months=+cm.dataset.cm;o.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed",b===cm));draw();return}
+    const ck=e.target.closest("[data-ck]");if(ck){const k=ck.dataset.ck;sel.has(k)?sel.delete(k):sel.add(k);haptic();paint();return}
+    if(e.target.closest("[data-cgo]")){const go=plan.filter(x=>sel.has(x.k));if(!go.length)return;const tot=go.reduce((a,x)=>a+x.v,0);
+      askSave("לנקות "+kb(tot)+"?","המידע יימחק מכל המכשירים. עותק נשמר במכשיר הזה כדי שאפשר יהיה לשחזר.","ניקוי","ביטול").then(ok=>{if(!ok)return;
+        try{localStorage.setItem("shift-state-before-cleanup",JSON.stringify(S))}catch(err){}
+        go.forEach(x=>x.run());changed();render();USAGE_KEY="";renderUsage();close();toast("נוקה "+kb(tot))})}});
+}
+document.addEventListener("click",e=>{if(e.target.closest("[data-fbclean]"))openClean();
+  if(e.target.closest("[data-fbundo]"))askSave("לשחזר את המצב שלפני הניקוי?","שינויים שנעשו מאז הניקוי יוחלפו.","שחזור","ביטול").then(ok=>{if(!ok)return;
+    try{const b=JSON.parse(localStorage.getItem("shift-state-before-cleanup")||"null");if(b){Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,b);localStorage.removeItem("shift-state-before-cleanup");changed();render();USAGE_KEY="";renderUsage();toast("שוחזר")}}catch(err){toast("השחזור נכשל")}})});
+document.addEventListener("click",e=>{if(e.target.closest('.tabs button[data-tab="set"]'))setTimeout(()=>{USAGE_KEY="";renderUsage()},450)});
 /* ---------- new / edit exam or event: a native-style sheet with the whole form ---------- */
 function openItemSheet(kind,id,seed){const isEx=kind==="exams",old=id?(S[kind]||[]).find(x=>x.id===id):null;
   const r=Object.assign({date:key(new Date())>cur?key(new Date()):cur},seed||{},old||{});
