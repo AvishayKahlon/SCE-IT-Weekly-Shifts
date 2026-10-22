@@ -1464,6 +1464,24 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 @keyframes sgout{to{opacity:0;transform:scale(1.03)}}
 @keyframes sgbreath{from{opacity:.55}to{opacity:.95}}
 @media (prefers-reduced-motion:reduce){.siriglow{display:none}}
+
+/* floating AI button (events tab) */
+.aifab{position:fixed;z-index:38;inset-inline-start:18px;bottom:calc(98px + env(safe-area-inset-bottom,0px));width:58px;height:58px;padding:0!important;border:0!important;border-radius:50%!important;
+  display:grid;place-items:center;background:var(--glass-bg)!important;-webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);
+  box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-edge),inset 0 0 0 .5px var(--glass-edge)!important;isolation:isolate}
+.aifab::before{content:"";position:absolute;inset:-2px;border-radius:50%;padding:2px;z-index:-1;background:conic-gradient(from var(--pa),#FF9F0A,#FF375F,#BF5AF2,#5E5CE6,#64D2FF,#30D158,#FF9F0A);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:pspin 4s linear infinite;opacity:.9}
+.aifab::after{content:"";position:absolute;inset:-8px;border-radius:50%;z-index:-2;background:conic-gradient(from var(--pa),#FF9F0A,#FF375F,#BF5AF2,#5E5CE6,#64D2FF,#30D158,#FF9F0A);filter:blur(14px);opacity:.35;animation:pspin 4s linear infinite}
+.aifab svg{width:28px;height:28px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15));animation:aifloat 3.2s ease-in-out infinite}
+@keyframes aifloat{50%{transform:translateY(-2px) rotate(-6deg) scale(1.04)}}
+.aifab:active{transform:scale(.92)}
+#tab-ev[hidden] .aifab{display:none}
+@media (min-width:701px){.aifab{bottom:28px;inset-inline-start:28px}}
+@media (prefers-reduced-motion:reduce){.aifab::before,.aifab::after,.aifab svg{animation:none}}
+/* add-to-calendar buttons */
+.xcal{width:34px;height:34px;padding:0!important;display:inline-grid;place-items:center;flex:none;margin-inline-end:4px}
+.xcal svg{width:18px;height:18px}
+.ewi .xcal{border-radius:12px!important}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1587,7 +1605,7 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
       <h2>מבחנים</h2>
       <p class="hint" style="margin:10px 0">מבחן מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם המבחן | שעה.</p>
       <div class="scroll"><table class="cal xt" id="exT"></table></div>
-      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button><button data-paste>📋 הדבקה ממייל</button></div>
+      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
       <details class="cons xsec sub" id="catBox">
         <summary><h3>מאגר מבחנים קבועים</h3><span class="xcnt" id="ecN"></span></summary>
         <p class="hint" style="margin:10px 0">ממוין לפי א-ב. בחירת שם מבחן בטבלה למעלה ממלאת אוטומטית תוכנה, מרצה, קמפוס, שעה והערות. מבחן או מרצה חדשים שמוסיפים למעלה נשמרים כאן לפעם הבאה.</p>
@@ -1599,8 +1617,9 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
       <h2>אירועים וכנסים</h2>
       <p class="hint" style="margin:10px 0">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם האירוע | שעה. אירועים שעברו מוצגים באפור.</p>
       <div class="scroll"><table class="cal xt" id="evT"></table></div>
-      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button><button data-paste>📋 הדבקה ממייל</button></div>
+      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button></div>
     </section>
+    <button class="aifab" data-paste aria-label="הוספה חכמה ממייל" title="הוספה חכמה ממייל"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9F0A"/><stop offset=".35" stop-color="#FF375F"/><stop offset=".65" stop-color="#BF5AF2"/><stop offset="1" stop-color="#5E5CE6"/></linearGradient></defs><path fill="url(#aig)" d="M10 2.5l1.6 4.6a3 3 0 0 0 1.8 1.8L18 10.5l-4.6 1.6a3 3 0 0 0-1.8 1.8L10 18.5l-1.6-4.6a3 3 0 0 0-1.8-1.8L2 10.5l4.6-1.6a3 3 0 0 0 1.8-1.8z"/><path fill="url(#aig)" d="M18.5 14l.8 2.2a1.6 1.6 0 0 0 1 1l2.2.8-2.2.8a1.6 1.6 0 0 0-1 1l-.8 2.2-.8-2.2a1.6 1.6 0 0 0-1-1L14.5 18l2.2-.8a1.6 1.6 0 0 0 1-1z"/></svg></button>
     <datalist id="dlExam"></datalist><datalist id="dlLect"></datalist><datalist id="dlSoft"></datalist><datalist id="dlEvent"></datalist>
   </section>
 
@@ -1718,7 +1737,7 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 07:25";
+const APP_VER="22.10.2026 07:40";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2497,7 +2516,7 @@ function renderEv(){
       return `<td data-l="${l}"><input type="text" ${at} value="${esc(v)}" aria-label="${l}"${t==="h"?' placeholder="שעה" dir="ltr"':f==="name"?` placeholder="${l}"`:""}></td>`};
     $(cfg.tbl).innerHTML=`<thead><tr>${cfg.cols.map(c=>`<th>${c[1]}</th>`).join("")}<th></th></tr></thead><tbody>`+
       (list.length?list.map(r=>{const open=XOPEN.has(r.id),sum=cfg.det?[r.software,r.lecturer,r.notes].filter(Boolean).join(" · "):"";
-        let h=`<tr class="${r.date&&r.date<today?"past":""}${kind==="examCat"?" cat":""}${open?" open":""}${cfg.det&&(open||sum)?" has-det":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel">${kind==="examCat"&&r.name?`<button class="xuse" data-xuse="${r.id}" title="הוספת מבחן ${esc(r.name)} לטבלת המבחנים" aria-label="הוספת מבחן ${esc(r.name)}">+</button>`:""}${cfg.det?`<button class="xexp" data-xexp="${r.id}" aria-expanded="${open}" title="${esc(sum||"פרטים")}">${open?"▴":"▾"}</button>`:""}<button data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button></td></tr>`;
+        let h=`<tr class="${r.date&&r.date<today?"past":""}${kind==="examCat"?" cat":""}${open?" open":""}${cfg.det&&(open||sum)?" has-det":""}">${cfg.cols.map(c=>cell(r,c)).join("")}<td class="xdel">${kind==="examCat"&&r.name?`<button class="xuse" data-xuse="${r.id}" title="הוספת מבחן ${esc(r.name)} לטבלת המבחנים" aria-label="הוספת מבחן ${esc(r.name)}">+</button>`:""}${cfg.det?`<button class="xexp" data-xexp="${r.id}" aria-expanded="${open}" title="${esc(sum||"פרטים")}">${open?"▴":"▾"}</button>`:""}${kind!=="examCat"&&r.date&&r.name?`<button class="xcal" data-ical="${kind}|${r.id}" title="הוספה ליומן" aria-label="הוספה ליומן"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg></button>`:""}<button data-xdel="${kind}|${r.id}" aria-label="מחק">✕</button></td></tr>`;
         /* details line (software / lecturer / notes): a short summary, or editable fields when opened */
         if(cfg.det)h+=open?`<tr class="xdet"><td colspan="${cfg.cols.length+1}"><div class="xdg">${cfg.det.map(([f,l])=>`<label><span>${l}</span>${(DL[kind]||{})[f]?`<div class="cmb"><input type="text" data-xf="${kind}|${r.id}|${f}" value="${esc(r[f]||"")}" data-dl="${DL[kind][f]}" autocomplete="off"><button type="button" class="cmb-b" data-cmb tabindex="-1" aria-label="פתיחת רשימת ${l}">▾</button></div>`:`<input type="text" data-xf="${kind}|${r.id}|${f}" value="${esc(r[f]||"")}">`}</label>`).join("")}</div></td></tr>`
           :sum?`<tr class="xdet sum"><td colspan="${cfg.cols.length+1}">${esc(sum)}</td></tr>`:"";
@@ -2673,11 +2692,11 @@ function renderEvWeek(){const el=$("#ev-wk");if(!el)return;const w=W();
   const row=(x,d)=>{const s=S.sites.find(st=>siteMatch(x.campus,st.id)),duty=s&&x.time?onDutyAt(x.time,namesAt(w,s.id,"m",d),namesAt(w,s.id,"e",d)):"";
     return `<div class="ovr ewi" data-goto="${x.kind}|${x.id}" role="button" tabindex="0"><span class="pav ${x.kind}">${x.kind==="exams"?"📝":"📅"}</span>
       <span class="ovm"><b>${esc(x.name)}</b><small>${[x.time?"🕐 "+esc(x.time):"",esc(x.campus||""),x.room?"כיתה "+esc(x.room):""].filter(Boolean).join(" · ")}</small>${duty?`<small class="duty">👤 בכוננות: ${esc(duty)}</small>`:""}</span>
-      ${s?waBtn(`data-xwa="${x.kind}|${x.id}|${s.id}|${d}"`,"שליחה לוואטסאפ: "+x.name):""}</div>`};
+      <button class="xcal" data-ical="${x.kind}|${x.id}" title="הוספה ליומן" aria-label="הוספה ליומן"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg></button>${s?waBtn(`data-xwa="${x.kind}|${x.id}|${s.id}|${d}"`,"שליחה לוואטסאפ: "+x.name):""}</div>`};
   el.innerHTML=`<section class="card"><div class="ovh"><h2>מבחנים ואירועים ${weekSpan()}</h2></div>
     ${days.length?days.map(({dn,d,k,items})=>`<div class="ovday"><div class="ovdh"><b>${dn}</b><span>${dK(k)}</span></div><div class="ovl">${items.map(x=>row(x,d)).join("")}</div></div>`).join("")
       :`<p class="ovempty">אין מבחנים או אירועים בשבוע הזה</p>`}
-    <div class="row"><button class="primary" data-ovadd="exams">+ מבחן</button><button data-ovadd="events">+ אירוע</button><button data-paste>📋 הדבקה ממייל</button></div></section>`}
+    <div class="row"><button class="primary" data-ovadd="exams">+ מבחן</button><button data-ovadd="events">+ אירוע</button></div></section>`}
 
 /* ---------- paste an email → exam / event ----------
    Plain rules, all on this device: date, time (or range), campus, room, exam name from the bank, needs. You check before it is added. */
@@ -2755,7 +2774,7 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
     f.querySelectorAll("textarea.grow").forEach(x=>{x.style.height="auto";x.style.height=x.scrollHeight+"px"});
     /* reveal: each detected field fades up in turn, filled ones glow */
     [...f.children].forEach((el,i)=>{el.style.animationDelay=(i*70)+"ms";el.classList.add("rev");const inp=el.querySelector("input,select,textarea");if(inp&&inp.value)el.classList.add("pgot")});
-    o.querySelector(".pact").innerHTML=`<button data-pgo>✨ זיהוי מחדש</button><button class="primary" data-padd>הוסף</button>`};
+    o.querySelector(".pact").innerHTML=`<button data-pgo>✨ זיהוי מחדש</button><button class="primary" data-padd>הוסף</button><button data-padd="cal" title="הוסף גם ליומן">הוסף + ליומן</button>`};
   o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-px]")){close();return}
     if(e.target.closest("[data-pgo]")){if(!ta.value.trim()){toast("הדביקו קודם את המייל");return}const r=parseMail(ta.value),card=o.querySelector(".pcard");
       card.classList.add("thinking");f.hidden=true;
@@ -2766,17 +2785,36 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
     const dx=e.target.closest("[data-pdx]");if(dx){const c=dx.closest(".pdchip"),wrap=f.querySelector(".pdc");c.remove();const n=wrap.children.length;
       f.querySelector(".pdl").textContent=n+" תאריכים – ייווצר רשומה נפרדת לכל תאריך";if(n<2){const only=wrap.querySelector(".pdchip");f.querySelector(".pdates").remove();const di=f.querySelector('[data-pf="date"]');if(only)di.value=only.dataset.pd;di.closest("label").hidden=false}return}
     const k=e.target.closest("[data-pk]");if(k){f.querySelectorAll("[data-pk]").forEach(b=>b.setAttribute("aria-pressed",b===k));return}
-    if(e.target.closest("[data-padd]")){const kind=f.querySelector('[data-pk][aria-pressed="true"]').dataset.pk,v=n=>(f.querySelector(`[data-pf="${n}"]`)||{}).value||"";
+    if(e.target.closest("[data-padd]")){const alsoCal=e.target.closest("[data-padd]").dataset.padd==="cal",kind=f.querySelector('[data-pk][aria-pressed="true"]').dataset.pk,v=n=>(f.querySelector(`[data-pf="${n}"]`)||{}).value||"";
       const dates=f.querySelector(".pdc")?[...f.querySelectorAll(".pdchip")].map(c=>c.dataset.pd):[v("date")||cur];
       if(!v("name").trim()){toast("חסר שם");return}
       let rec;dates.forEach(dd=>{rec={id:uid(),date:dd,name:v("name").trim(),time:v("time").trim(),campus:v("campus"),room:v("room").trim()};
       if(kind==="exams"){applyCat(rec);if(v("room").trim())rec.room=v("room").trim();if(v("campus"))rec.campus=v("campus");if(v("time").trim())rec.time=v("time").trim();S.exams.push(rec);learnExam(rec)}
       else{rec.needs=v("needs").trim();applyEvent(rec);S.events.push(rec)}
       if(kind==="exams"&&v("needs").trim())rec.notes=v("needs").trim()});
+      if(alsoCal){const made=(kind==="exams"?S.exams:S.events).filter(x=>dates.includes(x.date)&&x.name===v("name").trim());setTimeout(()=>addToCal(made),300)}
       changed();render();close();toast(dates.length>1?`נוספו ${dates.length} ${kind==="exams"?"מבחנים":"אירועים"}`:(kind==="exams"?"המבחן":"האירוע")+" נוסף");
       const first=(kind==="exams"?S.exams:S.events).filter(x=>dates.includes(x.date)&&x.name===v("name").trim()).sort((a,b)=>a.date.localeCompare(b.date))[0];setTimeout(()=>goItem(kind,(first||rec).id),260)}});
   document.addEventListener("keydown",function k(e){if(e.key==="Escape"&&document.body.contains(o)){close();document.removeEventListener("keydown",k)}})}
 document.addEventListener("click",e=>{if(e.target.closest("[data-paste]"))openPaste()});
+
+/* ---------- add to calendar: a standard .ics the phone / Outlook opens as "Add to calendar" ---------- */
+function icsFor(list){const esc2=x=>String(x||"").replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/[,;]/g,m=>"\\"+m);
+  const d8=k=>k.replace(/-/g,""),t4=x=>x.replace(":","")+"00",stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,"");
+  const ev=list.map(x=>{const tt=[...String(x.time||"").matchAll(/(\d{1,2}):(\d{2})/g)].map(m=>String(m[1]).padStart(2,"0")+":"+m[2]);
+    let when;if(tt.length){const st=tt[0];let en=tt[1];if(!en){const[h,mi]=st.split(":");en=String(Math.min(23,+h+1)).padStart(2,"0")+":"+mi}
+      when=`DTSTART;TZID=Asia/Jerusalem:${d8(x.date)}T${t4(st)}\r\nDTEND;TZID=Asia/Jerusalem:${d8(x.date)}T${t4(en)}`}
+    else{const n=parseKey(x.date);n.setDate(n.getDate()+1);when=`DTSTART;VALUE=DATE:${d8(x.date)}\r\nDTEND;VALUE=DATE:${d8(key(n))}`}
+    const loc=[x.campus,x.room?(/^\d/.test(x.room)?"כיתה "+x.room:x.room):""].filter(Boolean).join(" · ");
+    const desc=[x.software?"תוכנה: "+x.software:"",x.lecturer?"מרצה: "+x.lecturer:"",x.needs||"",x.notes||""].filter(Boolean).join("\n");
+    return `BEGIN:VEVENT\r\nUID:${x.id}-${d8(x.date)}@sce-team\r\nDTSTAMP:${stamp}\r\n${when}\r\nSUMMARY:${esc2(x.name)}\r\n${loc?`LOCATION:${esc2(loc)}\r\n`:""}${desc?`DESCRIPTION:${esc2(desc)}\r\n`:""}END:VEVENT`}).join("\r\n");
+  return `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//SCE IT//Team//HE\r\nCALSCALE:GREGORIAN\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Jerusalem\r\nBEGIN:STANDARD\r\nDTSTART:19701025T020000\r\nTZOFFSETFROM:+0300\r\nTZOFFSETTO:+0200\r\nRRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:19700327T020000\r\nTZOFFSETFROM:+0200\r\nTZOFFSETTO:+0300\r\nRRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1FR\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\n${ev}\r\nEND:VCALENDAR\r\n`}
+function addToCal(list){if(!list.length)return;haptic();const ics=icsFor(list),name=(list.length>1?list[0].name+" ("+list.length+")":list[0].name).replace(/[\\/:*?"<>|]/g," ")+".ics";
+  const isApple=/iPhone|iPad|Macintosh/.test(navigator.userAgent)&&"ontouchend" in document;
+  if(isApple){location.href="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics);return}   /* iOS opens its own "Add to calendar" sheet */
+  saveFile(name,new Blob([ics],{type:"text/calendar;charset=utf-8"}));toast("הקובץ ירד – פתחו אותו כדי להוסיף ליומן")}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-ical]");if(!b)return;e.stopPropagation();const[k,id]=b.dataset.ical.split("|");
+  const r=(S[k]||[]).find(x=>x.id===id);if(r)addToCal([r])},true);
 /* jump to one item in its own list, and flash it */
 function goItem(kind,id){const tab={vac:"cal",hol:"cal",exams:"ev",events:"ev"}[kind];if(!tab)return;
   const tb=document.querySelector(`.tabs button[data-tab="${tab}"]`);if(tb.getAttribute("aria-selected")!=="true")tb.click();
