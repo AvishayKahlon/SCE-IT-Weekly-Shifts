@@ -1665,6 +1665,20 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
 .prg{display:grid;gap:4px}
 .prg .rm{min-height:34px!important;min-width:50px!important;padding:3px 8px!important;font-size:14.5px!important;margin:0!important}.prg>div{gap:5px!important}.prg>span{font-size:12px;color:var(--muted);font-weight:600}.prg>div{display:flex;flex-wrap:wrap;gap:6px}
 .prmore{justify-self:start;min-height:34px!important;padding:4px 14px!important;font-size:14px;border-radius:999px!important}
+
+/* iOS-style alert */
+.alertbox{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:24px;background:rgba(0,0,0,.28);animation:scrimin 200ms ease both}
+.alertbox.out{animation:scrimout 180ms ease both}
+.alertc{width:min(300px,100%);border-radius:26px;padding:18px 16px 14px;text-align:center;display:grid;gap:6px;
+  background:color-mix(in srgb,var(--surface) 92%,transparent);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
+  box-shadow:0 20px 50px rgba(0,0,0,.25),inset 0 1px 0 var(--glass-edge,#fff);animation:alertin 380ms var(--pop) both}
+.alertbox.out .alertc{animation:dpopout 180ms var(--ease-in) both}
+@keyframes alertin{from{opacity:0;transform:scale(1.12)}}
+.alertc b{font-size:17px}.alertc p{margin:0 0 8px;font-size:14px;color:var(--muted)}
+.alertb{display:grid;gap:8px}.alertb button{min-height:46px;font-size:16px;font-weight:600;border-radius:16px!important}
+.alertc .alertb button.pref,.alertc .alertb button.pref *{color:var(--accent-ink)!important}
+.alertb button.pref{background:var(--accent)!important;color:var(--accent-ink)!important;border-color:var(--accent)!important;font-weight:700}
+.alertb small{font-weight:500;opacity:.8;font-size:12.5px}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1925,7 +1939,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 14:50";
+const APP_VER="22.10.2026 15:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2786,6 +2800,17 @@ function roomAdd(sid,txt,grp){S.rooms=S.rooms||{};const cur=S.rooms[sid]||(S.roo
   return n}
 /* which campus a room belongs to ("" when unknown or ambiguous) */
 const normRoom=x=>String(x||"").replace(/^(?:כיתה|חדר)\s+/,"").replace(/ספריה/g,"ספרייה").replace(/[\u200e\u200f]/g,"").trim();
+/* a room number that exists in both campuses → [room, campuses, suggested campus]; 131 is usually בני ברית */
+const ROOM_PREF={"131":"בני ברית"};
+function roomAmb(room){for(const n of splitL(room).map(normRoom)){const o=S.sites.filter(s=>((S.rooms||{})[s.id]||[]).includes(n));
+    if(o.length>1){const cs=o.map(s=>CAMPUS.find(c=>c!=="שניהם"&&siteMatch(c,s.id))).filter(Boolean);return {room:n,campuses:cs,pref:ROOM_PREF[n]||cs[0]}}}return null}
+/* iOS-style alert: which campus is this room in? */
+function askCampus(a,cb){const o=document.createElement("div");o.className="alertbox";
+  o.innerHTML=`<div class="alertc" role="alertdialog" aria-label="באיזה קמפוס?"><b>חדר ${esc(a.room)} – באיזה קמפוס?</b><p>מספר החדר הזה קיים בשני הקמפוסים.</p>
+    <div class="alertb">${a.campuses.map(c=>`<button type="button" data-ac="${esc(c)}" class="${c===a.pref?"pref":""}">${esc(c)}${c===a.pref?" <small>(בדרך כלל)</small>":""}</button>`).join("")}</div></div>`;
+  document.body.appendChild(o);haptic();
+  const done=c=>{o.classList.add("out");setTimeout(()=>o.remove(),200);cb(c)};
+  o.addEventListener("click",e=>{const b=e.target.closest("[data-ac]");if(b)done(b.dataset.ac);else if(e.target===o)done(a.pref)})}
 function campusOfRoom(room){const own=new Set();splitL(room).map(normRoom).forEach(n=>{const o=S.sites.filter(s=>((S.rooms||{})[s.id]||[]).includes(n));if(o.length===1)own.add(o[0])});
   if(own.size!==1)return "";const s1=[...own][0];return CAMPUS.find(c=>c!=="שניהם"&&siteMatch(c,s1.id))||""}
 
@@ -3028,7 +3053,9 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
       /* Siri-style light around the edges of the whole screen while it "thinks" */
       const glow=document.createElement("div");glow.className="siriglow";glow.innerHTML="<i></i><i></i>";document.body.appendChild(glow);
       setTimeout(()=>{glow.classList.add("out");setTimeout(()=>glow.remove(),700)},matchMedia("(prefers-reduced-motion:reduce)").matches?0:1000);o.querySelector(".pact").innerHTML=`<span class="pthink">מזהה פרטים…</span>`;haptic();
-      setTimeout(()=>{card.classList.remove("thinking");card.classList.add("done");show(r);setTimeout(()=>card.classList.remove("done"),1400)},matchMedia("(prefers-reduced-motion:reduce)").matches?0:900);return}
+      setTimeout(()=>{card.classList.remove("thinking");card.classList.add("done");
+        const amb=!r.campus&&r.room?roomAmb(r.room):null;if(amb)r.campus=amb.pref;show(r);
+        if(amb)setTimeout(()=>askCampus(amb,c=>{const sel=f.querySelector('[data-pf="campus"]');if(sel){sel.value=c;sel.closest("label").classList.add("pgot")}}),650);setTimeout(()=>card.classList.remove("done"),1400)},matchMedia("(prefers-reduced-motion:reduce)").matches?0:900);return}
     const dx=e.target.closest("[data-pdx]");if(dx){const c=dx.closest(".pdchip"),wrap=f.querySelector(".pdc");c.remove();const n=wrap.children.length;
       f.querySelector(".pdl").textContent=n+" תאריכים – ייווצר רשומה נפרדת לכל תאריך";if(n<2){const only=wrap.querySelector(".pdchip");f.querySelector(".pdates").remove();const di=f.querySelector('[data-pf="date"]');if(only)di.value=only.dataset.pd;di.closest("label").hidden=false}return}
     const k=e.target.closest("[data-pk]");if(k){f.querySelectorAll("[data-pk]").forEach(b=>b.setAttribute("aria-pressed",b===k));return}
@@ -3074,7 +3101,9 @@ function openItemSheet(kind,id,seed){const isEx=kind==="exams",old=id?(S[kind]||
     const chip=x=>`<button type="button" class="rm" data-pr="${esc(x)}" aria-pressed="${sel.includes(x)}">${esc(x)}</button>`;
     box.innerHTML=show.map(([g,l])=>`<div class="prg"><span>${esc(g)}</span><div>${[...l].map(chip).join("")}</div></div>`).join("")
       +(show.length<groups.size?`<button type="button" class="prmore" data-prall>כל החדרים (${[...groups.values()].reduce((a,l)=>a+l.size,0)})</button>`:allRooms&&groups.size>1?`<button type="button" class="prmore" data-prall>פחות</button>`:"")};rooms();
-  q("room").addEventListener("input",()=>{if(!campus){const c=campusOfRoom(q("room").value);if(c){campus=c;f.querySelectorAll("[data-pc]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pc===campus))}}rooms()});
+  const setCampus=c=>{campus=c;f.querySelectorAll("[data-pc]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pc===campus));rooms()};let asked="";
+  q("room").addEventListener("input",()=>{if(!campus){const c=campusOfRoom(q("room").value);if(c){setCampus(c);return}}rooms()});
+  q("room").addEventListener("change",()=>{if(campus)return;const a=roomAmb(q("room").value);if(a&&asked!==a.room){asked=a.room;askCampus(a,setCampus)}});
   /* picking an exam from the bank fills software / lecturer / campus / time that are still empty */
   q("name").addEventListener("change",()=>{if(!isEx)return;const t={name:q("name").value};applyCat(t);
     ["software","lecturer","time"].forEach(k=>{if(t[k]&&!q(k).value)q(k).value=t[k]});if(t.notes&&!q("notes").value){q("notes").value=t.notes;grow(q("notes"))}
