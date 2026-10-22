@@ -1801,6 +1801,13 @@ td.c-range{display:none}
 .rpro>h3{margin:0;font-size:15px;font-weight:800}.rpro>h3 span{font-weight:600;color:var(--muted);font-size:13px}
 .rgrp.sub h4{font-size:13px}
 .rtnew{border-style:dashed!important}
+
+.rplus{min-width:40px;min-height:32px!important;padding:0 12px!important;border-radius:999px!important;border:1.5px dashed color-mix(in srgb,var(--accent) 55%,transparent)!important;background:transparent!important;color:var(--accent)!important;font-size:19px;font-weight:700;box-shadow:none!important}
+.rgadd{display:inline-flex;gap:6px;align-items:center;animation:tipin 240ms var(--ease-out) both}
+.rgadd input{width:110px;min-height:34px;padding:4px 10px;font-weight:600}
+.rchip.fresh button{color:var(--accent-ink)!important;background:rgba(255,255,255,.2)!important}
+.rchip.fresh{background:var(--accent)!important;color:var(--accent-ink);animation:freshchip 1.4s var(--ease-out) both}
+@keyframes freshchip{0%{transform:scale(.6);opacity:0}25%{transform:scale(1.12);opacity:1}45%{transform:none}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -2061,7 +2068,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 18:05";
+const APP_VER="22.10.2026 18:15";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3270,7 +3277,7 @@ document.addEventListener("click",e=>{if(e.target.closest("[data-paste]"))openPa
 
 /* rooms of one campus in a sheet: view first; ✎ עריכה edits a draft, שמירה applies it, closing without saving discards it */
 function openRooms(sid){const site=S.sites.find(x=>x.id===sid);if(!site)return;
-  let edit=false,draft=null;const o=document.createElement("div");o.className="pastebox roombox";
+  let edit=false,draft=null,lastAdded="";const o=document.createElement("div");o.className="pastebox roombox";
   o.innerHTML=`<div class="pcard" role="dialog" aria-label="כיתות וחדרים"><div class="shd"><span class="pgrab" aria-hidden="true"></span><b>כיתות וחדרים</b><small>${esc(site.name)}</small><button class="shx" data-px aria-label="סגור">✕</button></div><div class="rbody"></div><div class="pact ract"></div></div>`;
   document.body.appendChild(o);const body=o.querySelector(".rbody"),act=o.querySelector(".ract");
   const close=()=>{if(o._closing)return;if(edit&&dirty()&&!confirm("לצאת בלי לשמור את השינויים?"))return;o._closing=1;o.classList.add("out");setTimeout(()=>o.remove(),320)};
@@ -3281,7 +3288,7 @@ function openRooms(sid){const site=S.sites.find(x=>x.id===sid);if(!site)return;
     return [...m.entries()].sort((a,b)=>{const ia=ROOM_G.indexOf(a[0]),ib=ROOM_G.indexOf(b[0]);return (ia<0?99:ia)-(ib<0?99:ib)||HE.compare(a[0],b[0])})};
   const draw=()=>{const src=edit?draft:snap(),gs=groups(src);
     const PEN='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
-    const sec=([g,l],sub)=>`<section class="rgrp${sub?" sub":""}"><h4 class="rgh"><span class="rgt">${esc(gName(sid,g,src.gname))}</span> <span class="rgn">${l.length}</span><button type="button" class="rgedit" data-rgedit="${esc(g)}" aria-label="עריכת הכותרת ${esc(gName(sid,g,src.gname))}">${PEN}</button></h4><div class="rchips">${l.map(r=>`<span class="rchip">${esc(r)}${edit?`<button type="button" data-rdel="${esc(r)}" aria-label="הסר ${esc(r)}">✕</button>`:""}</span>`).join("")}</div></section>`;
+    const sec=([g,l],sub)=>`<section class="rgrp${sub?" sub":""}"><h4 class="rgh"><span class="rgt">${esc(gName(sid,g,src.gname))}</span> <span class="rgn">${l.length}</span><button type="button" class="rgedit" data-rgedit="${esc(g)}" aria-label="עריכת הכותרת ${esc(gName(sid,g,src.gname))}">${PEN}</button></h4><div class="rchips">${l.map(r=>`<span class="rchip${r===lastAdded?" fresh":""}" data-room="${esc(r)}">${esc(r)}${edit?`<button type="button" data-rdel="${esc(r)}" aria-label="הסר ${esc(r)}">✕</button>`:""}</span>`).join("")}${edit?`<button type="button" class="rplus" data-raddg="${esc(g)}" aria-label="הוספת חדר ל${esc(gName(sid,g,src.gname))}">+</button>`:""}</div></section>`;
     /* professional labs sit together under one "מעבדות מקצועיות" heading, each with its short name */
     const pro=gs.filter(([g])=>isPro(g));let proDone=false;
     const proBlock=()=>`<section class="rpro"><h3>מעבדות מקצועיות <span>${pro.reduce((a,[,l])=>a+l.length,0)}</span></h3>${pro.map(x=>sec(x,true)).join("")}</section>`;
@@ -3291,11 +3298,14 @@ function openRooms(sid){const site=S.sites.find(x=>x.id===sid);if(!site)return;
         <button type="button" class="primary" data-rgo>הוספה</button></div>`:"");
     act.innerHTML=edit?`<button class="primary" data-rsave>שמירה</button><button data-rcancel>ביטול</button>`:`<button class="primary" data-redit><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg> עריכה</button>`};
   draw();
-  const add=()=>{const inp=body.querySelector("[data-rin]"),t=body.querySelector('[data-rt][aria-pressed="true"]'),g=t?t.dataset.rt:"אחר";
-    const list=String(inp.value||"").split(/[,;\n]+/).flatMap(x=>/^[\d\s]+$/.test(x.trim())?x.trim().split(/\s+/):[x.trim()]).map(normRoom).filter(Boolean);
-    if(!list.length)return;let n=0;list.forEach(r=>{if(!draft.rooms.includes(r)){draft.rooms.push(r);n++}draft.type[sid+"|"+r]=g});
-    draw();haptic();const ni=body.querySelector("[data-rin]");ni&&ni.focus();toast(n?(n>1?`${n} חדרים נוספו לטיוטה`:"החדר נוסף לטיוטה"):"כבר ברשימה")};
-  o.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("[data-rin]")){e.preventDefault();add()}});
+  const addTo=(g,txt)=>{const list=String(txt||"").split(/[,;\n]+/).flatMap(x=>/^[\d\s]+$/.test(x.trim())?x.trim().split(/\s+/):[x.trim()]).map(normRoom).filter(Boolean);
+    if(!list.length)return 0;let n=0;list.forEach(r=>{if(!draft.rooms.includes(r)){draft.rooms.push(r);n++}draft.type[sid+"|"+r]=g});lastAdded=list[list.length-1];
+    draw();haptic();const ch=body.querySelector(".rchip.fresh");if(ch)ch.scrollIntoView({block:"center",behavior:"smooth"});
+    toast(n?`${n>1?n+" חדרים נוספו":"החדר נוסף"} ל${isPro(g)?"מעבדה מקצועית ":""}${gName(sid,g,draft.gname)} – לחצו שמירה`:"כבר ברשימה – הקבוצה עודכנה");return n};
+  const add=()=>{const inp=body.querySelector("[data-rin]"),t=body.querySelector('[data-rt][aria-pressed="true"]');addTo(t?t.dataset.rt:"אחר",inp.value)};
+  o.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("[data-rin]")){e.preventDefault();add()}
+    if(e.key==="Enter"&&e.target.matches("[data-rgin]")){e.preventDefault();addTo(e.target.dataset.rgin,e.target.value)}
+    if(e.key==="Escape"&&e.target.matches("[data-rgin]"))draw()});
   o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-px]")){close();return}
     if(e.target.closest("[data-redit]")){edit=true;draft=snap();draw();haptic();return}
     /* rename a group heading: inline field → ✓ → "לשמור?" */
@@ -3314,6 +3324,11 @@ function openRooms(sid){const site=S.sites.find(x=>x.id===sid);if(!site)return;
       draft.extra=[...(draft.extra||[]),g];draw();const b=body.querySelector(`[data-rt="${CSS.escape(g)}"]`);if(b)b.click();return}
     const rt=e.target.closest("[data-rt]");if(rt){body.querySelectorAll("[data-rt]").forEach(b=>b.setAttribute("aria-pressed",b===rt));return}
     if(e.target.closest("[data-rgo]")){add();return}
+    /* "+" inside a group: type the room right there */
+    const pg=e.target.closest("[data-raddg]");if(pg){const g=pg.dataset.raddg;
+      pg.outerHTML=`<span class="rgadd"><input type="text" data-rgin="${esc(g)}" placeholder="מספר חדר" inputmode="text" enterkeyhint="done" autocomplete="off"><button type="button" class="rgok" data-rgaok="${esc(g)}" aria-label="הוספה">✓</button></span>`;
+      const i=body.querySelector(`[data-rgin="${CSS.escape(g)}"]`);i&&i.focus();return}
+    const ga=e.target.closest("[data-rgaok]");if(ga){const i=ga.parentElement.querySelector("input");if(!addTo(ga.dataset.rgaok,i.value)&&!i.value.trim())draw();return}
     const rd=e.target.closest("[data-rdel]");if(rd){const r=rd.dataset.rdel;const chip=rd.closest(".rchip");
       const go=()=>{draft.rooms=draft.rooms.filter(x=>x!==r);delete draft.type[sid+"|"+r];draw()};
       chip.animate([{opacity:1,transform:"none"},{opacity:0,transform:"scale(.7)"}],{duration:160,easing:EZ.in}).onfinish=go;return}
