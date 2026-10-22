@@ -1444,6 +1444,12 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 .pcard:not(.done) .pform .pgot :is(input,select,textarea){box-shadow:inset 0 0 0 .5px var(--g-line,var(--line))!important}
 .pcard.done .pform .pgot :is(input,select,textarea){box-shadow:0 0 0 1.5px color-mix(in srgb,#BF5AF2 45%,transparent),0 0 14px color-mix(in srgb,#5E5CE6 25%,transparent)!important}
 @media (prefers-reduced-motion:reduce){.pcard.thinking::before,.pcard.thinking::after,.pthink,.pform .rev,.pcard.thinking .ptx{animation:none}}
+
+.pdates{display:grid;gap:6px;padding:10px 12px;border-radius:16px;background:var(--g-field,var(--bg));box-shadow:inset 0 0 0 .5px var(--g-line,var(--line))}
+.pdl{font-size:12.5px;color:var(--muted);font-weight:700}
+.pdc{display:flex;flex-wrap:wrap;gap:6px}
+.pdchip{display:inline-flex;align-items:center;gap:4px;padding:4px 4px 4px 10px;padding-inline-start:10px;border-radius:999px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--ink);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.pdchip button{width:22px;height:22px;min-height:0;padding:0!important;font-size:11px;border-radius:50%!important}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1698,7 +1704,7 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 06:45";
+const APP_VER="22.10.2026 07:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2679,7 +2685,8 @@ function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎�
   for(const m of t.matchAll(/(?<![\d:])(\d{1,2})[.\/-](\d{1,2})(?:[.\/-](\d{2,4}))?(?![\d:])/g)){const d=+m[1],mo=+m[2];if(d<1||d>31||mo<1||mo>12)continue;
     let dt;if(m[3]){let y=+m[3];if(y<100)y+=2000;dt=new Date(y,mo-1,d)}
     else{const c=[-1,0,1].map(k=>new Date(now.getFullYear()+k,mo-1,d));dt=c.sort((a,b)=>Math.abs(a-today)-Math.abs(b-today))[0]}
-    r.date=key(dt);break}
+    (r.dates=r.dates||[]).includes(key(dt))||r.dates.push(key(dt))}
+  if(r.dates){r.dates.sort();r.date=r.dates[0];if(r.dates.length<2)delete r.dates}
   /* ---- time: range, "שעה 09:00", "בשמונה בבוקר" ---- */
   const tm=x=>{const[h,mi]=x.split(":");return p2(+h)+":"+mi};
   let m=t.match(/(\d{1,2}:\d{2})\s*(?:-|–|—|עד|to)\s*(\d{1,2}:\d{2})/);
@@ -2722,7 +2729,8 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
   const show=r=>{f.hidden=false;const kind=r.kind;
     f.innerHTML=`<div class="pseg"><button data-pk="exams" aria-pressed="${kind==="exams"}">📝 מבחן</button><button data-pk="events" aria-pressed="${kind==="events"}">📅 אירוע</button></div>
       <label>שם<input type="text" data-pf="name" value="${esc(r.name||"")}"></label>
-      <div class="p2"><label>תאריך<input type="date" data-pf="date" value="${esc(r.date||"")}"></label><label>שעה<input type="text" data-pf="time" value="${esc(r.time||"")}" placeholder="10:00 או 10:00-12:00"></label></div>
+      ${r.dates?`<div class="pdates"><span class="pdl">${r.dates.length} תאריכים – ייווצר ${kind==="exams"?"מבחן":"אירוע"} נפרד לכל תאריך, עם אותם פרטים</span><div class="pdc">${r.dates.map(d=>`<span class="pdchip" data-pd="${d}">${dK(d)}<button type="button" data-pdx aria-label="הסר תאריך">✕</button></span>`).join("")}</div></div>`:""}
+      <div class="p2"><label ${r.dates?"hidden":""}>תאריך<input type="date" data-pf="date" value="${esc(r.date||"")}"></label><label>שעה<input type="text" data-pf="time" value="${esc(r.time||"")}" placeholder="10:00 או 10:00-12:00"></label></div>
       <div class="p2"><label>קמפוס<select data-pf="campus"><option value=""></option>${CAMPUS.map(c=>`<option ${c===r.campus?"selected":""}>${esc(c)}</option>`).join("")}</select></label><label>מקום / כיתה<input type="text" data-pf="room" value="${esc(r.room||"")}"></label></div>
       <label>הערות / צרכים והיערכות<textarea class="grow" rows="2" data-pf="needs">${esc(r.needs||r.notes||"")}</textarea></label>`;
     f.querySelectorAll("textarea.grow").forEach(x=>{x.style.height="auto";x.style.height=x.scrollHeight+"px"});
@@ -2733,14 +2741,18 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
     if(e.target.closest("[data-pgo]")){if(!ta.value.trim()){toast("הדביקו קודם את המייל");return}const r=parseMail(ta.value),card=o.querySelector(".pcard");
       card.classList.add("thinking");f.hidden=true;o.querySelector(".pact").innerHTML=`<span class="pthink">מזהה פרטים…</span>`;haptic();
       setTimeout(()=>{card.classList.remove("thinking");card.classList.add("done");show(r);setTimeout(()=>card.classList.remove("done"),1400)},matchMedia("(prefers-reduced-motion:reduce)").matches?0:900);return}
+    const dx=e.target.closest("[data-pdx]");if(dx){const c=dx.closest(".pdchip"),wrap=f.querySelector(".pdc");c.remove();const n=wrap.children.length;
+      f.querySelector(".pdl").textContent=n+" תאריכים – ייווצר רשומה נפרדת לכל תאריך";if(n<2){const only=wrap.querySelector(".pdchip");f.querySelector(".pdates").remove();const di=f.querySelector('[data-pf="date"]');if(only)di.value=only.dataset.pd;di.closest("label").hidden=false}return}
     const k=e.target.closest("[data-pk]");if(k){f.querySelectorAll("[data-pk]").forEach(b=>b.setAttribute("aria-pressed",b===k));return}
     if(e.target.closest("[data-padd]")){const kind=f.querySelector('[data-pk][aria-pressed="true"]').dataset.pk,v=n=>(f.querySelector(`[data-pf="${n}"]`)||{}).value||"";
-      const rec={id:uid(),date:v("date")||cur,name:v("name").trim(),time:v("time").trim(),campus:v("campus"),room:v("room").trim()};
-      if(!rec.name){toast("חסר שם");return}
+      const dates=f.querySelector(".pdc")?[...f.querySelectorAll(".pdchip")].map(c=>c.dataset.pd):[v("date")||cur];
+      if(!v("name").trim()){toast("חסר שם");return}
+      let rec;dates.forEach(dd=>{rec={id:uid(),date:dd,name:v("name").trim(),time:v("time").trim(),campus:v("campus"),room:v("room").trim()};
       if(kind==="exams"){applyCat(rec);if(v("room").trim())rec.room=v("room").trim();if(v("campus"))rec.campus=v("campus");if(v("time").trim())rec.time=v("time").trim();S.exams.push(rec);learnExam(rec)}
       else{rec.needs=v("needs").trim();applyEvent(rec);S.events.push(rec)}
-      if(kind==="exams"&&v("needs").trim())rec.notes=v("needs").trim();
-      changed();render();close();toast((kind==="exams"?"המבחן":"האירוע")+" נוסף");setTimeout(()=>goItem(kind,rec.id),260)}});
+      if(kind==="exams"&&v("needs").trim())rec.notes=v("needs").trim()});
+      changed();render();close();toast(dates.length>1?`נוספו ${dates.length} ${kind==="exams"?"מבחנים":"אירועים"}`:(kind==="exams"?"המבחן":"האירוע")+" נוסף");
+      const first=(kind==="exams"?S.exams:S.events).filter(x=>dates.includes(x.date)&&x.name===v("name").trim()).sort((a,b)=>a.date.localeCompare(b.date))[0];setTimeout(()=>goItem(kind,(first||rec).id),260)}});
   document.addEventListener("keydown",function k(e){if(e.key==="Escape"&&document.body.contains(o)){close();document.removeEventListener("keydown",k)}})}
 document.addEventListener("click",e=>{if(e.target.closest("[data-paste]"))openPaste()});
 /* jump to one item in its own list, and flash it */
