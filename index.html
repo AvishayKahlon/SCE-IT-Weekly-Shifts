@@ -2131,7 +2131,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 20:55";
+const APP_VER="22.10.2026 21:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -4062,7 +4062,7 @@ document.addEventListener("change",e=>{
 });
 $("#addEmp").onclick=()=>{const v=$("#newEmp").value.trim();if(!v)return;S.employees.push({id:uid(),name:v,active:true});$("#newEmp").value="";changed();render()};
 $("#addVac").onclick=()=>{if(!S.employees.length)return;const d=parseKey(cur);d.setDate(d.getDate()+4);{const id=uid();XEDIT.add(id);rowsFlip(()=>{S.vac.push({id,emp:"",from:cur,to:key(d),purpose:"",campus:""});changed();render()})}};   /* technician left empty: you pick */
-$("#addHol").onclick=()=>{{const id=uid();XEDIT.add(id);rowsFlip(()=>{S.holidays.push({id,name:"",from:cur,to:cur,type:"off"});changed();render()})}};
+$("#addHol").onclick=()=>{ {const id=uid();XEDIT.add(id);rowsFlip(()=>{S.holidays.push({id,name:"",from:cur,to:cur,type:"off"});changed();render()})}};
 $("#newEmp").addEventListener("keydown",e=>{if(e.key==="Enter")$("#addEmp").click()});
 $("#addSite").onclick=()=>{const v=$("#newSite").value.trim();if(!v)return;S.sites.push({id:uid(),name:v,req:{m:[1,1,1,1,1,1],e:[1,1,1,1,1,0]}});$("#newSite").value="";changed();render()};
 
