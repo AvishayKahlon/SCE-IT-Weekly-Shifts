@@ -5,7 +5,12 @@
 <script>
 /* the event travels only in the #hash (never sent to a server); the local service worker turns it into a calendar file */
 const d=location.hash.slice(1),m=document.getElementById("m");
-function go(){location.replace("cal/"+(decodeURIComponent(new URLSearchParams(d).get("n")||"event")).replace(/[^\w֐-׿ -]/g,"")+".ics?d="+new URLSearchParams(d).get("d"))}
+/* after the calendar preview closes, come back to the app (button + auto when the page becomes active again) */
+let gone=false;const home=()=>location.replace("./");
+function back(){m.innerHTML='האירוע מוכן<small>אחרי ההוספה ליומן חוזרים לאפליקציה</small><a href="./" onclick="event.preventDefault();home()" style="display:inline-block;margin-top:18px;padding:12px 26px;border-radius:99px;background:#3E6B2A;color:#fff;text-decoration:none">חזרה לאפליקציה</a>'}
+addEventListener("pageshow",e=>{if(e.persisted&&gone)home()});
+document.addEventListener("visibilitychange",()=>{if(gone&&document.visibilityState==="visible")setTimeout(home,300)});
+function go(){if(gone)return;gone=true;setTimeout(back,700);location.href=("cal/"+(decodeURIComponent(new URLSearchParams(d).get("n")||"event")).replace(/[^\w֐-׿ -]/g,"")+".ics?d="+new URLSearchParams(d).get("d"))}
 if(!d||!("serviceWorker" in navigator)){m.innerHTML="לא ניתן לפתוח את היומן כאן<small>חזרו לאפליקציה ובחרו Outlook</small>"}
 else if(navigator.serviceWorker.controller)go();
 else{navigator.serviceWorker.addEventListener("controllerchange",go,{once:true});
