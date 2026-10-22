@@ -1450,6 +1450,20 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 .pdc{display:flex;flex-wrap:wrap;gap:6px}
 .pdchip{display:inline-flex;align-items:center;gap:4px;padding:4px 4px 4px 10px;padding-inline-start:10px;border-radius:999px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--ink);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
 .pdchip button{width:22px;height:22px;min-height:0;padding:0!important;font-size:11px;border-radius:50%!important}
+
+/* Siri edge glow (Apple Intelligence): soft iridescent light hugging the screen edges, flowing and breathing */
+.siriglow{position:fixed;inset:0;z-index:85;pointer-events:none;animation:sgin 420ms cubic-bezier(.3,1.2,.45,1) both}
+.siriglow.out{animation:sgout 650ms ease both}
+.siriglow i{position:absolute;inset:0;border-radius:calc(env(safe-area-inset-top,0px) > 0px ? 46px : 0px);
+  background:conic-gradient(from var(--pa),#FF9F0A,#FF375F,#BF5AF2,#5E5CE6,#64D2FF,#30D158,#FF9F0A);animation:pspin 2.2s linear infinite;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.siriglow i:nth-child(1){padding:5px;border-radius:44px}
+.siriglow i:nth-child(2){padding:26px;border-radius:44px;filter:blur(22px);opacity:.85;animation:pspin 2.2s linear infinite,sgbreath 1.1s ease-in-out infinite alternate}
+@media (min-width:701px){.siriglow i{border-radius:0!important}}
+@keyframes sgin{from{opacity:0;transform:scale(1.04)}}
+@keyframes sgout{to{opacity:0;transform:scale(1.03)}}
+@keyframes sgbreath{from{opacity:.55}to{opacity:.95}}
+@media (prefers-reduced-motion:reduce){.siriglow{display:none}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1704,7 +1718,7 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 07:15";
+const APP_VER="22.10.2026 07:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2744,7 +2758,10 @@ function openPaste(){const o=document.createElement("div");o.className="pastebox
     o.querySelector(".pact").innerHTML=`<button data-pgo>✨ זיהוי מחדש</button><button class="primary" data-padd>הוסף</button>`};
   o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-px]")){close();return}
     if(e.target.closest("[data-pgo]")){if(!ta.value.trim()){toast("הדביקו קודם את המייל");return}const r=parseMail(ta.value),card=o.querySelector(".pcard");
-      card.classList.add("thinking");f.hidden=true;o.querySelector(".pact").innerHTML=`<span class="pthink">מזהה פרטים…</span>`;haptic();
+      card.classList.add("thinking");f.hidden=true;
+      /* Siri-style light around the edges of the whole screen while it "thinks" */
+      const glow=document.createElement("div");glow.className="siriglow";glow.innerHTML="<i></i><i></i>";document.body.appendChild(glow);
+      setTimeout(()=>{glow.classList.add("out");setTimeout(()=>glow.remove(),700)},matchMedia("(prefers-reduced-motion:reduce)").matches?0:1000);o.querySelector(".pact").innerHTML=`<span class="pthink">מזהה פרטים…</span>`;haptic();
       setTimeout(()=>{card.classList.remove("thinking");card.classList.add("done");show(r);setTimeout(()=>card.classList.remove("done"),1400)},matchMedia("(prefers-reduced-motion:reduce)").matches?0:900);return}
     const dx=e.target.closest("[data-pdx]");if(dx){const c=dx.closest(".pdchip"),wrap=f.querySelector(".pdc");c.remove();const n=wrap.children.length;
       f.querySelector(".pdl").textContent=n+" תאריכים – ייווצר רשומה נפרדת לכל תאריך";if(n<2){const only=wrap.querySelector(".pdchip");f.querySelector(".pdates").remove();const di=f.querySelector('[data-pf="date"]');if(only)di.value=only.dataset.pd;di.closest("label").hidden=false}return}
