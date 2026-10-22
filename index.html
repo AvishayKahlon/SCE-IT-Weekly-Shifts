@@ -621,24 +621,37 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 ::view-transition-group(tabbar),::view-transition-old(tabbar),::view-transition-new(tabbar){animation:none}   /* the dock never moves during page changes */
 #tab-sched:not([hidden]),#tab-cal:not([hidden]),#tab-ev:not([hidden]),#tab-set:not([hidden]){view-transition-name:tabpage}
 html[data-vt="sub"]::view-transition-old(tabpage),html[data-vt="sub"]::view-transition-new(tabpage),html[data-vt="sub"]::view-transition-group(tabpage){animation:none}
-.panel:not([hidden])>.segbar{view-transition-name:subbar}
-.panel:not([hidden])>.segp:not([hidden]){view-transition-name:subpage}
+html[data-vt="sub"] .panel:not([hidden])>.segbar{view-transition-name:subbar}
+html[data-vt="sub"] .panel:not([hidden])>.segp:not([hidden]){view-transition-name:subpage}
 ::view-transition-group(subbar),::view-transition-old(subbar),::view-transition-new(subbar){animation:none}
 ::view-transition-group(subpage){animation-duration:440ms;animation-timing-function:var(--ease-out)}
-::view-transition-old(subpage){animation:440ms var(--ease-out) both vt-out-r}
-::view-transition-new(subpage){animation:440ms var(--ease-out) both vt-in-l}
+::view-transition-old(subpage){animation:150ms var(--ease-in) both vt-out-r}
+::view-transition-new(subpage){animation:440ms var(--ease-out) 70ms both vt-in-l}
 html[data-dir="back"]::view-transition-old(subpage){animation-name:vt-out-l}
 html[data-dir="back"]::view-transition-new(subpage){animation-name:vt-in-r}
 ::view-transition-old(root),::view-transition-new(root){animation:none}
 ::view-transition-group(tabpage){animation-duration:440ms;animation-timing-function:var(--ease-out)}
-::view-transition-old(tabpage){animation:440ms var(--ease-out) both vt-out-r}
-::view-transition-new(tabpage){animation:440ms var(--ease-out) both vt-in-l}
+::view-transition-old(tabpage){animation:150ms var(--ease-in) both vt-out-r}
+::view-transition-new(tabpage){animation:440ms var(--ease-out) 70ms both vt-in-l}
 html[data-dir="back"]::view-transition-old(tabpage){animation-name:vt-out-l}
 html[data-dir="back"]::view-transition-new(tabpage){animation-name:vt-in-r}
 @keyframes vt-out-r{to{opacity:0;transform:translateX(22%) scale(.95)}}
 @keyframes vt-out-l{to{opacity:0;transform:translateX(-22%) scale(.95)}}
 @keyframes vt-in-l{from{opacity:0;transform:translateX(-28%) scale(.97)}}
 @keyframes vt-in-r{from{opacity:0;transform:translateX(28%) scale(.97)}}
+/* the old and new page keep their own height (no stretching while the size changes), anchored at the top */
+::view-transition-group(tabpage),::view-transition-group(subpage){animation:none}
+::view-transition-old(tabpage),::view-transition-new(tabpage),::view-transition-old(subpage),::view-transition-new(subpage){height:auto;object-fit:none;object-position:top}
+/* desktop: a short, calm move (a % of a wide screen is too far) */
+@media (min-width:701px){
+  ::view-transition-old(tabpage),::view-transition-old(subpage){animation-name:vtd-out-r}
+  ::view-transition-new(tabpage),::view-transition-new(subpage){animation-name:vtd-in-l}
+  html[data-dir="back"]::view-transition-old(tabpage),html[data-dir="back"]::view-transition-old(subpage){animation-name:vtd-out-l}
+  html[data-dir="back"]::view-transition-new(tabpage),html[data-dir="back"]::view-transition-new(subpage){animation-name:vtd-in-r}}
+@keyframes vtd-out-r{to{opacity:0;transform:translateX(24px)}}
+@keyframes vtd-out-l{to{opacity:0;transform:translateX(-24px)}}
+@keyframes vtd-in-l{from{opacity:0;transform:translateX(-36px)}}
+@keyframes vtd-in-r{from{opacity:0;transform:translateX(36px)}}
 .panel.peek{animation:peek 260ms var(--ease-out)}
 @keyframes peek{from{opacity:.3;transform:translateY(8px)}}
 @media (prefers-reduced-motion:reduce){::view-transition-old(tabpage),::view-transition-new(tabpage),::view-transition-group(tabpage){animation:none}.panel.peek{animation:none}}
@@ -1895,7 +1908,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 13:55";
+const APP_VER="22.10.2026 14:05";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
