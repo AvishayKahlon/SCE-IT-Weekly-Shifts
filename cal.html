@@ -1,0 +1,14 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>הוספה ליומן</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;font:600 17px -apple-system,system-ui,sans-serif;background:#E9EFE5;color:#333;text-align:center;padding:24px}
+@media (prefers-color-scheme:dark){body{background:#1c211b;color:#ddd}}small{display:block;font-weight:400;opacity:.7;margin-top:8px}</style></head>
+<body><div id="m">פותח את היומן…</div>
+<script>
+/* the event travels only in the #hash (never sent to a server); the local service worker turns it into a calendar file */
+const d=location.hash.slice(1),m=document.getElementById("m");
+function go(){location.replace("cal/"+(decodeURIComponent(new URLSearchParams(d).get("n")||"event")).replace(/[^\w֐-׿ -]/g,"")+".ics?d="+new URLSearchParams(d).get("d"))}
+if(!d||!("serviceWorker" in navigator)){m.innerHTML="לא ניתן לפתוח את היומן כאן<small>חזרו לאפליקציה ובחרו Outlook</small>"}
+else if(navigator.serviceWorker.controller)go();
+else{navigator.serviceWorker.addEventListener("controllerchange",go,{once:true});
+  navigator.serviceWorker.register("sw.js",{scope:"./"}).catch(()=>{m.innerHTML="לא ניתן לפתוח את היומן כאן<small>חזרו לאפליקציה ובחרו Outlook</small>"});
+  setTimeout(()=>{if(navigator.serviceWorker.controller)go()},2500)}
+</script></body></html>

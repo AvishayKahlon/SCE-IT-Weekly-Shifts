@@ -1752,7 +1752,7 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 07:55";
+const APP_VER="22.10.2026 11:40";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2835,6 +2835,12 @@ function outlookUrl(x){const t=calTimes(x),q=new URLSearchParams({subject:x.name
   return "https://outlook.office.com/calendar/action/compose?"+q.toString()}
 function googleUrl(x){const t=calTimes(x),f=d=>t.allDay?key(d).replace(/-/g,""):key(d).replace(/-/g,"")+"T"+String(d.getHours()).padStart(2,"0")+String(d.getMinutes()).padStart(2,"0")+"00";
   return "https://calendar.google.com/calendar/render?"+new URLSearchParams({action:"TEMPLATE",text:x.name,dates:f(t.start)+"/"+f(t.end),details:calDesc(x),location:calLoc(x),ctz:"Asia/Jerusalem"}).toString()}
+const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&"ontouchend" in document);
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js",{scope:"./"}).catch(()=>{});
+/* iPhone: open the event as a real calendar file (made on the device by sw.js) → iOS shows its "Add to Calendar" screen */
+function iosCal(list){const b=new TextEncoder().encode(icsFor(list));let bin="";b.forEach(c=>bin+=String.fromCharCode(c));
+  const d=btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""),n=list[0].name.replace(/[^\w\u0590-\u05FF -]/g,"").slice(0,40)||"event";
+  window.open("cal.html#"+new URLSearchParams({n,d}).toString(),"_blank")}
 async function icsOut(list){const ics=icsFor(list),name=(list.length>1?list[0].name+" ("+list.length+")":list[0].name).replace(/[\\/:*?"<>|]/g," ")+".ics",f=new File([ics],name,{type:"text/calendar"});
   if(canShare&&navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]});return}catch(e){if(e&&e.name==="AbortError")return}}
   saveFile(name,f);toast("הקובץ ירד – פתחו אותו כדי להוסיף ליומן")}
@@ -2843,11 +2849,12 @@ function addToCal(list){if(!list.length)return;haptic();
   o.innerHTML=`<div class="csh" role="dialog" aria-label="הוספה ליומן"><span class="pgrab"></span><b>הוספה ליומן</b><small>${esc(list[0].name)}${many?` · ${list.length} מועדים`:""}</small>
     <button data-cv="outlook"><span class="ci ol">O</span><span><b>Outlook</b><small>${many?"נפתח מועד אחד בכל פעם":"היומן של SCE – נפתח עם כל הפרטים"}</small></span></button>
     <button data-cv="google"><span class="ci gg">G</span><span><b>Google Calendar</b><small>${many?"נפתח מועד אחד בכל פעם":"נפתח עם כל הפרטים"}</small></span></button>
-    <button data-cv="ics"><span class="ci ic">📅</span><span><b>קובץ ליומן</b><small>${many?"כל המועדים בקובץ אחד":"לפתיחה ביומן האייפון או במחשב"}</small></span></button>
+    ${isIOS?`<button data-cv="ios"><span class="ci ic">📅</span><span><b>יומן האייפון</b><small>${many?"כל המועדים בבת אחת":"נפתח מסך ״הוסף ליומן״"}</small></span></button>`:""}
+    <button data-cv="ics"><span class="ci ic">⤓</span><span><b>${isIOS?"שיתוף קובץ":"קובץ ליומן"}</b><small>${isIOS?"שליחת האירוע כקובץ (וואטסאפ, מייל…)":many?"כל המועדים בקובץ אחד":"לפתיחה ביומן במחשב"}</small></span></button>
     <button class="cx" data-cv="x">ביטול</button></div>`;
   document.body.appendChild(o);const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),240)};let i=0;
   o.addEventListener("click",e=>{if(e.target===o)return close();const b=e.target.closest("[data-cv]");if(!b)return;const v=b.dataset.cv;
-    if(v==="x")return close();if(v==="ics"){close();icsOut(list);return}
+    if(v==="x")return close();if(v==="ics"){close();icsOut(list);return}if(v==="ios"){close();iosCal(list);return}
     const x=list[Math.min(i,list.length-1)];window.open(v==="outlook"?outlookUrl(x):googleUrl(x),"_blank","noopener");
     if(many&&++i<list.length){b.querySelector("small").textContent=`נפתח ${i} מתוך ${list.length} – לחצו שוב למועד הבא (${dK(list[i].date)})`;return}close()})}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-ical]");if(!b)return;e.stopPropagation();const[k,id]=b.dataset.ical.split("|");
