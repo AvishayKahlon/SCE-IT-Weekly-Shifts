@@ -1390,10 +1390,10 @@ html,body{min-height:100%}
 @media (max-width:700px){body{min-height:calc(100lvh + env(safe-area-inset-top,0px) + 1px)}}
 
 /* settings categories as a floating glass bar with a sliding lens (matches the dock) */
-.subtabs{position:relative;display:grid!important;grid-template-columns:repeat(3,1fr);justify-self:stretch;width:min(460px,100%);padding:5px!important;gap:0;border-radius:999px!important;
+.subtabs{position:relative;display:grid!important;grid-template-columns:repeat(var(--n,3),1fr)!important;justify-self:stretch;width:min(calc(var(--n,3) * 153px),100%);padding:5px!important;gap:0;border-radius:999px!important;
   background:var(--glass-bg)!important;-webkit-backdrop-filter:blur(22px) saturate(185%)!important;backdrop-filter:blur(22px) saturate(185%)!important;
   box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-edge),inset 0 -1px 0 var(--glass-rim),inset 0 0 0 .5px var(--glass-edge)!important;touch-action:pan-y;--si:0}
-.subtabs::before{content:"";position:absolute;top:5px;bottom:5px;right:5px;width:calc((100% - 10px)/3);border-radius:999px;background:var(--glass-pill);
+.subtabs::before{content:"";position:absolute;top:5px;bottom:5px;right:5px;width:calc((100% - 10px)/var(--n,3));border-radius:999px;background:var(--glass-pill);
   box-shadow:inset 0 1px 0 var(--glass-edge),inset 0 0 0 .5px var(--glass-edge);transform:translateX(calc(var(--si) * -100%));transition:transform 480ms var(--pop);will-change:transform}
 .subtabs.drag::before{transform:translateX(calc(var(--si) * -100%)) scale(1.06,1.12);transition:transform 70ms linear;background:color-mix(in srgb,var(--glass-pill) 70%,var(--glass-edge))}
 .subtabs button{position:relative;background:none!important;box-shadow:none!important;border-radius:999px!important;color:var(--ink);opacity:.7;font-weight:700;padding:9px 6px!important;min-height:40px;transition:opacity 200ms ease,color 200ms ease}
@@ -1883,6 +1883,30 @@ td.c-range{display:none}
 .fbu-push>div{display:grid;gap:2px}.fbu-push b{font-size:15px}.fbu-push small{font-size:12.5px;color:var(--muted)}
 .fbu-push button{min-height:38px!important;padding:4px 16px!important;border-radius:999px!important;flex:none}
 .pushon{color:var(--accent);font-weight:700;font-size:14px;white-space:nowrap}
+
+/* notification settings: iOS grouped rows with switches */
+#pushSet .card h2{font-size:17px}
+.psgrp{display:grid}.psgrp.dis{opacity:.45;pointer-events:none}
+.psr{display:flex;align-items:center;gap:10px;min-height:54px;padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.psgrp .psr:last-child{border-bottom:0}
+.pst{display:grid;gap:1px;flex:1;min-width:0}.pst b{font-size:15.5px;font-weight:600}.pst small{font-size:12.5px;color:var(--muted)}
+.pswitch{position:relative;width:51px;height:31px;min-height:0!important;padding:0!important;border-radius:999px!important;border:0!important;flex:none;
+  background:color-mix(in srgb,var(--ink) 16%,transparent)!important;box-shadow:none!important;transition:background 220ms ease}
+.pswitch::after{content:"";position:absolute;top:2px;right:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.18),0 1px 1px rgba(0,0,0,.12);transition:transform 260ms var(--pop)}
+.pswitch[aria-checked="true"]{background:#34C759!important}
+.pswitch[aria-checked="true"]::after{transform:translateX(-20px)}
+.pstime{width:118px!important;min-height:36px;text-align:center;font-variant-numeric:tabular-nums}
+.pssel{width:auto!important;min-height:36px}
+.psr.off .pstime,.psr.off .pssel{opacity:.5}
+.psrange{display:inline-flex;align-items:center;gap:4px}.psrange i{font-style:normal;color:var(--muted)}
+.pseg2{display:flex;gap:6px;flex-wrap:wrap}.pseg2 button{min-height:34px!important;padding:3px 12px!important;border-radius:999px!important;font-size:14px}
+.pseg2 button[aria-pressed="true"]{background:var(--accent)!important;color:var(--accent-ink)!important;border-color:var(--accent)!important}
+.psbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.psdev{display:grid;gap:6px;margin-top:12px}.psdev>b{font-size:14px}
+.psd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:12px;background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.psd span{display:grid}.psd em{font-style:normal;color:var(--accent);font-weight:600}.psd small{font-size:12px;color:var(--muted)}
+.psd button{width:30px;height:30px;min-height:0!important;padding:0!important;border-radius:50%!important}
+@media (max-width:700px){.psr{flex-wrap:wrap}.psr .pst{flex-basis:calc(100% - 64px)}.psr .pstime,.psr .pssel,.psr .psrange,.psr .pseg2{order:3}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה ולכן אינו פעיל.</b><br>פתח אותו מהאייקון במסך הבית או מהקישור.</div>
@@ -2028,6 +2052,7 @@ td.c-range{display:none}
       <button role="tab" data-sub="gen" data-panel="sub-gen" aria-selected="true">כללי</button>
       <button role="tab" data-sub="staff" data-panel="sub-staff" aria-selected="false">עובדים</button>
       <button role="tab" data-sub="msg" data-panel="sub-msg" aria-selected="false">הודעות</button>
+      <button role="tab" data-sub="push" data-panel="sub-push" aria-selected="false">התראות</button>
     </nav>
     <div class="panel segp" id="sub-gen">
       <div class="card">
@@ -2124,6 +2149,7 @@ td.c-range{display:none}
       </div>
       <p class="hint">"פתיחה בוואטסאפ" פותח את וואטסאפ עם ההודעה כבר כתובה. בחר את הקבוצה ושלח. אפשר לערוך את הנוסח לפני השליחה.</p>
     </div>
+    <div class="panel segp" id="sub-push" hidden><div id="pushSet"></div></div>
   </section>
 </div>
 <div class="foot"><button class="cloud" id="status" data-st="wait" aria-label="טוען…" title="טוען…"></button><p class="ver" id="appVer"></p></div>
@@ -2141,7 +2167,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 21:30";
+const APP_VER="22.10.2026 21:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2770,7 +2796,7 @@ function render(){if(typeof maybeToday==="function"&&performance.now()<15000)may
    if(finalDirty(w))h=`<div class="fdirty"><span class="fi">✎</span><span class="ft"><b>שינויים בסידור המאושר</b><small>הגרסה המאושרת שמורה. אפשר לעדכן אותה או לחזור אליה.</small></span><span class="fb"><button class="primary" data-fsave>שמירה כסופי</button><button data-frevert>חזרה לסופי</button></span></div>`+h;
    $("#msgs").innerHTML=h;const d=$("#msgs .msgok");if(d)d.addEventListener("toggle",()=>{MSG_OPEN=d.open})}
   fitCells($("#sheet"));
-  renderSync();renderAgenda(w);if(!$("#tab-set").hidden)renderUsage();
+  renderSync();renderAgenda(w);if(!$("#tab-set").hidden){renderUsage();if(!$("#sub-push").hidden)renderPushSet()}
   renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderCalOv();renderEvWeek();requestAnimationFrame(()=>document.querySelectorAll("textarea.grow").forEach(t=>{t.style.height="auto";t.style.height=t.scrollHeight+"px"}));renderStaff();renderSettings();renderMsgs();
 }
 
@@ -3192,7 +3218,7 @@ function segOpen(bar,i,anim){if(!bar)return;const bs=segBtns(bar);i=Math.max(0,M
 const segBar=g=>document.querySelector(`.segbar[data-group="${g}"]`);
 function segTo(g,pid,anim=true){const bar=segBar(g);if(bar)segOpen(bar,segBtns(bar).findIndex(b=>b.dataset.panel===pid),anim)}
 function openSub(k){segTo("set","sub-"+k,true)}
-document.querySelectorAll(".segbar").forEach(bar=>{const btns=segBtns(bar),N=btns.length;let st=null,skip=false;
+document.querySelectorAll(".segbar").forEach(bar=>{const btns=segBtns(bar),N=btns.length;let st=null,skip=false;bar.style.setProperty("--n",N);
   btns.forEach((b,k)=>b.addEventListener("click",()=>{if(skip)return;if(b.getAttribute("aria-selected")!=="true")haptic();segOpen(bar,k,true)}));
   const at=x=>{const r=bar.getBoundingClientRect();return Math.max(0,Math.min(N-1,Math.floor((r.right-x)/(r.width/N))))};
   bar.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse")return;st={x:e.clientX,i:btns.findIndex(b=>b.getAttribute("aria-selected")==="true"),moved:false,id:e.pointerId}},{passive:true});
@@ -3535,7 +3561,50 @@ function pushRow(){const st=!FB_VAPID?"setup":!pushOK()?(/iPhone|iPad/.test(navi
   return `<div class="fbu-push"><div><b>התראות</b><small>${esc(msg)}</small></div>${st==="off"?`<button type="button" class="primary" data-pushon>הפעלה</button>`:st==="on"?`<span class="pushon">✓ פעיל</span>`:""}</div>`}
 document.addEventListener("click",async e=>{if(!e.target.closest("[data-pushon]"))return;const b=e.target.closest("[data-pushon]");b.disabled=true;
   try{const id=await pushToken(true);toast(id?"ההתראות הופעלו במכשיר הזה":"ההתראות לא הופעלו")}catch(err){toast("ההפעלה נכשלה: "+(err&&err.message||err))}
-  USAGE_KEY="";renderUsage()});
+  USAGE_KEY="";renderUsage();renderPushSet();loadDevices()});
+
+/* ---------- notification settings (synced; the scheduled sender reads the same values) ---------- */
+const PUSH_DEF={on:true,morning:true,morningAt:"06:00",eve:false,eveAt:"20:00",before:false,beforeMin:60,change:true,repeat:false,repeatH:2,exams:true,events:true,campus:"",quiet:true,quietFrom:"21:00",quietTo:"06:00",noSat:true};
+const pcfg=()=>Object.assign({},PUSH_DEF,S.pushCfg||{});
+function pcSet(k,v){S.pushCfg=Object.assign(pcfg(),{[k]:v});changed(true);renderPushSet()}
+let PUSH_DEV=null;
+async function loadDevices(){if(!fbUser||typeof firebase==="undefined")return;try{const d=await firebase.firestore().doc("app/push").get();PUSH_DEV=(d.data()||{}).tokens||{};renderPushSet()}catch(e){}}
+function renderPushSet(){const box=$("#pushSet");if(!box)return;const c=pcfg(),me=(()=>{try{return localStorage.getItem("push-id")}catch(e){return ""}})();
+  const sw=(k,label,sub,extra="")=>`<div class="psr${c[k]?"":" off"}"><div class="pst"><b>${label}</b>${sub?`<small>${sub}</small>`:""}</div>${extra}<button type="button" role="switch" class="pswitch" aria-checked="${!!c[k]}" data-pcsw="${k}" aria-label="${label}"></button></div>`;
+  const tm=(k,dis)=>`<input type="time" class="pstime" data-pctime="${k}" value="${c[k]}" ${dis?"disabled":""}>`;
+  const sel=(k,opts,dis)=>`<select class="pssel" data-pcsel="${k}" ${dis?"disabled":""}>${opts.map(([v,l])=>`<option value="${v}" ${String(c[k])===String(v)?"selected":""}>${l}</option>`).join("")}</select>`;
+  const devs=PUSH_DEV?Object.entries(PUSH_DEV):[];
+  const dName=ua=>/iPhone/.test(ua)?"אייפון":/iPad/.test(ua)?"אייפד":/Android/.test(ua)?"אנדרואיד":/Mac/.test(ua)?"מק":/Windows/.test(ua)?"מחשב Windows":"מכשיר";
+  box.innerHTML=`<div class="card"><h2>התראות במכשיר הזה</h2>${pushRow()}
+      <div class="psbtns"><button type="button" data-pushtest>התראת בדיקה במכשיר</button></div>
+      ${devs.length?`<div class="psdev"><b>מכשירים שמקבלים התראות</b>${devs.map(([id,v])=>`<div class="psd"><span>${dName(v.ua||"")}${id===me?" <em>(המכשיר הזה)</em>":""}<small>נרשם ${v.at?new Date(v.at).toLocaleDateString("he-IL"):""}</small></span><button type="button" data-pushdel="${id}" aria-label="הסרה">✕</button></div>`).join("")}</div>`:""}</div>
+    <div class="card"><h2>מתי לשלוח</h2>
+      ${sw("on","התראות פעילות","מפסק ראשי לכל ההתראות")}
+      <div class="psgrp${c.on?"":" dis"}">
+      ${sw("morning","התראת בוקר","מבחנים ואירועים של היום שעוד לא נשלחו לצוות",tm("morningAt",!c.morning))}
+      ${sw("eve","סיכום ערב קודם","מה מתוכנן למחר",tm("eveAt",!c.eve))}
+      ${sw("before","לפני תחילת מבחן או אירוע","",sel("beforeMin",[[30,"30 דק׳ לפני"],[60,"שעה לפני"],[120,"שעתיים לפני"]],!c.before))}
+      ${sw("change","כשמבחן או אירוע של היום משתנה","שעה, מקום או פרטים")}
+      ${sw("repeat","חזרה עד סימון ״נשלח״","",sel("repeatH",[[1,"כל שעה"],[2,"כל שעתיים"],[3,"כל 3 שעות"]],!c.repeat))}
+      </div></div>
+    <div class="card"><h2>מה לכלול</h2><div class="psgrp${c.on?"":" dis"}">
+      ${sw("exams","מבחנים","")}${sw("events","אירועים","")}
+      <div class="psr"><div class="pst"><b>קמפוס</b></div><div class="pseg2">${[["","הכל"],...CAMPUS.filter(x=>x!=="שניהם").map(x=>[x,x])].map(([v,l])=>`<button type="button" data-pccamp="${esc(v)}" aria-pressed="${c.campus===v}">${esc(l)}</button>`).join("")}</div></div>
+    </div></div>
+    <div class="card"><h2>שעות שקטות</h2><div class="psgrp${c.on?"":" dis"}">
+      ${sw("quiet","בלי התראות בשעות","",`<span class="psrange">${tm("quietFrom",!c.quiet)}<i>–</i>${tm("quietTo",!c.quiet)}</span>`)}
+      ${sw("noSat","בלי התראות בשבת","")}
+    </div><p class="hint">ההתראות נשלחות מהענן כל חצי שעה, ולכן עשויות להגיע עד כ־30 דקות אחרי השעה שנקבעה.</p></div>`}
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("[data-pcsw]");if(t){const k=t.dataset.pcsw;haptic();pcSet(k,!pcfg()[k]);return}
+  const cp=e.target.closest("[data-pccamp]");if(cp){pcSet("campus",cp.dataset.pccamp);return}
+  if(e.target.closest("[data-pushtest]")){try{if(!("Notification" in window)||Notification.permission!=="granted"){toast("קודם צריך להפעיל התראות במכשיר");return}
+      const reg=await navigator.serviceWorker.ready;await reg.showNotification("בדיקת התראות",{body:"ההתראות מוצגות במכשיר הזה ✓",icon:"icon-192.png",tag:"test",lang:"he",dir:"rtl"});}catch(err){toast("הבדיקה נכשלה")}return}
+  const pd=e.target.closest("[data-pushdel]");if(pd){const ok=await askSave("להפסיק התראות למכשיר הזה?","","הסרה","ביטול");if(!ok)return;
+    try{await firebase.firestore().doc("app/push").update({["tokens."+pd.dataset.pushdel]:firebase.firestore.FieldValue.delete()});toast("המכשיר הוסר");loadDevices()}catch(err){toast("ההסרה נכשלה")}}});
+document.addEventListener("change",e=>{const tm=e.target.closest("[data-pctime]");if(tm&&tm.value){pcSet(tm.dataset.pctime,tm.value);return}
+  const sl=e.target.closest("[data-pcsel]");if(sl)pcSet(sl.dataset.pcsel,+sl.value)});
+document.addEventListener("click",e=>{const b=e.target.closest('[data-sub="push"]');if(b){renderPushSet();loadDevices()}},true);
 /* ---------- Firebase storage (iCloud-style bar) + cleanup ----------
    Everything lives in one cloud document; Firestore allows up to 1 MB per document. */
 const FB_LIMIT=1048576;

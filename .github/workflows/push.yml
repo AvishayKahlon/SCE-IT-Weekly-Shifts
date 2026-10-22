@@ -1,9 +1,9 @@
-# Today's exam / event notifications to the iPhone. Every 30 minutes between 06:00 and 23:00 Israel time
-# (the script itself decides whether there is anything to send). "Run workflow" with force = 1 sends a test.
+# Exam / event notifications. Every 30 minutes, ~05:00-23:30 Israel time (summer + winter);
+# the settings in the app (הגדרות → התראות) decide whether there is anything to send. "Run workflow" with force = 1 sends a test.
 name: push-notifications
 on:
   schedule:
-    - cron: "5,35 3-20 * * *"
+    - cron: "5,35 2-20 * * *"
   workflow_dispatch:
     inputs:
       force:
