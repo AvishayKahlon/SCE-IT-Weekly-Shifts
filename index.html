@@ -2103,7 +2103,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 19:40";
+const APP_VER="22.10.2026 19:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3475,7 +3475,8 @@ setInterval(()=>{const st=tState();if(st.snooze&&hhmm(new Date())>=st.snooze&&!d
    Everything lives in one cloud document; Firestore allows up to 1 MB per document. */
 const FB_LIMIT=1048576;
 const jsize=x=>x==null?0:new Blob([JSON.stringify(x)]).size;
-const kb=n=>n<1024?n+" B":n<1048576?(n/1024).toFixed(n<10240?1:0)+" KB":(n/1048576).toFixed(2)+" MB";
+/* sizes keep left-to-right order inside Hebrew text ("130 KB", not "KB 130") */
+const kb=n=>"\u2066"+(n<1024?n+" B":n<1048576?(n/1024).toFixed(n<10240?1:0)+" KB":(n/1048576).toFixed(2)+" MB")+"\u2069";
 function usageParts(){const weeks=S.weeks||{},snaps=Object.values(weeks).reduce((a,w)=>a+jsize(w.finalSnap),0),all=jsize(S);
   const parts=[{k:"weeks",l:"סידורים ואילוצים",c:"#34C759",v:jsize(weeks)-snaps},{k:"snaps",l:"עותקי סידור סופי",c:"#30B0C7",v:snaps},
     {k:"items",l:"מבחנים ואירועים",c:"#FF9F0A",v:jsize(S.exams)+jsize(S.events)+jsize(S.examCat)},{k:"cal",l:"חופשות וחגים",c:"#FF375F",v:jsize(S.vac)+jsize(S.holidays)},
@@ -3484,7 +3485,7 @@ function usageParts(){const weeks=S.weeks||{},snaps=Object.values(weeks).reduce(
 let USAGE_KEY="";
 function renderUsage(){const box=$("#fbUsage");if(!box)return;const {all,parts}=usageParts();const key=all+"|"+parts.map(p=>p.v).join(",");if(key===USAGE_KEY&&box.childElementCount)return;USAGE_KEY=key;
   const pct=v=>Math.max(v>0?.4:0,v/FB_LIMIT*100);let bk=false;try{bk=!!localStorage.getItem("shift-state-before-cleanup")}catch(e){}
-  box.innerHTML=`<div class="fbu"><div class="fbu-h"><b>אחסון</b><span>${kb(all)} מתוך 1 MB · ${(all/FB_LIMIT*100).toFixed(1)}%</span></div>
+  box.innerHTML=`<div class="fbu"><div class="fbu-h"><b>אחסון</b><span>${kb(all)} מתוך \u20661 MB\u2069 · \u2066${(all/FB_LIMIT*100).toFixed(1)}%\u2069</span></div>
     <div class="fbu-bar" role="img" aria-label="נוצלו ${kb(all)} מתוך 1 MB">${parts.filter(p=>p.v>0).map(p=>`<i style="width:${pct(p.v)}%;background:${p.c}" title="${esc(p.l)} · ${kb(p.v)}"></i>`).join("")}</div>
     <div class="fbu-leg">${parts.filter(p=>p.v>0).sort((a,b)=>b.v-a.v).map(p=>`<span><i style="background:${p.c}"></i>${esc(p.l)} <small>${kb(p.v)}</small></span>`).join("")}</div>
     <p class="hint">הכל נשמר במסמך אחד בענן. בקצב השימוש הרגיל זה בערך 150–200 KB בשנה.</p>
