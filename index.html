@@ -1587,6 +1587,26 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
 .addfab.go svg{animation:gspin 600ms cubic-bezier(.3,1.3,.5,1)}
 @media (min-width:701px){.genfab{bottom:28px;inset-inline-end:28px}}
 @media (prefers-reduced-motion:reduce){.genfab,.genfab.on{transition:opacity 200ms ease;transform:none;filter:none}.genfab svg{animation:none!important}}
+
+/* add buttons at the top of exams / events */
+.xaddrow{display:flex;margin:4px 0 12px}
+.xaddrow .primary{display:inline-flex;align-items:center;gap:8px}.xaddrow .ico{width:20px;height:20px;flex:none}
+.xaddrow .primary{min-height:46px;padding-inline:20px}
+@media (max-width:700px){.xaddrow .primary{width:100%;min-height:50px;font-size:16px;justify-content:center}}
+/* the flying glass bubble between a big button and its floating circle */
+.morphg{position:fixed;z-index:39;pointer-events:none;display:grid;place-items:center;overflow:hidden;color:#fff;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 62%,rgba(255,255,255,.5)),color-mix(in srgb,var(--accent) 82%,transparent));
+  -webkit-backdrop-filter:blur(14px) saturate(180%);backdrop-filter:blur(14px) saturate(180%);
+  box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 40%,transparent),inset 0 1px 0 rgba(255,255,255,.65),inset 0 -2px 8px rgba(0,0,0,.15),inset 0 0 0 1px rgba(255,255,255,.25);
+  --lbo:1;--ico:0}
+@property --lbo{syntax:"<number>";inherits:true;initial-value:1}
+@property --ico{syntax:"<number>";inherits:true;initial-value:0}
+.morphg>svg{grid-area:1/1;width:27px;height:27px;opacity:var(--ico);transform:scale(calc(.6 + var(--ico) * .4))}
+.morphg .mlb{grid-area:1/1;white-space:nowrap;font-weight:700;font-size:16px;opacity:var(--lbo);transform:scale(calc(.7 + var(--lbo) * .3))}
+.genfab.snap,.genfab.snap svg{transition:none!important}
+.genfab.hold{opacity:0!important}
+.genfab.land{animation:fabland 420ms cubic-bezier(.34,1.5,.5,1)}
+@keyframes fabland{0%{transform:scale(.92)}60%{transform:scale(1.06)}100%{transform:none}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1711,8 +1731,8 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
     <section class="card segp" id="exBox" hidden>
       <h2>מבחנים</h2>
       <p class="hint" style="margin:10px 0">מבחן מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם המבחן | שעה.</p>
+      <div class="xaddrow"><button class="primary act" data-xadd="exams"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lb">הוסף מבחן</span></button></div>
       <div class="scroll"><table class="cal xt" id="exT"></table></div>
-      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
       <details class="cons xsec sub" id="catBox">
         <summary><h3>מאגר מבחנים קבועים</h3><span class="xcnt" id="ecN"></span></summary>
         <p class="hint" style="margin:10px 0">ממוין לפי א-ב. בחירת שם מבחן בטבלה למעלה ממלאת אוטומטית תוכנה, מרצה, קמפוס, שעה והערות. מבחן או מרצה חדשים שמוסיפים למעלה נשמרים כאן לפעם הבאה.</p>
@@ -1723,8 +1743,8 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
     <section class="card segp" id="evBox" hidden>
       <h2>אירועים וכנסים</h2>
       <p class="hint" style="margin:10px 0">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם האירוע | שעה. אירועים שעברו מוצגים באפור.</p>
+      <div class="xaddrow"><button class="primary act" data-xadd="events"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lb">הוסף אירוע</span></button></div>
       <div class="scroll"><table class="cal xt" id="evT"></table></div>
-      <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button></div>
     </section>
     <button class="aifab" data-paste aria-label="יצירה חכמה" title="יצירה חכמה – מבחן או אירוע מתוך מייל"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9F0A"/><stop offset=".35" stop-color="#FF375F"/><stop offset=".65" stop-color="#BF5AF2"/><stop offset="1" stop-color="#5E5CE6"/></linearGradient></defs><path fill="url(#aig)" d="M10 2.5l1.6 4.6a3 3 0 0 0 1.8 1.8L18 10.5l-4.6 1.6a3 3 0 0 0-1.8 1.8L10 18.5l-1.6-4.6a3 3 0 0 0-1.8-1.8L2 10.5l4.6-1.6a3 3 0 0 0 1.8-1.8z"/><path fill="url(#aig)" d="M18.5 14l.8 2.2a1.6 1.6 0 0 0 1 1l2.2.8-2.2.8a1.6 1.6 0 0 0-1 1l-.8 2.2-.8-2.2a1.6 1.6 0 0 0-1-1L14.5 18l2.2-.8a1.6 1.6 0 0 0 1-1z"/></svg></button>
     <datalist id="dlExam"></datalist><datalist id="dlLect"></datalist><datalist id="dlSoft"></datalist><datalist id="dlEvent"></datalist>
@@ -1844,7 +1864,7 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 13:00";
+const APP_VER="22.10.2026 13:20";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3136,20 +3156,43 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeStatSheet()});
 if("IntersectionObserver" in window){new IntersectionObserver(([en])=>document.body.classList.toggle("scrolled",!en.isIntersecting&&en.boundingClientRect.top<0),{threshold:0}).observe($("header .week"))}
 $("#weekPick").addEventListener("change",e=>{const v=e.target.dataset.iso;if(v){cur=key(sundayOf(parseKey(v)));render()}});
 $("#genBtn").onclick=()=>{if(!activeEmps().length)return;haptic();generate();changed();render()};
-/* scrolled past "צור סידור אוטומטי" → it continues as a round floating button */
-{const fab=$("#genFab"),gb=$("#genBtn");
-  if("IntersectionObserver" in window)new IntersectionObserver(([en])=>{const on=!en.isIntersecting&&en.boundingClientRect.top<0;
-    if(on!==fab.classList.contains("on")){fab.classList.toggle("on",on);fab.tabIndex=on?0:-1}},{threshold:0,rootMargin:"-60px 0px 0px 0px"}).observe(gb);
-  fab.onclick=()=>{fab.classList.remove("go");void fab.offsetWidth;fab.classList.add("go");gb.click()}}
-/* same for "+ הוסף מבחן / אירוע": once it scrolls away a round + floats (for the section you are in) */
-{const fab=$("#addFab"),btns=[...document.querySelectorAll('#tab-ev [data-xadd="exams"],#tab-ev [data-xadd="events"]')];
-  /* plain geometry check (an IntersectionObserver misses buttons that were hidden in another section) */
-  const sync=()=>{const b=btns.find(x=>{if(!x.offsetParent)return false;const r=x.getBoundingClientRect();return r.bottom<60||r.top>innerHeight-110}),on=!!b;
-    if(b){fab.dataset.k=b.dataset.xadd;fab.setAttribute("aria-label",b.dataset.xadd==="exams"?"הוסף מבחן":"הוסף אירוע");fab.title=fab.getAttribute("aria-label")}
-    if(on!==fab.classList.contains("on")){fab.classList.toggle("on",on);fab.tabIndex=on?0:-1}};
+/* big buttons ⇄ floating circles: scrolling past "צור סידור אוטומטי" / "הוסף מבחן" / "הוסף אירוע" turns the button into a glass bubble
+   that flies down to the corner and lands as the round button; scrolling back up flies it home and it opens back into the button
+   (like minimizing / restoring a window on the Mac) */
+const FABS=[];
+function fabMorph(btn,fab,on){const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  if(fab._anim){fab._anim.cancel()}
+  if(fab._ghost){fab._ghost.remove();fab._ghost=null}
+  btn.style.visibility="";
+  const br=btn.getBoundingClientRect(),visible=br.bottom>-40&&br.top<innerHeight&&br.width>0;
+  if(reduce||!visible||!btn.offsetParent){fab.classList.add("snap");fab.classList.toggle("on",on);fab.tabIndex=on?0:-1;requestAnimationFrame(()=>fab.classList.remove("snap"));return}
+  fab.classList.add("snap");fab.classList.add("on");const fr=fab.getBoundingClientRect();if(!on)fab.classList.remove("on");else fab.classList.add("hold");
+  const g=document.createElement("div");g.className="morphg";g.innerHTML=fab.innerHTML;document.body.appendChild(g);fab._ghost=g;
+  const lb=btn.querySelector(".lb");if(lb){const t=document.createElement("span");t.className="mlb";t.textContent=lb.textContent;g.appendChild(t)}
+  const R=r=>({left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});
+  const big={...R(br),borderRadius:Math.min(br.height/2,26)+"px"},small={...R(fr),borderRadius:fr.width/2+"px"};
+  /* genie: the pill narrows and stretches while it travels, then settles into the circle */
+  const mid={left:(on?fr.left+fr.width/2:br.left+br.width/2)-fr.width*.8+"px",top:((br.top+fr.top)/2-fr.height*.2)+"px",width:fr.width*1.6+"px",height:fr.height*1.25+"px",borderRadius:fr.width+"px"};
+  const kf=on?[{...big,"--lbo":1,"--ico":0},{...mid,"--lbo":0,"--ico":1,offset:.42},{...small,"--lbo":0,"--ico":1}]
+             :[{...small,"--lbo":0,"--ico":1},{...mid,"--lbo":0,"--ico":.6,offset:.5},{...big,"--lbo":1,"--ico":0}];
+  if(!on){btn.style.visibility="hidden";fab.tabIndex=-1}
+  g.classList.toggle("tobtn",!on);
+  const an=g.animate(kf,{duration:on?560:520,easing:"cubic-bezier(.32,.72,0,1)",fill:"forwards"});fab._anim=an;
+  an.onfinish=()=>{g.remove();fab._ghost=null;fab._anim=null;btn.style.visibility="";
+    if(on){fab.classList.remove("hold");fab.tabIndex=0;fab.classList.add("land");setTimeout(()=>fab.classList.remove("land"),500)}
+    requestAnimationFrame(()=>fab.classList.remove("snap"))};
+  an.oncancel=()=>{g.remove();btn.style.visibility="";fab.classList.remove("hold","snap")};
+  haptic()}
+function fabWatch(fab,getBtn,act){FABS.push({fab,getBtn});let state=false,cur=null;
+  const sync=()=>{const b=getBtn();let on=false;if(b&&b.offsetParent){const r=b.getBoundingClientRect();on=r.bottom<62}
+    if(b)cur=b;if(on!==state||(on&&fab.dataset.k!==(b&&b.dataset.xadd))){const was=state;state=on;if(b&&b.dataset.xadd){fab.dataset.k=b.dataset.xadd;fab.setAttribute("aria-label",b.dataset.xadd==="exams"?"הוסף מבחן":"הוסף אירוע");fab.title=fab.getAttribute("aria-label")}
+      if(was!==on)fabMorph(cur||b,fab,on)}};
   let raf=0;const q=()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;sync()})};
-  addEventListener("scroll",q,{passive:true});addEventListener("resize",q);document.addEventListener("click",()=>{setTimeout(q,60);setTimeout(q,500)},true);document.addEventListener("toggle",q,true);
-  fab.onclick=()=>{haptic();fab.classList.remove("go");void fab.offsetWidth;fab.classList.add("go");openItemSheet(fab.dataset.k||"exams")}}
+  addEventListener("scroll",q,{passive:true});addEventListener("resize",q);
+  document.addEventListener("click",()=>{setTimeout(q,60);setTimeout(q,500)},true);document.addEventListener("toggle",q,true);
+  fab.onclick=()=>{fab.classList.remove("go");void fab.offsetWidth;fab.classList.add("go");act()};setTimeout(q,300)}
+fabWatch($("#genFab"),()=>$("#genBtn"),()=>$("#genBtn").click());
+fabWatch($("#addFab"),()=>[...document.querySelectorAll('#tab-ev [data-xadd="exams"],#tab-ev [data-xadd="events"]')].find(x=>x.offsetParent),()=>{haptic();openItemSheet($("#addFab").dataset.k||"exams")});
 $("#clearBtn").onclick=()=>{const w=W();S.sites.forEach(s=>w.assign[s.id]={m:DAYS.map(()=>[]),e:DAYS.map(()=>[])});changed();render()};
 /* a final week keeps a copy of what was marked final: edits can then be saved as the new final, or thrown away */
 const finalPart=w=>JSON.stringify({a:w.assign,n:w.notes,an:w.anote||{},p:w.pref||{}});
