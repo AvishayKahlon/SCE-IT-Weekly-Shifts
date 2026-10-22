@@ -1704,7 +1704,7 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 07:00";
+const APP_VER="22.10.2026 07:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2717,6 +2717,10 @@ function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎�
   const REQ=/צריך|צריכה|נא\s|נבקש|מבקש|אשמח|יש להכין|להכין|לוודא|לבדוק|דרוש|נדרש|לדאוג|להביא|להתקין|לחבר|מחשב|מקרן|רמקול|מיקרופון|זום|zoom|הקלטה|צילום|ציוד|הגברה|מסך|לפטופ|תוכנ|התקנ|רשת|אינטרנט|wifi|סטנד|כבל|hdmi/i;
   const needs=sent.filter(x=>!isInfo(x)&&REQ.test(x));
   if(needs.length)r[r.kind==="events"?"needs":"notes"]=needs.join("\n").slice(0,600);
+  /* "open the computer station" → the short task that goes into the schedule notes: לפתוח POD ב114 (the event's purpose moves to the details) */
+  if(/(?:לפתוח|לפתיחת|פתיחת|פתיחה\s+של)\s+(?:את\s+)?(?:ה)?עמד(?:ת|ות)\s*(?:ה)?(?:מחשב|מרצה)|\bpod\b/i.test(t)){
+    const room=(r.room||"").match(/\d{2,4}/);const purpose=r.kind==="events"&&r.name&&!/עמד/.test(r.name)?r.name:"";
+    r.kind="events";r.name="לפתוח POD"+(room?" ב"+room[0]:"");r.needs=purpose}
   return r}
 function openPaste(){const o=document.createElement("div");o.className="pastebox";
   o.innerHTML=`<div class="pcard" role="dialog" aria-label="הדבקה ממייל"><div class="ph2"><b>📋 הדבקה ממייל</b><button data-px aria-label="סגור">✕</button></div>
