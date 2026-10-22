@@ -1823,7 +1823,16 @@ td.c-range{display:none}
 
 /* Firebase storage card (iCloud style) */
 .fbh{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;text-align:right}
-.fbu{display:grid;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.fbu{position:relative;display:grid;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.fbu-h{padding-inline-end:52px}
+/* small floating glass button for cleanup */
+.fbclean{position:absolute;top:6px;inset-inline-end:0;width:44px;height:44px;min-height:0!important;padding:0!important;border-radius:50%!important;display:grid!important;place-items:center;
+  color:var(--accent)!important;border:0!important;background:color-mix(in srgb,var(--surface) 70%,transparent)!important;-webkit-backdrop-filter:blur(16px) saturate(180%);backdrop-filter:blur(16px) saturate(180%);
+  box-shadow:0 6px 18px rgba(0,0,0,.14),inset 0 1px 0 var(--g-hi,rgba(255,255,255,.8)),inset 0 0 0 .5px var(--g-line,rgba(0,0,0,.08))!important;animation:fbfloat 3.4s ease-in-out infinite}
+.fbclean svg{width:22px;height:22px}
+.fbclean:active{transform:scale(.9)!important;animation:none}
+@keyframes fbfloat{0%,100%{translate:0 0}50%{translate:0 -3px}}
+@media (prefers-reduced-motion:reduce){.fbclean{animation:none}}
 .fbu-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.fbu-h b{font-size:16px}.fbu-h span{color:var(--muted);font-size:13.5px;font-variant-numeric:tabular-nums}
 .fbu-bar{display:flex;height:22px;border-radius:7px;overflow:hidden;background:color-mix(in srgb,var(--ink) 9%,transparent);box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--ink) 10%,transparent)}
 .fbu-bar i{display:block;height:100%;transform-origin:right center}.fbu-bar i+i{box-shadow:inset -1.5px 0 0 var(--surface)}
@@ -2103,7 +2112,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 19:45";
+const APP_VER="22.10.2026 19:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3485,11 +3494,11 @@ function usageParts(){const weeks=S.weeks||{},snaps=Object.values(weeks).reduce(
 let USAGE_KEY="";
 function renderUsage(){const box=$("#fbUsage");if(!box)return;const {all,parts}=usageParts();const key=all+"|"+parts.map(p=>p.v).join(",");if(key===USAGE_KEY&&box.childElementCount)return;USAGE_KEY=key;
   const pct=v=>Math.max(v>0?.4:0,v/FB_LIMIT*100);let bk=false;try{bk=!!localStorage.getItem("shift-state-before-cleanup")}catch(e){}
-  box.innerHTML=`<div class="fbu"><div class="fbu-h"><b>אחסון</b><span>${kb(all)} מתוך \u20661 MB\u2069 · \u2066${(all/FB_LIMIT*100).toFixed(1)}%\u2069</span></div>
+  box.innerHTML=`<div class="fbu"><button type="button" class="fbclean" data-fbclean aria-label="ניקוי מידע לא רלוונטי" title="ניקוי מידע לא רלוונטי"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5l-7 7"/><path d="M11.2 8.6l4.2 4.2-1.6 1.6c-.4 2.6-1.8 4.9-4 6.6L3 14.2c1.7-2.2 4-3.6 6.6-4z"/><path d="M6.4 17.6l2-2M8.6 19.8l1.7-2.1M4.2 15.4l2.1-1.7"/></svg></button><div class="fbu-h"><b>אחסון</b><span>${kb(all)} מתוך \u20661 MB\u2069 · \u2066${(all/FB_LIMIT*100).toFixed(1)}%\u2069</span></div>
     <div class="fbu-bar" role="img" aria-label="נוצלו ${kb(all)} מתוך 1 MB">${parts.filter(p=>p.v>0).map(p=>`<i style="width:${pct(p.v)}%;background:${p.c}" title="${esc(p.l)} · ${kb(p.v)}"></i>`).join("")}</div>
     <div class="fbu-leg">${parts.filter(p=>p.v>0).sort((a,b)=>b.v-a.v).map(p=>`<span><i style="background:${p.c}"></i>${esc(p.l)} <small>${kb(p.v)}</small></span>`).join("")}</div>
     <p class="hint">הכל נשמר במסמך אחד בענן. בקצב השימוש הרגיל זה בערך 150–200 KB בשנה.</p>
-    <div class="fbu-act"><button type="button" class="primary" data-fbclean>ניקוי מידע לא רלוונטי</button>${bk?`<button type="button" data-fbundo>שחזור הניקוי האחרון</button>`:""}</div></div>`;
+    ${bk?`<div class="fbu-act"><button type="button" data-fbundo>שחזור הניקוי האחרון</button></div>`:""}</div>`;
   box.querySelectorAll(".fbu-bar i").forEach((el,i)=>el.animate([{transform:"scaleX(0)"},{transform:"none"}],{duration:620,delay:i*60,easing:EZ.out,fill:"backwards"}))}
 /* what can be removed, with how much it frees */
 function cleanPlan(months){const cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-months);const ck=key(cutoff),curWk=key(sundayOf(new Date()));
