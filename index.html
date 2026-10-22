@@ -1879,9 +1879,9 @@ td.c-range{display:none}
   </nav>
 
   <section class="panel" id="tab-sched">
-    <button class="genfab" id="genFab" type="button" aria-label="יצירת סידור אוטומטי" title="יצירת סידור אוטומטי" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></button>
+    <button class="genfab" id="genFab" type="button" aria-label="שיבוץ חכם" title="שיבוץ חכם" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></button>
     <div class="bar">
-      <button class="primary act" id="genBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span class="lb">יצירת סידור אוטומטי</span></button>
+      <button class="primary act" id="genBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span class="lb">שיבוץ חכם</span></button>
       <button class="act" id="clearBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3.5l4.5 4.5-9.5 9.5H6.5L3.5 14.5z"/><path d="M9 21h12"/><path d="M11 8.5l4.5 4.5"/></svg><span class="lb">ניקוי שיבוצים</span></button>
       <button class="act soft" id="askConsBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01" stroke-width="2.6"/></svg><span class="lb">בקשת אילוצים לשבוע הבא</span></button>
       <span class="sp"></span>
@@ -1902,7 +1902,7 @@ td.c-range{display:none}
     <div class="duo" id="duo">
     <details class="card cons" id="agendaBox" hidden>
       <summary><h2 id="agendaTitle">הערות ואירועים</h2></summary>
-      <p class="hint" style="margin:10px 0">מבחנים, אירועים, חגים והערות לפי יום וקמפוס. ⭐ טכנאי מועדף נבחר כאן לפני יצירת הסידור.</p>
+      <p class="hint" style="margin:10px 0">מבחנים, אירועים, חגים והערות לפי יום וקמפוס. ⭐ טכנאי מועדף נבחר כאן לפני שיבוץ חכם.</p>
       <div id="agenda"></div>
     </details>
     </div>
@@ -2109,7 +2109,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 20:10";
+const APP_VER="22.10.2026 20:15";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2726,7 +2726,7 @@ function render(){if(typeof maybeToday==="function"&&performance.now()<15000)may
   {const probs=hasAssign(w)?pr.list.filter(m=>!m.startsWith("ℹ️")):[],infos=hasAssign(w)?pr.list.filter(m=>m.startsWith("ℹ️")):[];
    const line=(m,c)=>`<div class="msg${c?" "+c:""}">${esc(m)}</div>`;
    let h="";
-   if(!hasAssign(w))h=shortInfo+`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמן אילוצים ולחץ "יצירת סידור אוטומטי".</div>`;
+   if(!hasAssign(w))h=shortInfo+`<div class="msg info">עוד לא נוצר סידור לשבוע הזה. סמן אילוצים ולחץ "שיבוץ חכם".</div>`;
    else if(probs.length)h=`<div class="msgprob"><div class="msgh">⚠️ ${probs.length===1?"בעיה אחת בסידור":probs.length+" בעיות בסידור"}</div>`+probs.slice(0,12).map(m=>line(m)).join("")+(probs.length>12?line(`ועוד ${probs.length-12}…`):"")+shortInfo+infos.map(m=>line(m,"info")).join("")+`</div>`;
    else{const n=infos.length+(shortInfo?1:0);
      h=`<details class="msgok" ${MSG_OPEN?"open":""}><summary><span class="mk">✓</span><b>הכל משובץ, בלי התנגשויות</b>${n?`<span class="mn">${n} ${n===1?"הערה":"הערות"}</span>`:""}</summary>${n?`<div class="msgd">${shortInfo}${infos.map(m=>line(m,"info")).join("")}</div>`:""}</details>`}
