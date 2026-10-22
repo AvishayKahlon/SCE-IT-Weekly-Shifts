@@ -1800,6 +1800,8 @@ td.c-range{display:none}
 .rgok,.rgno{width:34px;height:34px;min-height:0!important;padding:0!important;border-radius:50%!important;display:inline-grid!important;place-items:center;font-weight:800}
 .rgok{background:var(--accent)!important;color:var(--accent-ink)!important;border:0!important}
 .alertb2{grid-template-columns:1fr}
+.avprev{white-space:pre-wrap;text-align:start;font-size:13.5px;line-height:1.45;max-height:150px;overflow:auto;padding:10px 12px;margin:0 0 10px;border-radius:14px;background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.availbox .alertc{width:min(340px,100%)}
 
 .rpro{display:grid;gap:12px;padding:12px 12px 14px;border-radius:20px;background:color-mix(in srgb,var(--accent) 6%,transparent);box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--accent) 22%,transparent)}
 .rpro>h3{margin:0;font-size:15px;font-weight:800}.rpro>h3 span{font-weight:600;color:var(--muted);font-size:13px}
@@ -2167,7 +2169,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 22:30";
+const APP_VER="22.10.2026 22:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2864,6 +2866,7 @@ function eventText(sid,d){const w=W(),s=S.sites.find(x=>x.id===sid),n=(w.notes[s
   return `תזכורת ליום ${DAYS[d]} ${dot(dayDate(d))}:\n📍 ${s?s.name:""}: ${n}\n   בוקר: ${m.join(", ")||"—"}${e.length?` | ערב: ${e.join(", ")}`:""}`}
 /* same as "העתק ופתח את הקבוצה" in Settings → Messages: copy the (possibly edited) text, open the group */
 $("#askConsBtn").onclick=()=>{
+  S.availSent=consWeek();changed(true);
   const g=(S.groupLink||"").trim(),text=($("#consMsg")&&$("#consMsg").value.trim())||consText();
   if(!groupOk(g)){sendWa(text);return}     /* no group link saved yet: previous behaviour */
   try{navigator.clipboard.writeText(text).then(()=>toast("ההודעה הועתקה – הדבק בקבוצה ושלח"),()=>toast("ההעתקה נכשלה – העתק מהגדרות ← הודעות"))}catch(e){toast("ההעתקה נכשלה – העתק מהגדרות ← הודעות")}
@@ -3483,7 +3486,19 @@ function tState(){const o=JSON.parse(JSON.stringify(S.todayState||{}));if(o.date
 function tSave(o){S.todayState=o;changed(true)}
 const hhmm=d=>String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
 var TODAY_T=0,TODAY_FORCE=/[?&]today=1/.test(location.search);
+var AVAIL_FORCE=/[?&]act=avail/.test(location.search);
+/* tapped the Wednesday notification: open WhatsApp with the availability request, and ask whether it went out */
+function availSheet(){if(document.querySelector(".availbox"))return;const nx=consWeek(),text=($("#consMsg")&&$("#consMsg").value.trim())||consText();
+  if(matchMedia("(pointer:coarse)").matches&&!groupOk(S.groupLink))try{location.href="whatsapp://send?text="+encodeURIComponent(text)}catch(e){}
+  const o=document.createElement("div");o.className="alertbox availbox";
+  o.innerHTML=`<div class="alertc" role="alertdialog" aria-label="בקשת זמינות"><b>בקשת זמינות</b><p>לשבוע ${esc(weekSpan(nx))}${S.availSent===nx?" · כבר סומן כנשלח":""}</p>
+    <div class="avprev">${esc(text)}</div>
+    <div class="alertb"><button type="button" class="pref" data-av="send">שליחה בוואטסאפ</button><button type="button" data-av="done">כבר נשלח</button><button type="button" data-av="later">אחר כך</button></div></div>`;
+  document.body.appendChild(o);haptic();const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),200)};
+  o.addEventListener("click",e=>{const b=e.target.closest("[data-av]");if(!b){if(e.target===o)close();return}
+    if(b.dataset.av==="send")$("#askConsBtn").onclick();else if(b.dataset.av==="done"){S.availSent=nx;changed(true);toast("סומן כנשלח")}close()})}
 function maybeToday(){clearTimeout(TODAY_T);TODAY_T=setTimeout(()=>{const now=new Date();
+  if(AVAIL_FORCE){AVAIL_FORCE=false;try{history.replaceState(null,"",location.pathname)}catch(e){}availSheet();return}
   if(TODAY_FORCE&&todayItems().length&&!document.querySelector(".todaybox")){TODAY_FORCE=false;try{history.replaceState(null,"",location.pathname)}catch(e){}openToday(todayItems());return}
   if(now.getHours()<6||document.hidden||document.querySelector(".todaybox,.pastebox,.calsheet,.alertbox,.pop,.itembox,.roombox"))return;
   const st=tState(),items=todayItems().filter(x=>st.sent[x.id]!==tSig(x));if(!items.length)return;
@@ -3576,7 +3591,7 @@ document.addEventListener("click",async e=>{if(!e.target.closest("[data-pushon]"
   USAGE_KEY="";renderUsage();renderPushSet();loadDevices()});
 
 /* ---------- notification settings (synced; the scheduled sender reads the same values) ---------- */
-const PUSH_DEF={on:true,morning:true,morningAt:"06:00",eve:false,eveAt:"20:00",before:false,beforeMin:60,change:true,repeat:false,repeatH:2,exams:true,events:true,campus:"",quiet:true,quietFrom:"21:00",quietTo:"06:00",noSat:true};
+const PUSH_DEF={avail:true,availDay:3,availAt:"08:00",on:true,morning:true,morningAt:"06:00",eve:false,eveAt:"20:00",before:false,beforeMin:60,change:true,repeat:false,repeatH:2,exams:true,events:true,campus:"",quiet:true,quietFrom:"21:00",quietTo:"06:00",noSat:true};
 const pcfg=()=>Object.assign({},PUSH_DEF,S.pushCfg||{});
 function pcSet(k,v){S.pushCfg=Object.assign(pcfg(),{[k]:v});changed(true);renderPushSet()}
 let PUSH_DEV=null;
@@ -3597,6 +3612,7 @@ function renderPushSet(){const box=$("#pushSet");if(!box)return;const c=pcfg(),m
       ${sw("eve","סיכום ערב קודם","מה מתוכנן למחר",tm("eveAt",!c.eve))}
       ${sw("before","לפני תחילת מבחן או אירוע","",sel("beforeMin",[[30,"30 דק׳ לפני"],[60,"שעה לפני"],[120,"שעתיים לפני"]],!c.before))}
       ${sw("change","כשמבחן או אירוע של היום משתנה","שעה, מקום או פרטים")}
+      ${sw("avail","תזכורת לבקשת זמינות","לחיצה על ההתראה פותחת את וואטסאפ עם ההודעה · לא נשלחת אם כבר שלחת לשבוע הזה",`<span class="psrange">${sel("availDay",DAYS.slice(0,5).map((d,i)=>[i,"יום "+d]),!c.avail)}${tm("availAt",!c.avail)}</span>`)}
       ${sw("repeat","חזרה עד סימון ״נשלח״","",sel("repeatH",[[1,"כל שעה"],[2,"כל שעתיים"],[3,"כל 3 שעות"]],!c.repeat))}
       </div></div>
     <div class="card"><h2>מה לכלול</h2><div class="psgrp${c.on?"":" dis"}">

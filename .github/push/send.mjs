@@ -23,7 +23,7 @@ if (!stateDoc.exists) { console.log("no data"); process.exit(0); }
 const S = JSON.parse(stateDoc.data().state || "{}");
 
 /* settings from the app (Settings → התראות); same defaults as the app */
-const C = Object.assign({ on: true, morning: true, morningAt: "06:00", eve: false, eveAt: "20:00", before: false, beforeMin: 60, change: true, repeat: false, repeatH: 2,
+const C = Object.assign({ avail: true, availDay: 3, availAt: "08:00", on: true, morning: true, morningAt: "06:00", eve: false, eveAt: "20:00", before: false, beforeMin: 60, change: true, repeat: false, repeatH: 2,
   exams: true, events: true, campus: "", quiet: true, quietFrom: "21:00", quietTo: "06:00", noSat: true }, S.pushCfg || {});
 if (!force) {
   if (!C.on) { console.log("notifications off"); process.exit(0); }
@@ -61,6 +61,14 @@ else {
   /* evening: tomorrow's summary */
   if (C.eve && nowM >= min(C.eveAt) && log.eveDone !== tomorrow && tmr.length) {
     msgs.push({ title: `מחר יש ${head(tmr)}`, body: lines(tmr), tag: "eve-" + tomorrow, url: "./" }); log.eveDone = tomorrow; }
+  /* weekly: send the availability request (next week) – tapping opens WhatsApp with the message */
+  const dow = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(P.weekday);
+  const sun = new Date(Date.UTC(+P.year, +P.month - 1, +P.day - dow + 7)), sat = new Date(sun.getTime() + 5 * 864e5);
+  const nxWeek = sun.toISOString().slice(0, 10), dm = d => `${d.getUTCDate()}.${d.getUTCMonth() + 1}`;
+  if (C.avail && dow === +C.availDay && nowM >= min(C.availAt) && S.availSent !== nxWeek &&
+      (log.availDone !== today || (C.repeat && log.availAt && Date.now() - log.availAt >= C.repeatH * 36e5 - 5 * 6e4))) {
+    msgs.push({ title: "תזכורת: בקשת זמינות", body: `לשבוע ${dm(sun)}–${dm(sat)} · לחיצה תפתח את וואטסאפ עם ההודעה`, tag: "avail-" + nxWeek, url: "./?act=avail" });
+    log.availDone = today; log.availAt = Date.now(); }
   /* before start of each item */
   if (C.before) for (const x of items) { const s = min(x.time); if (s == null || log.before[x.id]) continue;
     if (nowM >= s - C.beforeMin && nowM < s) { const left = s - nowM;
