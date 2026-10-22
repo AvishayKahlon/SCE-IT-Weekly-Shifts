@@ -1594,7 +1594,7 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
 .xaddrow .primary{min-height:46px;padding-inline:20px}
 @media (max-width:700px){.xaddrow .primary{width:100%;min-height:50px;font-size:16px;justify-content:center}}
 /* the flying glass bubble between a big button and its floating circle */
-.morphg{position:fixed;z-index:39;pointer-events:none;display:grid;place-items:center;overflow:hidden;color:#fff;
+.morphg{position:fixed;z-index:39;pointer-events:none;will-change:left,top,width,height;display:grid;place-items:center;overflow:hidden;color:#fff;
   background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 62%,rgba(255,255,255,.5)),color-mix(in srgb,var(--accent) 82%,transparent));
   -webkit-backdrop-filter:blur(14px) saturate(180%);backdrop-filter:blur(14px) saturate(180%);
   box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 40%,transparent),inset 0 1px 0 rgba(255,255,255,.65),inset 0 -2px 8px rgba(0,0,0,.15),inset 0 0 0 1px rgba(255,255,255,.25);
@@ -1864,7 +1864,7 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 13:20";
+const APP_VER="22.10.2026 13:35";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3161,30 +3161,33 @@ $("#genBtn").onclick=()=>{if(!activeEmps().length)return;haptic();generate();cha
    (like minimizing / restoring a window on the Mac) */
 const FABS=[];
 function fabMorph(btn,fab,on){const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
-  if(fab._anim){fab._anim.cancel()}
-  if(fab._ghost){fab._ghost.remove();fab._ghost=null}
+  if(fab._anim)fab._anim.cancel();
   btn.style.visibility="";
-  const br=btn.getBoundingClientRect(),visible=br.bottom>-40&&br.top<innerHeight&&br.width>0;
+  const br0=btn.getBoundingClientRect(),visible=br0.bottom>-40&&br0.top<innerHeight&&br0.width>0;
   if(reduce||!visible||!btn.offsetParent){fab.classList.add("snap");fab.classList.toggle("on",on);fab.tabIndex=on?0:-1;requestAnimationFrame(()=>fab.classList.remove("snap"));return}
-  fab.classList.add("snap");fab.classList.add("on");const fr=fab.getBoundingClientRect();if(!on)fab.classList.remove("on");else fab.classList.add("hold");
-  const g=document.createElement("div");g.className="morphg";g.innerHTML=fab.innerHTML;document.body.appendChild(g);fab._ghost=g;
+  fab.classList.add("snap","on");const fr=fab.getBoundingClientRect();if(!on)fab.classList.remove("on");else fab.classList.add("hold");
+  const g=document.createElement("div");g.className="morphg";g.innerHTML=fab.innerHTML;document.body.appendChild(g);
   const lb=btn.querySelector(".lb");if(lb){const t=document.createElement("span");t.className="mlb";t.textContent=lb.textContent;g.appendChild(t)}
-  const R=r=>({left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});
-  const big={...R(br),borderRadius:Math.min(br.height/2,26)+"px"},small={...R(fr),borderRadius:fr.width/2+"px"};
-  /* genie: the pill narrows and stretches while it travels, then settles into the circle */
-  const mid={left:(on?fr.left+fr.width/2:br.left+br.width/2)-fr.width*.8+"px",top:((br.top+fr.top)/2-fr.height*.2)+"px",width:fr.width*1.6+"px",height:fr.height*1.25+"px",borderRadius:fr.width+"px"};
-  const kf=on?[{...big,"--lbo":1,"--ico":0},{...mid,"--lbo":0,"--ico":1,offset:.42},{...small,"--lbo":0,"--ico":1}]
-             :[{...small,"--lbo":0,"--ico":1},{...mid,"--lbo":0,"--ico":.6,offset:.5},{...big,"--lbo":1,"--ico":0}];
   if(!on){btn.style.visibility="hidden";fab.tabIndex=-1}
-  g.classList.toggle("tobtn",!on);
-  const an=g.animate(kf,{duration:on?560:520,easing:"cubic-bezier(.32,.72,0,1)",fill:"forwards"});fab._anim=an;
-  an.onfinish=()=>{g.remove();fab._ghost=null;fab._anim=null;btn.style.visibility="";
+  /* driven frame by frame so the bubble lands exactly where the button is NOW, even while the page is still scrolling */
+  const D=on?540:560,t0=performance.now(),lerp=(a,b,k)=>a+(b-a)*k,cl=x=>Math.max(0,Math.min(1,x));
+  const ease=t=>1-Math.pow(1-t,3.4);let raf=0,done=false;
+  const frame=now=>{const t=cl((now-t0)/D),e=ease(t);
+    const br=on?br0:btn.getBoundingClientRect();
+    const A=on?br0:fr,B=on?fr:br;
+    /* genie: the width changes faster/slower than the position, so the pill narrows into a bubble on the way (and widens at the end on the way back) */
+    const ew=on?1-Math.pow(1-e,2.2):Math.pow(e,2.2),eh=on?e:Math.pow(e,1.4);
+    const cx=lerp(A.left+A.width/2,B.left+B.width/2,e),cy=lerp(A.top+A.height/2,B.top+B.height/2,e);
+    const w=lerp(A.width,B.width,ew),h=lerp(A.height,B.height,eh)*(1+.12*Math.sin(Math.PI*e));
+    g.style.cssText=`left:${cx-w/2}px;top:${cy-h/2}px;width:${w}px;height:${h}px;border-radius:${Math.min(w,h)/2}px;--lbo:${on?cl(1-e*2.4):cl((e-.6)/.4)};--ico:${on?cl((e-.15)/.4):cl(1-e*2)}`;
+    if(t<1)raf=requestAnimationFrame(frame);else finish()};
+  const finish=()=>{if(done)return;done=true;cancelAnimationFrame(raf);g.remove();fab._anim=null;btn.style.visibility="";
     if(on){fab.classList.remove("hold");fab.tabIndex=0;fab.classList.add("land");setTimeout(()=>fab.classList.remove("land"),500)}
     requestAnimationFrame(()=>fab.classList.remove("snap"))};
-  an.oncancel=()=>{g.remove();btn.style.visibility="";fab.classList.remove("hold","snap")};
-  haptic()}
+  fab._anim={cancel:()=>{if(done)return;done=true;cancelAnimationFrame(raf);g.remove();btn.style.visibility="";fab.classList.remove("hold","snap");fab._anim=null}};
+  frame(t0);haptic()}
 function fabWatch(fab,getBtn,act){FABS.push({fab,getBtn});let state=false,cur=null;
-  const sync=()=>{const b=getBtn();let on=false;if(b&&b.offsetParent){const r=b.getBoundingClientRect();on=r.bottom<62}
+  const sync=()=>{const b=getBtn();let on=false;if(b&&b.offsetParent){const r=b.getBoundingClientRect();on=state?r.top<76:r.bottom<62}
     if(b)cur=b;if(on!==state||(on&&fab.dataset.k!==(b&&b.dataset.xadd))){const was=state;state=on;if(b&&b.dataset.xadd){fab.dataset.k=b.dataset.xadd;fab.setAttribute("aria-label",b.dataset.xadd==="exams"?"הוסף מבחן":"הוסף אירוע");fab.title=fab.getAttribute("aria-label")}
       if(was!==on)fabMorph(cur||b,fab,on)}};
   let raf=0;const q=()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;sync()})};
