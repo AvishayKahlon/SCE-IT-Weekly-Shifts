@@ -1,0 +1,28 @@
+# Today's exam / event notifications to the iPhone. Every 30 minutes between 06:00 and 23:00 Israel time
+# (the script itself decides whether there is anything to send). "Run workflow" with force = 1 sends a test.
+name: push-notifications
+on:
+  schedule:
+    - cron: "5,35 3-20 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "1 = send a test notification now"
+        default: "1"
+concurrency: { group: push, cancel-in-progress: false }
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: .github/push }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+        working-directory: .github/push
+      - run: node send.mjs
+        working-directory: .github/push
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SA }}
+          FORCE: ${{ github.event.inputs.force }}

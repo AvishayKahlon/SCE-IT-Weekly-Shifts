@@ -1878,6 +1878,11 @@ td.c-range{display:none}
 .fbu-q span{color:var(--muted)}.fbu-q b{font-variant-numeric:tabular-nums;font-weight:650}
 .clr.none{opacity:.5}
 .clp{gap:6px}
+
+.fbu-push{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.fbu-push>div{display:grid;gap:2px}.fbu-push b{font-size:15px}.fbu-push small{font-size:12.5px;color:var(--muted)}
+.fbu-push button{min-height:38px!important;padding:4px 16px!important;border-radius:999px!important;flex:none}
+.pushon{color:var(--accent);font-weight:700;font-size:14px;white-space:nowrap}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה ולכן אינו פעיל.</b><br>פתח אותו מהאייקון במסך הבית או מהקישור.</div>
@@ -2136,7 +2141,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 21:15";
+const APP_VER="22.10.2026 21:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3448,11 +3453,12 @@ function todayItems(){const k=key(new Date());return [...(S.exams||[]).map(x=>({
   .filter(x=>x.date===k&&x.name).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||HE.compare(a.name,b.name))}
 function todayCtx(fn){const keep=cur;cur=key(sundayOf(new Date()));try{return fn(new Date().getDay())}finally{cur=keep}}
 const tSig=x=>[x.name,x.time,x.campus,x.room,x.needs||"",x.notes||"",x.software||"",x.lecturer||""].join("¦");
-function tState(){let o={};try{o=JSON.parse(localStorage.getItem("today-state")||"{}")}catch(e){}if(o.date!==key(new Date()))o={date:key(new Date()),sent:{},snooze:""};return o}
-function tSave(o){try{localStorage.setItem("today-state",JSON.stringify(o))}catch(e){}}
+function tState(){const o=JSON.parse(JSON.stringify(S.todayState||{}));if(o.date!==key(new Date()))return {date:key(new Date()),sent:{},snooze:""};o.sent=o.sent||{};return o}
+function tSave(o){S.todayState=o;changed(true)}
 const hhmm=d=>String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
-var TODAY_T=0;
+var TODAY_T=0,TODAY_FORCE=/[?&]today=1/.test(location.search);
 function maybeToday(){clearTimeout(TODAY_T);TODAY_T=setTimeout(()=>{const now=new Date();
+  if(TODAY_FORCE&&todayItems().length&&!document.querySelector(".todaybox")){TODAY_FORCE=false;try{history.replaceState(null,"",location.pathname)}catch(e){}openToday(todayItems());return}
   if(now.getHours()<6||document.hidden||document.querySelector(".todaybox,.pastebox,.calsheet,.alertbox,.pop,.itembox,.roombox"))return;
   const st=tState(),items=todayItems().filter(x=>st.sent[x.id]!==tSig(x));if(!items.length)return;
   const pend=items.map(x=>x.id+"="+tSig(x)).join("|");
@@ -3509,6 +3515,27 @@ addEventListener("pageshow",()=>maybeToday());
 document.addEventListener("click",e=>{const t=e.target.closest('.tabs button[data-tab="sched"]');if(t)setTimeout(maybeToday,300)});
 setInterval(()=>{const st=tState();if(st.snooze&&hhmm(new Date())>=st.snooze&&!document.hidden)maybeToday()},30000);
 
+/* ---------- push notifications (iPhone home-screen app, iOS 16.4+) ----------
+   The device registers with Firebase Cloud Messaging; its address is saved in app/push. A scheduled job (GitHub Actions)
+   reads today's exams / events and sends: 06:00, at the reminder time you chose, and when today's item changes. */
+const FB_VAPID="";   /* Firebase → Project settings → Cloud Messaging → Web Push certificates → public key */
+const pushOK=()=>"serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window;
+const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+async function pushToken(ask){if(!FB_VAPID||!pushOK()||!fbUser)return null;
+  if(ask){const p=await Notification.requestPermission();if(p!=="granted")return null}else if(Notification.permission!=="granted")return null;
+  if(!firebase.messaging){await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-messaging-compat.js`)}
+  const reg=await navigator.serviceWorker.register("sw.js",{scope:"./"});await navigator.serviceWorker.ready;
+  const t=await firebase.messaging().getToken({vapidKey:FB_VAPID,serviceWorkerRegistration:reg});if(!t)return null;
+  let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))|0;const id="d"+(h>>>0).toString(36);
+  await firebase.firestore().doc("app/push").set({tokens:{[id]:{t,ua:navigator.userAgent.slice(0,120),at:Date.now()}}},{merge:true});
+  try{localStorage.setItem("push-id",id)}catch(e){}return id}
+function pushRow(){const st=!FB_VAPID?"setup":!pushOK()?(/iPhone|iPad/.test(navigator.userAgent)&&!standalone()?"homescreen":"unsupported"):!fbUser?"login":Notification.permission==="granted"?"on":Notification.permission==="denied"?"denied":"off";
+  const msg={setup:"ממתין להגדרת מפתח ההתראות ב-Firebase",homescreen:"זמין רק מהאייקון במסך הבית (לא מ-Safari)",unsupported:"הדפדפן הזה לא תומך בהתראות",login:"נדרשת התחברות",
+    on:"פעיל במכשיר הזה – 06:00, בשעת התזכורת, ובשינוי של מבחן או אירוע של היום",denied:"ההתראות חסומות. אפשר להפעיל ב: הגדרות ← התראות ← ניהול צוות טכנאים",off:"קבלת התראה על מבחנים ואירועים של היום, גם כשהאפליקציה סגורה"}[st];
+  return `<div class="fbu-push"><div><b>התראות</b><small>${esc(msg)}</small></div>${st==="off"?`<button type="button" class="primary" data-pushon>הפעלה</button>`:st==="on"?`<span class="pushon">✓ פעיל</span>`:""}</div>`}
+document.addEventListener("click",async e=>{if(!e.target.closest("[data-pushon]"))return;const b=e.target.closest("[data-pushon]");b.disabled=true;
+  try{const id=await pushToken(true);toast(id?"ההתראות הופעלו במכשיר הזה":"ההתראות לא הופעלו")}catch(err){toast("ההפעלה נכשלה: "+(err&&err.message||err))}
+  USAGE_KEY="";renderUsage()});
 /* ---------- Firebase storage (iCloud-style bar) + cleanup ----------
    Everything lives in one cloud document; Firestore allows up to 1 MB per document. */
 const FB_LIMIT=1048576;
@@ -3539,7 +3566,7 @@ function renderUsage(){const box=$("#fbUsage");if(!box)return;const {all,parts}=
     <div class="fbu-leg">${parts.filter(p=>p.v>0).sort((a,b)=>b.v-a.v).map(p=>`<span><i style="background:${p.c}"></i>${esc(p.l)} <small>${kb(p.v)}</small></span>`).join("")}</div>
     <div class="fbu-q"><span>מכסת האחסון החינמית</span><b>${kb(fz.total)} מתוך \u20661 GB\u2069 · \u2066${(fz.total/1073741824*100).toFixed(3)}%\u2069</b></div>
     <p class="hint">מחושב לפי כללי הספירה של Firebase, על הנתונים המסונכרנים. כל הנתונים נשמרים במסמך אחד, שמוגבל ל־1 MB; המכסה החינמית כוללת גם אינדקסים.</p>
-    ${bk?`<div class="fbu-act"><button type="button" data-fbundo>שחזור הניקוי האחרון</button></div>`:""}</div>`;
+    ${bk?`<div class="fbu-act"><button type="button" data-fbundo>שחזור הניקוי האחרון</button></div>`:""}${pushRow()}</div>`;
   box.querySelectorAll(".fbu-bar i").forEach((el,i)=>el.animate([{transform:"scaleX(0)"},{transform:"none"}],{duration:620,delay:i*60,easing:EZ.out,fill:"backwards"}))}
 /* what can be removed, with how much it frees */
 function cleanPlan(months){const cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-months);cutoff.setDate(cutoff.getDate()-cutoff.getDay());const ck=key(cutoff),curWk=key(sundayOf(new Date()));
@@ -4255,7 +4282,7 @@ async function fbInit(){
   try{for(const m of ["app","auth","firestore"])await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${m}-compat.js`)}
   catch(e){setStatus("אין חיבור לסנכרון – שומר במכשיר");return false}
   firebase.initializeApp(FB_CONFIG);fbAuth=firebase.auth();
-  fbAuth.onAuthStateChanged(u=>{fbUser=u;renderSync();if(u)fbAttach();else fbDetach()});
+  fbAuth.onAuthStateChanged(u=>{fbUser=u;renderSync();if(u){fbAttach();setTimeout(()=>pushToken(false).catch(()=>{}),4000)}else fbDetach()});
   return true}
 function fbDetach(){if(fbUnsub){fbUnsub();fbUnsub=null}ref=null;setStatus(FB_CONFIG?"לא מחובר – שמירה במכשיר הזה בלבד":"שמירה בדפדפן הזה בלבד")}
 function fbAttach(){
