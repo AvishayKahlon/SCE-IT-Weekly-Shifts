@@ -1521,6 +1521,39 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
   #exT td.xdel{order:5}
   td.ro{padding-top:0!important;padding-bottom:0!important}
 }
+
+/* ===== iOS-native bottom sheets on the phone: flush with the bottom edge, rounded top, grabber, centred title + round ✕ ===== */
+.shd{position:relative;display:grid;justify-items:center;gap:1px;padding:2px 44px 6px;text-align:center}
+.shd b{font-size:17px;font-weight:700}.shd small{font-size:12.5px;color:var(--muted);font-weight:500}
+.shd .pgrab{width:38px;height:5px;border-radius:99px;background:var(--muted);opacity:.35;margin:0 0 8px}
+.shx{position:absolute;inset-inline-end:0;top:8px;width:36px!important;height:36px!important;min-height:0!important;padding:0!important;border-radius:999px!important;display:grid!important;place-items:center;
+  font-size:15px!important;font-weight:700;color:var(--muted)!important;background:color-mix(in srgb,var(--ink) 8%,transparent)!important;border:0!important;box-shadow:inset 0 1px 0 var(--glass-edge,rgba(255,255,255,.6))!important}
+.shx:active{transform:scale(.9)}
+.csh>.shd{margin-bottom:4px}
+.pop .ph{position:relative}.pop .ph .shx{top:6px;inset-inline-end:2px}
+@media (min-width:701px){.pop .ph .shx,.shd .pgrab{display:none!important}}
+@media (max-width:700px){
+  .pastebox,.calsheet{padding:0!important;place-items:end stretch!important;background:rgba(0,0,0,calc(.32 * var(--dim,1)))!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .popscrim{background:rgba(0,0,0,calc(.32 * var(--dim,1)))!important}
+  .pcard,.csh,.pop{width:100%!important;max-width:none!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;margin:0!important;
+    border-radius:34px 34px 0 0!important;border:0!important;
+    padding:8px 16px calc(18px + env(safe-area-inset-bottom,0px))!important;
+    background:color-mix(in srgb,var(--surface) 98%,transparent)!important;
+    -webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
+    box-shadow:0 -10px 40px rgba(0,0,0,.18),inset 0 1px 0 var(--glass-edge,rgba(255,255,255,.7))!important;
+    animation:iosup 520ms cubic-bezier(.32,.72,0,1) both!important;will-change:transform;overscroll-behavior:contain}
+  .pcard{max-height:92dvh}.pop{max-height:82dvh}
+  .pcard::before,.pcard::after{border-radius:34px 34px 0 0}
+  .pastebox.out .pcard,.calsheet.out .csh,.pop.out{animation:iosdown 300ms cubic-bezier(.32,.72,0,1) both!important}
+  .pastebox.out .pcard.dragged,.calsheet.out .csh.dragged,.pop.out.dragged{animation:none!important}
+  @keyframes iosup{from{transform:translateY(100%)}}
+  @keyframes iosdown{to{transform:translateY(100%)}}
+  .pop .ph{padding:2px 44px 10px;background:transparent;top:0}
+  .pop .ph .pgrab{margin-bottom:8px}
+  .csh button:not(.shx){min-height:60px}
+  .pcard .ptx{background:var(--bg,var(--surface))}
+  @media (prefers-reduced-motion:reduce){.pcard,.csh,.pop{animation:scrimin 200ms ease both!important}}
+}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1658,7 +1691,7 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
       <div class="scroll"><table class="cal xt" id="evT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button></div>
     </section>
-    <button class="aifab" data-paste aria-label="הוספה חכמה ממייל" title="הוספה חכמה ממייל"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9F0A"/><stop offset=".35" stop-color="#FF375F"/><stop offset=".65" stop-color="#BF5AF2"/><stop offset="1" stop-color="#5E5CE6"/></linearGradient></defs><path fill="url(#aig)" d="M10 2.5l1.6 4.6a3 3 0 0 0 1.8 1.8L18 10.5l-4.6 1.6a3 3 0 0 0-1.8 1.8L10 18.5l-1.6-4.6a3 3 0 0 0-1.8-1.8L2 10.5l4.6-1.6a3 3 0 0 0 1.8-1.8z"/><path fill="url(#aig)" d="M18.5 14l.8 2.2a1.6 1.6 0 0 0 1 1l2.2.8-2.2.8a1.6 1.6 0 0 0-1 1l-.8 2.2-.8-2.2a1.6 1.6 0 0 0-1-1L14.5 18l2.2-.8a1.6 1.6 0 0 0 1-1z"/></svg></button>
+    <button class="aifab" data-paste aria-label="יצירה חכמה" title="יצירה חכמה – מבחן או אירוע מתוך מייל"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9F0A"/><stop offset=".35" stop-color="#FF375F"/><stop offset=".65" stop-color="#BF5AF2"/><stop offset="1" stop-color="#5E5CE6"/></linearGradient></defs><path fill="url(#aig)" d="M10 2.5l1.6 4.6a3 3 0 0 0 1.8 1.8L18 10.5l-4.6 1.6a3 3 0 0 0-1.8 1.8L10 18.5l-1.6-4.6a3 3 0 0 0-1.8-1.8L2 10.5l4.6-1.6a3 3 0 0 0 1.8-1.8z"/><path fill="url(#aig)" d="M18.5 14l.8 2.2a1.6 1.6 0 0 0 1 1l2.2.8-2.2.8a1.6 1.6 0 0 0-1 1l-.8 2.2-.8-2.2a1.6 1.6 0 0 0-1-1L14.5 18l2.2-.8a1.6 1.6 0 0 0 1-1z"/></svg></button>
     <datalist id="dlExam"></datalist><datalist id="dlLect"></datalist><datalist id="dlSoft"></datalist><datalist id="dlEvent"></datalist>
   </section>
 
@@ -1776,7 +1809,7 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 11:55";
+const APP_VER="22.10.2026 12:20";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2803,14 +2836,29 @@ function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎�
     const room=(r.room||"").match(/\d{2,4}/);const purpose=r.kind==="events"&&r.name&&!/עמד/.test(r.name)?r.name:"";
     r.kind="events";if(!r.name||/עמד/.test(r.name))r.name=purpose||"פתיחת עמדת מחשב";r.needs="לפתוח POD"+(room?" ב"+room[0]:"")}
   return r}
+function sheetDrag(sh,close){if(!sh||!matchMedia("(max-width:700px)").matches)return;
+  let y0=null,x0=0,dy=0,t0=0,last=0,lastT=0,v=0,armed=false;
+  const canStart=ev=>{const t=ev.target;if(t.closest("input,textarea,select,button:not(.shx)"))return t.closest(".shd,.ph")&&!t.closest("input,textarea,select,button");
+    return t.closest(".shd,.ph")||sh.scrollTop<=0};
+  sh.addEventListener("touchstart",ev=>{if(ev.touches.length>1||!canStart(ev)){y0=null;return}y0=last=ev.touches[0].clientY;x0=ev.touches[0].clientX;t0=lastT=performance.now();dy=0;v=0;armed=false},{passive:true});
+  sh.addEventListener("touchmove",ev=>{if(y0===null)return;const y=ev.touches[0].clientY,d=y-y0;
+    if(!armed){if(Math.abs(ev.touches[0].clientX-x0)>Math.abs(d)&&Math.abs(d)<8){y0=null;return}
+      if(d<=0&&!ev.target.closest(".shd,.ph")){y0=null;return}if(Math.abs(d)<4)return;armed=true;sh.style.animation="none";sh.style.transition="none"}
+    if(ev.cancelable)ev.preventDefault();const n=performance.now();v=(y-last)/Math.max(1,n-lastT);last=y;lastT=n;
+    dy=d>0?d:-Math.pow(-d,.7);sh.style.transform=`translateY(${dy}px)`;
+    const sc=sh._scrim||sh.parentElement;if(sc&&d>0&&sc!==document.body)sc.style.setProperty("--dim",String(Math.max(0,1-d/(sh.offsetHeight||1))))},{passive:false});
+  const end=()=>{if(y0===null)return;y0=null;if(!armed)return;armed=false;const h=sh.offsetHeight||400;
+    if(dy>h*.25||(v>.5&&dy>20)){sh.style.transition="transform 280ms cubic-bezier(.32,.72,0,1)";sh.style.transform=`translateY(${h+40}px)`;sh.classList.add("dragged");close()}
+    else{sh.style.transition="transform 420ms cubic-bezier(.32,.72,0,1)";sh.style.transform="";const sc=sh._scrim||sh.parentElement;if(sc)sc.style.removeProperty("--dim")}};
+  sh.addEventListener("touchend",end);sh.addEventListener("touchcancel",end)}
 function openPaste(){const o=document.createElement("div");o.className="pastebox";
-  o.innerHTML=`<div class="pcard" role="dialog" aria-label="הדבקה ממייל"><div class="ph2"><b>📋 הדבקה ממייל</b><button data-px aria-label="סגור">✕</button></div>
-    <p class="hint">מעתיקים את המייל (נושא + תוכן) ומדביקים כאן. הכלי מזהה תאריך, שעה, קמפוס, כיתה ומבחן מהמאגר. בודקים, מתקנים אם צריך, ומוסיפים.</p>
-    <textarea class="ptx" rows="6" placeholder="הדביקו כאן את המייל…"></textarea>
+  o.innerHTML=`<div class="pcard" role="dialog" aria-label="יצירה חכמה"><div class="shd"><span class="pgrab" aria-hidden="true"></span><b>יצירה חכמה</b><small>מבחן או אירוע מתוך מייל</small><button class="shx" data-px aria-label="סגור">✕</button></div>
+    <p class="hint">הדביקו את תוכן המייל או הבקשה (כולל הנושא). המערכת מזהה תאריך, שעה, קמפוס, כיתה ומבחן מהמאגר – בודקים, מתקנים במידת הצורך, ומוסיפים.</p>
+    <textarea class="ptx" rows="6" placeholder="הדביקו כאן את תוכן המייל…"></textarea>
     <div class="pform" hidden></div>
     <div class="row pact"><button class="primary" data-pgo>✨ זיהוי</button></div></div>`;
   document.body.appendChild(o);const ta=o.querySelector(".ptx"),f=o.querySelector(".pform");setTimeout(()=>ta.focus(),50);
-  const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),240)};
+  const close=()=>{if(o._closing)return;o._closing=1;o.classList.add("out");setTimeout(()=>o.remove(),320)};sheetDrag(o.querySelector(".pcard"),close);
   const show=r=>{f.hidden=false;const kind=r.kind;
     f.innerHTML=`<div class="pseg"><button data-pk="exams" aria-pressed="${kind==="exams"}">📝 מבחן</button><button data-pk="events" aria-pressed="${kind==="events"}">📅 אירוע</button></div>
       <label>שם<input type="text" data-pf="name" value="${esc(r.name||"")}"></label>
@@ -2878,13 +2926,13 @@ async function icsOut(list){const ics=icsFor(list),name=(list.length>1?list[0].n
   saveFile(name,f);toast("הקובץ ירד – פתחו אותו כדי להוסיף ליומן")}
 function addToCal(list){if(!list.length)return;haptic();
   const o=document.createElement("div");o.className="calsheet";const many=list.length>1;
-  o.innerHTML=`<div class="csh" role="dialog" aria-label="הוספה ליומן"><span class="pgrab"></span><b>הוספה ליומן</b><small>${esc(list[0].name)}${many?` · ${list.length} מועדים`:""}</small>
+  o.innerHTML=`<div class="csh" role="dialog" aria-label="הוספה ליומן"><div class="shd"><span class="pgrab" aria-hidden="true"></span><b>הוספה ליומן</b><small>${esc(list[0].name)}${many?` · ${list.length} מועדים`:""}</small><button class="shx" data-cv="x" aria-label="סגור">✕</button></div>
     <button data-cv="outlook"><span class="ci ol">O</span><span><b>Outlook</b><small>${many?"נפתח מועד אחד בכל פעם":"היומן של SCE – נפתח עם כל הפרטים"}</small></span></button>
     <button data-cv="google"><span class="ci gg">G</span><span><b>Google Calendar</b><small>${many?"נפתח מועד אחד בכל פעם":"נפתח עם כל הפרטים"}</small></span></button>
     ${isIOS?`<button data-cv="ios"><span class="ci ic">📅</span><span><b>יומן האייפון</b><small>${many?"כל המועדים בבת אחת":"נפתח מסך ״הוסף ליומן״"}</small></span></button>`:""}
     <button data-cv="ics"><span class="ci ic">⤓</span><span><b>${isIOS?"שיתוף קובץ":"קובץ ליומן"}</b><small>${isIOS?"שליחת האירוע כקובץ (וואטסאפ, מייל…)":many?"כל המועדים בקובץ אחד":"לפתיחה ביומן במחשב"}</small></span></button>
-    <button class="cx" data-cv="x">ביטול</button></div>`;
-  document.body.appendChild(o);const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),240)};let i=0;
+</div>`;
+  document.body.appendChild(o);const close=()=>{if(o._closing)return;o._closing=1;o.classList.add("out");setTimeout(()=>o.remove(),320)};sheetDrag(o.querySelector(".csh"),close);let i=0;
   o.addEventListener("click",e=>{if(e.target===o)return close();const b=e.target.closest("[data-cv]");if(!b)return;const v=b.dataset.cv;
     if(v==="x")return close();if(v==="ics"){close();icsOut(list);return}if(v==="ios"){close();iosCal(list);return}
     const x=list[Math.min(i,list.length-1)];window.open(v==="outlook"?outlookUrl(x):googleUrl(x),"_blank","noopener");
@@ -3172,7 +3220,7 @@ function openPop(td){
   const notes=curIds.map(id=>{const k=`${sid}|${sh}|${d}|${id}`,auto=autoNote(sh,+d),v=(w.anote||{})[k];
     return `<label class="pn"><span>שעות / הערה – ${esc(empName(id))}</span><input type="text" data-anote="${k}" value="${esc(v===undefined?auto:v)}" placeholder="למשל 11:00-19:00"></label>`}).join("");
   const canSw=sh==="m"?!!arr[+i===0?0:1]:!!arr[+i];
-  const head=`<div class="ph"><span class="pgrab" aria-hidden="true"></span><b>${DAYS[+d]} · ${sh==="m"?"בוקר":"ערב"}</b><span>${esc(site)}</span></div>`;
+  const head=`<div class="ph"><span class="pgrab" aria-hidden="true"></span><b>${DAYS[+d]} · ${sh==="m"?"בוקר":"ערב"}</b><span>${esc(site)}</span><button type="button" class="shx" data-pclose aria-label="סגור">✕</button></div>`;
   pop.innerHTML=head+(canSw?`<button class="swapb" data-swap><span>⇄ החלפה עם משבצת אחרת</span></button>`:"")+(notes?`<div class="pns">${notes}</div>`:"")+opts+`<button data-pick=""><span>ריק</span><span class="tag">הסר שיבוץ</span></button>`;
   document.body.appendChild(pop);
   if(matchMedia("(max-width:700px)").matches){
@@ -3185,14 +3233,11 @@ function openPop(td){
     lay._off=()=>{if(window.visualViewport){visualViewport.removeEventListener("resize",fit);visualViewport.removeEventListener("scroll",fit)}};
     const sc=document.createElement("div");sc.className="popscrim";sc.addEventListener("click",()=>closePop());lay.appendChild(sc);lay.appendChild(pop);pop._scrim=sc;pop._layer=lay;
     /* drag the sheet down to dismiss */
-    let y0=null,dy=0;const h=pop.querySelector(".ph");
-    h.addEventListener("touchstart",ev=>{y0=ev.touches[0].clientY;dy=0;pop.style.transition="none"},{passive:true});
-    h.addEventListener("touchmove",ev=>{if(y0===null)return;dy=Math.max(0,ev.touches[0].clientY-y0);pop.style.transform=`translateY(${dy}px)`},{passive:true});
-    h.addEventListener("touchend",()=>{if(y0===null)return;y0=null;pop.style.transition="";if(dy>80)closePop();else pop.style.transform=""});
+    sheetDrag(pop,()=>closePop());
   }
   const r=td.getBoundingClientRect();pop.style.top=Math.min(r.bottom+4,innerHeight-pop.offsetHeight-8)+"px";pop.style.left=Math.max(8,Math.min(r.left,innerWidth-pop.offsetWidth-8))+"px";
   pop.addEventListener("keydown",ev=>{if(ev.key==="Enter"&&ev.target.dataset.anote){closePop();render()}});
-  pop.addEventListener("click",ev=>{if(ev.target.closest("[data-swap]")){ev.stopPropagation();closePop();startSwap(td.dataset.k);return}
+  pop.addEventListener("click",ev=>{if(ev.target.closest("[data-pclose]")){ev.stopPropagation();closePop();return}if(ev.target.closest("[data-swap]")){ev.stopPropagation();closePop();startSwap(td.dataset.k);return}
     const b=ev.target.closest("[data-pick]");if(!b)return;const id=b.dataset.pick;
     let list=arr.slice();
     if(sh==="m"){if(+i===0){list=id?[id,...list.slice(1).filter(x=>x!==id)]:list.slice(1)}else{list=list.slice(0,1);if(id&&list[0]!==id)list.push(id)}}
