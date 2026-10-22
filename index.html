@@ -1960,7 +1960,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 15:15";
+const APP_VER="22.10.2026 15:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2887,8 +2887,24 @@ let CMB_TOUCH=false;
 {let y0=scrollY,acc=0;addEventListener("scroll",()=>{const y=scrollY,dy=y-y0;y0=y;acc=(Math.sign(dy)===Math.sign(acc)?acc:0)+dy;
     const t=$(".tabs"),m=$(".minibar");if(y<40||acc<-24){t.classList.remove("mini");m&&m.classList.remove("mini")}else if(acc>24){t.classList.add("mini");m&&m.classList.add("mini")}},{passive:true});
   const isField=el=>el&&(el.tagName==="TEXTAREA"||(el.tagName==="INPUT"&&!["checkbox","radio","button","date"].includes(el.type)));
-  document.addEventListener("focusin",e=>{if(isField(e.target))document.body.classList.add("kb")});
-  document.addEventListener("focusout",()=>setTimeout(()=>{if(!isField(document.activeElement))document.body.classList.remove("kb")},80))}
+  /* the dock is hidden ONLY while the on-screen keyboard is really up, and only while a sheet that replaces it is really open.
+     Both are re-checked from the actual state (not remembered), so the dock can never get stuck hidden –
+     e.g. when the focused field is removed by a redraw (iOS then sends no blur). */
+  const vv=window.visualViewport;
+  const dockGuard=()=>{const a=document.activeElement,b=document.body;
+    const kbUp=!!(a&&a.isConnected&&isField(a))&&(!vv||innerHeight-vv.height*(vv.scale||1)>140||!matchMedia("(pointer:coarse)").matches);
+    if(b.classList.contains("kb")!==kbUp)b.classList.toggle("kb",kbUp);
+    const st=$("#stPop"),shareOpen=(st&&!st.hidden)||!!document.querySelector(".share-open");
+    if(b.classList.contains("sharing")&&!shareOpen)b.classList.remove("sharing");
+    const t=$(".tabs");if(t&&!b.classList.contains("kb")&&!b.classList.contains("sharing")){if(t.hidden)t.hidden=false;if(t.style.transform||t.style.opacity){t.style.transform="";t.style.opacity=""}}};
+  window.dockGuard=dockGuard;
+  document.addEventListener("focusin",()=>setTimeout(dockGuard,350));
+  document.addEventListener("focusout",()=>setTimeout(dockGuard,80));
+  if(vv){vv.addEventListener("resize",dockGuard);vv.addEventListener("scroll",dockGuard)}
+  ["pageshow","focus","orientationchange"].forEach(ev=>addEventListener(ev,()=>setTimeout(dockGuard,120)));
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout(dockGuard,120)});
+  document.addEventListener("touchend",()=>setTimeout(dockGuard,400),{passive:true});
+  setInterval(dockGuard,1000)}
 /* visible press feedback on touch screens (see .pressed in CSS) */
 {const SEL="button,a.btn,summary,.cst";let el=null,t0=0;
   const off=()=>{const x=el;el=null;if(!x)return;setTimeout(()=>x.classList.remove("pressed"),Math.max(0,120-(performance.now()-t0)))};
