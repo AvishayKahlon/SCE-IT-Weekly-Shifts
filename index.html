@@ -1658,6 +1658,13 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
 .rmc button{width:24px;height:24px;min-height:0!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;color:var(--muted);font-size:11px;box-shadow:none!important}
 .rmc button:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)!important}
 .rmadd{display:flex;gap:8px}.rmadd input{flex:1;min-width:0}
+
+.rmg{display:grid;gap:4px}.rmgl{font-size:12.5px;font-weight:700;color:var(--muted)}.rmgl small{font-weight:600;opacity:.7}
+.rmadd select{width:auto;max-width:42%}
+.prooms{display:grid!important;gap:8px}
+.prg{display:grid;gap:4px}
+.prg .rm{min-height:34px!important;min-width:50px!important;padding:3px 8px!important;font-size:14.5px!important;margin:0!important}.prg>div{gap:5px!important}.prg>span{font-size:12px;color:var(--muted);font-weight:600}.prg>div{display:flex;flex-wrap:wrap;gap:6px}
+.prmore{justify-self:start;min-height:34px!important;padding:4px 14px!important;font-size:14px;border-radius:999px!important}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1918,7 +1925,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 14:35";
+const APP_VER="22.10.2026 14:50";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1970,6 +1977,11 @@ function ensureData(){
   if((S.catVer||0)<2){S.catVer=2;const clean=n=>String(n||"").replace(/\.?\s*לפעמים בבני ברית/g,"").replace(/^כיתה 216 או 206, או שתיהן$/,"").trim();
     S.examCat.forEach(c=>c.notes=clean(c.notes));S.exams.forEach(e=>e.notes=clean(e.notes))}
   if(!S.rooms){S.rooms={};S.sites.forEach(s=>S.rooms[s.id]=s.name.includes("בוטינסקי")?["124","125","140","141","144"]:s.name.includes("בני ברית")?["205","206","216"]:[])}
+  /* full room list per campus, grouped by type (computer labs, podiums, professional labs…); rooms added by hand are kept */
+  if(!S.roomType)S.roomType={};
+  if((S.roomsVer||0)<2){S.roomsVer=2;const SEED={"bb": [["מעבדת מחשוב", ["205", "206", "216"]], ["מעבדת בניין", ["255"]], ["מעבדת מכונות", ["158", "159", "251", "256", "257"]], ["תקשורת חזותית (מק)", ["208"]], ["פודיום", ["359", "358", "357", "356", "353", "354", "193", "190", "187", "186", "181", "176", "128", "213", "212", "210", "207", "135", "134", "133", "131", "130", "127", "126", "114"]], ["מרכז למידה", ["מרכז למידה"]]], "zb": [["מעבדת מחשוב", ["124", "125", "140", "141", "144"]], ["מעבדת חשמל", ["112", "108", "103", "0001", "105", "104", "109"]], ["מעבדת פיזיקה", ["0002"]], ["פודיום", ["110", "131", "167", "168", "169", "170", "171", "173", "174", "1001", "1003", "1005", "1006", "1007", "1012", "1013", "1014", "1015", "1016", "2045", "2046"]], ["ספרייה", ["ספרייה"]]]};
+    S.sites.forEach(s=>{const k=s.name.includes("בוטינסקי")?"zb":s.name.includes("בני ברית")?"bb":"";if(!k)return;const cur=S.rooms[s.id]||(S.rooms[s.id]=[]);
+      SEED[k].forEach(([g,list])=>list.forEach(r=>{if(!cur.includes(r))cur.push(r);S.roomType[s.id+"|"+r]=g}))})}
   if(S.friVer!==2){S.friVer=2;S.friRule=defaultFri()}
   if(!S.friRule)S.friRule={};
   if(!S.bkVer&&S.employees.length)S.bkVer=1;
@@ -2708,7 +2720,7 @@ function renderEv(){
     const cell=(r,[f,l,t])=>{const at=`data-xf="${kind}|${r.id}|${f}"`,v=r[f]||"",dl=(DL[kind]||{})[f];
       if(!XEDIT.has(r.id)){const txt=t==="d"?roD(v):t==="r"?esc(splitL(v).join(", ")):esc(v);
         return `<td data-l="${l}" class="ro ro-${t}${t==="r"?" rooms":""}${f==="name"?" ro-n":""}${v?"":" ro-e"}">${t==="r"&&v?`<span class="rod">כיתה</span> `:t==="h"&&v?`<span class="rod">🕐</span> `:""}${txt}</td>`}
-      if(t==="r"){const opts=roomsFor(r.campus),sel=splitL(v);
+      if(t==="r"){const sel=splitL(v),opts=roomsFor(r.campus).filter(x=>sel.includes(x)||S.sites.some(s=>siteMatch(r.campus,s.id)&&roomG(s.id,x)==="מעבדת מחשוב"));
         return `<td data-l="${l}" class="rooms">${opts.length?opts.map(o=>`<button type="button" class="rm" data-xroom="${kind}|${r.id}|${o}" aria-pressed="${sel.includes(o)}">${esc(o)}</button>`).join(""):`<span class="hint">בחרו קמפוס</span>`}</td>`}
       if(t==="d")return `<td data-l="${l}">${dateField(at,v,l)}</td>`;
       if(t==="c")return `<td data-l="${l}"><select ${at} aria-label="${l}"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v?"selected":""}>${esc(c)}</option>`).join("")}</select></td>`;
@@ -2757,20 +2769,25 @@ function renderSettings(){
     ${["m","e"].map(sh=>`<tr><td>${sh==="m"?"בוקר":"ערב"}</td>${DAYS.map((_,d)=>`<td><input type="number" min="0" max="6" data-req="${s.id}|${sh}|${d}" value="${(s.req[sh]||[])[d]||0}" aria-label="${sh==="m"?"בוקר":"ערב"} ${DAYS[d]}"></td>`).join("")}</tr>`).join("")}
     </table></div>
     <div class="rmset"><div class="rmh"><b>כיתות וחדרים</b><span class="hint">משמשים לזיהוי הקמפוס במבחנים, באירועים וביצירה חכמה</span></div>
-      <div class="rmchips">${roomSort((S.rooms||{})[s.id]||[]).map(r=>`<span class="rmc">${esc(r)}<button type="button" data-roomdel="${s.id}|${esc(r)}" aria-label="הסר ${esc(r)}">✕</button></span>`).join("")||`<span class="hint">אין עדיין כיתות</span>`}</div>
-      <div class="rmadd"><input type="text" data-roomadd="${s.id}" placeholder="הוספת כיתה, למשל 124" enterkeyhint="done" autocomplete="off"><button type="button" data-roomgo="${s.id}">הוסף</button></div></div>
+      ${roomGroups(s.id).map(([g,list])=>`<div class="rmg"><span class="rmgl">${esc(g)} <small>${list.length}</small></span><div class="rmchips">${list.map(r=>`<span class="rmc">${esc(r)}<button type="button" data-roomdel="${s.id}|${esc(r)}" aria-label="הסר ${esc(r)}">✕</button></span>`).join("")}</div></div>`).join("")||`<span class="hint">אין עדיין כיתות</span>`}
+      <div class="rmadd"><input type="text" data-roomadd="${s.id}" placeholder="כיתה, למשל 124" enterkeyhint="done" autocomplete="off"><select data-roomgrp="${s.id}" aria-label="סוג">${[...new Set([...ROOM_G,...roomGroups(s.id).map(x=>x[0])])].map(g=>`<option>${esc(g)}</option>`).join("")}<option>אחר</option></select><button type="button" data-roomgo="${s.id}">הוסף</button></div></div>
     </div>`).join("");
 }
+const ROOM_G=["מעבדת מחשוב","פודיום","מעבדת חשמל","מעבדת פיזיקה","מעבדת מכונות","מעבדת בניין","תקשורת חזותית (מק)","מרכז למידה","ספרייה"];
+const roomG=(sid,r)=>(S.roomType||{})[sid+"|"+r]||"אחר";
+/* rooms of a site grouped by type, in a fixed order (computer labs first) */
+function roomGroups(sid){const m=new Map();roomSort((S.rooms||{})[sid]||[]).forEach(r=>{const g=roomG(sid,r);if(!m.has(g))m.set(g,[]);m.get(g).push(r)});
+  return [...m.entries()].sort((a,b)=>{const ia=ROOM_G.indexOf(a[0]),ib=ROOM_G.indexOf(b[0]);return (ia<0?99:ia)-(ib<0?99:ib)||HE.compare(a[0],b[0])})}
 /* rooms: numbers first in numeric order, then names */
 function roomSort(a){return a.slice().sort((x,y)=>{const nx=/^\d+$/.test(x),ny=/^\d+$/.test(y);return nx&&ny?x-y:nx?-1:ny?1:HE.compare(x,y)})}
-function roomAdd(sid,txt){S.rooms=S.rooms||{};const cur=S.rooms[sid]||(S.rooms[sid]=[]);
+function roomAdd(sid,txt,grp){S.rooms=S.rooms||{};const cur=S.rooms[sid]||(S.rooms[sid]=[]);
   const list=String(txt||"").split(/[,;\n]+|\s{2,}/).flatMap(x=>/^[\d\s]+$/.test(x.trim())?x.trim().split(/\s+/):[x.trim()]).map(x=>x.replace(/^(?:כיתה|חדר)\s+/,"").trim()).filter(Boolean);
-  let n=0;list.forEach(r=>{if(!cur.includes(r)){cur.push(r);n++}
-    S.sites.forEach(o=>{if(o.id!==sid&&S.rooms[o.id]&&S.rooms[o.id].includes(r)){S.rooms[o.id]=S.rooms[o.id].filter(x=>x!==r);toast(`${r} הועבר מ${o.name}`)}})});
+  S.roomType=S.roomType||{};let n=0;list.forEach(r=>{if(!cur.includes(r)){cur.push(r);n++}if(grp)S.roomType[sid+"|"+r]=grp});
   return n}
 /* which campus a room belongs to ("" when unknown or ambiguous) */
-function campusOfRoom(room){const nums=splitL(room).map(x=>x.replace(/^(?:כיתה|חדר)\s+/,""));const own=S.sites.filter(s=>nums.some(n=>((S.rooms||{})[s.id]||[]).includes(n)));
-  if(own.length!==1)return "";return CAMPUS.find(c=>siteMatch(c,own[0].id)&&c!=="שניהם")||""}
+const normRoom=x=>String(x||"").replace(/^(?:כיתה|חדר)\s+/,"").replace(/ספריה/g,"ספרייה").replace(/[\u200e\u200f]/g,"").trim();
+function campusOfRoom(room){const own=new Set();splitL(room).map(normRoom).forEach(n=>{const o=S.sites.filter(s=>((S.rooms||{})[s.id]||[]).includes(n));if(o.length===1)own.add(o[0])});
+  if(own.size!==1)return "";const s1=[...own][0];return CAMPUS.find(c=>c!=="שניהם"&&siteMatch(c,s1.id))||""}
 
 /* ---------- pick-list for exam / lecturer / software / event names ----------
    tap anywhere on the field = full list (א-ב); typing filters it and highlights the best match; Enter / tap picks */
@@ -2951,8 +2968,7 @@ function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎�
   /* ---- campus: words first, then which campus owns the rooms ---- */
   const zb=/ב?וטינסקי|ז['׳]?בו|אשדוד/.test(t),bb=/בני[\s\-־]*ברית|באר[\s\-־]*שבע|ב["״]ש|ביאליק/.test(t);
   r.campus=zb&&bb?"שניהם":zb?"ז'בוטינסקי":bb?"בני ברית":"";
-  if(!r.campus&&r.room){const nums=r.room.match(/\d+/g)||[];const own=S.sites.filter(s=>nums.some(n=>((S.rooms||{})[s.id]||[]).includes(n)));
-    if(own.length===1)r.campus=CAMPUS.find(c=>own[0].name.includes(c)||c.includes(own[0].name))||own[0].name;else if(own.length>1)r.campus="שניהם"}
+  if(!r.campus&&r.room){const nums=r.room.match(/\d{2,4}/g);r.campus=campusOfRoom(nums?nums.join(", "):r.room)}
   /* ---- exam from the bank / exam words; event name from known phrases ---- */
   const bank=(S.examCat||[]).filter(c=>c.name&&t.includes(c.name.trim())).sort((a,b)=>b.name.length-a.name.length)[0];
   r.kind=bank||/מבחן|בחינה|בוחן|מועד\s*[אב]/.test(t)?"exams":"events";
@@ -3049,7 +3065,15 @@ function openItemSheet(kind,id,seed){const isEx=kind==="exams",old=id?(S[kind]||
   const close=()=>{if(o._closing)return;o._closing=1;o.classList.add("out");setTimeout(()=>o.remove(),320)};sheetDrag(o.querySelector(".pcard"),close);
   const grow=x=>{x.style.height="auto";x.style.height=x.scrollHeight+"px"};f.querySelectorAll("textarea.grow").forEach(x=>{grow(x);x.addEventListener("input",()=>grow(x))});
   let campus=r.campus||"";
-  const rooms=()=>{const opts=campus?roomsFor(campus):[],sel=splitL(q("room").value);f.querySelector(".prooms").innerHTML=opts.map(x=>`<button type="button" class="rm" data-pr="${esc(x)}" aria-pressed="${sel.includes(x)}">${esc(x)}</button>`).join("")};rooms();
+  let allRooms=false;
+  const rooms=()=>{const box=f.querySelector(".prooms"),sel=splitL(q("room").value);if(!campus){box.innerHTML="";return}
+    const sids=S.sites.filter(s=>siteMatch(campus,s.id)).map(s=>s.id),groups=new Map();
+    sids.forEach(sid=>roomGroups(sid).forEach(([g,l])=>{if(!groups.has(g))groups.set(g,new Set());l.forEach(x=>groups.get(g).add(x))}));
+    const pri=isEx?["מעבדת מחשוב"]:["פודיום","מרכז למידה","ספרייה","מעבדת מחשוב"];
+    const show=[...groups.entries()].filter(([g,l])=>allRooms||pri.includes(g)||[...l].some(x=>sel.includes(x)));
+    const chip=x=>`<button type="button" class="rm" data-pr="${esc(x)}" aria-pressed="${sel.includes(x)}">${esc(x)}</button>`;
+    box.innerHTML=show.map(([g,l])=>`<div class="prg"><span>${esc(g)}</span><div>${[...l].map(chip).join("")}</div></div>`).join("")
+      +(show.length<groups.size?`<button type="button" class="prmore" data-prall>כל החדרים (${[...groups.values()].reduce((a,l)=>a+l.size,0)})</button>`:allRooms&&groups.size>1?`<button type="button" class="prmore" data-prall>פחות</button>`:"")};rooms();
   q("room").addEventListener("input",()=>{if(!campus){const c=campusOfRoom(q("room").value);if(c){campus=c;f.querySelectorAll("[data-pc]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pc===campus))}}rooms()});
   /* picking an exam from the bank fills software / lecturer / campus / time that are still empty */
   q("name").addEventListener("change",()=>{if(!isEx)return;const t={name:q("name").value};applyCat(t);
@@ -3058,6 +3082,7 @@ function openItemSheet(kind,id,seed){const isEx=kind==="exams",old=id?(S[kind]||
   if(!old)setTimeout(()=>q("name").focus(),380);
   o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-px]")){close();return}
     const pc=e.target.closest("[data-pc]");if(pc){campus=campus===pc.dataset.pc?"":pc.dataset.pc;f.querySelectorAll("[data-pc]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pc===campus));rooms();haptic();return}
+    if(e.target.closest("[data-prall]")){allRooms=!allRooms;rooms();return}
     const pr=e.target.closest("[data-pr]");if(pr){const sel=splitL(q("room").value),x=pr.dataset.pr;q("room").value=(sel.includes(x)?sel.filter(y=>y!==x):[...sel,x]).sort(HE.compare).join(", ");rooms();haptic();return}
     if(e.target.closest("[data-idel]")){if(!confirm(`למחוק את ${old.name||"הרשומה"}?`))return;close();setTimeout(()=>rowsFlip(()=>{S[kind]=S[kind].filter(x=>x.id!==old.id);changed();render()}),180);toast("נמחק");return}
     if(e.target.closest("[data-isave]")){const v=n=>((q(n)||{}).value||"").trim();if(!v("name")){toast("חסר שם");q("name").focus();return}if(!v("date")){toast("חסר תאריך");return}
@@ -3429,9 +3454,9 @@ document.addEventListener("click",e=>{
   const hd=e.target.closest("[data-hdel]");
   if(hd){rowOut(hd,()=>{S.holidays=S.holidays.filter(x=>x.id!==hd.dataset.hdel);changed();render()});return}
   const rmd=e.target.closest("[data-roomdel]");
-  if(rmd){const[sid,r]=rmd.dataset.roomdel.split("|");S.rooms[sid]=(S.rooms[sid]||[]).filter(x=>x!==r);changed();render();return}
+  if(rmd){const[sid,r]=rmd.dataset.roomdel.split("|");S.rooms[sid]=(S.rooms[sid]||[]).filter(x=>x!==r);if(S.roomType)delete S.roomType[sid+"|"+r];changed();render();return}
   const rmg=e.target.closest("[data-roomgo]");
-  if(rmg){const inp=document.querySelector(`[data-roomadd="${rmg.dataset.roomgo}"]`);const n=roomAdd(rmg.dataset.roomgo,inp.value);if(n){changed();render();toast(n>1?`נוספו ${n} כיתות`:"הכיתה נוספה")}else if(inp.value.trim())toast("כבר ברשימה");return}
+  if(rmg){const inp=document.querySelector(`[data-roomadd="${rmg.dataset.roomgo}"]`);const gs=document.querySelector(`[data-roomgrp="${rmg.dataset.roomgo}"]`);const n=roomAdd(rmg.dataset.roomgo,inp.value,gs&&gs.value);if(n){changed();render();toast(n>1?`נוספו ${n} כיתות`:"הכיתה נוספה")}else if(inp.value.trim())toast("כבר ברשימה");return}
   const sd=e.target.closest("[data-sdel]");
   if(sd){S.sites=S.sites.filter(x=>x.id!==sd.dataset.sdel);changed();render()}
 });
