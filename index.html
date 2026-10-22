@@ -1728,6 +1728,42 @@ td.c-range{display:none}
   #holT tr.ro .c-fri{display:none}
   #vacT tr.ro.old{opacity:.55}
 }
+
+/* ===== today's card: macOS-style liquid glass that condenses out of a blur and dissolves upward when closed ===== */
+.todaybox{position:fixed;inset:0;z-index:85;display:grid;place-items:center;padding:20px;background:rgba(10,14,10,.22);
+  -webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%);animation:tdscrim 420ms var(--ease-out) both}
+@keyframes tdscrim{from{background:rgba(10,14,10,0);-webkit-backdrop-filter:blur(0);backdrop-filter:blur(0)}}
+.todaybox.out{animation:tdscrimout 380ms var(--ease-in) both}
+@keyframes tdscrimout{to{background:rgba(10,14,10,0);-webkit-backdrop-filter:blur(0);backdrop-filter:blur(0)}}
+.tdc{position:relative;overflow:hidden;width:min(440px,100%);max-height:84dvh;display:grid;grid-template-rows:auto 1fr auto;gap:14px;padding:20px 18px 16px;border-radius:34px;
+  background:color-mix(in srgb,var(--surface) 70%,transparent);-webkit-backdrop-filter:blur(40px) saturate(200%);backdrop-filter:blur(40px) saturate(200%);
+  box-shadow:0 30px 80px rgba(0,0,0,.3),0 2px 8px rgba(0,0,0,.08),inset 0 1px 0 var(--g-hi,rgba(255,255,255,.8)),inset 0 0 0 .5px var(--g-line,rgba(0,0,0,.08));
+  transform-origin:50% 30%;animation:tdin 760ms var(--spring) both}
+@keyframes tdin{0%{opacity:0;transform:translateY(-26px) scale(.82);filter:blur(16px)}55%{opacity:1;filter:blur(0)}100%{opacity:1;transform:none;filter:none}}
+.todaybox.out .tdc{animation:tdout 380ms var(--ease-in) both}
+@keyframes tdout{to{opacity:0;transform:translateY(-18px) scale(.92);filter:blur(12px)}}
+/* a soft light runs across the glass once it lands */
+.tdsheen{position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 66%);
+  transform:translateX(-120%);animation:tdsheen 1100ms var(--ease-out) 420ms both;mix-blend-mode:soft-light}
+@keyframes tdsheen{to{transform:translateX(120%)}}
+.tdh{display:flex;align-items:center;gap:14px}
+.tdh>span:last-child{display:grid}.tdh>span:last-child b{font-size:20px;font-family:var(--font-display)}.tdh small{color:var(--muted);font-size:13.5px}
+.tdd{width:56px;height:60px;border-radius:16px;display:grid;place-content:center;text-align:center;flex:none;background:var(--surface);box-shadow:0 4px 12px rgba(0,0,0,.08),inset 0 0 0 .5px var(--line);overflow:hidden;position:relative;padding-top:10px}
+.tdd::before{content:"";position:absolute;top:0;left:0;right:0;height:14px;background:#E5484D}
+.tdd b{font-size:24px;line-height:1;font-family:var(--font-display)}.tdd small{font-size:11px!important;font-weight:700}
+.tdl{display:grid;gap:10px;overflow:auto;overscroll-behavior:contain;margin:0 -4px;padding:2px 4px}
+.tdi{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px;border-radius:22px;background:color-mix(in srgb,var(--surface) 72%,transparent);
+  box-shadow:inset 0 0 0 .5px var(--g-line,var(--line));animation:tdrow 520ms var(--ease-out) both;animation-delay:calc(260ms + var(--i) * 70ms)}
+@keyframes tdrow{from{opacity:0;transform:translateY(10px) scale(.98)}}
+.tdk{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.tdm{display:grid;gap:2px;min-width:0}.tdm b{font-size:16.5px}.tdm small{color:var(--muted);font-size:13px}.tdm .duty{color:var(--accent);font-weight:600}
+.tdwa{display:grid!important;justify-items:center;gap:1px;min-height:0!important;padding:6px 8px!important;border-radius:16px!important;border:0!important;background:#25D366!important;color:#fff!important;font-size:10.5px;font-weight:700;box-shadow:0 4px 12px rgba(37,211,102,.35)!important}
+.tdwa svg{width:22px;height:22px}
+.tda{display:grid;gap:8px}
+.tda button{min-height:48px;font-size:16.5px;font-weight:700;border-radius:16px!important}
+.tda .tdall{background:#25D366!important;color:#fff!important;border:0!important}
+.tda .tdclose{background:color-mix(in srgb,var(--ink) 8%,transparent)!important;border:0!important}
+@media (prefers-reduced-motion:reduce){.tdc,.todaybox.out .tdc,.tdi,.tdsheen{animation:scrimin 160ms ease both!important}.tdsheen{display:none}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1988,7 +2024,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 15:55";
+const APP_VER="22.10.2026 16:10";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2553,7 +2589,7 @@ document.querySelectorAll("#viewSeg button").forEach(b=>b.addEventListener("clic
       {opacity:1,transform:"none",clipPath:"inset(0% 0% 0% 0% round 22px)"}],{duration:620,easing:EZ.pop})];
     newEl._a[0].onfinish=()=>{newEl.style.transformOrigin=""}}}));
 let MSG_OPEN=false;
-function render(){
+function render(){if(typeof maybeToday==="function")maybeToday();
   ensureData();calcNeed();
   const w=W();
   const d0=parseKey(cur),d5=dayDate(5);
@@ -3168,6 +3204,41 @@ function openRooms(sid){const site=S.sites.find(x=>x.id===sid);if(!site)return;
     if(e.target.closest("[data-rsave]")){S.rooms=S.rooms||{};S.roomType=S.roomType||{};S.rooms[sid]=draft.rooms;
       Object.keys(S.roomType).forEach(k=>{if(k.startsWith(sid+"|"))delete S.roomType[k]});Object.assign(S.roomType,draft.type);
       edit=false;draft=null;changed();render();draw();haptic();toast("החדרים נשמרו")}})}
+
+/* ---------- today's exams / events: from 06:00, the first time the app is opened that day, a glass card with the details ----------
+   once per day (shown again only if something for today is added or changed) */
+function todayItems(){const k=key(new Date());return [...(S.exams||[]).map(x=>({...x,kind:"exams"})),...(S.events||[]).map(x=>({...x,kind:"events"}))]
+  .filter(x=>x.date===k&&x.name).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||HE.compare(a.name,b.name))}
+function todayCtx(fn){const keep=cur;cur=key(sundayOf(new Date()));try{return fn(new Date().getDay())}finally{cur=keep}}
+var TODAY_T=0;
+function maybeToday(){clearTimeout(TODAY_T);TODAY_T=setTimeout(()=>{
+  if(new Date().getHours()<6||document.hidden||document.querySelector(".todaybox,.pastebox,.calsheet,.alertbox,.pop"))return;
+  const items=todayItems();if(!items.length)return;
+  const sig=key(new Date())+"|"+items.map(x=>x.id+":"+x.time+":"+x.campus+":"+x.room).join(",");
+  let seen="";try{seen=localStorage.getItem("today-pop")||""}catch(e){}
+  if(seen===sig)return;try{localStorage.setItem("today-pop",sig)}catch(e){}
+  openToday(items)},900)}
+function openToday(items){const o=document.createElement("div");o.className="todaybox";const now=new Date();
+  const rows=todayCtx(d=>items.map(x=>{const s=S.sites.find(st=>siteMatch(x.campus,st.id)),w=W();
+    const duty=s?(x.time?onDutyAt(x.time,namesAt(w,s.id,"m",d),namesAt(w,s.id,"e",d)):[...namesAt(w,s.id,"m",d),...namesAt(w,s.id,"e",d)].join(", ")):"";
+    const txt=s?itemText(x.kind,x.id,s.id,d):[x.name,x.time,x.campus,x.room&&"כיתה "+x.room,x.needs||x.notes].filter(Boolean).join("\n");
+    const det=[x.software?"💻 "+x.software:"",x.lecturer?"👤 "+x.lecturer:"",x.needs||x.notes?"🛠️ "+(x.needs||x.notes):""].filter(Boolean);
+    return {x,duty,txt,det}}));
+  o.innerHTML=`<div class="tdc" role="dialog" aria-label="היום"><div class="tdsheen" aria-hidden="true"></div>
+    <div class="tdh"><span class="tdd"><b>${now.getDate()}</b><small>${["ינו׳","פבר׳","מרץ","אפר׳","מאי","יוני","יולי","אוג׳","ספט׳","אוק׳","נוב׳","דצמ׳"][now.getMonth()]}</small></span>
+      <span><b>היום יש ${items.length>1?items.length+" מבחנים ואירועים":items[0].kind==="exams"?"מבחן":"אירוע"}</b><small>יום ${DAYS[now.getDay()]||""}</small></span></div>
+    <div class="tdl">${rows.map(({x,duty,det},i)=>`<div class="tdi" style="--i:${i}"><span class="tdk ${x.kind}">${x.kind==="exams"?"📝":"📅"}</span>
+      <div class="tdm"><b>${esc(x.name)}</b><small>${[x.time?"🕐 "+esc(x.time):"",esc(x.campus||""),x.room?"כיתה "+esc(x.room):""].filter(Boolean).join(" · ")}</small>
+        ${det.map(t=>`<small class="tdx">${esc(t)}</small>`).join("")}${duty?`<small class="duty">👤 בכוננות: ${esc(duty)}</small>`:""}</div>
+      <button type="button" class="tdwa" data-tdwa="${i}" aria-label="שליחה בוואטסאפ"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.6-.3z"/></svg><span>וואטסאפ</span></button></div>`).join("")}</div>
+    <div class="tda">${items.length>1?`<button type="button" class="tdall" data-tdall>שליחת הכל בוואטסאפ</button>`:""}<button type="button" class="tdclose" data-tdx>סגירה</button></div></div>`;
+  document.body.appendChild(o);haptic();
+  const close=()=>{if(o._c)return;o._c=1;o.classList.add("out");setTimeout(()=>o.remove(),420)};
+  o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-tdx]")){close();return}
+    const w=e.target.closest("[data-tdwa]");if(w){sendWa(rows[+w.dataset.tdwa].txt);return}
+    if(e.target.closest("[data-tdall]")){sendWa(rows.map(r=>r.txt).join("\n\n"));return}});
+  document.addEventListener("keydown",function k(e){if(e.key==="Escape"&&document.body.contains(o)){close();document.removeEventListener("keydown",k)}})}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)maybeToday()});
 /* ---------- new / edit exam or event: a native-style sheet with the whole form ---------- */
 function openItemSheet(kind,id,seed){const isEx=kind==="exams",old=id?(S[kind]||[]).find(x=>x.id===id):null;
   const r=Object.assign({date:key(new Date())>cur?key(new Date()):cur},seed||{},old||{});
