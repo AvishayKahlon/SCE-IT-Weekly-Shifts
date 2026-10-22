@@ -621,8 +621,8 @@ table.cal .num{font-variant-numeric:tabular-nums;font-weight:700}
 ::view-transition-group(tabbar),::view-transition-old(tabbar),::view-transition-new(tabbar){animation:none}   /* the dock never moves during page changes */
 #tab-sched:not([hidden]),#tab-cal:not([hidden]),#tab-ev:not([hidden]),#tab-set:not([hidden]){view-transition-name:tabpage}
 html[data-vt="sub"]::view-transition-old(tabpage),html[data-vt="sub"]::view-transition-new(tabpage),html[data-vt="sub"]::view-transition-group(tabpage){animation:none}
-#tab-set .subtabs{view-transition-name:subbar}
-#sub-gen:not([hidden]),#sub-staff:not([hidden]),#sub-msg:not([hidden]){view-transition-name:subpage}
+.panel:not([hidden])>.segbar{view-transition-name:subbar}
+.panel:not([hidden])>.segp:not([hidden]){view-transition-name:subpage}
 ::view-transition-group(subbar),::view-transition-old(subbar),::view-transition-new(subbar){animation:none}
 ::view-transition-group(subpage){animation-duration:440ms;animation-timing-function:cubic-bezier(.32,.72,0,1)}
 ::view-transition-old(subpage){animation:440ms cubic-bezier(.32,.72,0,1) both vt-out-r}
@@ -1370,6 +1370,39 @@ html,body{min-height:100%}
 .subtabs button[aria-selected="true"],.subtabs button.hov{opacity:1;color:var(--accent)}
 .subtabs button.pressed{background:none!important;transform:scale(.94)}
 @media (max-width:700px){.subtabs{touch-action:none}}
+
+/* segment bars with counters, overviews */
+.segbar{margin-bottom:2px}
+.segbar button .sbn{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-inline-start:6px;border-radius:9px;font-size:11px;font-weight:800;background:var(--g-field,var(--line));color:var(--muted);vertical-align:1px}
+.segbar button .sbn:empty{display:none}
+.segbar button[aria-selected="true"] .sbn{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent)}
+.ov{display:grid;gap:14px}
+.ovtiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ovt{display:grid;gap:2px;align-content:start;padding:14px 16px!important}
+.ovt .ol{font-size:13px;color:var(--muted);font-weight:700}
+.ovt b{font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}.ovt b.sm{font-size:20px;line-height:1.25}
+.ovt .os{font-size:12.5px;color:var(--muted)}
+.ovh{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}.ovh h2{margin:0!important}
+.ovl{display:grid;gap:8px}
+.ovr{display:flex;align-items:center;gap:12px;width:100%;text-align:right;padding:10px 12px!important;min-height:56px;border:0!important;border-radius:18px!important;
+  background:var(--g-field,var(--bg))!important;box-shadow:inset 0 0 0 .5px var(--g-line,var(--line))!important;cursor:pointer;color:var(--ink);font:inherit}
+.ovr .pav{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:800;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+.ovr .pav.hol{background:rgba(89,89,89,.16);color:var(--ink)}
+.ovr .pav.exams,.ovr .pav.events{background:var(--g-ctl,var(--surface));font-size:18px}
+.ovm{display:grid;gap:1px;flex:1;min-width:0}.ovm b{font-size:16px}.ovm small{font-size:12.5px;color:var(--muted)}.ovm small.duty{color:var(--accent);font-weight:700}
+.ovr .chev{width:8px;height:8px;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(135deg);flex:none;margin-inline-start:4px}
+.htag{font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap;background:rgba(89,89,89,.14)}
+.htag.t-off{background:#595959;color:#fff}
+.ovempty{margin:4px 0 12px;color:var(--muted);font-size:14px}
+.ov .row{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.ovday{display:grid;gap:8px;margin-bottom:12px}.ovdh{display:flex;justify-content:space-between;align-items:baseline;padding:0 4px}.ovdh b{font-size:16px}.ovdh span{font-size:12.5px;color:var(--muted)}
+.ewi .wab{width:34px;height:34px;flex:none}
+.lk{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+@keyframes flashrow{0%,35%{background:color-mix(in srgb,var(--accent) 24%,transparent)}}
+tr.flash,tr.flash td{animation:flashrow 1.8s ease}
+@media (max-width:700px){.ovtiles{gap:10px}.ovt b{font-size:26px}}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ovr .pav.hol{background:rgba(255,255,255,.1)}:root:not([data-theme="light"]) .htag{background:rgba(255,255,255,.1)}}
+:root[data-theme="dark"] .ovr .pav.hol{background:rgba(255,255,255,.1)}:root[data-theme="dark"] .htag{background:rgba(255,255,255,.1)}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1460,25 +1493,37 @@ html,body{min-height:100%}
 
 
   <section class="panel" id="tab-cal" hidden>
-    <details class="card cons xsec" id="vacBox">
-      <summary><h2>יומן חופשות</h2><span class="xcnt" id="vacN"></span></summary>
+    <nav class="subtabs segbar" data-group="cal" role="tablist" aria-label="חופשות וחגים">
+      <button role="tab" data-panel="cal-ov" aria-selected="true">סקירה</button>
+      <button role="tab" data-panel="vacBox" aria-selected="false">חופשות<span class="sbn" id="vacN"></span></button>
+      <button role="tab" data-panel="holBox" aria-selected="false">חגים<span class="sbn" id="holN"></span></button>
+    </nav>
+    <div class="segp ov" id="cal-ov"></div>
+    <section class="card segp" id="vacBox" hidden>
+      <h2>יומן חופשות</h2>
       <p class="hint" style="margin:10px 0">חופשה מסמנת "חופש" אוטומטית בימים ראשון–חמישי שבטווח. ● אדום = החופשה הסתיימה לפני השבוע המוצג.</p>
       <div class="scroll"><table class="cal" id="vacT"></table></div>
       <div class="row" style="margin-top:10px"><button id="addVac" class="primary">+ הוסף חופשה</button></div>
-    </details>
-    <details class="card cons xsec" id="holBox">
-      <summary><h2>לוח חגים</h2><span class="xcnt" id="holN"></span></summary>
+    </section>
+    <section class="card segp" id="holBox" hidden>
+      <h2>לוח חגים</h2>
       <p class="hint" style="margin:10px 0"><b>פגרה</b>: לא עובדים, כל היום סגור, ושישי של פגרה לא תופס תור בסבב. <b>סיום ב-16:00</b>: אין משמרת ערב. <b>סיום ב-19:00</b>: המשמרות כרגיל, מופיע כהערה. שם החג מופיע אוטומטית בשורת ההערות.</p>
       <div class="scroll"><table class="cal" id="holT"></table></div>
       <div class="row" style="margin-top:10px"><button id="addHol" class="primary">+ הוסף חג</button></div>
-    </details>
+    </section>
   </section>
 
 
 
   <section class="panel" id="tab-ev" hidden>
-    <details class="card cons xsec" id="exBox">
-      <summary><h2>מבחנים</h2><span class="xcnt" id="exN"></span></summary>
+    <nav class="subtabs segbar" data-group="ev" role="tablist" aria-label="מבחנים ואירועים">
+      <button role="tab" data-panel="ev-wk" aria-selected="true">השבוע</button>
+      <button role="tab" data-panel="exBox" aria-selected="false">מבחנים<span class="sbn" id="exN"></span></button>
+      <button role="tab" data-panel="evBox" aria-selected="false">אירועים<span class="sbn" id="evN"></span></button>
+    </nav>
+    <div class="segp ov" id="ev-wk"></div>
+    <section class="card segp" id="exBox" hidden>
+      <h2>מבחנים</h2>
       <p class="hint" style="margin:10px 0">מבחן מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם המבחן | שעה.</p>
       <div class="scroll"><table class="cal xt" id="exT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="exams">+ הוסף מבחן</button></div>
@@ -1488,23 +1533,23 @@ html,body{min-height:100%}
         <div class="scroll"><table class="cal xt" id="ecT"></table></div>
         <div class="row" style="margin-top:10px"><button data-xadd="examCat">+ הוסף למאגר</button></div>
       </details>
-    </details>
-    <details class="card cons xsec" id="evBox">
-      <summary><h2>אירועים וכנסים</h2><span class="xcnt" id="evN"></span></summary>
+    </section>
+    <section class="card segp" id="evBox" hidden>
+      <h2>אירועים וכנסים</h2>
       <p class="hint" style="margin:10px 0">אירוע מופיע אוטומטית בשורת "הערות ואירועים" של אותו יום בקמפוס שלו: שם האירוע | שעה. אירועים שעברו מוצגים באפור.</p>
       <div class="scroll"><table class="cal xt" id="evT"></table></div>
       <div class="row" style="margin-top:10px"><button class="primary" data-xadd="events">+ הוסף אירוע</button></div>
-    </details>
+    </section>
     <datalist id="dlExam"></datalist><datalist id="dlLect"></datalist><datalist id="dlSoft"></datalist><datalist id="dlEvent"></datalist>
   </section>
 
   <section class="panel" id="tab-set" hidden>
-    <nav class="subtabs" role="tablist" aria-label="קטגוריות הגדרות">
-      <button role="tab" data-sub="gen" aria-selected="true">כללי</button>
-      <button role="tab" data-sub="staff" aria-selected="false">עובדים</button>
-      <button role="tab" data-sub="msg" aria-selected="false">הודעות</button>
+    <nav class="subtabs segbar" data-group="set" role="tablist" aria-label="קטגוריות הגדרות">
+      <button role="tab" data-sub="gen" data-panel="sub-gen" aria-selected="true">כללי</button>
+      <button role="tab" data-sub="staff" data-panel="sub-staff" aria-selected="false">עובדים</button>
+      <button role="tab" data-sub="msg" data-panel="sub-msg" aria-selected="false">הודעות</button>
     </nav>
-    <div class="panel" id="sub-gen">
+    <div class="panel segp" id="sub-gen">
       <div class="card">
         <h2>סנכרון בין מכשירים</h2>
         <div id="syncBox"></div>
@@ -1534,7 +1579,7 @@ html,body{min-height:100%}
         <div class="row"><button id="backupBtn">הורד גיבוי</button><button id="restoreBtn">שחזר מגיבוי</button><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
       </div>
     </div>
-    <div class="panel" id="sub-staff" hidden>
+    <div class="panel segp" id="sub-staff" hidden>
       <div class="card">
         <h2>עובדים</h2>
         <div class="rows" id="staffRows"></div>
@@ -1544,7 +1589,7 @@ html,body{min-height:100%}
         </div>
       </div>
     </div>
-    <div class="panel" id="sub-msg" hidden>
+    <div class="panel segp" id="sub-msg" hidden>
       <div class="card">
         <h2>שליחה במייל</h2>
         <div class="row">
@@ -1612,7 +1657,7 @@ html,body{min-height:100%}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 05:25";
+const APP_VER="22.10.2026 05:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -1915,8 +1960,8 @@ function renderAgenda(w){
   $("#agendaTitle").textContent="הערות ואירועים "+weekSpan();
   $("#agendaBox").hidden=!days.length;if(!days.length){$("#agenda").innerHTML="";return}
   $("#agenda").innerHTML=days.map(({dn,d,sites})=>`<div class="ag-day"><div class="ag-h"><b>${dn}</b> <span>${dot(dayDate(d))}</span></div>`+
-    sites.map(({s,lines})=>`<div class="ag-site"><div class="ag-n">${esc(s.name)}</div><div class="ag-l">${lines.map(l=>`<span>${esc(l)}</span>`).join("")}</div>
-      <div class="ag-p">${dm(d).off?"":`<span>⭐</span>${prefSel(w,s.id,d)}`}</div></div>`).join("")+`</div>`).join("")}
+    sites.map(({s,lines})=>{const its=dayItemObjs(dayDate(d),s.id);return `<div class="ag-site"><div class="ag-n">${esc(s.name)}</div><div class="ag-l">${lines.map(l=>{const it=its.find(x=>x.text===l);return it?`<span class="lk" data-goto="${it.kind}|${it.id}">${esc(l)}</span>`:`<span>${esc(l)}</span>`}).join("")}</div>
+      <div class="ag-p">${dm(d).off?"":`<span>⭐</span>${prefSel(w,s.id,d)}`}</div></div>`}).join("")+`</div>`).join("")}
 function prefSel(w,sid,d){const p=(w.pref[sid]||[])[d],v=p?p.e+"|"+p.sh:"",ok=p&&(!hasAssign(w)||(w.assign[sid]?.[p.sh]?.[d]||[]).includes(p.e));   /* red only once a schedule exists and it wasn't honoured */
   return `<select class="psel${p?(ok?" ok":" no"):""}" data-pref="${sid}|${d}" aria-label="טכנאי מועדף ${DAYS[d]}"><option value="">—</option>${activeEmps().map(e=>["m","e"].map(sh=>`<option value="${e.id}|${sh}" ${v===e.id+"|"+sh?"selected":""}>${esc(e.name)} – ${sh==="m"?"בוקר":"ערב"}</option>`).join("")).join("")}</select>`}
 /* shrink text until it fits its cell (start from the CSS size, never larger) */
@@ -1949,7 +1994,7 @@ function dayItems(dt,sid){return dayItemObjs(dt,sid).map(x=>x.text)}
 /* small WhatsApp send button (generic chat icon) */
 const WA_ICO=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01" stroke-width="2.8"/></svg>`;
 function waBtn(attr,label){return `<button class="wab" ${attr} title="${esc(label)}" aria-label="${esc(label)}">${WA_ICO}</button>`}
-function itemChips(d,sid){return dayItemObjs(dayDate(d),sid).map(x=>`<span class="ich">${esc(x.text)}${waBtn(`data-xwa="${x.kind}|${x.id}|${sid}|${d}"`,"שליחה לוואטסאפ: "+x.text)}</span>`).join("")}
+function itemChips(d,sid){return dayItemObjs(dayDate(d),sid).map(x=>`<span class="ich"><span class="lk" data-goto="${x.kind}|${x.id}">${esc(x.text)}</span>${waBtn(`data-xwa="${x.kind}|${x.id}|${sid}|${d}"`,"שליחה לוואטסאפ: "+x.text)}</span>`).join("")}
 /* WhatsApp text for one event / exam, with who is on shift at that campus */
 function itemText(kind,id,sid,d){const r=(S[kind]||[]).find(x=>x.id===id);if(!r)return "";const w=W(),s=S.sites.find(x=>x.id===sid);
   const m=namesAt(w,sid,"m",d),e=namesAt(w,sid,"e",d),L=[`תזכורת ליום ${DAYS[d]} ${dot(dayDate(d))}:`];
@@ -2199,7 +2244,7 @@ function render(){
    $("#msgs").innerHTML=h;const d=$("#msgs .msgok");if(d)d.addEventListener("toggle",()=>{MSG_OPEN=d.open})}
   fitCells($("#sheet"));
   renderSync();renderAgenda(w);
-  renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderStaff();renderSettings();renderMsgs();
+  renderFair(w);renderCons(w);renderFriSet();renderCal();renderEv();renderCalOv();renderEvWeek();renderStaff();renderSettings();renderMsgs();
 }
 
 /* ---------- WhatsApp messages ---------- */
@@ -2375,7 +2420,7 @@ function applyEvent(r){const prev=S.events.filter(x=>x!==r&&x.name===r.name).sor
 let EV_KEEP=false;const XOPEN=new Set();
 function renderEv(){
   fillLists();{const t=key(new Date()),up=a=>a.filter(x=>!x.date||x.date>=t).length;
-    $("#exN").textContent=up(S.exams)?up(S.exams)+" קרובים":"";$("#evN").textContent=up(S.events)?up(S.events)+" קרובים":"";$("#ecN").textContent=S.examCat.length||""}
+    $("#exN").textContent=up(S.exams)||"";$("#evN").textContent=up(S.events)||"";$("#ecN").textContent=S.examCat.length||""}
   if(EV_KEEP)return;const a=document.activeElement;if(a&&a.closest&&a.closest("#tab-ev")&&a.type==="text"&&!a.classList.contains("dtx"))return;
   const today=key(new Date());
   Object.entries(XT).forEach(([kind,cfg])=>{
@@ -2401,7 +2446,7 @@ let CAL_KEEP=false;
 function renderCal(){if(CAL_KEEP)return;
   if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#tab-cal")&&document.activeElement.type==="text"&&!document.activeElement.classList.contains("dtx"))return;
   {const t=key(new Date()),nv=S.vac.filter(v=>!v.to||v.to>=t).length,nh=S.holidays.filter(h=>(h.to||h.from||"9")>=t).length;
-    $("#vacN").textContent=nv?nv+" קרובות":"";$("#holN").textContent=nh?nh+" קרובים":""}
+    $("#vacN").textContent=nv||"";$("#holN").textContent=nh||""}
   const opts=sel=>`<option value="" ${sel?"":"selected"} disabled>בחרו טכנאי</option>`+S.employees.slice().sort(byName).map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
   $("#vacT").innerHTML=`<tr><th></th><th>טכנאי</th><th>מתאריך</th><th>עד תאריך</th><th>סה"כ ימים</th><th>מטרת החופש</th><th>קמפוס</th><th></th></tr>`+
     (S.vac.length?S.vac.slice().sort((a,b)=>(a.from||"9").localeCompare(b.from||"9")||HE.compare(empName(a.emp),empName(b.emp))).map(v=>{const days=v.from&&v.to&&v.to>=v.from?Math.round((parseKey(v.to)-parseKey(v.from))/864e5)+1:"";const old=v.to&&v.to<cur;
@@ -2515,31 +2560,72 @@ window.addEventListener("scroll",()=>{if(CMB)cmbPlace()},{passive:true});
 window.addEventListener("resize",()=>{if(CMB)cmbPlace()});
 if(window.visualViewport){visualViewport.addEventListener("resize",()=>{if(CMB)cmbPlace()});visualViewport.addEventListener("scroll",()=>{if(CMB)cmbPlace()})}
 /* ---------- settings categories ---------- */
-function openSub(k){if(!$("#sub-"+k))return;document.querySelectorAll(".subtabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.sub===k));
-  {const bs=[...document.querySelectorAll(".subtabs button")];$(".subtabs").style.setProperty("--si",Math.max(0,bs.findIndex(x=>x.dataset.sub===k)))}
-  subSwap(k,true);try{sessionStorage.setItem("shift-sub",k)}catch(e){}}
-/* settings pages slide in from the side you move to, like the main tabs */
-const SUBS=["gen","staff","msg"];
-function subSwap(k,anim){const now=SUBS.find(t=>$("#sub-"+t)&&!$("#sub-"+t).hidden);if(now===k)return;
-  const upd=()=>SUBS.forEach(t=>{$("#sub-"+t).hidden=t!==k});
-  if(!anim||!now||$("#tab-set").hidden||matchMedia("(prefers-reduced-motion:reduce)").matches){upd();return}
-  document.documentElement.dataset.dir=SUBS.indexOf(k)>SUBS.indexOf(now)?"fwd":"back";document.documentElement.dataset.vt="sub";
+/* ---------- segment bars (settings, חופשות וחגים, מבחנים ואירועים): one glass bar, sliding lens, swipe, animated pages ---------- */
+const segBtns=bar=>[...bar.querySelectorAll(":scope>button")];
+function segShow(bar,pid,anim){const ids=segBtns(bar).map(b=>b.dataset.panel),now=ids.find(id=>$("#"+id)&&!$("#"+id).hidden);if(now===pid)return;
+  const upd=()=>ids.forEach(id=>{const p=$("#"+id);if(p)p.hidden=id!==pid});const tab=bar.closest(".panel");
+  if(!anim||!now||(tab&&tab.hidden)||matchMedia("(prefers-reduced-motion:reduce)").matches){upd();return}
+  document.documentElement.dataset.dir=ids.indexOf(pid)>ids.indexOf(now)?"fwd":"back";document.documentElement.dataset.vt="sub";
   if(document.startViewTransition){try{const v=document.startViewTransition(upd);v.finished.finally(()=>{document.documentElement.dataset.vt=""});return}catch(e){}}
-  upd();const p=$("#sub-"+k);p.classList.remove("peek");void p.offsetWidth;p.classList.add("peek")}
-document.querySelectorAll(".subtabs button").forEach(b=>b.addEventListener("click",()=>{if(skipSub)return;if(b.getAttribute("aria-selected")!=="true")haptic();openSub(b.dataset.sub)}));
-/* settings categories: same glass bar as the dock — slide a finger along it and the lens follows, the page under it shows */
-let skipSub=false;
-{const bar=$(".subtabs"),btns=[...bar.querySelectorAll("button")],N=btns.length;let st=null;
+  upd();const p=$("#"+pid);p.classList.remove("peek");void p.offsetWidth;p.classList.add("peek")}
+function segOpen(bar,i,anim){if(!bar)return;const bs=segBtns(bar);i=Math.max(0,Math.min(bs.length-1,+i||0));
+  bs.forEach((b,k)=>b.setAttribute("aria-selected",k===i));bar.style.setProperty("--si",i);segShow(bar,bs[i].dataset.panel,anim);
+  try{sessionStorage.setItem("seg-"+bar.dataset.group,i)}catch(e){}}
+const segBar=g=>document.querySelector(`.segbar[data-group="${g}"]`);
+function segTo(g,pid,anim=true){const bar=segBar(g);if(bar)segOpen(bar,segBtns(bar).findIndex(b=>b.dataset.panel===pid),anim)}
+function openSub(k){segTo("set","sub-"+k,true)}
+document.querySelectorAll(".segbar").forEach(bar=>{const btns=segBtns(bar),N=btns.length;let st=null,skip=false;
+  btns.forEach((b,k)=>b.addEventListener("click",()=>{if(skip)return;if(b.getAttribute("aria-selected")!=="true")haptic();segOpen(bar,k,true)}));
   const at=x=>{const r=bar.getBoundingClientRect();return Math.max(0,Math.min(N-1,Math.floor((r.right-x)/(r.width/N))))};
   bar.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse")return;st={x:e.clientX,i:btns.findIndex(b=>b.getAttribute("aria-selected")==="true"),moved:false,id:e.pointerId}},{passive:true});
   bar.addEventListener("pointermove",e=>{if(!st||e.pointerId!==st.id)return;if(!st.moved&&Math.abs(e.clientX-st.x)<10)return;
     if(!st.moved){st.moved=true;bar.classList.add("drag");try{bar.setPointerCapture(e.pointerId)}catch(_){}}
     const r=bar.getBoundingClientRect(),f=Math.max(0,Math.min(N-1,(r.right-e.clientX)/(r.width/N)-.5));bar.style.setProperty("--si",f.toFixed(3));
-    const i=at(e.clientX);if(i!==st.i){st.i=i;btns.forEach((b,k)=>b.classList.toggle("hov",k===i));
-      subSwap(btns[i].dataset.sub,true);haptic()}});
+    const i=at(e.clientX);if(i!==st.i){st.i=i;btns.forEach((b,k)=>b.classList.toggle("hov",k===i));segShow(bar,btns[i].dataset.panel,true);haptic()}});
   const end=()=>{if(!st)return;const s0=st;st=null;bar.classList.remove("drag");btns.forEach(b=>b.classList.remove("hov"));
-    if(s0.moved){openSub(btns[s0.i].dataset.sub);skipSub=true;setTimeout(()=>skipSub=false,350)}};
-  bar.addEventListener("pointerup",end);bar.addEventListener("pointercancel",end)}
+    if(s0.moved){segOpen(bar,s0.i,true);skip=true;setTimeout(()=>skip=false,350)}};
+  bar.addEventListener("pointerup",end);bar.addEventListener("pointercancel",end)});
+/* overviews */
+const plusD=(k,n)=>{const d=parseKey(k);d.setDate(d.getDate()+n);return key(d)};
+const dK=k=>dot(parseKey(k));
+function renderCalOv(){const el=$("#cal-ov");if(!el)return;const t=key(new Date()),w0=key(sundayOf(new Date())),w0e=plusD(w0,5),w2=addW(w0,2);
+  const live=(S.vac||[]).filter(v=>v.emp&&v.from);
+  const nowOff=[...new Set(live.filter(v=>v.from<=w0e&&(v.to||v.from)>=w0).map(v=>v.emp))].map(empName).sort(HE.compare);
+  const soon=live.filter(v=>(v.to||v.from)>=w0&&v.from<w2).sort((a,b)=>a.from.localeCompare(b.from)||HE.compare(empName(a.emp),empName(b.emp)));
+  const hols=(S.holidays||[]).filter(h=>h.from&&(h.to||h.from)>=t).sort((a,b)=>a.from.localeCompare(b.from)).slice(0,3);
+  const nh=hols[0],inDays=nh?Math.round((parseKey(nh.from)-parseKey(t))/864e5):0;
+  const days=v=>v.to&&v.to>=v.from?Math.round((parseKey(v.to)-parseKey(v.from))/864e5)+1:1;
+  el.innerHTML=`<div class="ovtiles">
+    <div class="card ovt"><span class="ol">בחופש השבוע</span><b>${nowOff.length}</b><span class="os">${nowOff.length?esc(nowOff.join(", ")):"אף אחד"}</span></div>
+    <div class="card ovt"><span class="ol">החג הבא</span><b class="sm">${nh?esc(nh.name||"חג"):"—"}</b><span class="os">${nh?(inDays<=0?"היום":inDays===1?"מחר":`בעוד ${inDays} ימים`)+" · "+esc(HOL_T[nh.type]||""):"אין חגים קרובים"}</span></div></div>
+   <section class="card"><div class="ovh"><h2>מי בחופש</h2><span class="hint">השבוע והשבוע הבא</span></div>
+    ${soon.length?`<div class="ovl">${soon.map(v=>`<button class="ovr" data-goto="vac|${v.id}"><span class="pav">${esc(initial(empName(v.emp)))}</span><span class="ovm"><b>${esc(empName(v.emp))}</b><small>${dK(v.from)}${v.to&&v.to!==v.from?" – "+dK(v.to):""} · ${days(v)} ${days(v)===1?"יום":"ימים"}${v.campus?" · "+esc(v.campus):""}</small></span><span class="chev"></span></button>`).join("")}</div>`:`<p class="ovempty">אין חופשות בשבועיים הקרובים</p>`}
+    <div class="row"><button class="primary" data-ovadd="vac">+ חופשה</button></div></section>
+   <section class="card"><div class="ovh"><h2>חגים קרובים</h2></div>
+    ${hols.length?`<div class="ovl">${hols.map(h=>`<button class="ovr" data-goto="hol|${h.id}"><span class="pav hol">${esc(initial(h.name||"ח"))}</span><span class="ovm"><b>${esc(h.name||"חג")}</b><small>${dK(h.from)}${h.to&&h.to!==h.from?" – "+dK(h.to):""}</small></span><span class="htag t-${h.type}">${esc(HOL_T[h.type]||"")}</span><span class="chev"></span></button>`).join("")}</div>`:`<p class="ovempty">אין חגים קרובים</p>`}
+   </section>`}
+function renderEvWeek(){const el=$("#ev-wk");if(!el)return;const w=W();
+  const all=[...(S.exams||[]).map(x=>({...x,kind:"exams"})),...(S.events||[]).map(x=>({...x,kind:"events"}))].filter(x=>x.name&&x.date);
+  const days=DAYS.map((dn,d)=>{const k=plusD(cur,d);return{dn,d,k,items:all.filter(x=>x.date===k).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||HE.compare(a.name,b.name))}}).filter(x=>x.items.length);
+  const row=(x,d)=>{const s=S.sites.find(st=>siteMatch(x.campus,st.id)),duty=s&&x.time?onDutyAt(x.time,namesAt(w,s.id,"m",d),namesAt(w,s.id,"e",d)):"";
+    return `<div class="ovr ewi" data-goto="${x.kind}|${x.id}" role="button" tabindex="0"><span class="pav ${x.kind}">${x.kind==="exams"?"📝":"📅"}</span>
+      <span class="ovm"><b>${esc(x.name)}</b><small>${[x.time?"🕐 "+esc(x.time):"",esc(x.campus||""),x.room?"כיתה "+esc(x.room):""].filter(Boolean).join(" · ")}</small>${duty?`<small class="duty">👤 בכוננות: ${esc(duty)}</small>`:""}</span>
+      ${s?waBtn(`data-xwa="${x.kind}|${x.id}|${s.id}|${d}"`,"שליחה לוואטסאפ: "+x.name):""}</div>`};
+  el.innerHTML=`<section class="card"><div class="ovh"><h2>מבחנים ואירועים ${weekSpan()}</h2></div>
+    ${days.length?days.map(({dn,d,k,items})=>`<div class="ovday"><div class="ovdh"><b>${dn}</b><span>${dK(k)}</span></div><div class="ovl">${items.map(x=>row(x,d)).join("")}</div></div>`).join("")
+      :`<p class="ovempty">אין מבחנים או אירועים בשבוע הזה</p>`}
+    <div class="row"><button class="primary" data-ovadd="exams">+ מבחן</button><button data-ovadd="events">+ אירוע</button></div></section>`}
+/* jump to one item in its own list, and flash it */
+function goItem(kind,id){const tab={vac:"cal",hol:"cal",exams:"ev",events:"ev"}[kind];if(!tab)return;
+  const tb=document.querySelector(`.tabs button[data-tab="${tab}"]`);if(tb.getAttribute("aria-selected")!=="true")tb.click();
+  segTo(tab,{vac:"vacBox",hol:"holBox",exams:"exBox",events:"evBox"}[kind],true);
+  setTimeout(()=>{const sel={vac:`[data-vf^="${id}|"]`,hol:`[data-hf^="${id}|"]`,exams:`[data-xf^="exams|${id}|"]`,events:`[data-xf^="events|${id}|"]`}[kind];
+    const tr=document.querySelector(sel)?.closest("tr");if(!tr)return;tr.scrollIntoView({block:"center",behavior:"smooth"});tr.classList.remove("flash");void tr.offsetWidth;tr.classList.add("flash")},480)}
+document.addEventListener("click",e=>{if(e.target.closest(".wab"))return;
+  const g=e.target.closest("[data-goto]");if(g){const[k,id]=g.dataset.goto.split("|");haptic();goItem(k,id);return}
+  const a=e.target.closest("[data-ovadd]");if(!a)return;const k=a.dataset.ovadd;
+  if(k==="vac"){$("#addVac").click();segTo("cal","vacBox",true);setTimeout(()=>{const s=[...document.querySelectorAll("#vacT select[data-vf$='|emp']")].find(x=>!x.value);s&&s.closest("tr").scrollIntoView({block:"center",behavior:"smooth"})},480)}
+  else{document.querySelector(`[data-xadd="${k}"]`).click();segTo("ev",k==="exams"?"exBox":"evBox",true)}});
 $("#status").addEventListener("click",()=>{toast($("#status").title);if($("#status").classList.contains("warn")){document.querySelector('.tabs button[data-tab="set"]').click();openSub("gen");$("#syncBox").scrollIntoView({block:"center",behavior:"smooth"})}});
 /* collapsible sections start closed; an opened one stays open only for this visit (incl. auto-update reloads) */
 /* long explanations stay hidden behind a small ⓘ next to the section title */
@@ -2592,7 +2678,7 @@ document.addEventListener("click",e=>{const s=e.target.closest&&e.target.closest
 {const wed=new Date().getDay()>=3;
   ["consBox","agendaBox"].forEach(id=>{const a=$("#"+id),k="open-"+id;let v=null;try{v=sessionStorage.getItem(k)}catch(e){}
     a.open=v===null?wed:v==="1";a.addEventListener("toggle",()=>{try{sessionStorage.setItem(k,a.open?"1":"0")}catch(e){}})})}
-["friBox","catBox","exBox","evBox","vacBox","holBox"].forEach(id=>{const b=$("#"+id),k="open-"+id;
+["friBox","catBox"].forEach(id=>{const b=$("#"+id),k="open-"+id;
   try{if(sessionStorage.getItem(k)==="1")b.open=true}catch(e){}
   b.addEventListener("toggle",()=>{try{sessionStorage.setItem(k,b.open?"1":"0")}catch(e){}})});
 /* ---------- interactions ---------- */
@@ -3170,7 +3256,9 @@ function devToggle(){const b=document.createElement("nav");b.className="devbar";
   if(DEV_DATA){load(JSON.stringify(devFixture(DEV_DATA)));if(DEV_DATA==="worst"||DEV_DATA==="many"){const g=generate;try{g()}catch(e){}}render();setStatus("מצב בדיקה – לא נשמר");devToggle();return}
   try{let t=sessionStorage.getItem("shift-tab"),u=sessionStorage.getItem("shift-sub");   /* new visit opens on סידור ואילוצים */
     if(t==="msg"||t==="staff"){u=t;t="set"}      /* old tabs now live inside settings */
-    if(t)document.querySelector(`.tabs button[data-tab="${t}"]`)?.click();if(u)openSub(u)}catch(e){}
+    if(t)document.querySelector(`.tabs button[data-tab="${t}"]`)?.click();
+    document.querySelectorAll(".segbar").forEach(b=>{const v=sessionStorage.getItem("seg-"+b.dataset.group);if(v!==null)segOpen(b,+v,false)});
+    if(u&&sessionStorage.getItem("seg-set")===null)openSub(u)}catch(e){}
   render();
   function goLocal(){
     ref=null;
