@@ -704,7 +704,8 @@ textarea{padding:10px 12px;border-radius:14px}
     -webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);box-shadow:var(--g-sh-ctl),inset 0 1px 0 var(--g-hi),inset 0 0 0 .5px var(--g-line);--ti:0}
   .tabs::before{content:"";position:absolute;top:5px;bottom:5px;right:5px;width:calc((100% - 10px)/4);border-radius:999px;background:var(--accent);
     box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.3);transform:translateX(calc(var(--ti) * -100%));transition:transform 460ms var(--pop)}
-  .tabs button{position:relative;border:0;border-radius:999px;padding:8px 10px;font-size:16px;color:var(--muted);transition:color 220ms ease}
+  .tabs button{position:relative;border:0;border-radius:999px;padding:8px 10px;font-size:16px;color:var(--muted);transition:color 140ms linear}
+  .tabs button[aria-selected="true"]{transition:color 120ms linear}
   .tabs button[aria-selected="true"]{color:var(--accent-ink);border:0}
   .tabs button.pressed{background:none;border-radius:999px}
 }
@@ -1908,7 +1909,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 14:05";
+const APP_VER="22.10.2026 14:20";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3163,14 +3164,20 @@ const haptic=()=>{try{if(navigator.vibrate){navigator.vibrate(8);return}
 /* page change between tabs, iOS-style: the old page slides away and dims, the new one glides in from the side
    you are moving towards (View Transitions; plain fade where unsupported) */
 const TABS=["sched","cal","ev","set"];
+/* page change runs live (no frozen snapshot), so the pill in the tab bar glides at the same moment the page moves.
+   RTL: going to a tab further along, the old page leaves to the right and the new one comes in from the left */
+let PSWAP=null;
 function swapPanel(t,anim,top){
+  if(PSWAP)PSWAP();   /* a quick second tap: finish the running change first */
   const now=TABS.find(k=>$("#tab-"+k)&&!$("#tab-"+k).hidden);if(now===t)return;
   const upd=()=>{TABS.forEach(k=>{const p=$("#tab-"+k);if(p)p.hidden=k!==t});if(top)scrollTo({top:0});if(t==="sched")fitCells($("#sheet"))};
-  const calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
-  if(!anim||calm){upd();return}
-  document.documentElement.dataset.dir=TABS.indexOf(t)>TABS.indexOf(now)?"fwd":"back";document.documentElement.dataset.vt="tab";
-  if(document.startViewTransition){try{document.startViewTransition(upd);return}catch(e){}}
-  upd();const p=$("#tab-"+t);p.classList.remove("peek");void p.offsetWidth;p.classList.add("peek")}
+  const calm=matchMedia("(prefers-reduced-motion:reduce)").matches,old=$("#tab-"+now);
+  if(!anim||calm||!old){upd();return}
+  const fwd=TABS.indexOf(t)>TABS.indexOf(now),D=matchMedia("(min-width:701px)").matches?32:Math.round(innerWidth*.2);
+  const out=old.animate([{opacity:1,transform:"none"},{opacity:0,transform:`translateX(${fwd?D*.6:-D*.6}px)`}],{duration:130,easing:EZ.in,fill:"forwards"});
+  let done=false;const go=()=>{if(done)return;done=true;PSWAP=null;out.cancel();upd();
+    const nw=$("#tab-"+t);nw.animate([{opacity:0,transform:`translateX(${fwd?-D:D}px)`},{opacity:1,transform:"none"}],{duration:440,easing:EZ.out})};
+  out.onfinish=go;PSWAP=go}
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",ev=>{
   if(ev.isTrusted&&b.getAttribute("aria-selected")!=="true")haptic();
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
