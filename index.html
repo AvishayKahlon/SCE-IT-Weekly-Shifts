@@ -1787,6 +1787,13 @@ td.c-range{display:none}
 .tdrem span{font-size:14.5px;font-weight:600;white-space:nowrap}.tdrem input{flex:1 1 0;width:0;min-width:0;font-size:16px;min-height:40px;text-align:center}
 .tdrem button{min-height:40px!important;padding:6px 14px!important;font-size:15px!important;border-radius:12px!important}
 .tda .tdlater{background:transparent!important;border:0!important;color:var(--muted)!important;font-weight:600;font-size:15px!important;min-height:40px!important}
+
+.rgh{display:flex;align-items:center;gap:6px}
+.rgedit{width:26px;height:26px;min-height:0!important;padding:0!important;border:0!important;border-radius:50%!important;display:inline-grid!important;place-items:center;background:color-mix(in srgb,var(--ink) 6%,transparent)!important;color:var(--muted)!important;box-shadow:none!important}
+.rgin{flex:1;min-width:0;font-size:16px!important;font-weight:700;min-height:36px;padding:4px 10px}
+.rgok,.rgno{width:34px;height:34px;min-height:0!important;padding:0!important;border-radius:50%!important;display:inline-grid!important;place-items:center;font-weight:800}
+.rgok{background:var(--accent)!important;color:var(--accent-ink)!important;border:0!important}
+.alertb2{grid-template-columns:1fr}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -2047,7 +2054,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 17:20";
+const APP_VER="22.10.2026 17:35";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2401,12 +2408,14 @@ function itemsHead(list){const ne=list.filter(x=>x.kind==="exams").length,nv=lis
 /* "כיתה 124" / "כיתות 124, 125"; named places (מרכז למידה, ספרייה) as they are */
 /* the words before the room numbers, by the room's type in that campus (singular / plural):
    מעבדת מחשוב 205 · מעבדות מחשוב 205, 206 · מעבדה מקצועית מכונות 158 · מעבדות מקצועיות חשמל 103, 104 · אודיטוריום 131 · כיתה 124 / כיתות … */
-function roomWord(g,many){
-  if(g==="מעבדת מחשוב")return many?"מעבדות מחשוב":"מעבדת מחשוב";
-  if(g==="אודיטוריום")return many?"אודיטוריומים":"אודיטוריום";
-  if(/^מעבדת\s/.test(g))return (many?"מעבדות מקצועיות ":"מעבדה מקצועית ")+g.replace(/^מעבדת\s+/,"");
+function roomWord(g,many){g=String(g||"").trim();
+  if(/מחשוב/.test(g))return many?"מעבדות מחשוב":"מעבדת מחשוב";
+  if(/אודיטוריום/.test(g))return many?"אודיטוריומים":"אודיטוריום";
+  if(/^(?:מעבדה מקצועית|מעבדות מקצועיות)\s/.test(g))return (many?"מעבדות מקצועיות ":"מעבדה מקצועית ")+g.replace(/^(?:מעבדה מקצועית|מעבדות מקצועיות)\s+/,"");
+  if(/^מעבד[הת]\s/.test(g))return (many?"מעבדות מקצועיות ":"מעבדה מקצועית ")+g.replace(/^מעבד[הת]\s+/,"");
   if(/תקשורת חזותית/.test(g))return (many?"מעבדות מקצועיות ":"מעבדה מקצועית ")+g;
-  return many?"כיתות":"כיתה"}
+  if(!g||/^(?:פודיום|פודיומים|אחר|כיתה|כיתות)$/.test(g))return many?"כיתות":"כיתה";
+  return g}
 function roomParts(room,campus){const l=splitL(room);if(!l.length)return null;
   const sids=S.sites.filter(s=>campus?siteMatch(campus,s.id):true).map(s=>s.id);
   const typeOf=r=>{if(!/^\d/.test(r))return "";const t=[...new Set(sids.filter(id=>((S.rooms||{})[id]||[]).includes(r)).map(id=>roomG(id,r)))];return t.length===1?t[0]:"כיתה"};
@@ -2918,11 +2927,13 @@ function renderSettings(){
     <div class="scroll"><table class="req"><tr><th>עובדים במשמרת</th>${DAYS.map(d=>`<th>${d}</th>`).join("")}</tr>
     ${["m","e"].map(sh=>`<tr><td>${sh==="m"?"בוקר":"ערב"}</td>${DAYS.map((_,d)=>`<td><input type="number" min="0" max="6" data-req="${s.id}|${sh}|${d}" value="${(s.req[sh]||[])[d]||0}" aria-label="${sh==="m"?"בוקר":"ערב"} ${DAYS[d]}"></td>`).join("")}</tr>`).join("")}
     </table></div>
-    <button type="button" class="rmopen" data-roomsheet="${s.id}"><span class="rmoi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></svg></span><span class="rmot"><b>כיתות וחדרים</b><small>${((S.rooms||{})[s.id]||[]).length} חדרים · ${roomGroups(s.id).map(x=>x[0]).slice(0,3).join(", ")}${roomGroups(s.id).length>3?"…":""}</small></span><span class="rmoc" aria-hidden="true">‹</span></button>
+    <button type="button" class="rmopen" data-roomsheet="${s.id}"><span class="rmoi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></svg></span><span class="rmot"><b>כיתות וחדרים</b><small>${((S.rooms||{})[s.id]||[]).length} חדרים · ${roomGroups(s.id).map(x=>gName(s.id,x[0])).slice(0,3).join(", ")}${roomGroups(s.id).length>3?"…":""}</small></span><span class="rmoc" aria-hidden="true">‹</span></button>
     </div>`).join("");
 }
 const ROOM_G=["מעבדת מחשוב","אודיטוריום","פודיום","מעבדת חשמל","מעבדת פיזיקה","מעבדת מכונות","מעבדת בניין","תקשורת חזותית (מק)","מרכז למידה","ספרייה"];
 const roomG=(sid,r)=>(S.roomType||{})[sid+"|"+r]||"אחר";
+/* a group's heading can be renamed; the type behind it (and the wording in messages) stays */
+const gName=(sid,g,src)=>((src||S.roomGName||{})[sid+"|"+g])||g;
 /* rooms of a site grouped by type, in a fixed order (computer labs first) */
 function roomGroups(sid){const m=new Map();roomSort((S.rooms||{})[sid]||[]).forEach(r=>{const g=roomG(sid,r);if(!m.has(g))m.set(g,[]);m.get(g).push(r)});
   return [...m.entries()].sort((a,b)=>{const ia=ROOM_G.indexOf(a[0]),ib=ROOM_G.indexOf(b[0]);return (ia<0?99:ia)-(ib<0?99:ib)||HE.compare(a[0],b[0])})}
@@ -2941,6 +2952,11 @@ function askCampus(a,cb){const o=document.createElement("div");o.className="aler
   document.body.appendChild(o);haptic();
   const done=c=>{o.classList.add("out");setTimeout(()=>o.remove(),200);cb(c)};
   o.addEventListener("click",e=>{const b=e.target.closest("[data-ac]");if(b)done(b.dataset.ac);else if(e.target===o)done(a.pref)})}
+/* iOS-style confirm (same look as the campus question) → Promise<boolean> */
+function askSave(title,msg,ok="שמירה",no="ביטול"){return new Promise(res=>{const o=document.createElement("div");o.className="alertbox";
+  o.innerHTML=`<div class="alertc" role="alertdialog" aria-label="${esc(title)}"><b>${esc(title)}</b>${msg?`<p>${esc(msg)}</p>`:""}<div class="alertb alertb2"><button type="button" data-ok class="pref">${esc(ok)}</button><button type="button" data-no>${esc(no)}</button></div></div>`;
+  document.body.appendChild(o);haptic();const done=v=>{o.classList.add("out");setTimeout(()=>o.remove(),200);res(v)};
+  o.addEventListener("click",e=>{if(e.target.closest("[data-ok]"))done(true);else if(e.target.closest("[data-no]")||e.target===o)done(false)})})}
 function campusOfRoom(room){const own=new Set();splitL(room).map(normRoom).forEach(n=>{const o=S.sites.filter(s=>((S.rooms||{})[s.id]||[]).includes(n));if(o.length===1)own.add(o[0])});
   if(own.size!==1)return "";const s1=[...own][0];return CAMPUS.find(c=>c!=="שניהם"&&siteMatch(c,s1.id))||""}
 
@@ -3228,14 +3244,14 @@ function openRooms(sid){const site=S.sites.find(x=>x.id===sid);if(!site)return;
   document.body.appendChild(o);const body=o.querySelector(".rbody"),act=o.querySelector(".ract");
   const close=()=>{if(o._closing)return;if(edit&&dirty()&&!confirm("לצאת בלי לשמור את השינויים?"))return;o._closing=1;o.classList.add("out");setTimeout(()=>o.remove(),320)};
   sheetDrag(o.querySelector(".pcard"),close);
-  const snap=()=>({rooms:[...((S.rooms||{})[sid]||[])],type:Object.fromEntries(Object.entries(S.roomType||{}).filter(([k])=>k.startsWith(sid+"|")))});
+  const snap=()=>({rooms:[...((S.rooms||{})[sid]||[])],type:Object.fromEntries(Object.entries(S.roomType||{}).filter(([k])=>k.startsWith(sid+"|"))),gname:Object.fromEntries(Object.entries(S.roomGName||{}).filter(([k])=>k.startsWith(sid+"|")))});
   const dirty=()=>draft&&JSON.stringify(draft)!==JSON.stringify(snap());
   const groups=src=>{const m=new Map();roomSort(src.rooms).forEach(r=>{const g=src.type[sid+"|"+r]||"אחר";if(!m.has(g))m.set(g,[]);m.get(g).push(r)});
     return [...m.entries()].sort((a,b)=>{const ia=ROOM_G.indexOf(a[0]),ib=ROOM_G.indexOf(b[0]);return (ia<0?99:ia)-(ib<0?99:ib)||HE.compare(a[0],b[0])})};
   const draw=()=>{const src=edit?draft:snap(),gs=groups(src);
-    body.innerHTML=(gs.length?gs.map(([g,l])=>`<section class="rgrp"><h4>${esc(g)} <span>${l.length}</span></h4><div class="rchips">${l.map(r=>`<span class="rchip">${esc(r)}${edit?`<button type="button" data-rdel="${esc(r)}" aria-label="הסר ${esc(r)}">✕</button>`:""}</span>`).join("")}</div></section>`).join(""):`<p class="hint">אין עדיין חדרים</p>`)
+    body.innerHTML=(gs.length?gs.map(([g,l])=>`<section class="rgrp"><h4 class="rgh"><span class="rgt">${esc(gName(sid,g,src.gname))}</span> <span class="rgn">${l.length}</span><button type="button" class="rgedit" data-rgedit="${esc(g)}" aria-label="עריכת הכותרת ${esc(gName(sid,g,src.gname))}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button></h4><div class="rchips">${l.map(r=>`<span class="rchip">${esc(r)}${edit?`<button type="button" data-rdel="${esc(r)}" aria-label="הסר ${esc(r)}">✕</button>`:""}</span>`).join("")}</div></section>`).join(""):`<p class="hint">אין עדיין חדרים</p>`)
       +(edit?`<div class="radd"><input type="text" data-rin placeholder="מספר חדר, או כמה: 124, 125" enterkeyhint="done" autocomplete="off" inputmode="text">
-        <div class="rtype">${[...new Set([...ROOM_G,...gs.map(x=>x[0])])].map((g,i)=>`<button type="button" data-rt="${esc(g)}" aria-pressed="${i===0}">${esc(g)}</button>`).join("")}</div>
+        <div class="rtype">${[...new Set([...ROOM_G,...gs.map(x=>x[0])])].map((g,i)=>`<button type="button" data-rt="${esc(g)}" aria-pressed="${i===0}">${esc(gName(sid,g,src.gname))}</button>`).join("")}</div>
         <button type="button" class="primary" data-rgo>הוספה</button></div>`:"");
     act.innerHTML=edit?`<button class="primary" data-rsave>שמירה</button><button data-rcancel>ביטול</button>`:`<button class="primary" data-redit><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg> עריכה</button>`};
   draw();
@@ -3246,6 +3262,17 @@ function openRooms(sid){const site=S.sites.find(x=>x.id===sid);if(!site)return;
   o.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("[data-rin]")){e.preventDefault();add()}});
   o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-px]")){close();return}
     if(e.target.closest("[data-redit]")){edit=true;draft=snap();draw();haptic();return}
+    /* rename a group heading: inline field → ✓ → "לשמור?" */
+    const rge=e.target.closest("[data-rgedit]");if(rge){const g=rge.dataset.rgedit,h=rge.closest("h4"),cur0=gName(sid,g,(edit&&draft?draft:snap()).gname);
+      h.innerHTML=`<input type="text" class="rgin" value="${esc(cur0)}" aria-label="שם הקבוצה" enterkeyhint="done"><button type="button" class="rgok" data-rgok="${esc(g)}" aria-label="שמירה">✓</button><button type="button" class="rgno" data-rgno aria-label="ביטול">✕</button>`;
+      const i=h.querySelector("input");i.focus();i.select();i.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();h.querySelector("[data-rgok]").click()}if(ev.key==="Escape")draw()});return}
+    if(e.target.closest("[data-rgno]")){draw();return}
+    const rgo=e.target.closest("[data-rgok]");if(rgo){const g=rgo.dataset.rgok,from=gName(sid,g,(edit&&draft?draft:snap()).gname),to=rgo.closest("h4").querySelector("input").value.trim();
+      if(!to||to===from){draw();return}
+      askSave("לשמור את השם החדש?",`"${from}" ← "${to}"`).then(ok=>{if(!ok){draw();return}
+        const set=t=>{if(to===g)delete t[sid+"|"+g];else t[sid+"|"+g]=to};
+        if(edit&&draft)set(draft.gname);else{S.roomGName=S.roomGName||{};set(S.roomGName);changed();render()}
+        draw();toast("השם עודכן")});return}
     if(e.target.closest("[data-rcancel]")){edit=false;draft=null;draw();return}
     const rt=e.target.closest("[data-rt]");if(rt){body.querySelectorAll("[data-rt]").forEach(b=>b.setAttribute("aria-pressed",b===rt));return}
     if(e.target.closest("[data-rgo]")){add();return}
@@ -3254,6 +3281,7 @@ function openRooms(sid){const site=S.sites.find(x=>x.id===sid);if(!site)return;
       chip.animate([{opacity:1,transform:"none"},{opacity:0,transform:"scale(.7)"}],{duration:160,easing:EZ.in}).onfinish=go;return}
     if(e.target.closest("[data-rsave]")){S.rooms=S.rooms||{};S.roomType=S.roomType||{};S.rooms[sid]=draft.rooms;
       Object.keys(S.roomType).forEach(k=>{if(k.startsWith(sid+"|"))delete S.roomType[k]});Object.assign(S.roomType,draft.type);
+      S.roomGName=S.roomGName||{};Object.keys(S.roomGName).forEach(k=>{if(k.startsWith(sid+"|"))delete S.roomGName[k]});Object.assign(S.roomGName,draft.gname);
       edit=false;draft=null;changed();render();draw();haptic();toast("החדרים נשמרו")}})}
 
 /* ---------- today's exams / events: from 06:00 a glass card with the details, on duty and WhatsApp ----------
@@ -3347,7 +3375,7 @@ function openItemSheet(kind,id,seed){const isEx=kind==="exams",old=id?(S[kind]||
     const pri=isEx?["מעבדת מחשוב"]:["אודיטוריום","פודיום","מרכז למידה","ספרייה","מעבדת מחשוב"];
     const show=[...groups.entries()].filter(([g,l])=>allRooms||pri.includes(g)||[...l].some(x=>sel.includes(x)));
     const chip=x=>`<button type="button" class="rm" data-pr="${esc(x)}" aria-pressed="${sel.includes(x)}">${esc(x)}</button>`;
-    box.innerHTML=show.map(([g,l])=>`<div class="prg"><span>${esc(g)}</span><div>${[...l].map(chip).join("")}</div></div>`).join("")
+    box.innerHTML=show.map(([g,l])=>`<div class="prg"><span>${esc(gName(sids[0],g))}</span><div>${[...l].map(chip).join("")}</div></div>`).join("")
       +(show.length<groups.size?`<button type="button" class="prmore" data-prall>כל החדרים (${[...groups.values()].reduce((a,l)=>a+l.size,0)})</button>`:allRooms&&groups.size>1?`<button type="button" class="prmore" data-prall>פחות</button>`:"")};rooms();
   const setCampus=c=>{campus=c;f.querySelectorAll("[data-pc]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pc===campus));rooms()};let asked="";
   q("room").addEventListener("input",()=>{if(!campus){const c=campusOfRoom(q("room").value);if(c){setCampus(c);return}}rooms()});
