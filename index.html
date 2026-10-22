@@ -802,8 +802,7 @@ details.card.cons{transition:none}
 .seg button{position:relative;border:0!important;background:none!important;box-shadow:none!important;padding:8px 10px;font-weight:700;font-size:14px;color:var(--muted);border-radius:999px;transition:color 220ms ease}
 .seg button[aria-selected="true"]{color:var(--accent-ink)}
 @media (max-width:700px){.seg{display:grid}
-  body:not(.tableview) #days{view-transition-name:schedview}
-  body.tableview #sheetScroll{view-transition-name:schedview}}
+}
 /* iOS-style zoom between the two views, like Photos switching Days ⇄ Months:
    to the full table = zoom out (days shrink away, the table settles from slightly larger);
    back to days = zoom in. Driven by a real spring curve (response .5 s, damping .82) and only
@@ -1613,7 +1612,7 @@ html,body{min-height:100%}
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 05:15";
+const APP_VER="22.10.2026 05:25";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2159,8 +2158,18 @@ document.querySelectorAll("#viewSeg button").forEach(b=>b.addEventListener("clic
   const tbl=b.dataset.v==="table";if(document.body.classList.contains("tableview")===tbl)return;haptic();
   document.querySelectorAll("#viewSeg button").forEach(x=>x.setAttribute("aria-selected",x===b));$("#viewSeg").classList.toggle("on2",tbl);
   const upd=()=>{document.body.classList.toggle("tableview",tbl);fitCells($("#sheet"))};
-  document.documentElement.dataset.vdir=tbl?"fwd":"back";
-  if(document.startViewTransition&&!matchMedia("(prefers-reduced-motion:reduce)").matches){try{document.startViewTransition(upd);return}catch(e){}}upd()}));
+  /* only the schedule area moves: the old view shrinks away, the new one blows out of the switch like a bubble
+     (rounded capsule → full panel, slight overshoot) — transform/opacity/clip only, nothing else on the page redraws */
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches||!document.body.animate){upd();return}
+  const oldEl=tbl?$("#days"):$("#sheetScroll"),newEl=tbl?$("#sheetScroll"):$("#days");
+  (oldEl._a||[]).concat(newEl._a||[]).forEach(a=>{try{a.cancel()}catch(e){}});
+  const out=oldEl.animate([{opacity:1,transform:"none"},{opacity:0,transform:"scale(.9) translateY(-10px)"}],{duration:170,easing:"cubic-bezier(.4,0,1,1)"});oldEl._a=[out];
+  out.onfinish=()=>{upd();newEl.style.transformOrigin="50% 0";
+    newEl._a=[newEl.animate([
+      {opacity:0,transform:"scale(.55,.25)",clipPath:"inset(0% 22% 60% 22% round 60px)"},
+      {opacity:1,transform:"scale(1.015,1.03)",clipPath:"inset(0% 0% 0% 0% round 22px)",offset:.62},
+      {opacity:1,transform:"none",clipPath:"inset(0% 0% 0% 0% round 22px)"}],{duration:620,easing:"cubic-bezier(.3,1.05,.4,1)"})];
+    newEl._a[0].onfinish=()=>{newEl.style.transformOrigin=""}}}));
 let MSG_OPEN=false;
 function render(){
   ensureData();calcNeed();
