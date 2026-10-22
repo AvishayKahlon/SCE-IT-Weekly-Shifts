@@ -65,7 +65,7 @@ table.sh .slot.pressed,.cst.pressed{filter:brightness(.88)}
   .bar .act.primary:hover{filter:brightness(1.06)}
   .tools .tool:hover{background:var(--bg)}
   table.sh .slot:hover{outline:2px solid var(--accent);outline-offset:-3px}
-  table.sh .nbtn:hover{background:#166C3B}
+  
   .pop button:hover{background:var(--bg)}
   .cst:not(:disabled):hover{filter:brightness(.97)}
 }
@@ -154,7 +154,7 @@ table.sh .slot.bad{box-shadow:inset 0 0 0 3px #D93025}
 table.sh .slot.empty-need{background:repeating-linear-gradient(135deg,var(--sh-cell),var(--sh-cell) 6px,#F4D6D3 6px,#F4D6D3 12px)}
 table.sh .note input{width:100%;border:0;background:transparent;text-align:center;font:inherit;color:inherit;padding:2px;min-width:0}
 table.sh .note .nw{display:flex;align-items:center;gap:2px}
-table.sh .nbtn{flex:none;border:0;background:#1E8E4E;color:#fff;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:700;cursor:pointer;line-height:1.6}
+
 
 .export table.sh .slot{cursor:default}
 /* exported file (image / PDF / print): larger type for reading on a phone; long text still shrinks to fit */
@@ -171,11 +171,11 @@ table.sh .nbtn{flex:none;border:0;background:#1E8E4E;color:#fff;border-radius:6p
 #exportBox{position:fixed;left:-99999px;top:0;width:1500px}
 /* print version = the Excel print area: SCE logo banner + the site tables, A4 landscape */
 .export .logo{display:block;width:96%;height:auto;margin:0 auto -10px}   /* spread across the middle, like the original sheet */
-.export .doc-head{text-align:center;font-family:var(--sh-font);color:#3F3F3F;margin:-6px 0 2px}
-.export .doc-title{font-size:26px;font-weight:700;letter-spacing:.2px}
-.export .doc-sub{font-size:16px;color:#595959;margin-top:2px}
-.export .doc-head::after{content:"";display:block;width:140px;height:3px;background:#A9D18E;margin:10px auto 0;border-radius:2px}
-.export .doc-foot{display:flex;justify-content:space-between;font-family:var(--sh-font);font-size:12px;color:#808080;border-top:1px solid #D9D9D9;padding-top:6px;margin-top:-6px}
+
+
+
+
+
 .ver{color:var(--muted);font-size:12px;text-align:center;margin:8px 0 0}
 #printBox{display:none}
 @page{size:A4 landscape;margin:7mm}
@@ -257,7 +257,7 @@ a.primary-link{background:#1E8E4E;color:#FFFFFF;border-color:#1E8E4E;font-weight
 .chip.off{background:transparent;border-style:dashed;color:var(--muted);font-weight:500}
 .dnote{display:flex;gap:6px;align-items:center}
 .dnote input{flex:1;min-width:0}
-.dnote .nbtn{border:0;background:#1E8E4E;color:#fff;border-radius:8px;padding:8px 10px;font-size:13px;font-weight:700}
+
 .sd{display:none}
 @media (max-width:700px){
   h1{font-size:22px}.week b{min-width:0}
@@ -481,7 +481,7 @@ table.sh .note .nw input{flex:1 1 60px}
 @media (max-width:700px){.ag-site{grid-template-columns:1fr;gap:6px}.ag-n{font-size:13px}}
 /* exams & events */
 #exT td.xdel{white-space:nowrap;width:80px}
-.xexp{padding:5px 9px;margin-inline-end:4px}
+
 .xuse{padding:5px 10px;margin-inline-end:4px;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:800}
 #ecT td.xdel{white-space:nowrap;width:84px}
 table.cal.xt tr.xdet td{border-bottom:1px solid var(--line);padding-top:0;text-align:right}
@@ -511,7 +511,7 @@ body.swapping .slot.swapsrc{outline:3px solid #E07A00!important;background:#FFE7
 .ib[aria-expanded="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .tip{display:none}
 .tipon>.tip,.tipon>.dbody>.tip{display:block}
-.card>h2:has(.ib),.subh:has(.ib){display:flex;align-items:center;gap:4px}
+.card>h2:has(.ib){display:flex;align-items:center;gap:4px}
 /* tab icons: shown only in the phone bottom bar */
 .tabs .ti,.tabs .ts{display:none}
 .wkc,.minibar{display:none}
@@ -593,7 +593,7 @@ td.stt.ok{color:#008000} td.stt.bad{color:#E00000} td.stt.miss{color:#BF8F00}
 table.rotT{border-collapse:collapse;min-width:320px}
 table.rotT th,table.rotT td{border:1px solid var(--line);padding:5px 6px;text-align:center}
 table.rotT th{background:var(--sh-dark);color:#fff}
-table.rotT td.rn{color:var(--muted);width:32px}
+
 table.rotT td.now{background:var(--sh-cell);color:var(--sh-ink)}
 table.rotT .rc{display:flex;gap:4px;align-items:center;justify-content:center}
 table.rotT .rc button{padding:3px 8px;font-size:13px}
@@ -678,7 +678,7 @@ body::before{content:"";position:fixed;inset:-20vmax;z-index:-1;pointer-events:n
 .msg{border-radius:12px}
 /* controls: capsules with a top highlight */
 /* low specificity on purpose: component rules (primary, soft, WhatsApp…) keep their own colours */
-:is(button,.btn):where(:not(:is(.slot,.cst,.got,.ib,.rm,.wab,.cmb-b,.nbtn,.xexp,.xuse,.upd))):where(:not(:is(#sheet,.export,#printBox,.pop,.tabs,.subtabs,.tools,.cmbl,.swapbar,.devbar) *)){
+:is(button,.btn):where(:not(:is(.slot,.cst,.got,.ib,.rm,.wab,.cmb-b,.xuse,.upd))):where(:not(:is(#sheet,.export,#printBox,.pop,.tabs,.subtabs,.tools,.cmbl,.swapbar,.devbar) *)){
   border:0;border-radius:999px;background:var(--g-ctl);box-shadow:var(--g-sh-ctl),inset 0 1px 0 var(--g-hi),inset 0 0 0 .5px var(--g-line);padding-inline:15px}
 button.primary:where(:not(:is(#sheet,.export) *)){border:0;border-radius:999px;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 88%,#fff),var(--accent));color:var(--accent-ink);
   box-shadow:0 1px 2px rgba(0,0,0,.12),0 6px 16px color-mix(in srgb,var(--accent) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.35)}
@@ -689,7 +689,7 @@ button.primary:where(:not(:is(#sheet,.export) *)){border:0;border-radius:999px;b
 .tools .tool{border-inline-start-color:var(--g-line)}
 .tools .badge{border-radius:9px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 2px rgba(0,0,0,.15)}
 .cst{border-radius:10px}
-.xexp,.xuse,.rm{border-radius:999px}
+.xuse,.rm{border-radius:999px}
 /* fields: soft tinted wells, accent ring on focus */
 :is(input[type=text],input[type=number],input[type=date],input[type=email],input[type=password],select,textarea):where(:not(:is(#sheet,.export) *)){border:0;border-radius:12px;background:var(--g-field);box-shadow:inset 0 0 0 .5px var(--g-line);transition:box-shadow 160ms ease,background-color 160ms ease}
 :is(input[type=text],input[type=number],input[type=date],input[type=email],input[type=password],select,textarea):where(:not(:is(#sheet,.export) *)):focus{outline:0;background:var(--g-ctl);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 28%,transparent),inset 0 0 0 1px var(--accent)}
@@ -762,7 +762,7 @@ body::before{background:
 .card .card::after{display:none}
 /* controls on top of the page get their own blur */
 :is(.week,.bar,header) :is(button,.btn):not(.primary),.tools,.subtabs{-webkit-backdrop-filter:blur(16px) saturate(180%);backdrop-filter:blur(16px) saturate(180%)}
-:is(button,.btn):where(:not(:is(.slot,.cst,.got,.ib,.rm,.wab,.cmb-b,.nbtn,.xexp,.xuse,.upd))):where(:not(:is(#sheet,.export,#printBox,.pop,.tabs,.subtabs,.tools,.cmbl,.swapbar,.devbar) *)){
+:is(button,.btn):where(:not(:is(.slot,.cst,.got,.ib,.rm,.wab,.cmb-b,.xuse,.upd))):where(:not(:is(#sheet,.export,#printBox,.pop,.tabs,.subtabs,.tools,.cmbl,.swapbar,.devbar) *)){
   box-shadow:0 1px 2px rgba(20,35,20,.08),0 4px 14px rgba(20,35,20,.06),inset 0 1px 0 var(--g-rim1),inset 0 -1px 0 rgba(0,0,0,.03),inset 0 0 0 .5px var(--g-rim3)}
 button.primary:where(:not(:is(#sheet,.export) *)){background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 80%,#fff) 0%,var(--accent) 55%,color-mix(in srgb,var(--accent) 88%,#000) 100%);
   box-shadow:0 2px 4px rgba(0,0,0,.12),0 8px 22px color-mix(in srgb,var(--accent) 38%,transparent),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(0,0,0,.12)}
@@ -1321,10 +1321,7 @@ header .brand h1{color:#595959;font-weight:600;letter-spacing:-.1px}
   @keyframes scrimin{from{opacity:0}}@keyframes scrimout{to{opacity:0}}
   .pop{left:8px!important;right:8px!important;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:70dvh;overflow:auto;
     border-radius:30px!important;padding:6px 8px 10px!important;gap:2px;background:color-mix(in srgb,var(--surface) 86%,transparent)!important;
-    animation:sheetin 520ms var(--spring) both;transition:transform 380ms var(--spring,ease)}
-  .pop.out{animation:sheetout 260ms var(--ease-in) both}
-  @keyframes sheetin{from{transform:translateY(105%)}}
-  @keyframes sheetout{to{transform:translateY(105%)}}
+    transition:transform 380ms var(--spring,ease)}
   .pop .ph{display:grid;justify-items:center;gap:2px;padding:4px 0 10px;position:sticky;top:-6px;z-index:1;background:color-mix(in srgb,var(--surface) 94%,transparent);border-radius:24px 24px 0 0;touch-action:none}
   .pop .pgrab{width:38px;height:5px;border-radius:99px;background:var(--muted);opacity:.35;margin-bottom:6px}
   .pop .ph b{font-size:17px}.pop .ph>span:last-child{font-size:12.5px;color:var(--muted)}
@@ -1422,10 +1419,8 @@ tr.flash,tr.flash td{animation:flashrow 1.8s ease}
 .pastebox{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:16px;background:rgba(10,14,10,.32);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:scrimin 240ms ease both}
 .pastebox.out{animation:scrimout 220ms ease both}
 .pcard{width:min(560px,100%);max-height:88dvh;overflow:auto;display:grid;gap:10px;padding:16px 18px;border-radius:28px;background:color-mix(in srgb,var(--surface) 90%,transparent);
-  -webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);box-shadow:0 24px 60px rgba(0,0,0,.28),inset 0 1px 0 var(--glass-edge,#fff);animation:sheetin 480ms var(--spring) both}
-.pastebox.out .pcard{animation:sheetout 220ms ease both}
-@media (min-width:701px){.pcard{animation-name:popin}@keyframes popin{from{opacity:0;transform:scale(.94)}}}
-.ph2{display:flex;justify-content:space-between;align-items:center}.ph2 b{font-size:18px}.ph2 button{width:34px;height:34px;padding:0!important}
+  -webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);box-shadow:0 24px 60px rgba(0,0,0,.28),inset 0 1px 0 var(--glass-edge,#fff)}
+
 .ptx{width:100%;font:inherit;font-size:15px;resize:vertical;min-height:120px}
 .pform{display:grid;gap:10px}.pform label{display:grid;gap:3px;font-size:12.5px;color:var(--muted)}.pform input,.pform select{width:100%;font-size:16px}
 .p2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -1501,15 +1496,13 @@ textarea.grow{width:100%;resize:none;overflow:hidden;min-height:38px;line-height
 .calsheet{position:fixed;inset:0;z-index:82;display:grid;place-items:end center;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));background:rgba(10,14,10,.3);animation:scrimin 220ms ease both}
 .calsheet.out{animation:scrimout 220ms ease both}
 .csh{width:min(460px,100%);display:grid;gap:8px;justify-items:stretch;padding:8px 12px 12px;border-radius:30px;background:color-mix(in srgb,var(--surface) 90%,transparent);
-  -webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);box-shadow:0 24px 60px rgba(0,0,0,.28),inset 0 1px 0 var(--glass-edge,#fff);animation:sheetin 460ms var(--spring) both}
-.calsheet.out .csh{animation:sheetout 220ms ease both}
-.csh>.pgrab{justify-self:center;width:38px;height:5px;border-radius:99px;background:var(--muted);opacity:.35;margin:2px 0 4px}
+  -webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);box-shadow:0 24px 60px rgba(0,0,0,.28),inset 0 1px 0 var(--glass-edge,#fff)}
 .csh>b{text-align:center;font-size:17px}.csh>small{text-align:center;color:var(--muted);margin-top:-6px;margin-bottom:4px}
 .csh button{display:flex;align-items:center;gap:12px;text-align:right;min-height:58px;padding:8px 12px!important;border-radius:18px!important}
 .csh button>span:last-child{display:grid}.csh button small{color:var(--muted);font-size:12.5px;font-weight:500}
 .csh .ci{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-weight:900;color:#fff;flex:none}
 .csh .ci.ol{background:#0F6CBD}.csh .ci.gg{background:#fff;color:#1A73E8;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}.csh .ci.ic{background:var(--g-field,var(--line));font-size:18px}
-.csh .cx{justify-content:center;font-weight:700;min-height:48px}
+
 @media (min-width:701px){.calsheet{place-items:center}}
 
 /* read-only rows; ✎ opens a row for editing */
@@ -1651,16 +1644,16 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
 }
 
 /* rooms per campus (settings) */
-.rmset{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:grid;gap:8px}
-.rmh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}.rmh b{font-size:15px}.rmh .hint{margin:0;font-size:12.5px}
-.rmchips{display:flex;flex-wrap:wrap;gap:6px}
-.rmc{display:inline-flex;align-items:center;gap:2px;padding:3px 4px 3px 10px;border-radius:999px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));font-weight:600;font-variant-numeric:tabular-nums;animation:tipin 260ms var(--ease-out) both}
-.rmc button{width:24px;height:24px;min-height:0!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;color:var(--muted);font-size:11px;box-shadow:none!important}
-.rmc button:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)!important}
-.rmadd{display:flex;gap:8px}.rmadd input{flex:1;min-width:0}
 
-.rmg{display:grid;gap:4px}.rmgl{font-size:12.5px;font-weight:700;color:var(--muted)}.rmgl small{font-weight:600;opacity:.7}
-.rmadd select{width:auto;max-width:42%}
+
+
+
+
+
+
+
+
+
 .prooms{display:grid!important;gap:8px}
 .prg{display:grid;gap:4px}
 .prg .rm{min-height:34px!important;min-width:50px!important;padding:3px 8px!important;font-size:14.5px!important;margin:0!important}.prg>div{gap:5px!important}.prg>span{font-size:12px;color:var(--muted);font-weight:600}.prg>div{display:flex;flex-wrap:wrap;gap:6px}
@@ -1700,6 +1693,29 @@ td.xdel>button{vertical-align:middle;margin-inline-start:4px}
 .rtype button[aria-pressed="true"]{background:var(--accent)!important;color:var(--accent-ink)!important;border-color:var(--accent)!important}
 .roombox .ract{display:grid;grid-template-columns:1fr;gap:8px;margin-top:6px}
 .roombox .ract button{min-height:48px;font-size:16.5px;font-weight:700;justify-content:center;display:inline-flex;align-items:center;gap:8px}
+
+td.c-range{display:none}
+.c-range .rdays{display:block;font-size:13px}
+/* phone: read-only vacation / holiday rows become compact cards (no sideways scrolling) */
+@media (max-width:700px){
+  #vacT:has(tr.ro),#holT:has(tr.ro){min-width:0!important;width:100%}
+  #vacT,#holT,#vacT tbody,#holT tbody{display:block}
+  #vacT tr:first-child:has(th),#holT tr:first-child:has(th){display:none}
+  #vacT:not(:has(tr.ro)) tr:first-child:has(th),#holT:not(:has(tr.ro)) tr:first-child:has(th){display:table-row}
+  #vacT tr.ro,#holT tr.ro{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px;padding:10px 12px;margin:0 0 8px;border-radius:16px;
+    background:var(--g-field,color-mix(in srgb,var(--surface) 70%,transparent));box-shadow:inset 0 0 0 .5px var(--g-line,var(--line))}
+  #vacT tr.ro td,#holT tr.ro td{border:0!important;padding:0!important;text-align:right;background:none!important;font-size:14px}
+  #vacT tr.ro td.ro-n,#holT tr.ro td.ro-n{grid-column:1;grid-row:1;font-size:16px;font-weight:700}
+  #vacT tr.ro td.xdel,#holT tr.ro td.xdel{grid-column:2;grid-row:1/4;align-self:center}
+  #vacT tr.ro .c-dot{display:none}
+  #vacT tr.ro .c-from,#holT tr.ro .c-from,#vacT tr.ro .c-to,#holT tr.ro .c-to,#vacT tr.ro .c-days{display:none}
+  #vacT tr.ro .c-range,#holT tr.ro .c-range{display:block!important;grid-column:1;grid-row:2;color:var(--muted)}
+  #vacT tr.ro .c-purp:empty,#vacT tr.ro .c-camp:empty{display:none}
+  #vacT tr.ro .c-purp,#vacT tr.ro .c-camp{grid-column:1;font-size:13px;color:var(--muted)}
+  #holT tr.ro .c-type{grid-column:1;grid-row:3}
+  #holT tr.ro .c-fri{display:none}
+  #vacT tr.ro.old{opacity:.55}
+}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה, ולכן הכפתורים לא עובדים.</b><br>
@@ -1960,7 +1976,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 15:25";
+const APP_VER="22.10.2026 15:45";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2726,7 +2742,7 @@ function learnExam(r){const n=String(r.name||"").trim();if(!n)return;let c=S.exa
   splitL(r.lecturer).forEach(l=>{if(!splitL(c.lecturer).includes(l))c.lecturer=[...splitL(c.lecturer),l].join(" / ")})}
 function applyEvent(r){const prev=S.events.filter(x=>x!==r&&x.name===r.name).sort((a,b)=>(b.date||"").localeCompare(a.date||""))[0];if(!prev)return;
   if(!r.time)r.time=prev.time||"";if(!r.campus)r.campus=prev.campus||"";if(!r.needs)r.needs=prev.needs||""}
-let EV_KEEP=false;const XOPEN=new Set();
+let EV_KEEP=false;
 /* rows are read-only until ✎ is tapped (new rows open in edit mode) */
 const XEDIT=new Set();
 /* list changes animate: rows that stay slide to their new place, new rows grow in, the edited row cross-fades */
@@ -2780,7 +2796,7 @@ function renderCal(){if(CAL_KEEP)return;
   const opts=sel=>`<option value="" ${sel?"":"selected"} disabled>בחרו טכנאי</option>`+S.employees.slice().sort(byName).map(e=>`<option value="${e.id}" ${e.id===sel?"selected":""}>${esc(e.name)}</option>`).join("");
   $("#vacT").innerHTML=`<tr><th></th><th>טכנאי</th><th>מתאריך</th><th>עד תאריך</th><th>סה"כ ימים</th><th>מטרת החופש</th><th>קמפוס</th><th></th></tr>`+
     (S.vac.length?S.vac.slice().sort((a,b)=>(a.from||"9").localeCompare(b.from||"9")||HE.compare(empName(a.emp),empName(b.emp))).map(v=>{const days=v.from&&v.to&&v.to>=v.from?Math.round((parseKey(v.to)-parseKey(v.from))/864e5)+1:"";const old=v.to&&v.to<cur;
-      if(!XEDIT.has(v.id))return `<tr data-rid="${v.id}" class="ro"><td><span class="dot${old?" old":""}">●</span></td><td class="ro-n">${v.emp?esc(empName(v.emp)):""}</td><td>${roD(v.from)}</td><td>${roD(v.to)}</td><td class="num">${days}</td><td>${esc(v.purpose||"")}</td><td>${esc(v.campus||"")}</td><td class="xdel">${edBtn(v.id,false)}</td></tr>`;
+      if(!XEDIT.has(v.id))return `<tr data-rid="${v.id}" class="ro${old?" old":""}"><td class="c-dot"><span class="dot${old?" old":""}">●</span></td><td class="ro-n">${v.emp?esc(empName(v.emp)):"<span class=\"hint\">בחרו טכנאי</span>"}</td><td class="c-from">${roD(v.from)}</td><td class="c-to">${roD(v.to)}</td><td class="num c-days">${days}</td><td class="c-purp">${esc(v.purpose||"")}</td><td class="c-camp">${esc(v.campus||"")}</td><td class="c-range">${roD(v.from)}${v.to&&v.to!==v.from?" – "+roD(v.to):""}${days?`<span class="rdays">${days} ימים</span>`:""}</td><td class="xdel">${edBtn(v.id,false)}</td></tr>`;
       return `<tr data-rid="${v.id}"><td><span class="dot${old?" old":""}" title="${old?"החופשה הסתיימה":""}">●</span></td>
         <td><select data-vf="${v.id}|emp" aria-label="טכנאי">${opts(v.emp)}</select></td>
         <td>${dateField(`data-vf="${v.id}|from"`,v.from,"מתאריך")}</td>
@@ -2790,7 +2806,7 @@ function renderCal(){if(CAL_KEEP)return;
         <td><select data-vf="${v.id}|campus" aria-label="קמפוס"><option value=""></option>${CAMPUS.map(c=>`<option ${c===v.campus?"selected":""}>${esc(c)}</option>`).join("")}</select></td>
         <td class="xdel ed"><button class="xdelb" data-vdel="${v.id}" aria-label="מחק חופשה">✕</button>${edBtn(v.id,true)}</td></tr>`}).join(""):`<tr><td colspan="8" class="empty">אין חופשות רשומות</td></tr>`);
   $("#holT").innerHTML=`<tr><th>חג</th><th>מתאריך</th><th>עד תאריך</th><th>מהות</th><th>ימי שישי</th><th></th></tr>`+
-    S.holidays.slice().sort((a,b)=>(a.from||"9").localeCompare(b.from||"9")||HE.compare(a.name||"",b.name||"")).map(h=>!XEDIT.has(h.id)?`<tr data-rid="${h.id}" class="ro"><td class="ro-n">${esc(h.name||"")}</td><td>${roD(h.from)}</td><td>${roD(h.to)}</td><td>${esc(HOL_T[h.type]||"")}</td><td class="num">${h.type==="off"?countFris(h.from,h.to||h.from):0}</td><td class="xdel">${edBtn(h.id,false)}</td></tr>`:`<tr data-rid="${h.id}"><td><input type="text" data-hf="${h.id}|name" value="${esc(h.name||"")}" aria-label="שם החג"></td>
+    S.holidays.slice().sort((a,b)=>(a.from||"9").localeCompare(b.from||"9")||HE.compare(a.name||"",b.name||"")).map(h=>!XEDIT.has(h.id)?`<tr data-rid="${h.id}" class="ro"><td class="ro-n">${esc(h.name||"")}</td><td class="c-from">${roD(h.from)}</td><td class="c-to">${h.to&&h.to!==h.from?roD(h.to):""}</td><td class="c-type"><span class="htag t-${h.type}">${esc(HOL_T[h.type]||"")}</span></td><td class="num c-fri">${h.type==="off"?countFris(h.from,h.to||h.from):0}</td><td class="c-range">${roD(h.from)}${h.to&&h.to!==h.from?" – "+roD(h.to):""}</td><td class="xdel">${edBtn(h.id,false)}</td></tr>`:`<tr data-rid="${h.id}"><td><input type="text" data-hf="${h.id}|name" value="${esc(h.name||"")}" aria-label="שם החג"></td>
       <td>${dateField(`data-hf="${h.id}|from"`,h.from,"מתאריך")}</td>
       <td>${dateField(`data-hf="${h.id}|to"`,h.to,"עד תאריך")}</td>
       <td><select data-hf="${h.id}|type" aria-label="מהות">${Object.entries(HOL_T).map(([k,l])=>`<option value="${k}" ${k===h.type?"selected":""}>${esc(l)}</option>`).join("")}</select></td>
@@ -2813,10 +2829,6 @@ function roomGroups(sid){const m=new Map();roomSort((S.rooms||{})[sid]||[]).forE
   return [...m.entries()].sort((a,b)=>{const ia=ROOM_G.indexOf(a[0]),ib=ROOM_G.indexOf(b[0]);return (ia<0?99:ia)-(ib<0?99:ib)||HE.compare(a[0],b[0])})}
 /* rooms: numbers first in numeric order, then names */
 function roomSort(a){return a.slice().sort((x,y)=>{const nx=/^\d+$/.test(x),ny=/^\d+$/.test(y);return nx&&ny?x-y:nx?-1:ny?1:HE.compare(x,y)})}
-function roomAdd(sid,txt,grp){S.rooms=S.rooms||{};const cur=S.rooms[sid]||(S.rooms[sid]=[]);
-  const list=String(txt||"").split(/[,;\n]+|\s{2,}/).flatMap(x=>/^[\d\s]+$/.test(x.trim())?x.trim().split(/\s+/):[x.trim()]).map(x=>x.replace(/^(?:כיתה|חדר)\s+/,"").trim()).filter(Boolean);
-  S.roomType=S.roomType||{};let n=0;list.forEach(r=>{if(!cur.includes(r)){cur.push(r);n++}if(grp)S.roomType[sid+"|"+r]=grp});
-  return n}
 /* which campus a room belongs to ("" when unknown or ambiguous) */
 const normRoom=x=>String(x||"").replace(/^(?:כיתה|חדר)\s+/,"").replace(/ספריה/g,"ספרייה").replace(/[\u200e\u200f]/g,"").trim();
 /* a room number that exists in both campuses → [room, campuses, suggested campus]; 131 is usually בני ברית */
@@ -3036,6 +3048,8 @@ function parseMail(txt){const t=String(txt||"").replace(/\r/g,"").replace(/[‎�
   const km=(subjLine||"").match(KNOWN)||all.match(KNOWN);
   let name=bank?bank.name.trim():subjLine&&!(km&&subjLine.length>45)?subjLine:km?km[1]:(body[0]||"").split(/[,.]/)[0];
   name=name.replace(/\s*ב?-?\d{1,2}[.\/]\d{1,2}(?:[.\/]\d{2,4})?/g,"").replace(/^(ביום\s+[א-ת]['׳]?\s*)/,"").replace(/^(צריך|צריכה|אני צריך|אני צריכה)\s+(להציג|לקיים|להעביר)\s+/,"").replace(/\s{2,}/g," ").trim();
+  /* the place and time belong in their own fields, not in the name: "סדנה … בכיתה 1012 בשעה 10:00" → "סדנה …" */
+  name=name.replace(/\s+(?:ב|ל)?(?:ה)?(?:כיתה|כיתות|חדר|חדרים|מעבדה|מעבדות|מעבדת|אולם|קמפוס|בניין)(?=[\s,.:]|$).*$/,"").replace(/\s+ב(?:שעה|שעות)?\s*\d{1,2}(?::\d{2})?.*$/,"").replace(/\s+(?:ב)?(?:ז['׳]?בוטינסקי|בני\s*ברית|באר\s*שבע|אשדוד)(?=[\s,.]|$).*$/,"").replace(/[\s,–-]+$/,"").trim()||name;
   r.name=name.slice(0,80);
   /* ---- needs: only the requests (what to prepare), not the sentence that just states when/where ---- */
   const sent=all.split(/(?<=[.!?])\s+|\n/).map(x=>x.trim()).filter(Boolean);
@@ -3504,7 +3518,6 @@ function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();haptic();if(a.
   const w=W(),bad=[[x,b],[y,a]].filter(([e,s])=>e&&!canWork(w,e,s.d,s.sh)).map(([e])=>empName(e));
   changed();render();toast(y?`הוחלפו: ${empName(x)} ⇄ ${empName(y)}`:`${empName(x)} הועבר/ה`+(bad.length?` · שימו לב לאילוץ של ${bad.join(", ")}`:""))}
 /* iPhone: briefly lock the viewport scale — Safari jumps back to 100% — then restore (pinch-zoom still works) */
-function unzoom(){const m=$("#vp");if(!m)return;const c=m.content;m.content=c+",maximum-scale=1,user-scalable=no";setTimeout(()=>{m.content=c},350)}
 function closePop(){if(pop){const p=pop,hadNote=!!p.querySelector("[data-anote]");pop=null;
   if(p._scrim){const sc=p._scrim,ly=p._layer;p.classList.add("out");sc.classList.add("out");setTimeout(()=>{p.remove();sc.remove();if(ly){ly._off();ly.remove()}},280)}else p.remove();
   if(hadNote)render()}}
@@ -3541,8 +3554,6 @@ document.addEventListener("click",e=>{
     const id=xed.dataset.xedit;haptic();rowsFlip(()=>{if(XEDIT.has(id)){XEDIT.delete(id);document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}else XEDIT.add(id);render()},id);return}
   const xu=e.target.closest("[data-xuse]");
   if(xu){const c=S.examCat.find(x=>x.id===xu.dataset.xuse);if(c){const t={name:c.name};applyCat(t);openItemSheet("exams",null,t)}return}
-  const xe=e.target.closest("[data-xexp]");
-  if(xe){const id=xe.dataset.xexp;XOPEN.has(id)?XOPEN.delete(id):XOPEN.add(id);renderEv();return}
   const xr=e.target.closest("[data-xroom]");
   if(xr){const[k,id,room]=xr.dataset.xroom.split("|"),r=S[k].find(x=>x.id===id);if(r){const sel=splitL(r.room);r.room=(sel.includes(room)?sel.filter(x=>x!==room):[...sel,room]).sort(HE.compare).join(", ");changed();render()}return}
   const xd=e.target.closest("[data-xdel]");
@@ -3558,7 +3569,7 @@ document.addEventListener("click",e=>{
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closePop();endSwap()}});
 document.addEventListener("click",e=>{if(e.target.closest("[data-fsave]"))saveFinal();else if(e.target.closest("[data-frevert]")){if(confirm("לבטל את השינויים ולחזור לסידור שסומן כסופי?"))revertFinal()}});
 function openPop(td){
-  closePop();
+  if(!td||!td.offsetParent)return;closePop();
   const[sid,sh,d,i]=td.dataset.k.split("|");const w=W();const arr=w.assign[sid][sh][+d];
   const busy=new Set();S.sites.forEach(s=>["m","e"].forEach(x=>w.assign[s.id][x][+d].forEach(id=>busy.add(id))));
   const curIds=sh==="m"?(+i===0?arr.slice(0,1):arr.slice(1)):arr.slice();
