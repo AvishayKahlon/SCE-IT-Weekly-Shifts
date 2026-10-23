@@ -69,15 +69,21 @@ else {
       (log.availDone !== today || (C.repeat && log.availAt && Date.now() - log.availAt >= C.repeatH * 36e5 - 5 * 6e4))) {
     msgs.push({ title: "תזכורת: בקשת זמינות", body: `לשבוע ${dm(sun)}–${dm(sat)} · לחיצה תפתח את וואטסאפ עם ההודעה`, tag: "avail-" + nxWeek, url: "./?act=avail" });
     log.availDone = today; log.availAt = Date.now(); }
-  /* birthdays (Gregorian and Hebrew), with the morning notification time */
+  /* birthdays: Gregorian and/or Hebrew date, as chosen on each technician's card */
   if (C.bday && nowM >= min(C.morningAt) && log.bdayDone !== today) {
     const HF = new Intl.DateTimeFormat("he-u-ca-hebrew", { day: "numeric", month: "long" });
-    const hp = d => { const p = HF.formatToParts(d); return (p.find(x => x.type === "day") || {}).value + "|" + (p.find(x => x.type === "month") || {}).value; };
-    const tD = new Date(Date.UTC(+P.year, +P.month - 1, +P.day, 12)), tH = hp(tD), md = today.slice(5);
-    const who = (S.employees || []).filter(e => e.bday && e.active !== false).flatMap(e => {
-      const [y, m, d] = e.bday.split("-").map(Number), out = [];
-      if (e.bday.slice(5) === md) out.push(e.name + " (לועזי)");
-      if (hp(new Date(Date.UTC(y, m - 1, d, 12))) === tH) out.push(e.name + " (עברי)");
+    const hp = d => { const p = HF.formatToParts(d); return { day: +(p.find(x => x.type === "day") || {}).value, month: (p.find(x => x.type === "month") || {}).value }; };
+    const at = (y, m, d) => new Date(Date.UTC(y, m - 1, d, 12));
+    const tD = at(+P.year, +P.month, +P.day), tp = hp(tD), md = today.slice(5);
+    const hbOf = e => e.hb === undefined ? (e.bday ? (() => { const [y, m, d] = e.bday.split("-").map(Number), p = hp(at(y, m, d)); return { d: p.day, m: p.month }; })() : null) : e.hb;
+    const hebMatch = hb => { if (!hb) return false; let m = hb.m; const leap = tp.month === "אדר א׳" || tp.month === "אדר ב׳";
+      if (tp.month === "אדר" && (m === "אדר א׳" || m === "אדר ב׳")) m = "אדר"; if (leap && m === "אדר") m = "אדר ב׳";
+      if (tp.month !== m) return false; if (tp.day === hb.d) return true;
+      if (hb.d === 30 && tp.day === 29) return hp(new Date(tD.getTime() + 864e5)).month !== tp.month; return false; };
+    const who = (S.employees || []).filter(e => e.active !== false).flatMap(e => {
+      const out = [];
+      if (e.bday && e.bdG !== false && e.bday.slice(5) === md) out.push(e.name + " (לועזי)");
+      if (e.bdH !== false && hebMatch(hbOf(e))) out.push(e.name + " (עברי)");
       return out; });
     if (who.length) msgs.push({ title: "🎂 היום יום הולדת", body: who.join(" · ") + " – לחיצה לשליחת ברכה", tag: "bday-" + today, url: "./" });
     log.bdayDone = today; }

@@ -2212,6 +2212,44 @@ bdi.osl{white-space:nowrap;direction:ltr}
 #tab-set.split .setroot{position:sticky;top:12px}
 #tab-set.split .sbar{display:none}
 #tab-set.split .setpage>.slt{margin-top:52px}
+
+/* glass strength (Settings → תצוגה ומראה) */
+:root:root[data-glass="solid"]{--g-card:var(--surface);--g-ctl:color-mix(in srgb,var(--surface) 94%,var(--ink));--g-pop:var(--surface);--glass-bg:var(--surface);--glass-pill:color-mix(in srgb,var(--ink) 9%,var(--surface))}
+:root:root[data-glass="solid"] *,:root:root[data-glass="solid"] *::before{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+:root:root[data-glass="clear"]{--g-card:color-mix(in srgb,var(--surface) 36%,transparent);--g-ctl:color-mix(in srgb,var(--surface) 42%,transparent);--glass-bg:color-mix(in srgb,var(--surface) 34%,transparent);--g-pop:color-mix(in srgb,var(--surface) 55%,transparent)}
+/* slowly moving light behind the glass */
+.bgfx{display:none;position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22vh);mask-image:linear-gradient(180deg,transparent 0,#000 22vh)}
+:root[data-bgmove="1"] .bgfx{display:block}
+.bgfx i{position:absolute;width:70vmax;height:70vmax;border-radius:50%;will-change:transform}
+.bgfx i:nth-child(1){background:radial-gradient(closest-side,var(--g-blob1),transparent);left:-20vmax;top:-10vmax;animation:bgf1 38s ease-in-out infinite alternate}
+.bgfx i:nth-child(2){background:radial-gradient(closest-side,var(--g-blob2),transparent);right:-25vmax;top:25vh;animation:bgf2 46s ease-in-out infinite alternate}
+.bgfx i:nth-child(3){background:radial-gradient(closest-side,var(--g-blob3),transparent);left:10vw;bottom:-35vmax;animation:bgf3 52s ease-in-out infinite alternate}
+@keyframes bgf1{to{transform:translate(28vmax,22vmax) scale(1.15)}}
+@keyframes bgf2{to{transform:translate(-30vmax,-18vmax) scale(.9)}}
+@keyframes bgf3{to{transform:translate(18vmax,-26vmax) scale(1.2)}}
+@media (prefers-reduced-motion: reduce){.bgfx i{animation:none}}
+/* technician list + card */
+.emplist{display:grid}
+.emprow{padding:0 4px!important}.emprow .ecol{margin:9px 0}.emprow.off{opacity:.6}
+.emprow .srt small{font-size:12.5px;color:var(--muted);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.epf{display:grid;gap:12px;padding:4px 2px 10px}
+.ehead{display:flex;align-items:center;gap:12px}.enmi{flex:1;font-size:20px!important;font-weight:700}
+.ecol.xl{width:56px;height:56px;font-size:22px;flex:none;margin:0}
+.epal2{display:flex;flex-wrap:wrap;gap:9px}
+.epal2 button{width:30px;height:30px;min-height:0!important;padding:0!important;border-radius:50%!important;border:0!important;background:var(--ec)!important;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.15)!important}
+.epal2 button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ec)!important}
+.epal2 button.none{background:color-mix(in srgb,var(--ink) 8%,transparent)!important;color:var(--muted)!important;--ec:var(--muted)}
+.egh{font-size:13px;font-weight:600;color:var(--muted);margin:6px 4px -4px}
+.egrp{display:grid;border-radius:14px;background:color-mix(in srgb,var(--ink) 4%,transparent);padding:0 12px}
+.erowf{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:50px;padding:6px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.egrp>:last-child{border-bottom:0}
+.erowf>span:first-child{display:grid;font-size:15.5px;font-weight:500}.erowf small{font-size:12.5px;color:var(--muted);font-weight:400}
+.erowf input[data-ef="phone"]{width:170px;text-align:left}
+.erowf.dis{opacity:.45;pointer-events:none}
+.eval{display:inline-flex;align-items:center;gap:6px}.eval select{width:auto!important}
+.eclr{width:28px;height:28px;min-height:0!important;padding:0!important;border-radius:50%!important;font-size:12px}
+.ecalc{justify-self:start;margin:8px 0;min-height:34px!important;padding:4px 12px!important;border-radius:999px!important;font-size:13.5px}
+.edel{color:#E5484D!important;font-weight:600}
 </style><script>/* look chosen in Settings → מראה (this device): accent colour + background theme, applied before the page paints */
 var LOOK={acc:{blue:[["#0A6CD6","#0A5DBA","#fff"],["#4DA3FF","#7DBBFF","#06111F"]],purple:[["#7B4BD6","#6A3CC2","#fff"],["#B28CFF","#C4A8FF","#140A26"]],
   pink:[["#C8327A","#B02A6A","#fff"],["#FF7AB6","#FF9CC8","#24060F"]],red:[["#C9342C","#B02A23","#fff"],["#FF6B5E","#FF8C82","#240604"]],
@@ -2225,7 +2263,9 @@ function lookApply(){var r=document.documentElement,st=r.style,t=r.getAttribute(
   var a=LOOK.acc[lookGet("accent")],w=LOOK.wall[lookGet("wall")];
   ["--accent","--accent-text","--accent-ink"].forEach(function(v,i){if(a)st.setProperty(v,a[dark?1:0][i]);else st.removeProperty(v)});
   var al=lookGet("wall")==="graphite"?(dark?[.26,.22,.2,.22]:[.24,.2,.2,.18]):(dark?[.40,.34,.26,.30]:[.42,.30,.30,.26]);
-  for(var i=0;i<4;i++){if(w)st.setProperty("--g-blob"+(i+1),"rgba("+w[i].join(",")+","+al[i]+")");else st.removeProperty("--g-blob"+(i+1))}}
+  for(var i=0;i<4;i++){if(w)st.setProperty("--g-blob"+(i+1),"rgba("+w[i].join(",")+","+al[i]+")");else st.removeProperty("--g-blob"+(i+1))}
+  var gl=lookGet("glass");if(gl)r.setAttribute("data-glass",gl);else r.removeAttribute("data-glass");
+  if(lookGet("bgmove")==="1")r.setAttribute("data-bgmove","1");else r.removeAttribute("data-bgmove")}
 lookApply();</script></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה ולכן אינו פעיל.</b><br>פתח אותו מהאייקון במסך הבית או מהקישור.</div>
@@ -2242,6 +2282,7 @@ lookApply();</script></head><body>
       <span class="df"><input type="text" class="dtx" id="weekPick" data-iso="" value="" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="בחירת שבוע (dd/mm/yyyy)"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" tabindex="-1" aria-hidden="true"></span>
     </div>
   </header>
+  <div class="bgfx" aria-hidden="true"><i></i><i></i><i></i></div>
   <button type="button" id="spotFab" aria-label="חיפוש"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
   <div class="minibar" aria-hidden="true">
     <button class="mb-p" data-wk="-1" tabindex="-1" aria-label="שבוע קודם">‹</button>
@@ -2382,6 +2423,10 @@ lookApply();</script></head><body>
         </div><p class="hint" id="thHint"></p>
         <div class="lkh">ערכת נושא</div><div class="lkwall" id="lkWall" role="radiogroup" aria-label="ערכת נושא"></div>
         <div class="lkh">צבע הדגשה</div><div class="lkacc" id="lkAcc" role="radiogroup" aria-label="צבע הדגשה"></div></div>
+      <div class="card"><h2>זכוכית ורקע</h2>
+        <div class="lkh" style="margin-top:4px">זכוכית</div><div class="pseg2 lkglass" id="lkGlass" role="radiogroup" aria-label="זכוכית"></div>
+        <div class="psr" style="border:0;margin-top:6px"><div class="pst"><b>אור רקע נע</b><small>הצבעים שמאחורי הזכוכית זזים לאט, כמו טפט דינמי</small></div><button type="button" role="switch" class="pswitch" id="lkMove" aria-checked="false" aria-label="אור רקע נע"></button></div>
+        <p class="hint" id="lkGlassHint"></p></div>
       <div class="card"><h2>מסך פתיחה</h2><div class="pseg2 lkstart" id="lkStart" role="radiogroup" aria-label="מסך פתיחה"></div>
         <p class="hint" style="margin-top:8px">הלשונית שנפתחת כשנכנסים לאפליקציה. נשמר במכשיר הזה.</p></div>
     </div>
@@ -2434,7 +2479,7 @@ lookApply();</script></head><body>
       <div class="card">
         <h2>ימי הולדת קרובים</h2>
         <div id="bdayBox"></div>
-        <p class="hint" style="margin-top:8px">ביום ההולדת – לועזי וגם עברי – מופיעה תזכורת עם ברכה מוכנה לוואטסאפ.</p>
+        <p class="hint" style="margin-top:8px">ביום ההולדת מופיעה תזכורת עם ברכה מוכנה לוואטסאפ – לפי התאריך הלועזי, העברי או שניהם, כפי שנבחר בכרטיס הטכנאי.</p>
       </div>
     </div>
     <div class="setpage panel" id="sub-msg" data-title="תקשורת" hidden>
@@ -2512,7 +2557,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent=OS_NAME+" "+OS_LOG[0].v+" · "+APP_VER});
-const APP_VER="23.10.2026 22:30";
+const APP_VER="23.10.2026 23:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3267,15 +3312,8 @@ function renderCons(w){
         return `<td><button class="cst${eve3[d]&&v==="E"?" ev3":""}" data-cst="${e.id}|${d}" data-v="${v}"${s?` data-s="${s}"`:""} ${dis?"disabled":""} aria-label="${esc(e.name)} ${DAYS[d]}: ${lbl}">${sh?`<span class="lf">${lbl}</span><span class="ls">${sh}</span>`:lbl}</button></td>`}).join("")}</tr>`}).join("");
 }
 function renderStaff(){
-  $("#staffRows").innerHTML=S.employees.length?S.employees.map(e=>`<div class="erow${e.active===false?" off":""}">
-    <button type="button" class="ecol" data-ecol="${e.id}" style="--ec:${e.color||"#A1A1A8"}" aria-label="צבע לזיהוי של ${esc(e.name)}">${esc(initial(e.name))}</button>
-    <div class="ef"><input type="text" maxlength="40" data-ename="${e.id}" value="${esc(e.name)}" aria-label="שם">
-      <div class="esub"><input type="text" inputmode="tel" dir="ltr" data-ephone="${e.id}" value="${esc(e.phone||"")}" placeholder="טלפון" aria-label="טלפון של ${esc(e.name)}">
-        <label class="ebd" title="יום הולדת"><span aria-hidden="true">🎂</span><input type="date" data-ebday="${e.id}" value="${esc(e.bday||"")}" aria-label="יום הולדת של ${esc(e.name)}"></label>
-        ${e.bday?`<small class="eheb">${esc(hebDay(e.bday))}</small>`:""}</div>
-      <div class="eopts"><label><input type="checkbox" data-eact="${e.id}" ${e.active!==false?"checked":""}> פעיל</label><label title="לא משובץ בסידור האוטומטי, רק ידנית"><input type="checkbox" data-ebk="${e.id}" ${e.backup?"checked":""}> גיבוי בלבד</label><button data-edel="${e.id}">הסרה</button></div></div>
-    <div class="epal" data-epal="${e.id}" hidden>${(EMP_COLORS||[]).map(c=>`<button type="button" data-ecset="${e.id}|${c}" style="--ec:${c}" aria-label="צבע" aria-pressed="${e.color===c}"></button>`).join("")}<button type="button" class="none" data-ecset="${e.id}|" aria-label="בלי צבע" aria-pressed="${!e.color}">✕</button></div>
-  </div>`).join(""):`<p class="hint">עדיין אין עובדים.</p>`;
+  $("#staffRows").innerHTML=S.employees.length?`<div class="emplist">${S.employees.map(e=>{const hb=hbOf(e),sub=[e.phone,e.bday?"🎂 "+dot(parseKey(e.bday)):"",hb?hebStr(hb):""].filter(Boolean).join(" · ");
+    return `<button type="button" class="srow emprow${e.active===false?" off":""}" data-empopen="${e.id}"><span class="ecol sm" style="--ec:${e.color||"#A1A1A8"}" aria-hidden="true">${esc(initial(e.name))}</span><span class="srb"><span class="srt">${esc(e.name)}${sub?`<small>${esc(sub)}</small>`:""}</span><span class="smv">${e.active===false?"לא פעיל":e.backup?"גיבוי בלבד":""}</span><span class="schev" aria-hidden="true">‹</span></span></button>`}).join("")}</div>`:`<p class="hint">עדיין אין עובדים.</p>`;
   renderBdays();
 }
 /* Friday rotation table: one column per site, rows = rotation order (repeats allowed: the same person in every row = fixed) */
@@ -3995,12 +4033,17 @@ const LK_WALLS=[["","SCE","green",["#7CC24E","#3FA79B","#E0B45A"]],["ocean","א�
   ["nebula","ערפילית","purple",["#8C5AE6","#D25AC8","#5070F0"]],["rose","ורד","pink",["#FF78A0","#FFAABE","#C878FF"]],["graphite","גרפיט","graphite",["#969BA5","#787D87","#AAAAAF"]]];
 const LK_ACC=[["green","ירוק","#4F7A2C"],["blue","כחול","#0A6CD6"],["teal","טורקיז","#0B8585"],["purple","סגול","#7B4BD6"],["pink","ורוד","#C8327A"],["red","אדום","#C9342C"],["orange","כתום","#C25E00"],["graphite","גרפיט","#4A5360"]];
 const LK_START=[["sched","לו״ז"],["cal","חופשות"],["ev","יומן"],["set","הגדרות"],["last","האחרון"]];
-function renderLook(){const w=lookGet("wall"),a=lookGet("accent")||"green",st=lookGet("start-tab")||"sched";
+function renderLook(){const w=lookGet("wall"),a=lookGet("accent")||"green",st=lookGet("start-tab")||"sched",gl=lookGet("glass");
+  const G=$("#lkGlass");if(G)G.innerHTML=[["clear","שקופה"],["","רגילה"],["solid","אטומה"]].map(([k,n])=>`<button type="button" data-lkglass="${k}" aria-pressed="${gl===k}">${n}</button>`).join("");
+  const H=$("#lkGlassHint");if(H)H.textContent=gl==="solid"?"בלי שקיפות וטשטוש – הכי קריא, וחוסך סוללה":gl==="clear"?"יותר שקיפות – הרקע בולט יותר מבעד לזכוכית":"האיזון המקורי";
+  const M=$("#lkMove");if(M)M.setAttribute("aria-checked",lookGet("bgmove")==="1");
   const W1=$("#lkWall");if(W1)W1.innerHTML=LK_WALLS.map(([k,n,_,c])=>`<button type="button" role="radio" aria-checked="${w===k}" data-lkwall="${k}"><span class="lkw" style="--c1:${c[0]};--c2:${c[1]};--c3:${c[2]}" aria-hidden="true"></span>${n}</button>`).join("");
   const A=$("#lkAcc");if(A)A.innerHTML=LK_ACC.map(([k,n,c])=>`<button type="button" role="radio" aria-checked="${a===k}" data-lkacc="${k}" style="--c:${c}" aria-label="${n}" title="${n}"></button>`).join("");
   const S1=$("#lkStart");if(S1)S1.innerHTML=LK_START.map(([k,n])=>`<button type="button" data-lkstart="${k}" aria-pressed="${st===k}">${n}</button>`).join("")}
 function lookSet(k,v){try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k)}catch(e){}}
-document.addEventListener("click",e=>{const w=e.target.closest("[data-lkwall]"),a=e.target.closest("[data-lkacc]"),st=e.target.closest("[data-lkstart]");if(!w&&!a&&!st)return;haptic();
+document.addEventListener("click",e=>{const g=e.target.closest("[data-lkglass]"),mv=e.target.closest("#lkMove");
+  if(g||mv){haptic();if(g)lookSet("glass",g.dataset.lkglass);else lookSet("bgmove",lookGet("bgmove")==="1"?"":"1");lookApply();renderLook();return}
+  const w=e.target.closest("[data-lkwall]"),a=e.target.closest("[data-lkacc]"),st=e.target.closest("[data-lkstart]");if(!w&&!a&&!st)return;haptic();
   if(st){lookSet("start-tab",st.dataset.lkstart==="sched"?"":st.dataset.lkstart);renderLook();return}
   const go=()=>{if(w){const t=LK_WALLS.find(x=>x[0]===w.dataset.lkwall);lookSet("wall",t[0]);lookSet("accent",t[2]==="green"?"":t[2])}
     else lookSet("accent",a.dataset.lkacc==="green"?"":a.dataset.lkacc);lookApply();renderLook()};
@@ -4151,12 +4194,12 @@ function hebParts(d){if(!HEB_F)return null;const p=HEB_F.formatToParts(d);const 
 function hebDay(iso){const p=hebParts(parseKey(iso));return p?`${hebNum(p.day)} ב${p.month}`:""}
 /* whose birthday falls on date d: [{e, kind:"לועזי"|"עברי"}] */
 function bdaysOn(d){const out=[],hp=hebParts(d),md=key(d).slice(5);
-  S.employees.filter(e=>e.bday&&e.active!==false).forEach(e=>{if(e.bday.slice(5)===md)out.push({e,kind:"לועזי"});
-    const bp=hebParts(parseKey(e.bday));if(hp&&bp&&bp.day===hp.day&&bp.month===hp.month)out.push({e,kind:"עברי"})});return out}
+  S.employees.filter(e=>e.active!==false).forEach(e=>{if(e.bday&&e.bdG!==false&&e.bday.slice(5)===md)out.push({e,kind:"לועזי"});
+    const hb=hbOf(e);if(hb&&e.bdH!==false&&hebMatch(hb,d))out.push({e,kind:"עברי"})});return out}
 function renderBdays(){const box=$("#bdayBox");if(!box)return;const t=new Date();t.setHours(0,0,0,0);const L=[];
   for(let i=0;i<45;i++){const d=new Date(t);d.setDate(d.getDate()+i);bdaysOn(d).forEach(b=>L.push({...b,d,i}))}
-  box.innerHTML=L.length?L.slice(0,8).map(b=>`<div class="bdr${b.i===0?" now":""}"><span class="ecol sm" style="--ec:${b.e.color||"#A1A1A8"}">${esc(initial(b.e.name))}</span><span class="bdt"><b>${esc(b.e.name)}</b><small>${b.i===0?"היום":b.i===1?"מחר":`בעוד ${b.i} ימים`} · יום ${DAYS[b.d.getDay()]||"שבת"} ${dot(b.d)} · ${b.kind}${b.kind==="עברי"?" ("+esc(hebDay(key(b.d)))+")":""}</small></span>${b.i===0?`<button type="button" data-bdwa="${b.e.id}">ברכה 🎉</button>`:""}</div>`).join("")
-    :`<p class="hint">אין ימי הולדת ב־45 הימים הקרובים. מוסיפים תאריך ליד כל טכנאי למעלה.</p>`}
+  box.innerHTML=L.length?L.slice(0,8).map(b=>`<div class="bdr${b.i===0?" now":""}"><span class="ecol sm" style="--ec:${b.e.color||"#A1A1A8"}">${esc(initial(b.e.name))}</span><span class="bdt"><b>${esc(b.e.name)}</b><small>${b.i===0?"היום":b.i===1?"מחר":`בעוד ${b.i} ימים`} · יום ${DAYS[b.d.getDay()]||"שבת"} ${dot(b.d)} · ${b.kind}${b.kind==="עברי"?" ("+esc(hebStr(hbOf(b.e)))+")":""}</small></span>${b.i===0?`<button type="button" data-bdwa="${b.e.id}">ברכה 🎉</button>`:""}</div>`).join("")
+    :`<p class="hint">אין ימי הולדת ב־45 הימים הקרובים. מוסיפים תאריך בכרטיס של כל טכנאי.</p>`}
 const bdText=e=>`מזל טוב ${e.name}! 🎂🎉\nיום הולדת שמח מכל הצוות!`;
 function bdSend(e){const ph=waPhone(e.phone);if(ph)openUrl(`https://wa.me/${ph}?text=${encodeURIComponent(noEmoji(bdText(e)))}`);else sendWa(bdText(e))}
 /* on the day: a small card, once per device per day */
@@ -4166,7 +4209,7 @@ let BD_TRY=0;function bdayToday(){const today=key(new Date());let seen="";try{se
   try{localStorage.setItem("bday-seen",today)}catch(e){}
   const o=document.createElement("div");o.className="alertbox bdbox";
   o.innerHTML=`<div class="alertc" role="alertdialog" aria-label="יום הולדת"><div class="bdcake" aria-hidden="true">🎂</div><b>היום יום הולדת</b>
-    ${L.map(b=>`<div class="bdr"><span class="ecol sm" style="--ec:${b.e.color||"#A1A1A8"}">${esc(initial(b.e.name))}</span><span class="bdt"><b>${esc(b.e.name)}</b><small>${b.kind}${b.kind==="עברי"?" · "+esc(hebDay(today)):""}</small></span><button type="button" data-bdwa="${b.e.id}">ברכה</button></div>`).join("")}
+    ${L.map(b=>`<div class="bdr"><span class="ecol sm" style="--ec:${b.e.color||"#A1A1A8"}">${esc(initial(b.e.name))}</span><span class="bdt"><b>${esc(b.e.name)}</b><small>${b.kind}${b.kind==="עברי"?" · "+esc(hebStr(hbOf(b.e))):""}</small></span><button type="button" data-bdwa="${b.e.id}">ברכה</button></div>`).join("")}
     <div class="alertb"><button type="button" data-bdok>סגירה</button></div></div>`;
   document.body.appendChild(o);haptic();const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),200)};
   o.addEventListener("click",e=>{if(e.target.closest("[data-bdok]")||e.target===o)close()})}
@@ -4218,10 +4261,68 @@ document.addEventListener("click",e=>{const g=e.target.closest("#tab-set [data-g
   const t=e.target.closest('.tabs button[data-tab="set"]');if(t&&t.getAttribute("aria-selected")==="true"&&SET_PAGE!=="root"&&!setSplit())setGo("root")},true);
 matchMedia("(min-width:1000px)").addEventListener("change",()=>setGo(SET_PAGE,false));
 setTimeout(()=>{let sp="root";try{sp=sessionStorage.getItem("set-page")||"root"}catch(e){}setGo(sp,false)},0);
+
+/* ---------- technician card (like an iOS contact): colour, phone, status, Gregorian + Hebrew birthday, which reminders ---------- */
+const HEB_MONTHS=["תשרי","חשוון","כסלו","טבת","שבט","אדר","אדר א׳","אדר ב׳","ניסן","אייר","סיוון","תמוז","אב","אלול"];
+function hbFromDate(iso){const p=hebParts(parseKey(iso));return p?{d:p.day,m:p.month}:null}
+function hbOf(e){return e.hb===undefined?(e.bday?hbFromDate(e.bday):null):e.hb}   /* null = cleared on purpose */
+function hebStr(hb){return hb?`${hebNum(hb.d)} ב${hb.m}`:""}
+function hebMatch(hb,d){const p=hebParts(d);if(!p||!hb)return false;let m=hb.m;const leap=p.month==="אדר א׳"||p.month==="אדר ב׳";
+  if(p.month==="אדר"&&(m==="אדר א׳"||m==="אדר ב׳"))m="אדר";if(leap&&m==="אדר")m="אדר ב׳";   /* a plain-Adar birthday is kept in Adar II of a leap year */
+  if(p.month!==m)return false;if(p.day===hb.d)return true;
+  if(hb.d===30&&p.day===29){const t=new Date(d);t.setDate(t.getDate()+1);const q=hebParts(t);return !!q&&q.month!==p.month}   /* no 30th this year */
+  return false}
+function openEmpSheet(id){const e=S.employees.find(x=>x.id===id);if(!e)return;
+  const o=document.createElement("div");o.className="pastebox empbox";
+  const draw=()=>{const hb=hbOf(e),c=e.color||"#A1A1A8";
+    o.innerHTML=`<div class="pcard" role="dialog" aria-label="כרטיס טכנאי"><div class="shd"><span class="pgrab" aria-hidden="true"></span><b>כרטיס טכנאי</b><button class="shx" data-px aria-label="סגור">✕</button></div>
+    <div class="epf">
+      <div class="ehead"><span class="ecol xl" style="--ec:${c}">${esc(initial(e.name))}</span><input type="text" maxlength="40" class="enmi" data-ef="name" value="${esc(e.name)}" aria-label="שם"></div>
+      <div class="epal2">${EMP_COLORS.map(x=>`<button type="button" data-ec="${x}" style="--ec:${x}" aria-label="צבע" aria-pressed="${e.color===x}"></button>`).join("")}<button type="button" class="none" data-ec="" aria-label="בלי צבע" aria-pressed="${!e.color}">✕</button></div>
+      <div class="egrp">
+        <label class="erowf"><span>טלפון</span><input type="text" inputmode="tel" dir="ltr" data-ef="phone" value="${esc(e.phone||"")}" placeholder="050-0000000"></label>
+        <div class="erowf"><span>פעיל</span><button type="button" role="switch" class="pswitch" aria-checked="${e.active!==false}" data-esw="active"></button></div>
+        <div class="erowf"><span>גיבוי בלבד<small>לא משובץ בשיבוץ החכם, רק ידנית</small></span><button type="button" role="switch" class="pswitch" aria-checked="${!!e.backup}" data-esw="backup"></button></div>
+      </div>
+      <div class="egh">יום הולדת</div>
+      <div class="egrp">
+        <div class="erowf"><span>לועזי</span><span class="eval"><input type="date" data-ef="bday" value="${esc(e.bday||"")}" aria-label="תאריך לועזי">${e.bday?`<button type="button" class="eclr" data-eclr="bday" aria-label="מחיקת התאריך הלועזי">✕</button>`:""}</span></div>
+        <div class="erowf"><span>עברי</span><span class="eval"><select data-ef="hbd" aria-label="יום">${'<option value="">יום</option>'}${Array.from({length:30},(_,i)=>`<option value="${i+1}" ${hb&&hb.d===i+1?"selected":""}>${hebNum(i+1)}</option>`).join("")}</select>
+          <select data-ef="hbm" aria-label="חודש"><option value="">חודש</option>${HEB_MONTHS.map(m=>`<option ${hb&&hb.m===m?"selected":""}>${m}</option>`).join("")}</select>${hb?`<button type="button" class="eclr" data-eclr="hb" aria-label="מחיקת התאריך העברי">✕</button>`:""}</span></div>
+        ${e.bday&&(!hb||JSON.stringify(hb)!==JSON.stringify(hbFromDate(e.bday)))?`<button type="button" class="ecalc" data-ecalc>חישוב התאריך העברי מהלועזי (${esc(hebStr(hbFromDate(e.bday)))})</button>`:""}
+      </div>
+      <div class="egh">תזכורת ביום ההולדת</div>
+      <div class="egrp">
+        <div class="erowf${e.bday?"":" dis"}"><span>לפי התאריך הלועזי${e.bday?`<small>${esc(dot(parseKey(e.bday)).slice(0,5))} בכל שנה</small>`:"<small>אין תאריך לועזי</small>"}</span><button type="button" role="switch" class="pswitch" aria-checked="${!!e.bday&&e.bdG!==false}" data-esw="bdG"></button></div>
+        <div class="erowf${hb?"":" dis"}"><span>לפי התאריך העברי${hb?`<small>${esc(hebStr(hb))} בכל שנה</small>`:"<small>אין תאריך עברי</small>"}</span><button type="button" role="switch" class="pswitch" aria-checked="${!!hb&&e.bdH!==false}" data-esw="bdH"></button></div>
+      </div>
+      <button type="button" class="edel" data-edel2>הסרת הטכנאי</button>
+    </div></div>`};
+  draw();document.body.appendChild(o);haptic();
+  const save=()=>{changed()};
+  const close=()=>{if(o._closing)return;o._closing=1;o.classList.add("out");setTimeout(()=>{o.remove();render()},320)};sheetDrag(o.querySelector(".pcard"),close);
+  o.addEventListener("click",async ev=>{const t=ev.target;
+    if(t.closest("[data-px]")||t===o){close();return}
+    const c=t.closest("[data-ec]");if(c){if(c.dataset.ec)e.color=c.dataset.ec;else delete e.color;haptic();save();draw();return}
+    const w=t.closest("[data-esw]");if(w){const k=w.dataset.esw,on=w.getAttribute("aria-checked")!=="true";haptic();
+      if(k==="active")e.active=on;else if(k==="backup")e.backup=on;else if(k==="bdG")e.bdG=on;else if(k==="bdH")e.bdH=on;save();draw();return}
+    const cl=t.closest("[data-eclr]");if(cl){if(cl.dataset.eclr==="bday")delete e.bday;else e.hb=null;haptic();save();draw();return}
+    if(t.closest("[data-ecalc]")){e.hb=hbFromDate(e.bday);haptic();save();draw();return}
+    if(t.closest("[data-edel2]")){const ok=await askSave(`להסיר את ${e.name}?`,"הטכנאי יוסר מרשימת הצוות.","הסרה","ביטול");if(ok){S.employees=S.employees.filter(x=>x.id!==e.id);changed();close()}}});
+  o.addEventListener("input",ev=>{const t=ev.target;if(t.dataset.ef==="name"){e.name=t.value;o.querySelector(".ecol.xl").textContent=initial(e.name);changed(true)}if(t.dataset.ef==="phone"){e.phone=t.value.trim();changed(true)}});
+  o.addEventListener("change",ev=>{const t=ev.target,f=t.dataset.ef;
+    if(f==="bday"){if(t.value){const had=e.bday;e.bday=t.value;if(e.hb===undefined||e.hb===null&&!had)e.hb=hbFromDate(t.value)}else delete e.bday;save();draw()}
+    if(f==="hbd"||f==="hbm"){const d=+o.querySelector('[data-ef="hbd"]').value,m=o.querySelector('[data-ef="hbm"]').value;if(d&&m){e.hb={d,m};save();draw()}}})}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-empopen]");if(b)openEmpSheet(b.dataset.empopen)});
 /* ---------- sceOS: about page + what's new. The change log lives in the code (not in the data),
    and only the current version + the 3 before it are kept – older entries are deleted from here. ---------- */
 const OS_NAME="sceOS";
 const OS_LOG=[
+  {v:"4.6",name:"כרטיס טכנאי",date:"23.10.2026",items:[
+    "כרטיס לכל טכנאי בסגנון אנשי קשר: צבע, טלפון, פעיל וגיבוי בלבד",
+    "יום הולדת לועזי ועברי בנפרד, עם אפשרות למחוק כל אחד מהם ולחשב את העברי מהלועזי",
+    "בחירה לכל טכנאי: תזכורת לפי התאריך הלועזי, העברי או שניהם (כולל אדר בשנה מעוברת)",
+    "תצוגה ומראה: זכוכית שקופה, רגילה או אטומה, ואור רקע נע"]},
   {v:"4.5",name:"הגדרות בסגנון אייפון",date:"23.10.2026",items:[
     "ההגדרות נפתחות כתפריט מקובץ בסגנון הגדרות האייפון – כל שורה פותחת עמוד משלה עם כפתור חזרה",
     "ליד כל שורה מוצג המצב הנוכחי (מראה, התראות, מספר טכנאים וקמפוסים, סנכרון)",
@@ -4234,12 +4335,7 @@ const OS_LOG=[
     "ערכות נושא וצבעי הדגשה, ובחירת מסך הפתיחה"]},
   {v:"4.3",name:"חזרה לשבוע",date:"23.10.2026",items:[
     "כשעוברים לשבוע אחר בלו״ז מופיע ליד התאריכים כפתור ״חזרה״ שמחזיר לשבוע שעובדים עליו",
-    "הכפתור מופיע ונעלם בהנפשה חלקה, ובטלפון התאריכים זזים הצידה כדי לפנות לו מקום"]},
-  {v:"4.2",name:"הגדרות מסודרות",date:"23.10.2026",items:[
-    "ההגדרות מחולקות לקבוצות ברורות: תצוגה, שיבוץ, קמפוסים וחדרים, נתונים",
-    "אייקון צבעוני לכל קטגוריה ולכל כרטיס, בסגנון הגדרות האייפון",
-    "שמות חדשים לקטגוריות: צוות ותקשורת",
-    "סנכרון ואחסון וגיבוי ושחזור מרוכזים יחד תחת ״נתונים״"]}
+    "הכפתור מופיע ונעלם בהנפשה חלקה, ובטלפון התאריכים זזים הצידה כדי לפנות לו מקום"]}
 ].slice(0,4);
 const osLtr=t=>esc(t).replace(/[A-Za-z][\w.\-]*(?: \d[\d.]*)?/g,m=>`<bdi class="osl">${m}</bdi>`);
 const osSeen=()=>{try{return localStorage.getItem("os-seen")||""}catch(e){return ""}};
