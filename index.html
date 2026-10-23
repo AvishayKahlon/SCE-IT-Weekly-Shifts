@@ -2056,6 +2056,21 @@ bdi.osl{white-space:nowrap;direction:ltr}
 .thl{background:#EEF2EA}.thl::before,.thl::after{background:#C9D3C3}
 .thd{background:#14181A}.thd::before,.thd::after{background:#3A423C}
 .tha{background:linear-gradient(90deg,#14181A 50%,#EEF2EA 50%)}.tha::before,.tha::after{background:linear-gradient(90deg,#3A423C 50%,#C9D3C3 50%)}
+/* settings: grouped like iOS Settings – section labels, coloured icon tiles, icons in the category bar */
+.sgh{font-size:13px;font-weight:600;color:var(--muted);margin:14px 14px -2px;letter-spacing:.01em}
+.segp>.sgh:first-child{margin-top:2px}
+.sgp{margin:0 14px}
+.card>h2.hic{display:flex;align-items:center;gap:10px}
+.sic{display:inline-grid;place-items:center;width:29px;height:29px;border-radius:8px;background:var(--c);color:#fff;flex:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 1px 2px rgba(0,0,0,.15)}
+.sic svg{width:17px;height:17px}
+#sitesSet .card>.row.hic{align-items:center}
+.fbtag{font-size:11.5px;font-weight:600;color:var(--muted);padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--ink) 7%,transparent);margin-inline-start:2px}
+.addsite{padding:0 4px}
+[data-group="set"] button{display:inline-flex!important;align-items:center;justify-content:center;gap:6px}
+[data-group="set"] .tic{width:17px;height:17px;flex:none}
+@media (max-width:700px){[data-group="set"] button{flex-direction:column;gap:2px;padding:6px 2px!important;min-height:52px!important;font-size:12.5px!important}
+  [data-group="set"] .tic{width:19px;height:19px}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה ולכן אינו פעיל.</b><br>פתח אותו מהאייקון במסך הבית או מהקישור.</div>
@@ -2198,26 +2213,23 @@ bdi.osl{white-space:nowrap;direction:ltr}
 
   <section class="panel" id="tab-set" hidden>
     <nav class="subtabs segbar" data-group="set" role="tablist" aria-label="קטגוריות הגדרות">
-      <button role="tab" data-sub="gen" data-panel="sub-gen" aria-selected="true">כללי</button>
-      <button role="tab" data-sub="staff" data-panel="sub-staff" aria-selected="false">עובדים</button>
-      <button role="tab" data-sub="msg" data-panel="sub-msg" aria-selected="false">הודעות</button>
-      <button role="tab" data-sub="push" data-panel="sub-push" aria-selected="false">התראות</button>
-      <button role="tab" data-sub="about" data-panel="sub-about" aria-selected="false">אודות</button>
+      <button role="tab" data-sub="gen" data-panel="sub-gen" aria-selected="true"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>כללי</span></button>
+      <button role="tab" data-sub="staff" data-panel="sub-staff" aria-selected="false"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>צוות</span></button>
+      <button role="tab" data-sub="msg" data-panel="sub-msg" aria-selected="false"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2-5.3A8.4 8.4 0 1 1 21 11.5z"/></svg><span>תקשורת</span></button>
+      <button role="tab" data-sub="push" data-panel="sub-push" aria-selected="false"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg><span>התראות</span></button>
+      <button role="tab" data-sub="about" data-panel="sub-about" aria-selected="false"><svg class="tic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><span>אודות</span></button>
     </nav>
     <div class="panel segp" id="sub-gen">
+      <h3 class="sgh">תצוגה</h3>
       <div class="card thcard"><h2>מראה</h2>
         <div class="thseg" role="radiogroup" aria-label="מראה">
           <button type="button" role="radio" data-theme-set="light"><span class="thp thl" aria-hidden="true"></span>בהיר</button>
           <button type="button" role="radio" data-theme-set="dark"><span class="thp thd" aria-hidden="true"></span>כהה</button>
           <button type="button" role="radio" data-theme-set="auto"><span class="thp tha" aria-hidden="true"></span>אוטומטי</button>
         </div><p class="hint" id="thHint"></p></div>
+      <h3 class="sgh">שיבוץ</h3>
       <div class="card">
-        <h2 lang="en" dir="ltr" class="fbh">Firebase</h2>
-        <div id="syncBox"></div>
-        <div id="fbUsage"></div>
-      </div>
-      <div class="card">
-        <h2>הגדרת משמרות</h2>
+        <h2>משמרות ושיבוץ</h2>
         <div class="row">
           <label>בוקר <input type="text" id="lblM" style="width:150px"></label>
           <label>ערב <input type="text" id="lblE" style="width:150px"></label>
@@ -2233,8 +2245,15 @@ bdi.osl{white-space:nowrap;direction:ltr}
           <span class="hint">בוקר נחשב כלל חזק, ערב כשאיפה. כשאי אפשר לעמוד בכלל, הסידור יציין מי לא קיבל ולמה.</span></div>
         </div>
       </div>
+      <h3 class="sgh">קמפוסים וחדרים</h3>
       <div id="sitesSet" class="rows"></div>
-      <div class="row"><input type="text" id="newSite" maxlength="60" placeholder="שם אתר חדש" aria-label="שם אתר חדש"><button id="addSite">הוספת אתר</button></div>
+      <div class="row addsite"><input type="text" id="newSite" maxlength="60" placeholder="שם קמפוס חדש" aria-label="שם קמפוס חדש"><button id="addSite">הוספת קמפוס</button></div>
+      <h3 class="sgh">נתונים</h3>
+      <div class="card">
+        <h2>סנכרון ואחסון <small class="fbtag" lang="en" dir="ltr">Firebase</small></h2>
+        <div id="syncBox"></div>
+        <div id="fbUsage"></div>
+      </div>
       <div class="card">
         <h2>גיבוי ושחזור</h2>
         <p class="hint" style="margin-bottom:10px">גיבוי מלא של כל הנתונים לקובץ, ושחזור ממנו.</p>
@@ -2252,6 +2271,7 @@ bdi.osl{white-space:nowrap;direction:ltr}
       </div>
     </div>
     <div class="panel segp" id="sub-msg" hidden>
+      <h3 class="sgh">ערוצי שליחה</h3>
       <div class="card">
         <h2>נמעני מייל</h2>
         <div class="row">
@@ -2266,6 +2286,8 @@ bdi.osl{white-space:nowrap;direction:ltr}
         </div>
         <p class="hint" style="margin-top:8px">קישור ההזמנה לקבוצה (בוואטסאפ: פרטי הקבוצה ← הזמנה באמצעות קישור ← העתקת קישור). איתו, "העתקה ופתיחת הקבוצה" מעתיק את ההודעה ופותח את הקבוצה ישירות.</p>
       </div>
+      <h3 class="sgh">נוסחי הודעות</h3>
+      <p class="hint sgp">"פתיחה בוואטסאפ" פותח את וואטסאפ עם ההודעה כבר כתובה. בוחרים את הקבוצה ושולחים. אפשר לערוך את הנוסח לפני השליחה.</p>
       <div class="card">
         <h2>נוסח בקשת זמינות</h2>
         <div class="row" style="margin-bottom:10px">
@@ -2303,7 +2325,6 @@ bdi.osl{white-space:nowrap;direction:ltr}
           <span class="hint" data-copied="weekMsg"></span>
         </div>
       </div>
-      <p class="hint">"פתיחה בוואטסאפ" פותח את וואטסאפ עם ההודעה כבר כתובה. בחר את הקבוצה ושלח. אפשר לערוך את הנוסח לפני השליחה.</p>
     </div>
     <div class="panel segp" id="sub-push" hidden><div id="pushSet"></div></div>
     <div class="panel segp" id="sub-about" hidden><div id="aboutSet"></div></div>
@@ -2324,7 +2345,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent=OS_NAME+" "+OS_LOG[0].v+" · "+APP_VER});
-const APP_VER="23.10.2026 17:00";
+const APP_VER="23.10.2026 17:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3008,7 +3029,7 @@ function sendWa(text){
     return;
   }
   if(groupOk(g)){
-    try{navigator.clipboard.writeText(text).then(()=>toast("ההודעה הועתקה. בקבוצה: Ctrl+V ואז שליחה"),()=>toast("ההעתקה נכשלה – העתק מהגדרות ← הודעות"))}catch(e){toast("ההעתקה נכשלה – העתק מהגדרות ← הודעות")}
+    try{navigator.clipboard.writeText(text).then(()=>toast("ההודעה הועתקה. בקבוצה: Ctrl+V ואז שליחה"),()=>toast("ההעתקה נכשלה – העתק מהגדרות ← תקשורת"))}catch(e){toast("ההעתקה נכשלה – העתק מהגדרות ← תקשורת")}
     openUrl(g);
   }else openUrl(wa(text));
 }
@@ -3024,7 +3045,7 @@ $("#askConsBtn").onclick=()=>{
   S.availSent=consWeek();changed(true);
   const g=(S.groupLink||"").trim(),text=($("#consMsg")&&$("#consMsg").value.trim())||consText();
   if(!groupOk(g)){sendWa(text);return}     /* no group link saved yet: previous behaviour */
-  try{navigator.clipboard.writeText(text).then(()=>toast("ההודעה הועתקה – הדבק בקבוצה ושלח"),()=>toast("ההעתקה נכשלה – העתק מהגדרות ← הודעות"))}catch(e){toast("ההעתקה נכשלה – העתק מהגדרות ← הודעות")}
+  try{navigator.clipboard.writeText(text).then(()=>toast("ההודעה הועתקה – הדבק בקבוצה ושלח"),()=>toast("ההעתקה נכשלה – העתק מהגדרות ← תקשורת"))}catch(e){toast("ההעתקה נכשלה – העתק מהגדרות ← תקשורת")}
   openUrl(g)};
 function renderGroup(){
   if(document.activeElement!==$("#mailTo"))$("#mailTo").value=S.mailTo||"";
@@ -3056,12 +3077,12 @@ function renderFair(w){
   const nfCls=(n,id)=>{const k=empCap(id,C.cap);return !C.cap?"":n>k?"over":n===k?"eq":""};
   const rows=activeEmps().map(e=>{const nf=c[e.id].tot-c[e.id].fri;return `<tr><td>${esc(e.name)}</td><td class="${nfCls(nf,e.id)}">${nf}</td><td>${c[e.id].tot}</td><td>${c[e.id].tot-c[e.id].eve}</td><td>${c[e.id].eve}</td><td>${c[e.id].fri}</td><td class="${lastWk&&hasAssign(w)&&!(mf[e.id]+c[e.id].fri)?"fmiss":""}">${mf[e.id]+c[e.id].fri}</td></tr>`}).join("");
   const bk=backupEmps().filter(e=>c[e.id]&&c[e.id].tot).map(e=>`<tr class="bkrow"><td>${esc(e.name)} <span class="hint">(גיבוי)</span></td><td>${c[e.id].tot-c[e.id].fri}</td><td>${c[e.id].tot}</td><td>${c[e.id].tot-c[e.id].eve}</td><td>${c[e.id].eve}</td><td>${c[e.id].fri}</td><td>—</td></tr>`).join("");
-  $("#fair").innerHTML=`<tr><th>עובד/ת</th><th>ראשון–חמישי</th><th>סה"כ השבוע</th><th>בקרים</th><th>ערבים</th><th>שישי השבוע</th><th>שישי ב${mName}</th></tr>`+(rows||`<tr><td colspan="7" class="empty">הוסף עובדים בלשונית "עובדים"</td></tr>`)+bk;
+  $("#fair").innerHTML=`<tr><th>עובד/ת</th><th>ראשון–חמישי</th><th>סה"כ השבוע</th><th>בקרים</th><th>ערבים</th><th>שישי השבוע</th><th>שישי ב${mName}</th></tr>`+(rows||`<tr><td colspan="7" class="empty">הוסף עובדים בהגדרות ← צוות</td></tr>`)+bk;
 }
 /* constraints grid with the Excel status column (✔ ✘ ⚠) and cell states */
 function renderCons(w){
   const emps=activeEmps();
-  if(!emps.length){$("#consGrid").innerHTML=`<tr><td class="empty">הוסף עובדים בלשונית "עובדים"</td></tr>`;return}
+  if(!emps.length){$("#consGrid").innerHTML=`<tr><td class="empty">הוסף עובדים בהגדרות ← צוות</td></tr>`;return}
   const ha=hasAssign(w),ST={ok:"✔",bad:"✘",miss:"⚠"};
   const eve3=DAYS.map((_,d)=>d<5&&emps.filter(e=>cons(w,e.id,d)==="E").length>2);
   $("#consGrid").innerHTML=`<tr><th>עובד/ת</th><th>סטטוס</th>${DAYS.map((dn,d)=>`<th><span class="l">${dn}</span><span class="sd">${"אבגדהו"[d]}׳</span><br><span style="font-weight:400;color:var(--muted)">${fmt(dayDate(d)).slice(0,5)}</span></th>`).join("")}</tr>`+
@@ -3201,7 +3222,7 @@ function renderCal(){if(CAL_KEEP)return;
 }
 function renderSettings(){
   $("#lblM").value=S.shiftLbl.m;$("#lblE").value=S.shiftLbl.e;$("#h19Eve").value=S.h19Eve||"";$("#sheetTitle").value=S.title||"";$("#targetN").value=S.target??5;$("#coverSet").innerHTML=`<table class="req"><tr><th>אתר</th><th>בקרים</th><th>ערבים</th></tr>${S.sites.map(s=>`<tr><td>${esc(s.name)}</td>${["m","e"].map(sh=>`<td><input type="number" min="0" max="5" data-cov="${s.id}|${sh}" value="${S.cover[s.id][sh]||0}" aria-label="${esc(s.name)} ${sh==="m"?"בקרים":"ערבים"}"></td>`).join("")}</tr>`).join("")}</table>`;
-  $("#sitesSet").innerHTML=S.sites.map(s=>`<div class="card"><div class="row" style="margin-bottom:10px"><input type="text" maxlength="60" data-sname="${s.id}" value="${esc(s.name)}" aria-label="שם אתר"><button data-sdel="${s.id}">הסר אתר</button></div>
+  $("#sitesSet").innerHTML=S.sites.map(s=>`<div class="card"><div class="row" style="margin-bottom:10px"><input type="text" maxlength="60" data-sname="${s.id}" value="${esc(s.name)}" aria-label="שם קמפוס"><button data-sdel="${s.id}">הסרה</button></div>
     <div class="scroll"><table class="req"><tr><th>עובדים במשמרת</th>${DAYS.map(d=>`<th>${d}</th>`).join("")}</tr>
     ${["m","e"].map(sh=>`<tr><td>${sh==="m"?"בוקר":"ערב"}</td>${DAYS.map((_,d)=>`<td><input type="number" min="0" max="6" data-req="${s.id}|${sh}|${d}" value="${(s.req[sh]||[])[d]||0}" aria-label="${sh==="m"?"בוקר":"ערב"} ${DAYS[d]}"></td>`).join("")}</tr>`).join("")}
     </table></div>
@@ -3803,10 +3824,43 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-theme-set]
   const go=()=>thApply(t);if(document.startViewTransition&&!matchMedia("(prefers-reduced-motion: reduce)").matches){try{document.startViewTransition(go);return}catch(_){}}go()});
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>thApply(thGet()));
 thApply(thGet());
+
+/* ---------- settings: iOS-style coloured icons on every card heading (also cards rendered later) ---------- */
+const SIC={sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  cloud:'<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.8A6 6 0 0 0 4.3 12.5 3.5 3.5 0 0 0 6.5 19z"/>',
+  archive:'<path d="M3 4h18v4H3zM5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/>',
+  people:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/>',
+  chat:'<path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2-5.3A8.4 8.4 0 1 1 21 11.5z"/>',
+  cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>',
+  table:'<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 10h18M3 15h18M9 5v14"/>',
+  phone:'<rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  spark:'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+  hist:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l4 2"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
+  bldg:'<path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/>'};
+const SIC_MAP=[["מראה","sun","#0A84FF"],["משמרות ושיבוץ","clock","#34C759"],["סנכרון ואחסון","cloud","#32ADE6"],["גיבוי ושחזור","archive","#8E8E93"],
+  ["עובדים","people","#5856D6"],["נמעני מייל","mail","#0A84FF"],["קבוצת הצוות","chat","#30B04F"],["נוסח בקשת זמינות","cal","#00A79D"],["נוסח תזכורת","bell","#FF9500"],
+  ["נוסח הסידור השבועי","table","#AF52DE"],["התראות במכשיר","phone","#FF3B30"],["מתי לשלוח","clock","#FF9500"],["מה לכלול","list","#0A84FF"],["שעות שקטות","moon","#5856D6"],
+  ["מה חדש","spark","#34C759"],["גרסאות קודמות","hist","#8E8E93"],["פרטי מערכת","info","#8E8E93"]];
+const sicHTML=(ic,c)=>`<span class="sic" style="--c:${c}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${SIC[ic]}</svg></span>`;
+function setIcons(){const root=document.getElementById("tab-set");if(!root)return;
+  root.querySelectorAll(".card>h2:not(.hic)").forEach(h=>{const t=h.textContent.trim(),m=SIC_MAP.find(x=>t.startsWith(x[0]));if(!m)return;h.classList.add("hic");h.insertAdjacentHTML("afterbegin",sicHTML(m[1],m[2]))});
+  root.querySelectorAll("#sitesSet .card>.row:first-child:not(.hic)").forEach(r=>{r.classList.add("hic");r.insertAdjacentHTML("afterbegin",sicHTML("bldg","#FF9500"))})}
+new MutationObserver(()=>setIcons()).observe(document.getElementById("tab-set"),{childList:true,subtree:true});setIcons();
 /* ---------- sceOS: about page + what's new. The change log lives in the code (not in the data),
    and only the current version + the 3 before it are kept – older entries are deleted from here. ---------- */
 const OS_NAME="sceOS";
 const OS_LOG=[
+  {v:"4.2",name:"הגדרות מסודרות",date:"23.10.2026",items:[
+    "ההגדרות מחולקות לקבוצות ברורות: תצוגה, שיבוץ, קמפוסים וחדרים, נתונים",
+    "אייקון צבעוני לכל קטגוריה ולכל כרטיס, בסגנון הגדרות האייפון",
+    "שמות חדשים לקטגוריות: צוות ותקשורת",
+    "סנכרון ואחסון וגיבוי ושחזור מרוכזים יחד תחת ״נתונים״"]},
   {v:"4.1",name:"מראה",date:"23.10.2026",items:[
     "בחירת מראה בהגדרות ← כללי: בהיר, כהה או אוטומטי לפי המכשיר",
     "המעבר בין המצבים חלק, וגם צבע שורת הסטטוס באייפון מתאים את עצמו",
@@ -3821,11 +3875,7 @@ const OS_LOG=[
     "מד אחסון בסגנון iCloud עם חישוב מדויק של הנתונים",
     "ניקוי נתונים ישנים לפי תקופה, עם אפשרות שחזור",
     "שיבוץ חכם ובקשת זמינות ככפתורים צפים",
-    "ניסוחים מקצועיים ושמות חדשים ללשוניות ולכפתורים"]},
-  {v:"3.1",name:"כרטיס היום",date:"22.10.2026",items:[
-    "כרטיס ״היום״ מ־06:00: מבחנים ואירועים, טכנאים במשמרת, וואטסאפ וסימון ״נשלח?״",
-    "חדרים לפי קמפוס, מעבדות מקצועיות ואודיטוריומים",
-    "יצירה חכמה ממייל שלומדת מהתיקונים שלך"]}
+    "ניסוחים מקצועיים ושמות חדשים ללשוניות ולכפתורים"]}
 ].slice(0,4);
 const osLtr=t=>esc(t).replace(/[A-Za-z][\w.\-]*(?: \d[\d.]*)?/g,m=>`<bdi class="osl">${m}</bdi>`);
 const osSeen=()=>{try{return localStorage.getItem("os-seen")||""}catch(e){return ""}};
