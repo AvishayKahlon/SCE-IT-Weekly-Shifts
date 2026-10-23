@@ -3,6 +3,9 @@
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#E9EFE5">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07090A">
 <meta name="color-scheme" content="light dark">
+<script>/* appearance chosen in Settings → מראה (this device); applied before the page paints */
+try{var T0=localStorage.getItem("theme");if(T0==="light"||T0==="dark"){document.documentElement.setAttribute("data-theme",T0);document.querySelector('meta[name="color-scheme"]').content=T0;
+  document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.content=T0==="dark"?"#07090A":"#E9EFE5"})}}catch(e){}</script>
 <!-- home-screen app (iPhone "Add to Home Screen" / Android install) -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,11 +32,16 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#141714; --surface:#1D211D; --ink:#E9ECE7; --muted:#A4ACA4; --line:#323832; --accent:#8DBF5E; --accent-ink:#10140E; --warn:#F28B82; --warn-bg:#3A1F1C; --ok:#81C995; color-scheme:dark}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"]{
+  --bg:#141714; --surface:#1D211D; --ink:#E9ECE7; --muted:#A4ACA4; --line:#323832; --accent:#8DBF5E; --accent-ink:#10140E; --warn:#F28B82; --warn-bg:#3A1F1C; --ok:#81C995; color-scheme:dark}
+
 :root[data-theme="dark"]{
   --bg:#141714; --surface:#1D211D; --ink:#E9ECE7; --muted:#A4ACA4; --line:#323832; --accent:#8DBF5E; --accent-ink:#10140E; --warn:#F28B82; --warn-bg:#3A1F1C; --ok:#81C995; color-scheme:dark}
 /* liquid-glass material for the phone tab bar */
 :root{--glass-bg:rgba(250,251,249,.58);--glass-edge:rgba(255,255,255,.75);--glass-rim:rgba(0,0,0,.06);--glass-pill:rgba(30,35,32,.075);--glass-shadow:0 10px 30px rgba(20,30,20,.14),0 2px 6px rgba(20,30,20,.06)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--glass-bg:rgba(36,40,36,.55);--glass-edge:rgba(255,255,255,.16);--glass-rim:rgba(0,0,0,.4);--glass-pill:rgba(255,255,255,.12);--glass-shadow:0 10px 30px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.3)}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"]{--glass-bg:rgba(36,40,36,.55);--glass-edge:rgba(255,255,255,.16);--glass-rim:rgba(0,0,0,.4);--glass-pill:rgba(255,255,255,.12);--glass-shadow:0 10px 30px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.3)}
+
 :root[data-theme="dark"]{--glass-bg:rgba(36,40,36,.55);--glass-edge:rgba(255,255,255,.16);--glass-rim:rgba(0,0,0,.4);--glass-pill:rgba(255,255,255,.12);--glass-shadow:0 10px 30px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.3)}
 *{box-sizing:border-box}
 /* ===== interaction polish & mobile baseline ===== */
@@ -670,6 +678,10 @@ html[data-dir="back"]::view-transition-new(tabpage){animation-name:vt-in-r}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--g-card:rgba(34,38,34,.62);--g-ctl:rgba(255,255,255,.08);--g-field:rgba(255,255,255,.06);--g-line:rgba(255,255,255,.08);
   --g-hi:rgba(255,255,255,.12);--g-sh:0 1px 2px rgba(0,0,0,.3),0 8px 28px rgba(0,0,0,.28);--g-sh-ctl:0 1px 2px rgba(0,0,0,.35);--g-pop:rgba(36,40,36,.78);
   --g-blob1:rgba(110,160,70,.20);--g-blob2:rgba(60,120,110,.18);--g-blob3:rgba(150,120,60,.12)}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"]{--g-card:rgba(34,38,34,.62);--g-ctl:rgba(255,255,255,.08);--g-field:rgba(255,255,255,.06);--g-line:rgba(255,255,255,.08);
+  --g-hi:rgba(255,255,255,.12);--g-sh:0 1px 2px rgba(0,0,0,.3),0 8px 28px rgba(0,0,0,.28);--g-sh-ctl:0 1px 2px rgba(0,0,0,.35);--g-pop:rgba(36,40,36,.78);
+  --g-blob1:rgba(110,160,70,.20);--g-blob2:rgba(60,120,110,.18);--g-blob3:rgba(150,120,60,.12)}
+
 :root[data-theme="dark"]{--g-card:rgba(34,38,34,.62);--g-ctl:rgba(255,255,255,.08);--g-field:rgba(255,255,255,.06);--g-line:rgba(255,255,255,.08);
   --g-hi:rgba(255,255,255,.12);--g-sh:0 1px 2px rgba(0,0,0,.3),0 8px 28px rgba(0,0,0,.28);--g-sh-ctl:0 1px 2px rgba(0,0,0,.35);--g-pop:rgba(36,40,36,.78);
   --g-blob1:rgba(110,160,70,.20);--g-blob2:rgba(60,120,110,.18);--g-blob3:rgba(150,120,60,.12)}
@@ -691,6 +703,8 @@ button.primary:where(:not(:is(#sheet,.export) *)){border:0;border-radius:999px;b
   box-shadow:0 1px 2px rgba(0,0,0,.12),0 6px 16px color-mix(in srgb,var(--accent) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.35)}
 .bar .act.soft{border:0;border-radius:999px;background:color-mix(in srgb,#2E9E5B 13%,var(--g-ctl));color:#1E6B3F;box-shadow:var(--g-sh-ctl),inset 0 1px 0 var(--g-hi),inset 0 0 0 .5px rgba(46,158,91,.3)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .bar .act.soft{color:#8FD5A8}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"] .bar .act.soft{color:#8FD5A8}
+
 :root[data-theme="dark"] .bar .act.soft{color:#8FD5A8}
 .tools{border:0;border-radius:20px;background:var(--g-ctl);box-shadow:var(--g-sh-ctl),inset 0 1px 0 var(--g-hi),inset 0 0 0 .5px var(--g-line)}
 .tools .tool{border-inline-start-color:var(--g-line)}
@@ -735,6 +749,10 @@ textarea{padding:10px 12px;border-radius:14px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--g-card:rgba(44,50,44,.36);--g-ctl:rgba(255,255,255,.09);--g-field:rgba(255,255,255,.07);--g-pop:rgba(38,44,38,.55);
   --g-rim1:rgba(255,255,255,.38);--g-rim2:rgba(255,255,255,.03);--g-rim3:rgba(255,255,255,.16);--g-glow:rgba(255,255,255,.05);
   --g-blob1:rgba(100,170,60,.30);--g-blob2:rgba(40,130,125,.28);--g-blob3:rgba(170,120,50,.18);--g-blob4:rgba(70,90,170,.20);--g-base:linear-gradient(160deg,#121612,#0E120F 50%,#141310)}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"]{--g-card:rgba(44,50,44,.36);--g-ctl:rgba(255,255,255,.09);--g-field:rgba(255,255,255,.07);--g-pop:rgba(38,44,38,.55);
+  --g-rim1:rgba(255,255,255,.38);--g-rim2:rgba(255,255,255,.03);--g-rim3:rgba(255,255,255,.16);--g-glow:rgba(255,255,255,.05);
+  --g-blob1:rgba(100,170,60,.30);--g-blob2:rgba(40,130,125,.28);--g-blob3:rgba(170,120,50,.18);--g-blob4:rgba(70,90,170,.20);--g-base:linear-gradient(160deg,#121612,#0E120F 50%,#141310)}
+
 :root[data-theme="dark"]{--g-card:rgba(44,50,44,.36);--g-ctl:rgba(255,255,255,.09);--g-field:rgba(255,255,255,.07);--g-pop:rgba(38,44,38,.55);
   --g-rim1:rgba(255,255,255,.38);--g-rim2:rgba(255,255,255,.03);--g-rim3:rgba(255,255,255,.16);--g-glow:rgba(255,255,255,.05);
   --g-blob1:rgba(100,170,60,.30);--g-blob2:rgba(40,130,125,.28);--g-blob3:rgba(170,120,50,.18);--g-blob4:rgba(70,90,170,.20);--g-base:linear-gradient(160deg,#121612,#0E120F 50%,#141310)}
@@ -747,8 +765,12 @@ html{background:#E9EFE5}
   height:calc(env(safe-area-inset-top,0px) + 20px);
   background:linear-gradient(180deg,var(--g-top) 0,var(--g-top) env(safe-area-inset-top,0px),color-mix(in srgb,var(--g-top) 70%,transparent) calc(env(safe-area-inset-top,0px) + 10px),transparent 100%)}}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--g-top:#111511}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"]{--g-top:#111511}
+
 :root[data-theme="dark"]{--g-top:#111511}
 @media (prefers-color-scheme: dark){html:not([data-theme="light"]){background:#111511}}
+/* forced dark (Settings → מראה) */html[data-theme="dark"]{background:#111511}
+
 html[data-theme="dark"]{background:#111511}
 body{background:transparent}
 /* the top of the screen fades into exactly the status-bar colour, so there is no seam under the clock and battery */
@@ -876,6 +898,8 @@ html[data-vdir="back"]::view-transition-new(schedview){animation-name:sv-in-zi}
 #sheet table.sh .ce{background:color-mix(in srgb,var(--sh-eve) 78%,transparent)}
 #sheet table.sh .note{background:color-mix(in srgb,#fff 55%,transparent)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #sheet table.sh .note{background:color-mix(in srgb,#fff 82%,transparent)}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"] #sheet table.sh .note{background:color-mix(in srgb,#fff 82%,transparent)}
+
 
 /* font editor */
 .fontbtn{justify-self:start;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700}
@@ -962,6 +986,54 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 :root:not([data-theme="light"]) .msg{background:rgba(230,90,80,.12);color:#F4A79F}:root:not([data-theme="light"]) .msg.info,:root:not([data-theme="light"]) .msg.ok{background:transparent}:root:not([data-theme="light"]) .msg.info{color:var(--muted)}:root:not([data-theme="light"]) .msg.ok{color:#8FD99A}
 :root:not([data-theme="light"]) #sheetScroll{box-shadow:0 14px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 .5px rgba(255,255,255,.1)}
 }
+/* forced dark (Settings → מראה) */
+/* palette & light: near-black base with deep, saturated light behind the glass (like iOS / macOS dark wallpapers) */
+:root[data-theme="dark"]{--bg:#07090A;--surface:#14181A;--line:#2A302C;--muted:#9AA39C;--ink:#F1F4EF;--accent:#7CC24E;--accent-ink:#06120A;
+  --g-top:#07090A;--g-base:linear-gradient(165deg,#0A0E0C 0%,#06080A 55%,#0B0A08 100%);
+  --g-blob1:rgba(70,160,60,.42);--g-blob2:rgba(20,120,130,.38);--g-blob3:rgba(150,105,30,.26);--g-blob4:rgba(70,70,190,.30);
+  --g-card:rgba(255,255,255,.055);--g-ctl:rgba(255,255,255,.085);--g-field:rgba(255,255,255,.06);--g-pop:rgba(28,32,30,.62);--g-line:rgba(255,255,255,.09);
+  --g-rim1:rgba(255,255,255,.30);--g-rim2:rgba(255,255,255,.03);--g-rim3:rgba(255,255,255,.12);--g-glow:rgba(255,255,255,.03);
+  --glass-bg:rgba(30,34,32,.52);--glass-edge:rgba(255,255,255,.22);--glass-rim:rgba(0,0,0,.5);--glass-pill:rgba(255,255,255,.14);
+  --glass-shadow:0 14px 40px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.4)}
+:root[data-theme="dark"]{background:#07090A}
+/* panes */
+:root[data-theme="dark"] .card{box-shadow:0 12px 36px rgba(0,0,0,.45),inset 0 1px 0 var(--g-rim1),inset 0 0 0 .5px var(--g-line)}
+:root[data-theme="dark"] button.primary:where(:not(:is(#sheet,.export) *)){background:linear-gradient(180deg,#93D865 0%,#6DB43F 60%,#5A9C33 100%);color:#06120A;
+  box-shadow:0 0 0 .5px rgba(255,255,255,.18),0 8px 26px rgba(110,190,70,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+:root[data-theme="dark"] .bar .act.soft{background:rgba(70,180,110,.14);color:#9BE3B4;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 .5px rgba(110,220,150,.35)}
+:root[data-theme="dark"] .tools .badge{box-shadow:0 0 0 .5px rgba(255,255,255,.18),0 2px 8px rgba(0,0,0,.45)}
+:root[data-theme="dark"] .xcnt{background:rgba(255,255,255,.08);color:var(--muted)}
+:root[data-theme="dark"] .xcnt.all{background:rgba(110,200,120,.18);color:#9BE3A8}
+/* agenda (notes & events of the week) */
+:root[data-theme="dark"] .ag-day{border:0;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 .5px var(--g-line);border-radius:16px}
+:root[data-theme="dark"] .ag-h{background:rgba(255,255,255,.07);color:var(--ink)}
+:root[data-theme="dark"] .psel{background:rgba(255,255,255,.06);border-color:rgba(230,200,110,.4);color:var(--ink)}
+:root[data-theme="dark"] .psel.ok{background:rgba(80,180,90,.16);border-color:#4CAF50}:root[data-theme="dark"] .psel.no{background:rgba(220,70,60,.16);border-color:#E06055}
+/* day cards: deep green glass chips with light text */
+:root[data-theme="dark"] .chip{background:rgba(120,190,80,.24);color:#E6F5DC;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(150,220,110,.35)}
+:root[data-theme="dark"] .chip.c2{background:rgba(120,190,80,.20)}
+:root[data-theme="dark"] .chip.ce{background:rgba(110,170,150,.22);color:#DDF2EA;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 .5px rgba(120,200,180,.35)}
+:root[data-theme="dark"] .chip.off{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--g-line)}
+:root[data-theme="dark"] .chip.empty-need{background:rgba(220,90,80,.12);color:#F2B8B1;box-shadow:inset 0 0 0 1.5px rgba(230,110,100,.6)}
+:root[data-theme="dark"] .dcard .dh .hn{background:rgba(255,255,255,.14)}
+/* full table on screen (the sent image keeps its own light palette) */
+:root[data-theme="dark"] #sheet table.sh{color:#EAF2E4;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 .5px rgba(255,255,255,.12)}
+:root[data-theme="dark"] #sheet table.sh td,:root[data-theme="dark"] #sheet table.sh th{border-color:rgba(255,255,255,.08)}
+:root[data-theme="dark"] #sheet table.sh .site,:root[data-theme="dark"] #sheet table.sh .lbl,:root[data-theme="dark"] #sheet table.sh .dname,:root[data-theme="dark"] #sheet table.sh .off{background:rgba(255,255,255,.07);color:#F1F4EF}
+:root[data-theme="dark"] #sheet table.sh .date{background:rgba(140,200,95,.20);color:#D8EDC8}
+:root[data-theme="dark"] #sheet table.sh .c,:root[data-theme="dark"] #sheet table.sh .c2{background:rgba(120,190,80,.22);color:#EAF6E1}
+:root[data-theme="dark"] #sheet table.sh .ce{background:rgba(110,170,150,.20);color:#E2F3EC}
+:root[data-theme="dark"] #sheet table.sh .note{background:rgba(255,255,255,.035);color:#B9C2BA}
+:root[data-theme="dark"] #sheet table.sh .pref{background:rgba(230,200,110,.06)}
+:root[data-theme="dark"] #sheet table.sh .an{color:#C8D3C6}
+:root[data-theme="dark"] #sheet table.sh .slot.empty-need{background:repeating-linear-gradient(135deg,rgba(120,190,80,.18),rgba(120,190,80,.18) 6px,rgba(220,90,80,.18) 6px,rgba(220,90,80,.18) 12px)}
+:root[data-theme="dark"] #sheet table.sh .note .hol,:root[data-theme="dark"] .dnote .hol{background:rgba(255,255,255,.12);color:var(--ink)}
+/* constraint grid */
+:root[data-theme="dark"] table.grid th{background:rgba(255,255,255,.05)}
+:root[data-theme="dark"] .msg{background:rgba(230,90,80,.12);color:#F4A79F}:root[data-theme="dark"] .msg.info,:root[data-theme="dark"] .msg.ok{background:transparent}:root[data-theme="dark"] .msg.info{color:var(--muted)}:root[data-theme="dark"] .msg.ok{color:#8FD99A}
+:root[data-theme="dark"] #sheetScroll{box-shadow:0 14px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 .5px rgba(255,255,255,.1)}
+
+
 
 /* palette & light: near-black base with deep, saturated light behind the glass (like iOS / macOS dark wallpapers) */
 :root[data-theme="dark"]{--bg:#07090A;--surface:#14181A;--line:#2A302C;--muted:#9AA39C;--ink:#F1F4EF;--accent:#7CC24E;--accent-ink:#06120A;
@@ -1036,6 +1108,33 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
 :root:not([data-theme="light"]) .pop .tag.bk{background:rgba(255,255,255,.1);color:#B0BEC5}
 :root:not([data-theme="light"]) .nwp-ic{background:rgba(110,200,120,.16);color:#9BE3A8}
 }
+/* forced dark (Settings → מראה) */
+/* Friday rotation */
+:root[data-theme="dark"] table.rotT th{background:rgba(255,255,255,.08);color:var(--ink)}
+:root[data-theme="dark"] table.rotT td.now{background:rgba(120,190,80,.26);color:#EAF6E1;box-shadow:inset 0 0 0 .5px rgba(150,220,110,.4)}
+:root[data-theme="dark"] table.rotT tr.cur td{background:rgba(140,200,95,.18);color:#D8EDC8}
+:root[data-theme="dark"] table.rotT tr.nxt td{color:var(--muted)}
+:root[data-theme="dark"] ol.rot .turn{background:rgba(140,200,95,.22);color:#D8EDC8}
+/* vacation / holiday / exam table headers */
+:root[data-theme="dark"] table.cal th{background:rgba(140,200,95,.16);color:#D8EDC8}
+/* constraint cells: same meaning, dark-friendly tints with light text */
+:root[data-theme="dark"] .cst[data-v="M"]{background:rgba(90,150,255,.20);color:#BFD6FF}
+:root[data-theme="dark"] .cst[data-v="E"]{background:rgba(255,170,60,.20);color:#FFD49A}
+:root[data-theme="dark"] .cst[data-v="X"],:root[data-theme="dark"] .cst[data-v="V"]{background:rgba(240,110,100,.18);color:#F6B4AC}
+:root[data-theme="dark"] .cst[data-v="T"],:root[data-theme="dark"] .cst[data-v="B"]{background:rgba(140,200,95,.18);color:#D8EDC8}
+:root[data-theme="dark"] .cst[data-s="ok"]{background:rgba(90,200,110,.22);color:#A8EBB5}
+:root[data-theme="dark"] .cst[data-s="bad"]{background:rgba(240,90,100,.24);color:#FFB3BB}
+:root[data-theme="dark"] .cst[data-s="miss"]{background:rgba(240,200,60,.22);color:#FFE08A}
+:root[data-theme="dark"] .cst[data-v="O"]{background:rgba(255,255,255,.06);color:var(--muted)}
+:root[data-theme="dark"] .cst.ev3{background:rgba(180,130,220,.26)!important;color:#E3CCF5!important}
+:root[data-theme="dark"] .legend i{filter:saturate(.8) brightness(.55)}
+/* quick-swap source, small tags */
+:root[data-theme="dark"] body.swapping .slot.swapsrc{background:rgba(224,122,0,.32)!important}
+:root[data-theme="dark"] .dcard .dh .hn{background:rgba(255,255,255,.14);color:var(--ink)}
+:root[data-theme="dark"] .pop .tag.bk{background:rgba(255,255,255,.1);color:#B0BEC5}
+:root[data-theme="dark"] .nwp-ic{background:rgba(110,200,120,.16);color:#9BE3A8}
+
+
 
 /* Friday rotation */
 :root[data-theme="dark"] table.rotT th{background:rgba(255,255,255,.08);color:var(--ink)}
@@ -1114,6 +1213,9 @@ body.fontedit #sheet table.sh td.fsel{box-shadow:inset 0 0 0 2.5px #E07A00;posit
   --st-sh:0 1px 1px rgba(20,35,20,.04),0 8px 24px rgba(20,35,20,.08),inset 0 1px 0 var(--g-rim1),inset 0 0 0 .5px var(--g-line);--av-bg:rgba(255,255,255,.62)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--accent-text:#8FD45F;--ok-text:#9BE3A8;--ok-bg:rgba(110,200,120,.16);--amber:#FFB74D;--amber-ring:#E0951F;--amber-bg:rgba(255,183,77,.14);
   --st-sh:0 8px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.09);--av-bg:rgba(255,255,255,.12)}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"]{--accent-text:#8FD45F;--ok-text:#9BE3A8;--ok-bg:rgba(110,200,120,.16);--amber:#FFB74D;--amber-ring:#E0951F;--amber-bg:rgba(255,183,77,.14);
+  --st-sh:0 8px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.09);--av-bg:rgba(255,255,255,.12)}
+
 :root[data-theme="dark"]{--accent-text:#8FD45F;--ok-text:#9BE3A8;--ok-bg:rgba(110,200,120,.16);--amber:#FFB74D;--amber-ring:#E0951F;--amber-bg:rgba(255,183,77,.14);
   --st-sh:0 8px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.09);--av-bg:rgba(255,255,255,.12)}
 
@@ -1268,6 +1370,8 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
 .msgprob .msgh{font-weight:800;color:var(--warn);font-size:15px;padding:0 2px}
 .msgprob .msg{background:transparent;padding:0 2px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .msgok b{color:#8FD99A}:root:not([data-theme="light"]) .msgprob{background:rgba(230,90,80,.10)}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"] .msgok b{color:#8FD99A}:root[data-theme="dark"] .msgprob{background:rgba(230,90,80,.10)}
+
 :root[data-theme="dark"] .msgok b{color:#8FD99A}:root[data-theme="dark"] .msgprob{background:rgba(230,90,80,.10)}
 
 /* bottom of the page: sync cloud + version */
@@ -1282,6 +1386,8 @@ button.st.warn .st-go{color:var(--warn)}button.st.amber .st-go{color:var(--amber
 .cloud[data-st="wait"] svg{animation:cloudp 1.2s ease-in-out infinite}
 @keyframes cloudp{50%{opacity:.4}}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cloud[data-st="ok"]{color:#5DD07A}:root:not([data-theme="light"]) .cloud[data-st="bad"]{color:#FF6B5E}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"] .cloud[data-st="ok"]{color:#5DD07A}:root[data-theme="dark"] .cloud[data-st="bad"]{color:#FF6B5E}
+
 :root[data-theme="dark"] .cloud[data-st="ok"]{color:#5DD07A}:root[data-theme="dark"] .cloud[data-st="bad"]{color:#FF6B5E}
 @media (prefers-reduced-motion:reduce){.cloud[data-st="wait"] svg{animation:none}}
 
@@ -1303,11 +1409,15 @@ details.dcard[open] .dcompact{display:none}
 .mp.miss{background:color-mix(in srgb,var(--warn-bg) 80%,transparent);color:var(--warn)}
 .mnote{flex-basis:100%;font-size:12px;color:var(--muted);line-height:1.35}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mp{background:rgba(120,190,80,.24);color:#E6F5DC}:root:not([data-theme="light"]) .mp.e{background:rgba(110,170,150,.22);color:#DDF2EA}:root:not([data-theme="light"]) .mp.miss{background:rgba(230,90,80,.18);color:#F6B4AC}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"] .mp{background:rgba(120,190,80,.24);color:#E6F5DC}:root[data-theme="dark"] .mp.e{background:rgba(110,170,150,.22);color:#DDF2EA}:root[data-theme="dark"] .mp.miss{background:rgba(230,90,80,.18);color:#F6B4AC}
+
 :root[data-theme="dark"] .mp{background:rgba(120,190,80,.24);color:#E6F5DC}:root[data-theme="dark"] .mp.e{background:rgba(110,170,150,.22);color:#DDF2EA}:root[data-theme="dark"] .mp.miss{background:rgba(230,90,80,.18);color:#F6B4AC}
 
 /* title in the logo's grey and lighter weight, so mark and title read as one (dark: logo is brightened ×2.4 → #D3D3D3) */
 header .brand h1{color:#595959;font-weight:600;letter-spacing:-.1px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) header .brand h1{color:#D3D3D3}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"] header .brand h1{color:#D3D3D3}
+
 :root[data-theme="dark"] header .brand h1{color:#D3D3D3}
 
 /* phone header: centred brand row, logo as tall as the title's letters, final-mark inside the week capsule */
@@ -1432,6 +1542,8 @@ html,body{min-height:100%}
 tr.flash,tr.flash td{animation:flashrow 1.8s ease}
 @media (max-width:700px){.ovtiles{gap:10px}.ovt b{font-size:26px}}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ovr .pav.hol{background:rgba(255,255,255,.1)}:root:not([data-theme="light"]) .htag{background:rgba(255,255,255,.1)}}
+/* forced dark (Settings → מראה) */:root[data-theme="dark"] .ovr .pav.hol{background:rgba(255,255,255,.1)}:root[data-theme="dark"] .htag{background:rgba(255,255,255,.1)}
+
 :root[data-theme="dark"] .ovr .pav.hol{background:rgba(255,255,255,.1)}:root[data-theme="dark"] .htag{background:rgba(255,255,255,.1)}
 
 /* paste-from-email sheet */
@@ -1932,6 +2044,18 @@ bdi.osl{white-space:nowrap;direction:ltr}
 .osnew .alertc{width:min(360px,100%)}.osnew .oslist{margin:6px 0 12px;font-size:14px}
 #appVer{background:none!important;border:0!important;box-shadow:none!important;min-height:0!important;padding:2px 6px!important;font:inherit;color:inherit;cursor:pointer}
 @media (max-width:700px){.subtabs button{font-size:14px}}
+
+/* appearance picker (iOS Display & Brightness style) */
+.thseg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.thseg button{display:grid;justify-items:center;gap:8px;padding:12px 6px 10px!important;min-height:0!important;border-radius:18px!important;font-weight:600;font-size:14.5px;
+  border:1.5px solid transparent!important;background:color-mix(in srgb,var(--ink) 4%,transparent)!important;box-shadow:none!important;transition:border-color 200ms ease,background 200ms ease}
+.thseg button[aria-checked="true"]{border-color:var(--accent)!important;background:color-mix(in srgb,var(--accent) 12%,transparent)!important;color:var(--accent-text,var(--accent))}
+.thp{width:52px;height:84px;border-radius:12px;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 4px 10px rgba(0,0,0,.12);position:relative;overflow:hidden}
+.thp::before,.thp::after{content:"";position:absolute;left:8px;right:8px;height:8px;border-radius:4px}
+.thp::before{top:12px}.thp::after{top:26px;right:20px}
+.thl{background:#EEF2EA}.thl::before,.thl::after{background:#C9D3C3}
+.thd{background:#14181A}.thd::before,.thd::after{background:#3A423C}
+.tha{background:linear-gradient(90deg,#14181A 50%,#EEF2EA 50%)}.tha::before,.tha::after{background:linear-gradient(90deg,#3A423C 50%,#C9D3C3 50%)}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה ולכן אינו פעיל.</b><br>פתח אותו מהאייקון במסך הבית או מהקישור.</div>
@@ -2081,6 +2205,12 @@ bdi.osl{white-space:nowrap;direction:ltr}
       <button role="tab" data-sub="about" data-panel="sub-about" aria-selected="false">אודות</button>
     </nav>
     <div class="panel segp" id="sub-gen">
+      <div class="card thcard"><h2>מראה</h2>
+        <div class="thseg" role="radiogroup" aria-label="מראה">
+          <button type="button" role="radio" data-theme-set="light"><span class="thp thl" aria-hidden="true"></span>בהיר</button>
+          <button type="button" role="radio" data-theme-set="dark"><span class="thp thd" aria-hidden="true"></span>כהה</button>
+          <button type="button" role="radio" data-theme-set="auto"><span class="thp tha" aria-hidden="true"></span>אוטומטי</button>
+        </div><p class="hint" id="thHint"></p></div>
       <div class="card">
         <h2 lang="en" dir="ltr" class="fbh">Firebase</h2>
         <div id="syncBox"></div>
@@ -2194,7 +2324,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent=OS_NAME+" "+OS_LOG[0].v+" · "+APP_VER});
-const APP_VER="23.10.2026 16:50";
+const APP_VER="23.10.2026 17:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3659,10 +3789,28 @@ document.addEventListener("change",e=>{const tm=e.target.closest("[data-pctime]"
   const sl=e.target.closest("[data-pcsel]");if(sl)pcSet(sl.dataset.pcsel,+sl.value)});
 document.addEventListener("click",e=>{const b=e.target.closest('[data-sub="push"]');if(b){renderPushSet();loadDevices()}},true);
 
+
+/* ---------- appearance: light / dark / follow the system (per device) ---------- */
+const thGet=()=>{try{return localStorage.getItem("theme")||"auto"}catch(e){return "auto"}};
+function thApply(t){const r=document.documentElement;if(t==="light"||t==="dark")r.setAttribute("data-theme",t);else r.removeAttribute("data-theme");
+  const sys=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light",eff=t==="auto"?sys:t;
+  document.querySelector('meta[name="color-scheme"]').content=t==="auto"?"light dark":t;
+  const mm=document.querySelectorAll('meta[name="theme-color"]');mm.forEach(m=>{m.content=t==="auto"?(m.media.includes("dark")?"#07090A":"#E9EFE5"):(eff==="dark"?"#07090A":"#E9EFE5")});
+  document.querySelectorAll("[data-theme-set]").forEach(b=>b.setAttribute("aria-checked",b.dataset.themeSet===t));
+  const h=$("#thHint");if(h)h.textContent=t==="auto"?`לפי הגדרות המכשיר (כרגע ${sys==="dark"?"כהה":"בהיר"})`:"נשמר במכשיר הזה"}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-theme-set]");if(!b)return;const t=b.dataset.themeSet;if(t===thGet())return;
+  try{localStorage.setItem("theme",t)}catch(_){}haptic();
+  const go=()=>thApply(t);if(document.startViewTransition&&!matchMedia("(prefers-reduced-motion: reduce)").matches){try{document.startViewTransition(go);return}catch(_){}}go()});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>thApply(thGet()));
+thApply(thGet());
 /* ---------- sceOS: about page + what's new. The change log lives in the code (not in the data),
    and only the current version + the 3 before it are kept – older entries are deleted from here. ---------- */
 const OS_NAME="sceOS";
 const OS_LOG=[
+  {v:"4.1",name:"מראה",date:"23.10.2026",items:[
+    "בחירת מראה בהגדרות ← כללי: בהיר, כהה או אוטומטי לפי המכשיר",
+    "המעבר בין המצבים חלק, וגם צבע שורת הסטטוס באייפון מתאים את עצמו",
+    "כפתור ״בדיקת עדכונים״ בעמוד האודות"]},
   {v:"4.0",name:"התראות",date:"23.10.2026",items:[
     "מערכת ההפעלה של האפליקציה נקראת מעכשיו sceOS, עם עמוד אודות ו״מה חדש״",
     "קטגוריית התראות בהגדרות: התראת בוקר, סיכום בערב הקודם, לפני מבחן או אירוע, שינויים, חזרה עד סימון ושעות שקטות",
@@ -3677,11 +3825,7 @@ const OS_LOG=[
   {v:"3.1",name:"כרטיס היום",date:"22.10.2026",items:[
     "כרטיס ״היום״ מ־06:00: מבחנים ואירועים, טכנאים במשמרת, וואטסאפ וסימון ״נשלח?״",
     "חדרים לפי קמפוס, מעבדות מקצועיות ואודיטוריומים",
-    "יצירה חכמה ממייל שלומדת מהתיקונים שלך"]},
-  {v:"3.0",name:"עיצוב iOS",date:"21.10.2026",items:[
-    "חלונות תחתונים ותפריט שיתוף בסגנון iOS",
-    "הוספה ליומן: Outlook, Google או יומן האייפון",
-    "אנימציות חלקות ומעבר לשוניות חי"]}
+    "יצירה חכמה ממייל שלומדת מהתיקונים שלך"]}
 ].slice(0,4);
 const osLtr=t=>esc(t).replace(/[A-Za-z][\w.\-]*(?: \d[\d.]*)?/g,m=>`<bdi class="osl">${m}</bdi>`);
 const osSeen=()=>{try{return localStorage.getItem("os-seen")||""}catch(e){return ""}};
