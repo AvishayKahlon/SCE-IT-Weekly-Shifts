@@ -2071,6 +2071,25 @@ bdi.osl{white-space:nowrap;direction:ltr}
 [data-group="set"] .tic{width:17px;height:17px;flex:none}
 @media (max-width:700px){[data-group="set"] button{flex-direction:column;gap:2px;padding:6px 2px!important;min-height:52px!important;font-size:12.5px!important}
   [data-group="set"] .tic{width:19px;height:19px}}
+
+/* "חזרה" – small floating glass pill next to the dates */
+.backw{display:inline-flex;align-items:center;gap:5px;min-height:34px!important;padding:5px 13px 5px 12px!important;border-radius:999px!important;font-size:14px!important;font-weight:650;
+  color:var(--accent-text,var(--accent))!important;border:0!important;background:var(--glass-bg,var(--surface))!important;
+  -webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);
+  box-shadow:var(--glass-shadow,0 6px 18px rgba(0,0,0,.12)),inset 0 1px 0 var(--glass-edge,#fff),inset 0 0 0 .5px var(--glass-edge,var(--line))!important;transform-origin:center}
+.backw svg{width:16px;height:16px;flex:none}
+.backw[hidden]{display:none!important}
+.backw:active{scale:.94}
+/* phone: the pill sits inside the week capsule, between the dates and the arrow; the dates glide aside to make room */
+@media (max-width:700px){
+  .week{grid-template-columns:52px 1fr 0px 52px!important;transition:grid-template-columns 460ms var(--pop)}
+  .week.boff{grid-template-columns:52px 1fr 84px 52px!important}
+  .week>#nextW{grid-column:4!important}
+  .backw{grid-column:3;grid-row:1;justify-self:center;min-height:32px!important;padding:4px 10px!important;font-size:13.5px!important;white-space:nowrap;
+    background:color-mix(in srgb,var(--accent) 16%,transparent)!important;box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--accent) 30%,transparent)!important;
+    -webkit-backdrop-filter:none;backdrop-filter:none}
+  .backw svg{width:15px;height:15px}
+}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה ולכן אינו פעיל.</b><br>פתח אותו מהאייקון במסך הבית או מהקישור.</div>
@@ -2082,6 +2101,7 @@ bdi.osl{white-space:nowrap;direction:ltr}
       <b id="weekLbl"></b>
       <label class="wkc" aria-label="בחירת שבוע"><span class="wkc-t"><span class="wkf" id="wkFinal" hidden title="סידור סופי" aria-label="סידור סופי">✓</span><b id="wkTxt"></b><span class="wkc-c" aria-hidden="true">▾</span></span><input type="date" id="wkDate" tabindex="-1"></label>
       <button id="nextW" aria-label="שבוע הבא">שבוע הבא ←</button>
+      <button type="button" id="backW" class="backw" hidden aria-label="חזרה לשבוע הנוכחי" title="חזרה לשבוע הנוכחי"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span>חזרה</span></button>
       <span class="df"><input type="text" class="dtx" id="weekPick" data-iso="" value="" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="בחירת שבוע (dd/mm/yyyy)"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" tabindex="-1" aria-hidden="true"></span>
     </div>
   </header>
@@ -2345,7 +2365,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent=OS_NAME+" "+OS_LOG[0].v+" · "+APP_VER});
-const APP_VER="23.10.2026 17:30";
+const APP_VER="23.10.2026 20:55";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2947,7 +2967,7 @@ document.querySelectorAll("#viewSeg button").forEach(b=>b.addEventListener("clic
       {opacity:1,transform:"none",clipPath:"inset(0% 0% 0% 0% round 22px)"}],{duration:620,easing:EZ.pop})];
     newEl._a[0].onfinish=()=>{newEl.style.transformOrigin=""}}}));
 let MSG_OPEN=false;
-function render(){if(typeof maybeToday==="function"&&performance.now()<15000)maybeToday();
+function render(){if(typeof maybeToday==="function"&&performance.now()<15000)maybeToday();if(typeof updBack==="function")updBack();
   ensureData();calcNeed();
   const w=W();
   const d0=parseKey(cur),d5=dayDate(5);
@@ -3856,6 +3876,9 @@ new MutationObserver(()=>setIcons()).observe(document.getElementById("tab-set"),
    and only the current version + the 3 before it are kept – older entries are deleted from here. ---------- */
 const OS_NAME="sceOS";
 const OS_LOG=[
+  {v:"4.3",name:"חזרה לשבוע",date:"23.10.2026",items:[
+    "כשעוברים לשבוע אחר בלו״ז מופיע ליד התאריכים כפתור ״חזרה״ שמחזיר לשבוע שעובדים עליו",
+    "הכפתור מופיע ונעלם בהנפשה חלקה, ובטלפון התאריכים זזים הצידה כדי לפנות לו מקום"]},
   {v:"4.2",name:"הגדרות מסודרות",date:"23.10.2026",items:[
     "ההגדרות מחולקות לקבוצות ברורות: תצוגה, שיבוץ, קמפוסים וחדרים, נתונים",
     "אייקון צבעוני לכל קטגוריה ולכל כרטיס, בסגנון הגדרות האייפון",
@@ -3870,12 +3893,7 @@ const OS_LOG=[
     "קטגוריית התראות בהגדרות: התראת בוקר, סיכום בערב הקודם, לפני מבחן או אירוע, שינויים, חזרה עד סימון ושעות שקטות",
     "תזכורת שבועית לבקשת זמינות – לחיצה על ההתראה פותחת את וואטסאפ עם ההודעה",
     "אישור התראות לכל מכשיר בנפרד, עם התראת בדיקה ורשימת מכשירים",
-    "האפליקציה זמינה גם בכתובת sce-desk.pages.dev"]},
-  {v:"3.2",name:"אחסון וניקוי",date:"22.10.2026",items:[
-    "מד אחסון בסגנון iCloud עם חישוב מדויק של הנתונים",
-    "ניקוי נתונים ישנים לפי תקופה, עם אפשרות שחזור",
-    "שיבוץ חכם ובקשת זמינות ככפתורים צפים",
-    "ניסוחים מקצועיים ושמות חדשים ללשוניות ולכפתורים"]}
+    "האפליקציה זמינה גם בכתובת sce-desk.pages.dev"]}
 ].slice(0,4);
 const osLtr=t=>esc(t).replace(/[A-Za-z][\w.\-]*(?: \d[\d.]*)?/g,m=>`<bdi class="osl">${m}</bdi>`);
 const osSeen=()=>{try{return localStorage.getItem("os-seen")||""}catch(e){return ""}};
@@ -4182,6 +4200,18 @@ function weekSlide(n,fn){const calm=matchMedia("(prefers-reduced-motion:reduce)"
   const w=document.querySelectorAll("#wkLabel,.wkc b,.minibar b");w.forEach(el=>el.animate([{opacity:.2,transform:`translateX(${dx*14}px)`},{opacity:1,transform:"none"}],{duration:420,easing:EZ.out}))}
 function shiftWeek(n){weekSlide(n,()=>{const d=parseKey(cur);d.setDate(d.getDate()+7*n);cur=key(d);msgEdited.consMsg={};msgEdited.weekMsg={};render()})}
 $("#prevW").onclick=()=>shiftWeek(-1);$("#nextW").onclick=()=>shiftWeek(1);
+
+/* ---------- "חזרה": floating button back to the week being worked on (this week; from Wednesday – next week) ---------- */
+function homeWeek(){const t=new Date(),s=sundayOf(t);if(t.getDay()>=3)s.setDate(s.getDate()+7);return key(s)}
+var BACK_ON=false;
+function updBack(){const b=$("#backW");if(!b)return;const on=cur!==homeWeek();if(on===BACK_ON)return;BACK_ON=on;$(".week").classList.toggle("boff",on);
+  const calm=matchMedia("(prefers-reduced-motion: reduce)").matches;b.getAnimations().forEach(a=>a.cancel());
+  if(on){b.hidden=false;if(!calm)b.animate([{opacity:0,scale:".4",filter:"blur(8px)"},{opacity:1,scale:"1.06",filter:"blur(0)",offset:.62},{opacity:1,scale:"1",filter:"blur(0)"}],{duration:520,easing:EZ.out})}
+  else if(calm)b.hidden=true;
+  else b.animate([{opacity:1,scale:"1",filter:"blur(0)"},{opacity:0,scale:".55",filter:"blur(6px)"}],{duration:220,easing:EZ.in}).onfinish=()=>{if(!BACK_ON)b.hidden=true}}
+$("#backW").addEventListener("click",()=>{const h=homeWeek();if(cur===h)return;haptic();const n=h>cur?1:-1,c=$(".wkc");
+  weekSlide(n,()=>{cur=h;msgEdited.consMsg={};msgEdited.weekMsg={};render()});
+  if(c){c.classList.remove("go-n","go-p");c.classList.add(n>0?"go-n":"go-p");void c.offsetWidth;requestAnimationFrame(()=>c.classList.remove("go-n","go-p"))}});
 /* phone week capsule: the dates slide in from the side you moved to */
 function weekStep(n){haptic();const c=$(".wkc");shiftWeek(n);if(c){c.classList.remove("go-n","go-p");c.classList.add(n>0?"go-n":"go-p");void c.offsetWidth;requestAnimationFrame(()=>c.classList.remove("go-n","go-p"))}}
 $("#prevW").onclick=()=>weekStep(-1);$("#nextW").onclick=()=>weekStep(1);
