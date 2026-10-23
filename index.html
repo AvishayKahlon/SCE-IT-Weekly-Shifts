@@ -1913,7 +1913,9 @@ td.c-range{display:none}
 .rgok{background:var(--accent)!important;color:var(--accent-ink)!important;border:0!important}
 .alertb2{grid-template-columns:1fr}
 .avprev{white-space:pre-wrap;text-align:start;font-size:13.5px;line-height:1.45;max-height:150px;overflow:auto;padding:10px 12px;margin:0 0 10px;border-radius:14px;background:color-mix(in srgb,var(--ink) 6%,transparent)}
-.availbox .alertc{width:min(340px,100%)}
+.availbox .alertc,.swapmsg .alertc{width:min(340px,100%)}
+.smdirect{display:grid;grid-template-columns:1fr 1fr;gap:8px}.smdirect button:only-child{grid-column:1/-1}
+.smhint{display:block;margin-top:8px;font-size:12px;color:var(--muted)}
 
 .rpro{display:grid;gap:12px;padding:12px 12px 14px;border-radius:20px;background:color-mix(in srgb,var(--accent) 6%,transparent);box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--accent) 22%,transparent)}
 .rpro>h3{margin:0;font-size:15px;font-weight:800}.rpro>h3 span{font-weight:600;color:var(--muted);font-size:13px}
@@ -2090,13 +2092,116 @@ bdi.osl{white-space:nowrap;direction:ltr}
     -webkit-backdrop-filter:none;backdrop-filter:none}
   .backw svg{width:15px;height:15px}
 }
-</style></head><body>
+/* Spotlight (macOS-style search) */
+.spotb{display:inline-flex;align-items:center;gap:6px;min-height:36px!important;padding:5px 12px!important;border-radius:999px!important;font-size:14px!important;color:var(--muted)!important}
+.spotb svg{width:16px;height:16px}.spotb kbd{font:600 11.5px/1 -apple-system,system-ui,sans-serif;padding:3px 6px;border-radius:6px;background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--muted);direction:ltr}
+#spotFab{display:none}
+.spot{position:fixed;inset:0;z-index:120;display:grid;justify-items:center;align-items:start;padding:14vh 16px 16px;background:rgba(0,0,0,.32);animation:scrimin 200ms ease both}
+.spot.out{animation:scrimout 180ms ease both}
+.spbox{width:min(680px,100%);border-radius:22px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;max-height:min(560px,76vh);
+  background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(40px) saturate(190%);backdrop-filter:blur(40px) saturate(190%);
+  box-shadow:0 24px 70px rgba(0,0,0,.32),0 2px 6px rgba(0,0,0,.12),inset 0 1px 0 var(--glass-edge,rgba(255,255,255,.5)),inset 0 0 0 .5px var(--glass-edge,var(--line));
+  transform-origin:50% 0;animation:spin 360ms var(--pop) both}
+.spot.out .spbox{animation:spout 170ms var(--ease-in) both}
+@keyframes spin{from{opacity:0;transform:scale(.94) translateY(-8px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+@keyframes spout{to{opacity:0;transform:scale(.96) translateY(-4px)}}
+.spin{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.spin>svg{width:22px;height:22px;color:var(--muted);flex:none}
+.spin input{flex:1;min-width:0;border:0!important;background:none!important;box-shadow:none!important;outline:none;font-size:21px!important;font-weight:500;padding:4px 0!important;min-height:0!important;color:var(--ink)}
+.spin input::-webkit-search-cancel-button{display:none}
+.spx{border:0!important;background:none!important;box-shadow:none!important;color:var(--accent-text,var(--accent))!important;font-weight:600;font-size:15px;padding:4px!important;min-height:0!important}
+.spres{overflow:auto;padding:6px 8px 10px;overscroll-behavior:contain}
+.sph{font-size:12px;font-weight:700;color:var(--muted);padding:10px 10px 4px}
+.spr{display:flex!important;align-items:center;gap:11px;width:100%;text-align:start;padding:8px 10px!important;min-height:0!important;border:0!important;border-radius:12px!important;background:none!important;box-shadow:none!important;color:var(--ink)!important}
+.spr.sel,.spr:hover{background:color-mix(in srgb,var(--accent) 16%,transparent)!important}
+.spr.top{padding:11px 10px!important}.spr.top .sic{width:38px;height:38px;border-radius:10px}.spr.top .sic svg{width:21px;height:21px}.spr.top .spt b{font-size:17px}
+.spt{display:grid;gap:1px;flex:1;min-width:0}.spt b{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spt small{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spt mark{background:none;color:var(--accent-text,var(--accent));font-weight:800}
+.spk{font-size:11.5px;color:var(--muted);flex:none}
+.spri{width:29px;text-align:center;color:var(--muted);font-size:17px}
+.spchips{display:flex;flex-wrap:wrap;gap:8px;padding:4px 10px 8px}
+.spc{min-height:32px!important;padding:4px 12px!important;border-radius:999px!important;font-size:14px}
+.spnone{display:grid;gap:4px;text-align:center;padding:28px 12px}.spnone small{color:var(--muted)}
+@media (max-width:700px){
+  #spotBtn{display:none}
+  #spotFab{display:grid;place-items:center;position:fixed;left:14px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:41;width:60px;height:60px;min-height:0!important;padding:0!important;border-radius:50%!important;border:0!important;
+    color:var(--ink)!important;background:var(--glass-bg)!important;-webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);
+    box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-edge),inset 0 0 0 .5px var(--glass-edge)!important;transition:transform 300ms var(--pop),opacity 200ms ease}
+  #spotFab svg{width:24px;height:24px}
+  #spotFab:active{transform:scale(.9)}
+  .tabs{left:82px!important}
+  body.kb #spotFab,body.sharing #spotFab,body.spotting #spotFab{transform:translateY(calc(100% + 30px));opacity:0;pointer-events:none}
+  .spot{padding:calc(10px + env(safe-area-inset-top,0px)) 10px 10px;background:rgba(0,0,0,.28)}
+  .spbox{max-height:calc(100dvh - 30px - env(safe-area-inset-top,0px));border-radius:20px}
+  .spin input{font-size:18px!important}
+}
+
+/* staff rows: colour avatar, name, phone, birthday */
+.erow{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;padding:10px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.erow:last-child{border-bottom:0}.erow.off{opacity:.6}
+.ecol{width:40px;height:40px;min-height:0!important;padding:0!important;border-radius:50%!important;border:0!important;display:grid;place-items:center;font-weight:800;font-size:15px;
+  background:var(--ec)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 1px 3px rgba(0,0,0,.18)!important;margin-top:2px}
+.ecol.sm{width:30px;height:30px;font-size:12.5px;flex:none}
+.ef{display:grid;gap:6px;min-width:0}
+.ef>input[data-ename]{font-weight:600}
+.esub{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.esub input[data-ephone]{width:150px}
+.ebd{display:inline-flex;align-items:center;gap:4px}.ebd input{width:auto}
+.eheb{color:var(--muted);font-size:12.5px}
+.eopts{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:14px}
+.eopts button{margin-inline-start:auto}
+.epal{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;padding:8px 0 2px}
+.epal button{width:32px;height:32px;min-height:0!important;padding:0!important;border-radius:50%!important;border:0!important;background:var(--ec)!important;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.15)!important}
+.epal button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--ec)!important}
+.epal button.none{background:color-mix(in srgb,var(--ink) 8%,transparent)!important;color:var(--muted)!important;--ec:var(--muted)}
+.bdr{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);text-align:start}
+.bdr:last-child{border-bottom:0}.bdr.now .bdt b{color:var(--accent-text,var(--accent))}
+.bdt{display:grid;flex:1;min-width:0}.bdt small{color:var(--muted);font-size:12.5px}
+.bdr button{min-height:34px!important;padding:4px 12px!important;border-radius:999px!important;font-size:14px}
+.bdbox .alertc{width:min(340px,100%)}.bdcake{font-size:44px;line-height:1;margin-bottom:2px;animation:dpop 600ms var(--pop) both}
+@keyframes dpop{from{transform:scale(.3) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
+/* colour dot next to each name in the schedule (not in exports) */
+.enm::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ec);margin-inline-end:5px;vertical-align:1px}
+:is(.export,#printBox) .enm::before{display:none}
+#days .chip .av[style*="--ec"]{background:var(--ec)!important;color:#fff!important}
+</style><style>
+/* look: theme tiles, accent swatches */
+.lkh{font-size:14px;font-weight:600;margin:16px 0 8px}
+.lkwall{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.lkwall button{display:grid;justify-items:center;gap:6px;padding:8px 2px!important;min-height:0!important;border-radius:16px!important;font-size:12.5px;font-weight:600;
+  border:1.5px solid transparent!important;background:none!important;box-shadow:none!important}
+.lkwall button[aria-checked="true"]{border-color:var(--accent)!important;background:color-mix(in srgb,var(--accent) 10%,transparent)!important}
+.lkw{width:46px;height:46px;border-radius:13px;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.15),0 2px 6px rgba(0,0,0,.12);
+  background:radial-gradient(60% 60% at 80% 15%,var(--c1),transparent 70%),radial-gradient(60% 60% at 10% 55%,var(--c2),transparent 70%),radial-gradient(60% 60% at 70% 95%,var(--c3),transparent 70%),var(--bg)}
+.lkacc{display:flex;flex-wrap:wrap;gap:12px}
+.lkacc button{width:34px;height:34px;min-height:0!important;padding:0!important;border-radius:50%!important;border:0!important;background:var(--c)!important;
+  box-shadow:inset 0 0 0 .5px rgba(0,0,0,.2)!important;transition:transform 220ms var(--pop)}
+.lkacc button[aria-checked="true"]{box-shadow:0 0 0 2.5px var(--surface),0 0 0 4.5px var(--c)!important;transform:scale(1.04)}
+.lkacc button:active{transform:scale(.9)}
+@media (max-width:700px){.lkwall{grid-template-columns:repeat(3,1fr)}}
+</style><script>/* look chosen in Settings → מראה (this device): accent colour + background theme, applied before the page paints */
+var LOOK={acc:{blue:[["#0A6CD6","#0A5DBA","#fff"],["#4DA3FF","#7DBBFF","#06111F"]],purple:[["#7B4BD6","#6A3CC2","#fff"],["#B28CFF","#C4A8FF","#140A26"]],
+  pink:[["#C8327A","#B02A6A","#fff"],["#FF7AB6","#FF9CC8","#24060F"]],red:[["#C9342C","#B02A23","#fff"],["#FF6B5E","#FF8C82","#240604"]],
+  orange:[["#C25E00","#A35000","#fff"],["#FF9F45","#FFB26B","#1E0F02"]],teal:[["#0B8585","#0A7070","#fff"],["#3FD0C9","#6FE0DA","#031615"]],
+  graphite:[["#4A5360","#3E4650","#fff"],["#B5BEC9","#C9D0D9","#0D1014"]]},
+ wall:{ocean:[[40,140,230],[30,190,200],[90,110,240],[50,200,230]],sunset:[[255,140,60],[240,80,120],[255,190,90],[200,80,170]],
+  nebula:[[140,90,230],[210,90,200],[80,110,240],[170,120,255]],rose:[[255,120,160],[255,170,190],[200,120,255],[255,190,150]],
+  graphite:[[150,155,165],[120,125,135],[170,170,175],[110,115,125]]}};
+function lookGet(k){try{return localStorage.getItem(k)||""}catch(e){return ""}}
+function lookApply(){var r=document.documentElement,st=r.style,t=r.getAttribute("data-theme"),dark=t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
+  var a=LOOK.acc[lookGet("accent")],w=LOOK.wall[lookGet("wall")];
+  ["--accent","--accent-text","--accent-ink"].forEach(function(v,i){if(a)st.setProperty(v,a[dark?1:0][i]);else st.removeProperty(v)});
+  var al=lookGet("wall")==="graphite"?(dark?[.26,.22,.2,.22]:[.24,.2,.2,.18]):(dark?[.40,.34,.26,.30]:[.42,.30,.30,.26]);
+  for(var i=0;i<4;i++){if(w)st.setProperty("--g-blob"+(i+1),"rgba("+w[i].join(",")+","+al[i]+")");else st.removeProperty("--g-blob"+(i+1))}}
+lookApply();</script></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה ולכן אינו פעיל.</b><br>פתח אותו מהאייקון במסך הבית או מהקישור.</div>
 <div class="wrap">
   <header>
     <div class="brand"><img class="brand-mark" src="data:image/png;base64,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" alt="SCE" width="62" height="21"><span class="brand-sep" aria-hidden="true"></span><h1>ניהול צוות טכנאים</h1><span id="finalBadge" class="final-badge" hidden>סידור סופי</span></div>
     <div class="week">
+      <button type="button" id="spotBtn" class="spotb" aria-label="חיפוש"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>חיפוש</span><kbd id="spotKbd">Ctrl K</kbd></button>
       <button id="prevW" aria-label="שבוע קודם">→ שבוע קודם</button>
       <b id="weekLbl"></b>
       <label class="wkc" aria-label="בחירת שבוע"><span class="wkc-t"><span class="wkf" id="wkFinal" hidden title="סידור סופי" aria-label="סידור סופי">✓</span><b id="wkTxt"></b><span class="wkc-c" aria-hidden="true">▾</span></span><input type="date" id="wkDate" tabindex="-1"></label>
@@ -2105,6 +2210,7 @@ bdi.osl{white-space:nowrap;direction:ltr}
       <span class="df"><input type="text" class="dtx" id="weekPick" data-iso="" value="" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" dir="ltr" aria-label="בחירת שבוע (dd/mm/yyyy)"><span class="dfi" aria-hidden="true">📅</span><input type="date" class="dfp" tabindex="-1" aria-hidden="true"></span>
     </div>
   </header>
+  <button type="button" id="spotFab" aria-label="חיפוש"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
   <div class="minibar" aria-hidden="true">
     <button class="mb-p" data-wk="-1" tabindex="-1" aria-label="שבוע קודם">‹</button>
     <button class="mb-t" tabindex="-1"><span>ניהול צוות טכנאים</span><b id="mbTxt"></b></button>
@@ -2246,7 +2352,11 @@ bdi.osl{white-space:nowrap;direction:ltr}
           <button type="button" role="radio" data-theme-set="light"><span class="thp thl" aria-hidden="true"></span>בהיר</button>
           <button type="button" role="radio" data-theme-set="dark"><span class="thp thd" aria-hidden="true"></span>כהה</button>
           <button type="button" role="radio" data-theme-set="auto"><span class="thp tha" aria-hidden="true"></span>אוטומטי</button>
-        </div><p class="hint" id="thHint"></p></div>
+        </div><p class="hint" id="thHint"></p>
+        <div class="lkh">ערכת נושא</div><div class="lkwall" id="lkWall" role="radiogroup" aria-label="ערכת נושא"></div>
+        <div class="lkh">צבע הדגשה</div><div class="lkacc" id="lkAcc" role="radiogroup" aria-label="צבע הדגשה"></div></div>
+      <div class="card"><h2>מסך פתיחה</h2><div class="pseg2 lkstart" id="lkStart" role="radiogroup" aria-label="מסך פתיחה"></div>
+        <p class="hint" style="margin-top:8px">הלשונית שנפתחת כשנכנסים לאפליקציה. נשמר במכשיר הזה.</p></div>
       <h3 class="sgh">שיבוץ</h3>
       <div class="card">
         <h2>משמרות ושיבוץ</h2>
@@ -2288,6 +2398,11 @@ bdi.osl{white-space:nowrap;direction:ltr}
           <input type="text" id="newEmp" maxlength="40" placeholder="שם עובד/ת חדש/ה" aria-label="שם עובד חדש">
           <button id="addEmp" class="primary">הוסף</button>
         </div>
+      </div>
+      <div class="card">
+        <h2>ימי הולדת קרובים</h2>
+        <div id="bdayBox"></div>
+        <p class="hint" style="margin-top:8px">ביום ההולדת – לועזי וגם עברי – מופיעה תזכורת עם ברכה מוכנה לוואטסאפ.</p>
       </div>
     </div>
     <div class="panel segp" id="sub-msg" hidden>
@@ -2365,7 +2480,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent=OS_NAME+" "+OS_LOG[0].v+" · "+APP_VER});
-const APP_VER="23.10.2026 20:55";
+const APP_VER="23.10.2026 22:00";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -2698,7 +2813,8 @@ function autoNote(sh,d,wk){const dt=parseKey(wk||cur);dt.setDate(dt.getDate()+d)
 function aNote(w,sid,sh,d,id,wk){const v=(w.anote||{})[`${sid}|${sh}|${d}|${id}`];return (v===undefined?autoNote(sh,d,wk):v)||""}
 /* cell content: morning = note on a second line, evening = note in brackets on the same line */
 function cellNames(w,sid,sh,d,ids){return ids.map(id=>{const n=aNote(w,sid,sh,d,id);
-  return sh==="m"?`<span class="nm">${esc(empName(id))}</span>${n?`<span class="an an2">(${esc(n)})</span>`:""}`:`${esc(empName(id))}${n?` <span class="an">(${esc(n)})</span>`:""}`}).join(sh==="m"?"":", ")}
+  const c=empColor(id),nm=c?`<span class="enm" style="--ec:${c}">${esc(empName(id))}</span>`:esc(empName(id));
+  return sh==="m"?`<span class="nm">${nm}</span>${n?`<span class="an an2">(${esc(n)})</span>`:""}`:`${nm}${n?` <span class="an">(${esc(n)})</span>`:""}`}).join(sh==="m"?"":", ")}
 function plainNames(w,sid,sh,d,wk){return (w.assign[sid]?.[sh]?.[d]||[]).map(id=>{const n=aNote(w,sid,sh,d,id,wk);return empName(id)+(n?` (${n})`:"")})}
 /* note row text = holiday name(s) + the manual note, like the Excel note formula */
 /* events / exams of a given day at a site (campus "שניהם" = both sites) */
@@ -2826,7 +2942,7 @@ function daysHTML(w){
   /* chip: initial avatar + name; a missing must-fill slot is a dashed "שיבוץ טכנאי"; a clash gets an amber ring and ⚠ (not colour alone) */
   const chip=(sid,sh,d,i,names,need)=>{const empty=i<need&&!names.length;const cls=["slot","chip",sh==="e"?"ce":i===1?"c2":""];if(empty)cls.push("empty-need");
     const clash=names.some((_,j)=>pr.bad.has(`${sid}|${sh}|${d}|${i+j}`));if(clash)cls.push("bad");
-    const body=names.length?`<span class="av" aria-hidden="true">${esc(initial(empName(names[0])))}</span><span class="cn">${cellNames(W(),sid,sh,d,names)}</span>${clash?ICO_WARN:""}`
+    const body=names.length?`<span class="av" aria-hidden="true"${empColor(names[0])?` style="--ec:${empColor(names[0])}"`:""}>${esc(initial(empName(names[0])))}</span><span class="cn">${cellNames(W(),sid,sh,d,names)}</span>${clash?ICO_WARN:""}`
       :`${ICO_PLUS}${empty?"שיבוץ טכנאי":""}`;
     return `<button class="${cls.join(" ")}" data-k="${sid}|${sh}|${d}|${i}"${names.length?"":` aria-label="${empty?"שיבוץ טכנאי":"הוספת טכנאי"}"`}>${body}</button>`};
   return DAYS.map((dn,d)=>{
@@ -3119,7 +3235,16 @@ function renderCons(w){
         return `<td><button class="cst${eve3[d]&&v==="E"?" ev3":""}" data-cst="${e.id}|${d}" data-v="${v}"${s?` data-s="${s}"`:""} ${dis?"disabled":""} aria-label="${esc(e.name)} ${DAYS[d]}: ${lbl}">${sh?`<span class="lf">${lbl}</span><span class="ls">${sh}</span>`:lbl}</button></td>`}).join("")}</tr>`}).join("");
 }
 function renderStaff(){
-  $("#staffRows").innerHTML=S.employees.length?S.employees.map(e=>`<div class="row"><input type="text" maxlength="40" data-ename="${e.id}" value="${esc(e.name)}" aria-label="שם"><label><input type="checkbox" data-eact="${e.id}" ${e.active!==false?"checked":""}> פעיל/ה</label><label title="לא משובץ בסידור האוטומטי, רק ידנית"><input type="checkbox" data-ebk="${e.id}" ${e.backup?"checked":""}> גיבוי בלבד</label><button data-edel="${e.id}">הסר</button></div>`).join(""):`<p class="hint">עדיין אין עובדים.</p>`;
+  $("#staffRows").innerHTML=S.employees.length?S.employees.map(e=>`<div class="erow${e.active===false?" off":""}">
+    <button type="button" class="ecol" data-ecol="${e.id}" style="--ec:${e.color||"var(--av-bg,#8E8E93)"}" aria-label="צבע לזיהוי של ${esc(e.name)}">${esc(initial(e.name))}</button>
+    <div class="ef"><input type="text" maxlength="40" data-ename="${e.id}" value="${esc(e.name)}" aria-label="שם">
+      <div class="esub"><input type="text" inputmode="tel" dir="ltr" data-ephone="${e.id}" value="${esc(e.phone||"")}" placeholder="טלפון" aria-label="טלפון של ${esc(e.name)}">
+        <label class="ebd" title="יום הולדת"><span aria-hidden="true">🎂</span><input type="date" data-ebday="${e.id}" value="${esc(e.bday||"")}" aria-label="יום הולדת של ${esc(e.name)}"></label>
+        ${e.bday?`<small class="eheb">${esc(hebDay(e.bday))}</small>`:""}</div>
+      <div class="eopts"><label><input type="checkbox" data-eact="${e.id}" ${e.active!==false?"checked":""}> פעיל</label><label title="לא משובץ בסידור האוטומטי, רק ידנית"><input type="checkbox" data-ebk="${e.id}" ${e.backup?"checked":""}> גיבוי בלבד</label><button data-edel="${e.id}">הסרה</button></div></div>
+    <div class="epal" data-epal="${e.id}" hidden>${(EMP_COLORS||[]).map(c=>`<button type="button" data-ecset="${e.id}|${c}" style="--ec:${c}" aria-label="צבע" aria-pressed="${e.color===c}"></button>`).join("")}<button type="button" class="none" data-ecset="${e.id}|" aria-label="בלי צבע" aria-pressed="${!e.color}">✕</button></div>
+  </div>`).join(""):`<p class="hint">עדיין אין עובדים.</p>`;
+  renderBdays();
 }
 /* Friday rotation table: one column per site, rows = rotation order (repeats allowed: the same person in every row = fixed) */
 function renderFriSet(){
@@ -3696,7 +3821,7 @@ function availSheet(){if(document.querySelector(".availbox"))return;const nx=con
 function maybeToday(){clearTimeout(TODAY_T);TODAY_T=setTimeout(()=>{const now=new Date();
   if(AVAIL_FORCE){AVAIL_FORCE=false;try{history.replaceState(null,"",location.pathname)}catch(e){}availSheet();return}
   if(TODAY_FORCE&&todayItems().length&&!document.querySelector(".todaybox")){TODAY_FORCE=false;try{history.replaceState(null,"",location.pathname)}catch(e){}openToday(todayItems());return}
-  if(now.getHours()<6||document.hidden||document.querySelector(".todaybox,.pastebox,.calsheet,.alertbox,.pop,.itembox,.roombox"))return;
+  if(now.getHours()<6||document.hidden||document.querySelector(".todaybox,.pastebox,.calsheet,.alertbox,.pop,.itembox,.roombox,.spot"))return;
   const st=tState(),items=todayItems().filter(x=>st.sent[x.id]!==tSig(x));if(!items.length)return;
   const pend=items.map(x=>x.id+"="+tSig(x)).join("|");
   if(st.snooze&&hhmm(now)<st.snooze&&st.snoozeFor===pend)return;
@@ -3787,7 +3912,7 @@ document.addEventListener("click",async e=>{if(!e.target.closest("[data-pushon]"
   USAGE_KEY="";renderUsage();renderPushSet();loadDevices()});
 
 /* ---------- notification settings (synced; the scheduled sender reads the same values) ---------- */
-const PUSH_DEF={avail:true,availDay:3,availAt:"08:00",on:true,morning:true,morningAt:"06:00",eve:false,eveAt:"20:00",before:false,beforeMin:60,change:true,repeat:false,repeatH:2,exams:true,events:true,campus:"",quiet:true,quietFrom:"21:00",quietTo:"06:00",noSat:true};
+const PUSH_DEF={bday:true,avail:true,availDay:3,availAt:"08:00",on:true,morning:true,morningAt:"06:00",eve:false,eveAt:"20:00",before:false,beforeMin:60,change:true,repeat:false,repeatH:2,exams:true,events:true,campus:"",quiet:true,quietFrom:"21:00",quietTo:"06:00",noSat:true};
 const pcfg=()=>Object.assign({},PUSH_DEF,S.pushCfg||{});
 function pcSet(k,v){S.pushCfg=Object.assign(pcfg(),{[k]:v});changed(true);renderPushSet()}
 let PUSH_DEV=null;
@@ -3808,6 +3933,7 @@ function renderPushSet(){const box=$("#pushSet");if(!box)return;const c=pcfg(),m
       ${sw("eve","סיכום ערב קודם","מה מתוכנן למחר",tm("eveAt",!c.eve))}
       ${sw("before","לפני תחילת מבחן או אירוע","",sel("beforeMin",[[30,"30 דק׳ לפני"],[60,"שעה לפני"],[120,"שעתיים לפני"]],!c.before))}
       ${sw("change","כשמבחן או אירוע של היום משתנה","שעה, מקום או פרטים")}
+      ${sw("bday","ימי הולדת","בבוקר של יום ההולדת – לועזי ועברי")}
       ${sw("avail","תזכורת לבקשת זמינות","לחיצה על ההתראה פותחת את וואטסאפ עם ההודעה · לא נשלחת אם כבר שלחת לשבוע הזה",`<span class="psrange">${sel("availDay",DAYS.slice(0,5).map((d,i)=>[i,"יום "+d]),!c.avail)}${tm("availAt",!c.avail)}</span>`)}
       ${sw("repeat","חזרה עד סימון ״נשלח״","",sel("repeatH",[[1,"כל שעה"],[2,"כל שעתיים"],[3,"כל 3 שעות"]],!c.repeat))}
       </div></div>
@@ -3831,6 +3957,23 @@ document.addEventListener("change",e=>{const tm=e.target.closest("[data-pctime]"
 document.addEventListener("click",e=>{const b=e.target.closest('[data-sub="push"]');if(b){renderPushSet();loadDevices()}},true);
 
 
+
+/* ---------- look: themes, accent colours, start screen (per device) ---------- */
+const LK_WALLS=[["","SCE","green",["#7CC24E","#3FA79B","#E0B45A"]],["ocean","אוקיינוס","blue",["#2F8BE6","#25B8C4","#5A6EF0"]],["sunset","שקיעה","orange",["#FF8C3C","#EE5078","#FFBE5A"]],
+  ["nebula","ערפילית","purple",["#8C5AE6","#D25AC8","#5070F0"]],["rose","ורד","pink",["#FF78A0","#FFAABE","#C878FF"]],["graphite","גרפיט","graphite",["#969BA5","#787D87","#AAAAAF"]]];
+const LK_ACC=[["green","ירוק","#4F7A2C"],["blue","כחול","#0A6CD6"],["teal","טורקיז","#0B8585"],["purple","סגול","#7B4BD6"],["pink","ורוד","#C8327A"],["red","אדום","#C9342C"],["orange","כתום","#C25E00"],["graphite","גרפיט","#4A5360"]];
+const LK_START=[["sched","לו״ז"],["cal","חופשות"],["ev","יומן"],["set","הגדרות"],["last","האחרון"]];
+function renderLook(){const w=lookGet("wall"),a=lookGet("accent")||"green",st=lookGet("start-tab")||"sched";
+  const W1=$("#lkWall");if(W1)W1.innerHTML=LK_WALLS.map(([k,n,_,c])=>`<button type="button" role="radio" aria-checked="${w===k}" data-lkwall="${k}"><span class="lkw" style="--c1:${c[0]};--c2:${c[1]};--c3:${c[2]}" aria-hidden="true"></span>${n}</button>`).join("");
+  const A=$("#lkAcc");if(A)A.innerHTML=LK_ACC.map(([k,n,c])=>`<button type="button" role="radio" aria-checked="${a===k}" data-lkacc="${k}" style="--c:${c}" aria-label="${n}" title="${n}"></button>`).join("");
+  const S1=$("#lkStart");if(S1)S1.innerHTML=LK_START.map(([k,n])=>`<button type="button" data-lkstart="${k}" aria-pressed="${st===k}">${n}</button>`).join("")}
+function lookSet(k,v){try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k)}catch(e){}}
+document.addEventListener("click",e=>{const w=e.target.closest("[data-lkwall]"),a=e.target.closest("[data-lkacc]"),st=e.target.closest("[data-lkstart]");if(!w&&!a&&!st)return;haptic();
+  if(st){lookSet("start-tab",st.dataset.lkstart==="sched"?"":st.dataset.lkstart);renderLook();return}
+  const go=()=>{if(w){const t=LK_WALLS.find(x=>x[0]===w.dataset.lkwall);lookSet("wall",t[0]);lookSet("accent",t[2]==="green"?"":t[2])}
+    else lookSet("accent",a.dataset.lkacc==="green"?"":a.dataset.lkacc);lookApply();renderLook()};
+  if(document.startViewTransition&&!matchMedia("(prefers-reduced-motion: reduce)").matches){try{document.startViewTransition(go);return}catch(_){}}go()});
+renderLook();
 /* ---------- appearance: light / dark / follow the system (per device) ---------- */
 const thGet=()=>{try{return localStorage.getItem("theme")||"auto"}catch(e){return "auto"}};
 function thApply(t){const r=document.documentElement;if(t==="light"||t==="dark")r.setAttribute("data-theme",t);else r.removeAttribute("data-theme");
@@ -3838,6 +3981,7 @@ function thApply(t){const r=document.documentElement;if(t==="light"||t==="dark")
   document.querySelector('meta[name="color-scheme"]').content=t==="auto"?"light dark":t;
   const mm=document.querySelectorAll('meta[name="theme-color"]');mm.forEach(m=>{m.content=t==="auto"?(m.media.includes("dark")?"#07090A":"#E9EFE5"):(eff==="dark"?"#07090A":"#E9EFE5")});
   document.querySelectorAll("[data-theme-set]").forEach(b=>b.setAttribute("aria-checked",b.dataset.themeSet===t));
+  if(typeof lookApply==="function")lookApply();
   const h=$("#thHint");if(h)h.textContent=t==="auto"?`לפי הגדרות המכשיר (כרגע ${sys==="dark"?"כהה":"בהיר"})`:"נשמר במכשיר הזה"}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-theme-set]");if(!b)return;const t=b.dataset.themeSet;if(t===thGet())return;
   try{localStorage.setItem("theme",t)}catch(_){}haptic();
@@ -3863,8 +4007,8 @@ const SIC={sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l
   hist:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l4 2"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
   bldg:'<path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/>'};
-const SIC_MAP=[["מראה","sun","#0A84FF"],["משמרות ושיבוץ","clock","#34C759"],["סנכרון ואחסון","cloud","#32ADE6"],["גיבוי ושחזור","archive","#8E8E93"],
-  ["עובדים","people","#5856D6"],["נמעני מייל","mail","#0A84FF"],["קבוצת הצוות","chat","#30B04F"],["נוסח בקשת זמינות","cal","#00A79D"],["נוסח תזכורת","bell","#FF9500"],
+const SIC_MAP=[["מראה","sun","#0A84FF"],["מסך פתיחה","phone","#34C759"],["משמרות ושיבוץ","clock","#34C759"],["סנכרון ואחסון","cloud","#32ADE6"],["גיבוי ושחזור","archive","#8E8E93"],
+  ["עובדים","people","#5856D6"],["ימי הולדת","cal","#FF2D55"],["נמעני מייל","mail","#0A84FF"],["קבוצת הצוות","chat","#30B04F"],["נוסח בקשת זמינות","cal","#00A79D"],["נוסח תזכורת","bell","#FF9500"],
   ["נוסח הסידור השבועי","table","#AF52DE"],["התראות במכשיר","phone","#FF3B30"],["מתי לשלוח","clock","#FF9500"],["מה לכלול","list","#0A84FF"],["שעות שקטות","moon","#5856D6"],
   ["מה חדש","spark","#34C759"],["גרסאות קודמות","hist","#8E8E93"],["פרטי מערכת","info","#8E8E93"]];
 const sicHTML=(ic,c)=>`<span class="sic" style="--c:${c}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${SIC[ic]}</svg></span>`;
@@ -3872,10 +4016,143 @@ function setIcons(){const root=document.getElementById("tab-set");if(!root)retur
   root.querySelectorAll(".card>h2:not(.hic)").forEach(h=>{const t=h.textContent.trim(),m=SIC_MAP.find(x=>t.startsWith(x[0]));if(!m)return;h.classList.add("hic");h.insertAdjacentHTML("afterbegin",sicHTML(m[1],m[2]))});
   root.querySelectorAll("#sitesSet .card>.row:first-child:not(.hic)").forEach(r=>{r.classList.add("hic");r.insertAdjacentHTML("afterbegin",sicHTML("bldg","#FF9500"))})}
 new MutationObserver(()=>setIcons()).observe(document.getElementById("tab-set"),{childList:true,subtree:true});setIcons();
+
+/* ---------- Spotlight: one search for everything (settings, exams, events, staff, shifts, rooms, holidays, notes, actions) ---------- */
+const SP_NORM=t=>String(t||"").toLowerCase().replace(/[֑-ׇ]/g,"").replace(/[״"׳'`]/g,"").replace(/[\/\\-]/g,".").replace(/\s+/g," ").trim();
+const SP_IC={act:"spark",set:"info",ex:"cal",ev:"bell",emp:"people",shift:"clock",room:"bldg",cal:"moon",note:"list"};
+const SP_CAT={act:["פעולות","#0A84FF"],set:["הגדרות","#8E8E93"],ex:["מבחנים","#00A79D"],ev:["אירועים","#FF9500"],emp:["צוות","#5856D6"],shift:["משמרות","#34C759"],room:["חדרים","#FF9500"],cal:["חופשות וחגים","#AF52DE"],note:["הערות בסידור","#32ADE6"]};
+const SP_KW={"מראה":"מצב כהה בהיר dark light theme ערכת נושא","ערכת נושא":"רקע צבע theme wallpaper","צבע הדגשה":"accent צבע","מסך פתיחה":"פתיחה לשונית התחלה","סנכרון ואחסון":"firebase אחסון ענן מקום ניקוי","גיבוי ושחזור":"backup גיבוי שחזור קובץ",
+  "עובדים":"טכנאים צוות עובד טלפון יום הולדת צבע","נמעני מייל":"mail outlook דואר","קבוצת הצוות":"whatsapp וואטסאפ קבוצה קישור","משמרות ושיבוץ":"בוקר ערב שעות יעד מינימום","שעות שקטות":"לילה שבת שקט"};
+const goTab=t=>{const b=document.querySelector(`.tabs button[data-tab="${t}"]`);if(b&&b.getAttribute("aria-selected")!=="true")b.click()};
+function spFlash(el){if(!el)return;el.scrollIntoView({block:"center",behavior:"smooth"});
+  setTimeout(()=>el.animate([{boxShadow:"0 0 0 0 transparent"},{boxShadow:"0 0 0 4px color-mix(in srgb,var(--accent) 55%,transparent)"},{boxShadow:"0 0 0 0 transparent"}],{duration:1400,easing:"ease-in-out"}),350)}
+function spOpenSet(k,find){goTab("set");setTimeout(()=>{openSub(k);if(k==="push")renderPushSet();if(k==="about")renderAbout();setTimeout(()=>{const el=find&&find();spFlash(el&&(el.closest(".psr,.row,.osrow")||el.closest(".card")||el))},420)},380)}
+function spGoWeek(wk,el){goTab("sched");if(cur!==wk){cur=wk;msgEdited.consMsg={};msgEdited.weekMsg={};render()}setTimeout(()=>spFlash(el&&el()),350)}
+function spIndex(){const L=[],add=(cat,title,sub,run,kw="")=>L.push({cat,title,sub,run,kw,n:SP_NORM(title),s:SP_NORM(sub+" "+kw)});
+  const camp=s=>CAMPUS.find(c=>c!=="שניהם"&&siteMatch(c,s.id))||s.name;
+  /* actions */
+  [["שיבוץ חכם","יצירת סידור אוטומטי לשבוע",()=>{goTab("sched");setTimeout(()=>$("#genBtn").click(),300)},"generate auto"],
+   ["בקשת זמינות","שליחת בקשת אילוצים לצוות",()=>$("#askConsBtn").onclick(),"אילוצים whatsapp"],
+   ["מבחן חדש","הוספת מבחן",()=>openItemSheet("exams"),"exam"],["אירוע חדש","הוספת אירוע",()=>openItemSheet("events"),"event"],
+   ["חזרה לשבוע הנוכחי","השבוע שעובדים עליו",()=>{goTab("sched");$("#backW").hidden?toast("אתה כבר בשבוע הנוכחי"):$("#backW").click()},"היום today"],
+   ["השבוע הבא","מעבר לשבוע הבא",()=>{goTab("sched");shiftWeek(1)},"next"],["השבוע הקודם","מעבר לשבוע הקודם",()=>{goTab("sched");shiftWeek(-1)},"prev"],
+   ["החלפת משמרות","לחיצה על שם בסידור ← ⇄ החלפה",()=>{goTab("sched");toast("לחץ על שם בסידור ובחר ⇄ החלפה")},"swap החלפה"],
+   ["הורדת גיבוי","גיבוי מלא לקובץ",()=>$("#backupBtn").click(),"backup"],
+   ["מצב כהה","מראה כהה",()=>document.querySelector('[data-theme-set="dark"]').click(),"dark"],["מצב בהיר","מראה בהיר",()=>document.querySelector('[data-theme-set="light"]').click(),"light"],
+   ["מראה אוטומטי","לפי הגדרות המכשיר",()=>document.querySelector('[data-theme-set="auto"]').click(),"auto"],
+   ["בדיקת עדכונים","sceOS",()=>spOpenSet("about",()=>$("[data-oscheck]")),"update"]].forEach(([t,s,r,k])=>add("act",t,s,r,k));
+  /* settings: every card title and option row, wherever it lives */
+  try{renderPushSet();renderAbout()}catch(e){}
+  document.querySelectorAll('[data-group="set"] [data-sub]').forEach(b=>{const k=b.dataset.sub,lbl=b.textContent.trim(),p=$("#sub-"+k);if(!p)return;
+    p.querySelectorAll(".card>h2").forEach((h,i)=>{const hc=h.cloneNode(true);hc.querySelectorAll("button,.ib,.fbtag,.sic").forEach(x=>x.remove());const t=hc.textContent.trim();add("set",t,"הגדרות ← "+lbl,()=>spOpenSet(k,()=>$("#sub-"+k).querySelectorAll(".card>h2")[i]),(SP_KW[t]||"")+(t.startsWith("סנכרון")?" firebase":""))});
+    p.querySelectorAll(".pst b,.osrow>span").forEach(x=>{const t=x.textContent.trim();if(t)add("set",t,"הגדרות ← "+lbl,()=>spOpenSet(k,()=>[...$("#sub-"+k).querySelectorAll(".pst b,.osrow>span")].find(y=>y.textContent.trim()===t)))});
+    p.querySelectorAll("label").forEach(x=>{const t=(x.childNodes[0]&&x.childNodes[0].textContent||"").trim();if(t&&t.length>2)add("set",t,"הגדרות ← "+lbl,()=>spOpenSet(k,()=>[...$("#sub-"+k).querySelectorAll("label")].find(y=>(y.childNodes[0].textContent||"").trim()===t)))})});
+  /* exams / events */
+  const pd=x=>x.date?dot(parseKey(x.date)):"";
+  (S.exams||[]).forEach(x=>add("ex",x.name||"מבחן",[pd(x),x.time,x.campus,roomLbl(x.room,x.campus)].filter(Boolean).join(" · "),()=>openItemSheet("exams",x.id),[x.software,x.lecturer,x.room,x.notes,x.needs].join(" ")));
+  (S.events||[]).forEach(x=>add("ev",x.name||"אירוע",[pd(x),x.time,x.campus,roomLbl(x.room,x.campus)].filter(Boolean).join(" · "),()=>openItemSheet("events",x.id),[x.room,x.notes,x.needs].join(" ")));
+  /* staff */
+  S.employees.forEach(e=>add("emp",e.name,["צוות",e.phone,e.active===false?"לא פעיל":""].filter(Boolean).join(" · "),()=>spOpenSet("staff",()=>document.querySelector(`[data-ename="${e.id}"]`)),e.phone||""));
+  /* rooms */
+  S.sites.forEach(s=>((S.rooms||{})[s.id]||[]).forEach(r=>add("room",roomLbl(r,camp(s))||r,s.name+" · "+gName(s.id,roomG(s.id,r)),()=>spOpenSet("gen",()=>document.querySelector(`[data-roomsheet="${s.id}"]`)),r)));
+  /* vacations / holidays */
+  const rng=(a,b)=>dot(parseKey(a))+(b&&b!==a?" – "+dot(parseKey(b)):"");
+  (S.vac||[]).filter(v=>v.emp&&v.from).forEach(v=>add("cal",empName(v.emp),"חופשה · "+rng(v.from,v.to),()=>{goTab("cal");segTo("cal","vacBox")}));
+  (S.holidays||[]).filter(h=>h.from).forEach(h=>add("cal",h.name,"חג · "+rng(h.from,h.to),()=>{goTab("cal");segTo("cal","holBox")}));
+  /* shifts and notes in the schedule: 8 weeks back, 8 ahead */
+  const lb=sh=>sh==="m"?"בוקר":"ערב";
+  for(let n=-8;n<=8;n++){const wk=addW(cur,n),w=S.weeks[wk];if(!w)continue;const d0=parseKey(wk);
+    S.sites.forEach(s=>{for(let d=0;d<6;d++){const dt=new Date(d0);dt.setDate(dt.getDate()+d);const ds=`יום ${DAYS[d]} ${dot(dt)}`;
+      ["m","e"].forEach(sh=>((w.assign&&w.assign[s.id]&&w.assign[s.id][sh]&&w.assign[s.id][sh][d])||[]).forEach((id,i)=>
+        add("shift",empName(id)+" · "+ds,lb(sh)+" · "+s.name,()=>spGoWeek(wk,()=>[...document.querySelectorAll(`.slot[data-k^="${s.id}|${sh}|${d}|"]`)].find(x=>x.offsetParent)),"")));
+      const nt=w.notes&&w.notes[s.id]&&(w.notes[s.id][d]||"").trim();if(nt)add("note",nt.split("\n")[0].slice(0,80),s.name+" · "+ds,()=>spGoWeek(wk,()=>[...document.querySelectorAll(`[data-k^="${s.id}|n|${d}"],.note`)].find(x=>x.offsetParent)),nt)}})}
+  return L}
+function spSearch(q){const Q=SP_NORM(q);if(!Q)return[];const toks=Q.split(" ");const L=spIndex(),out=[];
+  const who=S.employees.find(e=>SP_NORM(e.name)===Q);   /* exact name: only that person's shifts */
+  L.forEach(it=>{if(who&&it.cat==="shift"&&!it.n.startsWith(SP_NORM(who.name)+" "))return;if(!toks.every(t=>it.n.includes(t)||it.s.includes(t)))return;let sc=0;
+    toks.forEach(t=>{sc+=it.n.startsWith(t)?6:it.n.split(" ").some(w=>w.startsWith(t))?4:it.n.includes(t)?3:1});
+    if(it.n===Q)sc+=8;sc+=({act:1.5,set:1,emp:1.2,ex:1,ev:1,room:.6,cal:.8,note:.7,shift:.3})[it.cat]||0;
+    /* upcoming items first */
+    if((it.cat==="ex"||it.cat==="ev"))sc+=.2;out.push({...it,sc})});
+  return out.sort((a,b)=>b.sc-a.sc)}
+const spRecent=()=>{try{return JSON.parse(localStorage.getItem("spot-recent")||"[]")}catch(e){return[]}};
+function spRemember(q){q=q.trim();if(!q)return;try{localStorage.setItem("spot-recent",JSON.stringify([q,...spRecent().filter(x=>x!==q)].slice(0,5)))}catch(e){}}
+function spMark(t,q){let h=esc(t);SP_NORM(q).split(" ").filter(x=>x.length>0).forEach(tok=>{const i=SP_NORM(t).indexOf(tok);if(i<0)return;
+  const raw=t.slice(i,i+tok.length);if(raw&&SP_NORM(raw)===tok)h=h.replace(esc(raw),`<mark>${esc(raw)}</mark>`)});return h}
+let SPOT=null;
+function openSpot(){if(SPOT)return;haptic();const o=document.createElement("div");o.className="spot";
+  o.innerHTML=`<div class="spbox" role="dialog" aria-label="חיפוש"><div class="spin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input type="search" enterkeyhint="go" autocomplete="off" spellcheck="false" placeholder="חיפוש בכל האפליקציה" aria-label="חיפוש"><button type="button" class="spx" aria-label="סגירה">ביטול</button></div><div class="spres" role="listbox"></div></div>`;
+  document.body.appendChild(o);SPOT=o;document.body.classList.add("spotting");
+  const inp=o.querySelector("input"),res=o.querySelector(".spres");let items=[],sel=0;
+  const row=(it,i,top)=>`<button type="button" class="spr${top?" top":""}${i===sel?" sel":""}" data-i="${i}" role="option">${sicHTML(SP_IC[it.cat],SP_CAT[it.cat][1])}<span class="spt"><b>${spMark(it.title,inp.value)}</b><small>${spMark(it.sub,inp.value)}</small></span><span class="spk">${SP_CAT[it.cat][0]}</span></button>`;
+  const draw=()=>{const q=inp.value;
+    if(!SP_NORM(q)){const rc=spRecent();items=[];res.innerHTML=(rc.length?`<div class="sph">חיפושים אחרונים</div>${rc.map(r=>`<button type="button" class="spr spq" data-q="${esc(r)}"><span class="spri">↺</span><span class="spt"><b>${esc(r)}</b></span></button>`).join("")}`:"")+
+        `<div class="sph">הצעות</div><div class="spchips">${["מבחנים השבוע","MATLAB","מצב כהה","בקשת זמינות","גיבוי"].map(c=>`<button type="button" class="spc" data-q="${esc(c==="מבחנים השבוע"?dot(new Date()).slice(3):c)}">${esc(c)}</button>`).join("")}</div>`;return}
+    const all=spSearch(q);if(!all.length){items=[];res.innerHTML=`<div class="spnone"><b>אין תוצאות עבור „${esc(q)}”</b><small>נסה שם, חדר, תאריך (28.10) או שם של הגדרה</small></div>`;return}
+    const top=all[0],groups={};all.slice(1).forEach(it=>{(groups[it.cat]=groups[it.cat]||[]).length<6&&groups[it.cat].push(it)});
+    items=[top];let h=`<div class="sph">התוצאה המובילה</div>`+row(top,0,true);
+    Object.keys(SP_CAT).forEach(c=>{const g=groups[c];if(!g)return;h+=`<div class="sph">${SP_CAT[c][0]}</div>`;g.forEach(it=>{items.push(it);h+=row(it,items.length-1)})});
+    res.innerHTML=h};
+  const pick=i=>{const it=items[i];if(!it)return;spRemember(inp.value);closeSpot();setTimeout(()=>{try{it.run()}catch(e){}},180)};
+  const move=n=>{if(!items.length)return;sel=(sel+n+items.length)%items.length;res.querySelectorAll(".spr[data-i]").forEach(b=>b.classList.toggle("sel",+b.dataset.i===sel));
+    const b=res.querySelector(`.spr[data-i="${sel}"]`);b&&b.scrollIntoView({block:"nearest"})};
+  inp.addEventListener("input",()=>{sel=0;draw()});
+  inp.addEventListener("keydown",e=>{if(e.key==="ArrowDown"){e.preventDefault();move(1)}else if(e.key==="ArrowUp"){e.preventDefault();move(-1)}else if(e.key==="Enter"){e.preventDefault();pick(sel)}else if(e.key==="Escape"){e.preventDefault();closeSpot()}});
+  o.addEventListener("click",e=>{const q=e.target.closest("[data-q]");if(q){inp.value=q.dataset.q;sel=0;draw();inp.focus();return}
+    const r=e.target.closest(".spr[data-i]");if(r){pick(+r.dataset.i);return}if(e.target.closest(".spx")||e.target===o)closeSpot()});
+  draw();requestAnimationFrame(()=>inp.focus({preventScroll:true}))}
+function closeSpot(){const o=SPOT;if(!o)return;SPOT=null;document.body.classList.remove("spotting");o.classList.add("out");const i=o.querySelector("input");i&&i.blur();setTimeout(()=>o.remove(),220)}
+document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&(e.key==="k"||e.key==="K"||e.code==="KeyK")){e.preventDefault();SPOT?closeSpot():openSpot();return}
+  const a=document.activeElement;if(e.key==="/"&&!SPOT&&!(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))&&!a?.isContentEditable){e.preventDefault();openSpot()}});
+document.addEventListener("click",e=>{if(e.target.closest("#spotBtn,#spotFab"))openSpot()});
+
+if(/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent))$("#spotKbd").textContent="⌘K";
+
+/* ---------- staff details: phone, birthday (Gregorian + Hebrew) with a reminder on the day, colour for quick recognition ---------- */
+var EMP_COLORS=["#FF3B30","#FF9500","#FFCC00","#34C759","#00C7BE","#30B0C7","#0A84FF","#5856D6","#AF52DE","#FF2D55","#A2845E"];
+function empColor(id){const e=S.employees.find(x=>x.id===id);return e&&e.color||""}
+var HEB_F=(()=>{try{return new Intl.DateTimeFormat("he-u-ca-hebrew",{day:"numeric",month:"long"})}catch(e){return null}})();
+function hebNum(n){const o=["","א","ב","ג","ד","ה","ו","ז","ח","ט"],t=["","י","כ","ל"];if(n===15)return "ט״ו";if(n===16)return "ט״ז";
+  const s=t[Math.floor(n/10)]+o[n%10];return s.length>1?s.slice(0,-1)+"״"+s.slice(-1):s+"׳"}
+function hebParts(d){if(!HEB_F)return null;const p=HEB_F.formatToParts(d);const day=+(p.find(x=>x.type==="day")||{}).value,month=(p.find(x=>x.type==="month")||{}).value;return day&&month?{day,month}:null}
+function hebDay(iso){const p=hebParts(parseKey(iso));return p?`${hebNum(p.day)} ב${p.month}`:""}
+/* whose birthday falls on date d: [{e, kind:"לועזי"|"עברי"}] */
+function bdaysOn(d){const out=[],hp=hebParts(d),md=key(d).slice(5);
+  S.employees.filter(e=>e.bday&&e.active!==false).forEach(e=>{if(e.bday.slice(5)===md)out.push({e,kind:"לועזי"});
+    const bp=hebParts(parseKey(e.bday));if(hp&&bp&&bp.day===hp.day&&bp.month===hp.month)out.push({e,kind:"עברי"})});return out}
+function renderBdays(){const box=$("#bdayBox");if(!box)return;const t=new Date();t.setHours(0,0,0,0);const L=[];
+  for(let i=0;i<45;i++){const d=new Date(t);d.setDate(d.getDate()+i);bdaysOn(d).forEach(b=>L.push({...b,d,i}))}
+  box.innerHTML=L.length?L.slice(0,8).map(b=>`<div class="bdr${b.i===0?" now":""}"><span class="ecol sm" style="--ec:${b.e.color||"var(--av-bg,#8E8E93)"}">${esc(initial(b.e.name))}</span><span class="bdt"><b>${esc(b.e.name)}</b><small>${b.i===0?"היום":b.i===1?"מחר":`בעוד ${b.i} ימים`} · יום ${DAYS[b.d.getDay()]||"שבת"} ${dot(b.d)} · ${b.kind}${b.kind==="עברי"?" ("+esc(hebDay(key(b.d)))+")":""}</small></span>${b.i===0?`<button type="button" data-bdwa="${b.e.id}">ברכה 🎉</button>`:""}</div>`).join("")
+    :`<p class="hint">אין ימי הולדת ב־45 הימים הקרובים. מוסיפים תאריך ליד כל טכנאי למעלה.</p>`}
+const bdText=e=>`מזל טוב ${e.name}! 🎂🎉\nיום הולדת שמח מכל הצוות!`;
+function bdSend(e){const ph=waPhone(e.phone);if(ph)openUrl(`https://wa.me/${ph}?text=${encodeURIComponent(noEmoji(bdText(e)))}`);else sendWa(bdText(e))}
+/* on the day: a small card, once per device per day */
+let BD_TRY=0;function bdayToday(){const today=key(new Date());let seen="";try{seen=localStorage.getItem("bday-seen")||""}catch(e){}
+  if(seen===today)return;const L=bdaysOn(new Date());if(!L.length)return;
+  if(document.hidden||document.querySelector(".alertbox,.todaybox,.pastebox,.itembox,.calsheet,.roombox,.spot")){if(++BD_TRY<40)setTimeout(bdayToday,4000);return}
+  try{localStorage.setItem("bday-seen",today)}catch(e){}
+  const o=document.createElement("div");o.className="alertbox bdbox";
+  o.innerHTML=`<div class="alertc" role="alertdialog" aria-label="יום הולדת"><div class="bdcake" aria-hidden="true">🎂</div><b>היום יום הולדת</b>
+    ${L.map(b=>`<div class="bdr"><span class="ecol sm" style="--ec:${b.e.color||"var(--av-bg,#8E8E93)"}">${esc(initial(b.e.name))}</span><span class="bdt"><b>${esc(b.e.name)}</b><small>${b.kind}${b.kind==="עברי"?" · "+esc(hebDay(today)):""}</small></span><button type="button" data-bdwa="${b.e.id}">ברכה</button></div>`).join("")}
+    <div class="alertb"><button type="button" data-bdok>סגירה</button></div></div>`;
+  document.body.appendChild(o);haptic();const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),200)};
+  o.addEventListener("click",e=>{if(e.target.closest("[data-bdok]")||e.target===o)close()})}
+setTimeout(bdayToday,5000);
+document.addEventListener("click",e=>{const w=e.target.closest("[data-bdwa]");if(w){const em=S.employees.find(x=>x.id===w.dataset.bdwa);if(em)bdSend(em);return}
+  const c=e.target.closest("[data-ecol]");if(c){const p=document.querySelector(`[data-epal="${c.dataset.ecol}"]`);if(p){document.querySelectorAll(".epal:not([hidden])").forEach(x=>{if(x!==p)x.hidden=true});p.hidden=!p.hidden;haptic()}return}
+  const st=e.target.closest("[data-ecset]");if(st){const[id,col]=st.dataset.ecset.split("|"),em=S.employees.find(x=>x.id===id);if(em){if(col)em.color=col;else delete em.color;haptic();changed();render()}}});
+document.addEventListener("input",e=>{const t=e.target;if(t.dataset.ephone){const em=S.employees.find(x=>x.id===t.dataset.ephone);if(em){em.phone=t.value.trim();changed(true)}}});
+document.addEventListener("change",e=>{const t=e.target;if(t.dataset.ebday){const em=S.employees.find(x=>x.id===t.dataset.ebday);if(em){if(t.value)em.bday=t.value;else delete em.bday;changed();render()}}});
 /* ---------- sceOS: about page + what's new. The change log lives in the code (not in the data),
    and only the current version + the 3 before it are kept – older entries are deleted from here. ---------- */
 const OS_NAME="sceOS";
 const OS_LOG=[
+  {v:"4.4",name:"Spotlight",date:"23.10.2026",items:[
+    "חיפוש בכל האפליקציה בסגנון Spotlight: מבחנים, אירועים, צוות, משמרות, חדרים, חגים, הערות, הגדרות ופעולות (⌘K / Ctrl+K, או כפתור החיפוש ליד סרגל הלשוניות)",
+    "אחרי החלפת משמרות – הודעת וואטסאפ מוכנה לקבוצה או ישירות לכל אחד מהטכנאים",
+    "פרטי טכנאי: טלפון, יום הולדת (לועזי ועברי) עם תזכורת וברכה, וצבע לזיהוי בסידור",
+    "ערכות נושא וצבעי הדגשה, ובחירת מסך הפתיחה"]},
   {v:"4.3",name:"חזרה לשבוע",date:"23.10.2026",items:[
     "כשעוברים לשבוע אחר בלו״ז מופיע ליד התאריכים כפתור ״חזרה״ שמחזיר לשבוע שעובדים עליו",
     "הכפתור מופיע ונעלם בהנפשה חלקה, ובטלפון התאריכים זזים הצידה כדי לפנות לו מקום"]},
@@ -3887,13 +4164,7 @@ const OS_LOG=[
   {v:"4.1",name:"מראה",date:"23.10.2026",items:[
     "בחירת מראה בהגדרות ← כללי: בהיר, כהה או אוטומטי לפי המכשיר",
     "המעבר בין המצבים חלק, וגם צבע שורת הסטטוס באייפון מתאים את עצמו",
-    "כפתור ״בדיקת עדכונים״ בעמוד האודות"]},
-  {v:"4.0",name:"התראות",date:"23.10.2026",items:[
-    "מערכת ההפעלה של האפליקציה נקראת מעכשיו sceOS, עם עמוד אודות ו״מה חדש״",
-    "קטגוריית התראות בהגדרות: התראת בוקר, סיכום בערב הקודם, לפני מבחן או אירוע, שינויים, חזרה עד סימון ושעות שקטות",
-    "תזכורת שבועית לבקשת זמינות – לחיצה על ההתראה פותחת את וואטסאפ עם ההודעה",
-    "אישור התראות לכל מכשיר בנפרד, עם התראת בדיקה ורשימת מכשירים",
-    "האפליקציה זמינה גם בכתובת sce-desk.pages.dev"]}
+    "כפתור ״בדיקת עדכונים״ בעמוד האודות"]}
 ].slice(0,4);
 const osLtr=t=>esc(t).replace(/[A-Za-z][\w.\-]*(?: \d[\d.]*)?/g,m=>`<bdi class="osl">${m}</bdi>`);
 const osSeen=()=>{try{return localStorage.getItem("os-seen")||""}catch(e){return ""}};
@@ -3914,7 +4185,7 @@ function renderAbout(){const box=$("#aboutSet");if(!box)return;const cur=OS_LOG[
     <div class="card"><h2>פרטי מערכת</h2>
       ${row("סנכרון",stT)}${row("נתונים",size)}${row("מכשיר",dev+(standalone()?" · מותקן כאפליקציה":" · בדפדפן"))}${row("התראות במכשיר",perm)}${row("כתובת",esc(location.host||"מקומי"))}</div>`}
 /* "what's new" once per device after an update */
-let OS_TRY=0;function osWhatsNew(){if(osSeen()===OS_LOG[0].v)return;if(document.hidden||document.querySelector(".alertbox,.todaybox,.pastebox,.itembox,.calsheet,.roombox")){if(++OS_TRY<40)setTimeout(osWhatsNew,4000);return}const cur=OS_LOG[0];osMark();
+let OS_TRY=0;function osWhatsNew(){if(osSeen()===OS_LOG[0].v)return;if(document.hidden||document.querySelector(".alertbox,.todaybox,.pastebox,.itembox,.calsheet,.roombox,.spot")){if(++OS_TRY<40)setTimeout(osWhatsNew,4000);return}const cur=OS_LOG[0];osMark();
   const o=document.createElement("div");o.className="alertbox osnew";
   o.innerHTML=`<div class="alertc" role="alertdialog" aria-label="מה חדש"><div class="oslogo sm" aria-hidden="true">sce<span>OS</span></div><b>מה חדש ב־<bdi class="osl">${OS_NAME} ${esc(cur.v)}</bdi></b>
     <ul class="oslist">${cur.items.map(x=>`<li>${osLtr(x)}</li>`).join("")}</ul>
@@ -4190,7 +4461,7 @@ document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
   $(".tabs").style.setProperty("--ti",[...document.querySelectorAll(".tabs button")].indexOf(b));
   swapPanel(b.dataset.tab,ev.isTrusted);
-  try{sessionStorage.setItem("shift-tab",b.dataset.tab)}catch(e){}
+  try{sessionStorage.setItem("shift-tab",b.dataset.tab);localStorage.setItem("last-tab",b.dataset.tab)}catch(e){}
   fitCells($("#sheet"));
 }));
 function weekSlide(n,fn){const calm=matchMedia("(prefers-reduced-motion:reduce)").matches;const p=document.querySelector(".panel:not([hidden])");
@@ -4384,7 +4655,22 @@ function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();haptic();if(a.
   if(y){a.arr[a.idx]=y;b.arr[b.idx]=x}
   else{a.arr.splice(a.idx,1);if(b.idx>=b.arr.length)b.arr.push(x);else b.arr.splice(b.idx,0,x)}
   const w=W(),bad=[[x,b],[y,a]].filter(([e,s])=>e&&!canWork(w,e,s.d,s.sh)).map(([e])=>empName(e));
-  changed();render();toast(y?`הוחלפו: ${empName(x)} ⇄ ${empName(y)}`:`${empName(x)} הועבר/ה`+(bad.length?` · שים לב לאילוץ של ${bad.join(", ")}`:""))}
+  changed();render();toast(y?`הוחלפו: ${empName(x)} ⇄ ${empName(y)}`:`${empName(x)} הועבר/ה`+(bad.length?` · שים לב לאילוץ של ${bad.join(", ")}`:""));
+  if(y&&x!==y)setTimeout(()=>swapMsg(x,y,a,b),450)}
+/* after a swap the techs agreed on: a ready WhatsApp update (to the group, or straight to each of them) */
+const waPhone=p=>{let d=String(p||"").replace(/\D/g,"");if(!d)return "";if(d.startsWith("0"))d="972"+d.slice(1);return d.length>=11?d:""};
+function swapMsg(x,y,a,b){const sl=r=>{const s=S.sites.find(z=>z.id===r.sid),lb=r.sh==="m"?"בוקר":"ערב",hrs=(S.shiftLbl||{})[r.sh]||"";
+    return `יום ${DAYS[r.d]} ${dot(dayDate(r.d))}, ${lb}${hrs?` (${hrs})`:""}${S.sites.length>1&&s?` – ${s.name}`:""}`};
+  const X=empName(x),Y=empName(y);
+  const text=`🔄 עדכון בסידור – החלפת משמרות\n${X} ו${Y} התחלפו:\n• ${sl(a)}: ${Y} במקום ${X}\n• ${sl(b)}: ${X} במקום ${Y}\nהסידור באפליקציה עודכן.`;
+  const ex=S.employees.find(e=>e.id===x)||{},ey=S.employees.find(e=>e.id===y)||{},px=waPhone(ex.phone),py=waPhone(ey.phone);
+  const o=document.createElement("div");o.className="alertbox swapmsg";
+  o.innerHTML=`<div class="alertc" role="alertdialog" aria-label="עדכון החלפה"><b>לשלוח עדכון על ההחלפה?</b><p>${esc(X)} ⇄ ${esc(Y)}</p><div class="avprev">${esc(text)}</div>
+    <div class="alertb"><button type="button" class="pref" data-sm="grp">שליחה לקבוצה</button>${px||py?`<div class="smdirect">${px?`<button type="button" data-sm="x">ל${esc(X)}</button>`:""}${py?`<button type="button" data-sm="y">ל${esc(Y)}</button>`:""}</div>`:""}<button type="button" data-sm="no">בלי הודעה</button></div>
+    ${px&&py?"":`<small class="smhint">להודעה ישירה לכל טכנאי – מוסיפים טלפון בהגדרות ← צוות</small>`}</div>`;
+  document.body.appendChild(o);haptic();const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),200)};
+  o.addEventListener("click",e=>{const t=e.target.closest("[data-sm]");if(!t){if(e.target===o)close();return}const k=t.dataset.sm;
+    if(k==="grp"){sendWa(text);close()}else if(k==="x"||k==="y"){openUrl(`https://wa.me/${k==="x"?px:py}?text=${encodeURIComponent(noEmoji(text))}`);t.disabled=true;t.textContent="✓ "+t.textContent;if(o.querySelectorAll(".smdirect button:not(:disabled)").length===0)close()}else close()})}
 /* iPhone: briefly lock the viewport scale — Safari jumps back to 100% — then restore (pinch-zoom still works) */
 function closePop(){if(pop){const p=pop,hadNote=!!p.querySelector("[data-anote]");pop=null;
   if(p._scrim){const sc=p._scrim,ly=p._layer;p.classList.add("out");sc.classList.add("out");setTimeout(()=>{p.remove();sc.remove();if(ly){ly._off();ly.remove()}},280)}else p.remove();
@@ -4805,7 +5091,8 @@ function devToggle(){const b=document.createElement("nav");b.className="devbar";
 (async()=>{
   setTimeout(checkUpdate,1500);setInterval(()=>{if(document.visibilityState==="visible")checkUpdate()},30000);   /* new versions appear within ~30 seconds */document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate()});
   if(DEV_DATA){load(JSON.stringify(devFixture(DEV_DATA)));if(DEV_DATA==="worst"||DEV_DATA==="many"){const g=generate;try{g()}catch(e){}}render();setStatus("מצב בדיקה – לא נשמר");devToggle();return}
-  try{let t=sessionStorage.getItem("shift-tab"),u=sessionStorage.getItem("shift-sub");   /* new visit opens on סידור ואילוצים */
+  try{let t=sessionStorage.getItem("shift-tab"),u=sessionStorage.getItem("shift-sub");
+    if(!t){const st=lookGet("start-tab");t=st==="last"?lookGet("last-tab"):st;if(t==="sched")t=""}   /* new visit opens on סידור ואילוצים */
     if(t==="msg"||t==="staff"){u=t;t="set"}      /* old tabs now live inside settings */
     if(t)document.querySelector(`.tabs button[data-tab="${t}"]`)?.click();
     document.querySelectorAll(".segbar").forEach(b=>{const v=sessionStorage.getItem("seg-"+b.dataset.group);if(v!==null)segOpen(b,+v,false)});

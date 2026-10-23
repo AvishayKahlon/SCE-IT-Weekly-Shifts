@@ -23,7 +23,7 @@ if (!stateDoc.exists) { console.log("no data"); process.exit(0); }
 const S = JSON.parse(stateDoc.data().state || "{}");
 
 /* settings from the app (Settings → התראות); same defaults as the app */
-const C = Object.assign({ avail: true, availDay: 3, availAt: "08:00", on: true, morning: true, morningAt: "06:00", eve: false, eveAt: "20:00", before: false, beforeMin: 60, change: true, repeat: false, repeatH: 2,
+const C = Object.assign({ bday: true, avail: true, availDay: 3, availAt: "08:00", on: true, morning: true, morningAt: "06:00", eve: false, eveAt: "20:00", before: false, beforeMin: 60, change: true, repeat: false, repeatH: 2,
   exams: true, events: true, campus: "", quiet: true, quietFrom: "21:00", quietTo: "06:00", noSat: true }, S.pushCfg || {});
 if (!force) {
   if (!C.on) { console.log("notifications off"); process.exit(0); }
@@ -69,6 +69,18 @@ else {
       (log.availDone !== today || (C.repeat && log.availAt && Date.now() - log.availAt >= C.repeatH * 36e5 - 5 * 6e4))) {
     msgs.push({ title: "תזכורת: בקשת זמינות", body: `לשבוע ${dm(sun)}–${dm(sat)} · לחיצה תפתח את וואטסאפ עם ההודעה`, tag: "avail-" + nxWeek, url: "./?act=avail" });
     log.availDone = today; log.availAt = Date.now(); }
+  /* birthdays (Gregorian and Hebrew), with the morning notification time */
+  if (C.bday && nowM >= min(C.morningAt) && log.bdayDone !== today) {
+    const HF = new Intl.DateTimeFormat("he-u-ca-hebrew", { day: "numeric", month: "long" });
+    const hp = d => { const p = HF.formatToParts(d); return (p.find(x => x.type === "day") || {}).value + "|" + (p.find(x => x.type === "month") || {}).value; };
+    const tD = new Date(Date.UTC(+P.year, +P.month - 1, +P.day, 12)), tH = hp(tD), md = today.slice(5);
+    const who = (S.employees || []).filter(e => e.bday && e.active !== false).flatMap(e => {
+      const [y, m, d] = e.bday.split("-").map(Number), out = [];
+      if (e.bday.slice(5) === md) out.push(e.name + " (לועזי)");
+      if (hp(new Date(Date.UTC(y, m - 1, d, 12))) === tH) out.push(e.name + " (עברי)");
+      return out; });
+    if (who.length) msgs.push({ title: "🎂 היום יום הולדת", body: who.join(" · ") + " – לחיצה לשליחת ברכה", tag: "bday-" + today, url: "./" });
+    log.bdayDone = today; }
   /* before start of each item */
   if (C.before) for (const x of items) { const s = min(x.time); if (s == null || log.before[x.id]) continue;
     if (nowM >= s - C.beforeMin && nowM < s) { const left = s - nowM;
