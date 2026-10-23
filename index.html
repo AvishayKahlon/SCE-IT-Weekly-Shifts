@@ -1909,6 +1909,29 @@ td.c-range{display:none}
 .psd span{display:grid}.psd em{font-style:normal;color:var(--accent);font-weight:600}.psd small{font-size:12px;color:var(--muted)}
 .psd button{width:30px;height:30px;min-height:0!important;padding:0!important;border-radius:50%!important}
 @media (max-width:700px){.psr{flex-wrap:wrap}.psr .pst{flex-basis:calc(100% - 64px)}.psr .pstime,.psr .pssel,.psr .psrange,.psr .pseg2{order:3}}
+
+/* sceOS about page */
+.oshero{display:grid;justify-items:center;text-align:center;gap:6px;padding:26px 16px 20px!important}
+.oslogo{font-size:46px;font-weight:800;letter-spacing:-.04em;line-height:1;direction:ltr;
+  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 45%,#2F80ED));-webkit-background-clip:text;background-clip:text;color:transparent}
+.oslogo span{font-weight:300}.oslogo.sm{font-size:30px;margin-bottom:4px}
+.osname{font-size:20px;font-weight:700;direction:ltr}.osname small{font-size:14px;font-weight:600;color:var(--muted);direction:rtl;unicode-bidi:isolate;margin-inline-start:6px}
+.osbuild{font-size:13px;color:var(--muted);margin-bottom:8px}
+.oslist{margin:0;padding:0 18px 0 0;display:grid;gap:7px;font-size:14.5px;line-height:1.5;text-align:start}
+.oslist li::marker{color:var(--accent)}
+.osold{border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent);padding:10px 0}.osold:first-of-type{border-top:0}
+.osold summary{cursor:pointer;display:flex;align-items:baseline;gap:6px;list-style:none;font-size:15px}
+.osold summary::-webkit-details-marker{display:none}
+.osold summary::after{content:"›";margin-inline-start:auto;color:var(--muted);transition:transform 220ms var(--ease-out);transform:rotate(90deg)}
+.osold[open] summary::after{transform:rotate(-90deg)}
+.osold summary small{color:var(--muted);font-size:12.5px}
+.osold .oslist{margin-top:8px;font-size:14px;color:color-mix(in srgb,var(--ink) 85%,transparent)}
+.osrow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);font-size:14.5px}
+.osrow:last-child{border-bottom:0}.osrow span{color:var(--muted)}.osrow b{font-weight:600;text-align:end}
+bdi.osl{white-space:nowrap;direction:ltr}
+.osnew .alertc{width:min(360px,100%)}.osnew .oslist{margin:6px 0 12px;font-size:14px}
+#appVer{background:none!important;border:0!important;box-shadow:none!important;min-height:0!important;padding:2px 6px!important;font:inherit;color:inherit;cursor:pointer}
+@media (max-width:700px){.subtabs button{font-size:14px}}
 </style></head><body>
 
 <div id="nojs" class="nojs" role="alert"><b>⚠️ הכלי נפתח בתצוגה מקדימה ולכן אינו פעיל.</b><br>פתח אותו מהאייקון במסך הבית או מהקישור.</div>
@@ -2055,6 +2078,7 @@ td.c-range{display:none}
       <button role="tab" data-sub="staff" data-panel="sub-staff" aria-selected="false">עובדים</button>
       <button role="tab" data-sub="msg" data-panel="sub-msg" aria-selected="false">הודעות</button>
       <button role="tab" data-sub="push" data-panel="sub-push" aria-selected="false">התראות</button>
+      <button role="tab" data-sub="about" data-panel="sub-about" aria-selected="false">אודות</button>
     </nav>
     <div class="panel segp" id="sub-gen">
       <div class="card">
@@ -2152,9 +2176,10 @@ td.c-range{display:none}
       <p class="hint">"פתיחה בוואטסאפ" פותח את וואטסאפ עם ההודעה כבר כתובה. בחר את הקבוצה ושלח. אפשר לערוך את הנוסח לפני השליחה.</p>
     </div>
     <div class="panel segp" id="sub-push" hidden><div id="pushSet"></div></div>
+    <div class="panel segp" id="sub-about" hidden><div id="aboutSet"></div></div>
   </section>
 </div>
-<div class="foot"><button class="cloud" id="status" data-st="wait" aria-label="טוען…" title="טוען…"></button><p class="ver" id="appVer"></p></div>
+<div class="foot"><button class="cloud" id="status" data-st="wait" aria-label="טוען…" title="טוען…"></button><button type="button" class="ver" id="appVer" aria-label="אודות sceOS"></button></div>
 <div id="exportBox"></div>
 <div id="printBox" aria-hidden="true"></div>
 
@@ -2168,8 +2193,8 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
-document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent="גרסה "+APP_VER});
-const APP_VER="22.10.2026 22:45";
+document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent=OS_NAME+" "+OS_LOG[0].v+" · "+APP_VER});
+const APP_VER="23.10.2026 16:50";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3633,6 +3658,66 @@ document.addEventListener("click",async e=>{
 document.addEventListener("change",e=>{const tm=e.target.closest("[data-pctime]");if(tm&&tm.value){pcSet(tm.dataset.pctime,tm.value);return}
   const sl=e.target.closest("[data-pcsel]");if(sl)pcSet(sl.dataset.pcsel,+sl.value)});
 document.addEventListener("click",e=>{const b=e.target.closest('[data-sub="push"]');if(b){renderPushSet();loadDevices()}},true);
+
+/* ---------- sceOS: about page + what's new. The change log lives in the code (not in the data),
+   and only the current version + the 3 before it are kept – older entries are deleted from here. ---------- */
+const OS_NAME="sceOS";
+const OS_LOG=[
+  {v:"4.0",name:"התראות",date:"23.10.2026",items:[
+    "מערכת ההפעלה של האפליקציה נקראת מעכשיו sceOS, עם עמוד אודות ו״מה חדש״",
+    "קטגוריית התראות בהגדרות: התראת בוקר, סיכום בערב הקודם, לפני מבחן או אירוע, שינויים, חזרה עד סימון ושעות שקטות",
+    "תזכורת שבועית לבקשת זמינות – לחיצה על ההתראה פותחת את וואטסאפ עם ההודעה",
+    "אישור התראות לכל מכשיר בנפרד, עם התראת בדיקה ורשימת מכשירים",
+    "האפליקציה זמינה גם בכתובת sce-desk.pages.dev"]},
+  {v:"3.2",name:"אחסון וניקוי",date:"22.10.2026",items:[
+    "מד אחסון בסגנון iCloud עם חישוב מדויק של הנתונים",
+    "ניקוי נתונים ישנים לפי תקופה, עם אפשרות שחזור",
+    "שיבוץ חכם ובקשת זמינות ככפתורים צפים",
+    "ניסוחים מקצועיים ושמות חדשים ללשוניות ולכפתורים"]},
+  {v:"3.1",name:"כרטיס היום",date:"22.10.2026",items:[
+    "כרטיס ״היום״ מ־06:00: מבחנים ואירועים, טכנאים במשמרת, וואטסאפ וסימון ״נשלח?״",
+    "חדרים לפי קמפוס, מעבדות מקצועיות ואודיטוריומים",
+    "יצירה חכמה ממייל שלומדת מהתיקונים שלך"]},
+  {v:"3.0",name:"עיצוב iOS",date:"21.10.2026",items:[
+    "חלונות תחתונים ותפריט שיתוף בסגנון iOS",
+    "הוספה ליומן: Outlook, Google או יומן האייפון",
+    "אנימציות חלקות ומעבר לשוניות חי"]}
+].slice(0,4);
+const osLtr=t=>esc(t).replace(/[A-Za-z][\w.\-]*(?: \d[\d.]*)?/g,m=>`<bdi class="osl">${m}</bdi>`);
+const osSeen=()=>{try{return localStorage.getItem("os-seen")||""}catch(e){return ""}};
+const osMark=()=>{try{localStorage.setItem("os-seen",OS_LOG[0].v)}catch(e){}};
+function renderAbout(){const box=$("#aboutSet");if(!box)return;const cur=OS_LOG[0];
+  const st=($("#status")||{}).dataset||{},stT={ok:"מסונכרן",bad:"אין חיבור",wait:"מתחבר…",dev:"מצב פיתוח"}[st.st]||"—";
+  const ua=navigator.userAgent,dev=/iPhone/.test(ua)?"אייפון":/iPad/.test(ua)?"אייפד":/Android/.test(ua)?"אנדרואיד":/Mac/.test(ua)?"מק":/Windows/.test(ua)?"Windows":"מכשיר";
+  let size="—";try{const u=usageParts();if(u&&u.all)size="⁦"+(u.all/1024).toFixed(0)+" KB⁩ מתוך ⁦1 MB⁩"}catch(e){}
+  const perm="Notification" in window?{granted:"מאושרות",denied:"חסומות",default:"לא אושרו"}[Notification.permission]:"לא נתמך";
+  const ul=it=>`<ul class="oslist">${it.map(x=>`<li>${osLtr(x)}</li>`).join("")}</ul>`;
+  const row=(k,v)=>`<div class="osrow"><span>${k}</span><b>${v}</b></div>`;
+  box.innerHTML=`<div class="card oshero"><div class="oslogo" aria-hidden="true">sce<span>OS</span></div>
+      <div class="osname">${OS_NAME} ${esc(cur.v)} <small>${esc(cur.name)}</small></div>
+      <div class="osbuild">גרסה ${esc(APP_VER)}</div>
+      <button type="button" class="soft" data-oscheck>בדיקת עדכונים</button></div>
+    <div class="card"><h2>מה חדש ב־<bdi class="osl">${esc(cur.v)}</bdi></h2>${ul(cur.items)}</div>
+    ${OS_LOG.length>1?`<div class="card"><h2>גרסאות קודמות</h2>${OS_LOG.slice(1).map(g=>`<details class="osold"><summary><b>${OS_NAME} ${esc(g.v)}</b> · ${esc(g.name)}<small>${esc(g.date)}</small></summary>${ul(g.items)}</details>`).join("")}<p class="hint">מוצגים עד 3 עדכונים אחורה.</p></div>`:""}
+    <div class="card"><h2>פרטי מערכת</h2>
+      ${row("סנכרון",stT)}${row("נתונים",size)}${row("מכשיר",dev+(standalone()?" · מותקן כאפליקציה":" · בדפדפן"))}${row("התראות במכשיר",perm)}${row("כתובת",esc(location.host||"מקומי"))}</div>`}
+/* "what's new" once per device after an update */
+let OS_TRY=0;function osWhatsNew(){if(osSeen()===OS_LOG[0].v)return;if(document.hidden||document.querySelector(".alertbox,.todaybox,.pastebox,.itembox,.calsheet,.roombox")){if(++OS_TRY<40)setTimeout(osWhatsNew,4000);return}const cur=OS_LOG[0];osMark();
+  const o=document.createElement("div");o.className="alertbox osnew";
+  o.innerHTML=`<div class="alertc" role="alertdialog" aria-label="מה חדש"><div class="oslogo sm" aria-hidden="true">sce<span>OS</span></div><b>מה חדש ב־<bdi class="osl">${OS_NAME} ${esc(cur.v)}</bdi></b>
+    <ul class="oslist">${cur.items.map(x=>`<li>${osLtr(x)}</li>`).join("")}</ul>
+    <div class="alertb"><button type="button" class="pref" data-osok>המשך</button><button type="button" data-osmore>פרטים באודות</button></div></div>`;
+  document.body.appendChild(o);const close=()=>{o.classList.add("out");setTimeout(()=>o.remove(),200)};
+  o.addEventListener("click",e=>{if(e.target.closest("[data-osmore]")){close();document.querySelector('.tabs button[data-tab="set"]').click();setTimeout(()=>{renderAbout();openSub("about")},350)}else if(e.target.closest("[data-osok]")||e.target===o)close()})}
+setTimeout(osWhatsNew,2500);setTimeout(renderAbout,1500);
+document.addEventListener("click",async e=>{
+  if(e.target.closest('[data-sub="about"],.tabs button[data-tab="set"]'))renderAbout();
+  if(e.target.closest("#appVer")){document.querySelector('.tabs button[data-tab="set"]').click();setTimeout(()=>{openSub("about");renderAbout()},350);return}
+  const ck=e.target.closest("[data-oscheck]");if(ck){ck.disabled=true;ck.textContent="בודק…";
+    try{const r=await fetch(location.pathname+"?nocache="+Date.now(),{cache:"no-store"});const m=r.ok&&(await r.text()).match(/const APP_VER="([^"]+)"/);
+      if(m&&m[1]!==APP_VER){toast("נמצאה גרסה חדשה – מתעדכן…");flush();setTimeout(()=>location.replace(location.pathname+"?v="+encodeURIComponent(m[1])),400);return}
+      toast(m?"יש לך את הגרסה האחרונה ✓":"לא ניתן לבדוק כרגע")}catch(err){toast("לא ניתן לבדוק כרגע")}
+    ck.disabled=false;ck.textContent="בדיקת עדכונים"}},true);
 /* ---------- Firebase storage (iCloud-style bar) + cleanup ----------
    Everything lives in one cloud document; Firestore allows up to 1 MB per document. */
 const FB_LIMIT=1048576;
