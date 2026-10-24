@@ -2265,6 +2265,49 @@ bdi.osl{white-space:nowrap;direction:ltr}
 :root[data-acc] .nwp-ic{background:color-mix(in srgb,var(--accent) 16%,transparent)!important;color:var(--accent-text,var(--accent))!important}
 :root[data-acc] .cmbl button.hl{background:color-mix(in srgb,var(--accent) 18%,transparent)!important;color:var(--ink)!important}
 :root[data-acc] .bar .act.soft{color:var(--accent-text,var(--accent))!important}
+/* undo toast */
+.undot{white-space:nowrap;position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:95;display:flex;align-items:center;gap:14px;padding:8px 8px 8px 16px;border-radius:999px;overflow:hidden;
+  background:color-mix(in srgb,var(--ink) 88%,transparent);color:var(--bg);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:0 10px 30px rgba(0,0,0,.25);font-weight:600;font-size:15px;
+  animation:undoin 380ms var(--pop) both}
+.undot.out{animation:undoout 240ms var(--ease-in) both}
+.undot button{min-height:34px!important;padding:4px 14px!important;border-radius:999px!important;border:0!important;background:var(--accent)!important;color:var(--accent-ink)!important;font-weight:800;box-shadow:none!important}
+.undot i{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--accent);transform-origin:left;animation:undobar 3s linear both}
+@keyframes undoin{from{opacity:0;transform:translate(-50%,16px) scale(.92)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes undoout{to{opacity:0;transform:translate(-50%,10px) scale(.96)}}
+@keyframes undobar{to{transform:scaleX(0)}}
+@media (min-width:701px){.undot{bottom:28px}}
+/* today dashboard */
+#todayDash{display:grid;gap:10px;padding:14px 16px;border-radius:var(--g-r,22px);background:var(--g-card);box-shadow:var(--g-sh),inset 0 1px 0 var(--g-hi),inset 0 0 0 .5px var(--g-line)}
+#todayDash[hidden]{display:none}
+.dsh-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.dsh-h b{font-size:22px;font-weight:800}.dsh-h span{color:var(--muted);font-weight:600}
+.dsh-h em{font-style:normal;font-size:13px;font-weight:700;padding:2px 10px;border-radius:999px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent-text,var(--accent))}
+.dsh-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.dsh-c{display:grid;gap:6px;align-content:start;padding:10px 12px;border-radius:16px;background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.dsh-c>small{font-size:12.5px;font-weight:700;color:var(--muted)}
+.dsh-c ul{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:14px}.dsh-c li b{font-variant-numeric:tabular-nums;color:var(--accent-text,var(--accent))}
+.dsh-c p{margin:0;font-size:14.5px}.dsh-m{color:var(--muted)}
+.dsh-site{display:grid;gap:1px;font-size:14px}.dsh-site b{font-size:13px;color:var(--muted)}.dsh-site span.now{font-weight:700}
+.dsh-site span.now::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#34C759;margin-inline-end:6px;vertical-align:1px;animation:dshp 2s ease-in-out infinite}
+@keyframes dshp{50%{opacity:.35}}
+.dsh-b{justify-self:start;min-height:32px!important;padding:4px 12px!important;border-radius:999px!important;font-size:13.5px;font-weight:700}
+.dsh-b.warn{background:color-mix(in srgb,#FF9500 18%,transparent)!important;color:#C26A00!important;border-color:transparent!important}
+/* report */
+.rpnav{display:flex!important;align-items:center;justify-content:space-between;padding:8px 10px!important}.rpnav b{font-size:18px}
+.rpnav button{width:40px;height:40px;min-height:0!important;padding:0!important;border-radius:50%!important;font-size:24px;color:var(--accent-text,var(--accent))!important}
+.rptiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.rptiles .st b{font-size:26px}
+@media (max-width:700px){.rptiles{grid-template-columns:repeat(2,1fr)}}
+table.rpt{width:100%;border-collapse:collapse;font-size:14.5px}table.rpt th{font-size:12.5px;color:var(--muted);font-weight:700;text-align:start;padding:6px 8px}
+table.rpt td{white-space:nowrap;padding:8px;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent);font-variant-numeric:tabular-nums}
+.rpsw{display:grid}.rps{display:grid;padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}.rps:last-child{border-bottom:0}.rps small{color:var(--muted);font-size:12.5px}
+.rpprint{padding:20px;font-family:var(--font);color:#000}.rpprint .card{box-shadow:none!important;border:1px solid #ccc;background:#fff!important}
+/* cloud backups */
+.bklist{display:grid;margin-top:6px}.bki{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.bki span{display:grid;flex:1}.bki small{color:var(--muted);font-size:12.5px}.bki button{min-height:32px!important;padding:4px 12px!important;border-radius:999px!important;font-size:13.5px}
+/* pull to refresh */
+.ptr{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;z-index:96;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;opacity:0;transform:translate(-50%,0) scale(.6);
+  background:var(--glass-bg,var(--surface));-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:0 6px 18px rgba(0,0,0,.18);color:var(--muted);pointer-events:none}
+.ptr svg{width:20px;height:20px;transition:transform 220ms var(--pop)}.ptr.ok{color:var(--accent-text,var(--accent))}.ptr.ok svg{transform:rotate(180deg)}
+.ptr.spin svg{animation:ptrs .8s linear infinite}@keyframes ptrs{to{transform:rotate(360deg)}}
 </style><script>/* look chosen in Settings → מראה (this device): accent colour + background theme, applied before the page paints */
 var LOOK={acc:{blue:[["#0A6CD6","#0A5DBA","#fff"],["#4DA3FF","#7DBBFF","#06111F"]],purple:[["#7B4BD6","#6A3CC2","#fff"],["#B28CFF","#C4A8FF","#140A26"]],
   pink:[["#C8327A","#B02A6A","#fff"],["#FF7AB6","#FF9CC8","#24060F"]],red:[["#C9342C","#B02A23","#fff"],["#FF6B5E","#FF8C82","#240604"]],
@@ -2316,6 +2359,7 @@ lookApply();</script></head><body>
   </nav>
 
   <section class="panel" id="tab-sched">
+    <div id="todayDash" hidden></div>
     <button class="genfab" id="genFab" type="button" aria-label="שיבוץ חכם" title="שיבוץ חכם" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></button>
     <div class="bar">
       <button class="primary act" id="genBtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span class="lb">שיבוץ חכם</span></button>
@@ -2446,7 +2490,8 @@ lookApply();</script></head><body>
         <div class="psr" style="border:0;margin-top:6px"><div class="pst"><b>אור רקע נע</b><small>הצבעים שמאחורי הזכוכית זזים לאט, כמו טפט דינמי</small></div><button type="button" role="switch" class="pswitch" id="lkMove" aria-checked="false" aria-label="אור רקע נע"></button></div>
         <p class="hint" id="lkGlassHint"></p></div>
       <div class="card"><h2>מסך פתיחה</h2><div class="pseg2 lkstart" id="lkStart" role="radiogroup" aria-label="מסך פתיחה"></div>
-        <p class="hint" style="margin-top:8px">הלשונית שנפתחת כשנכנסים לאפליקציה. נשמר במכשיר הזה.</p></div>
+        <p class="hint" style="margin-top:8px">הלשונית שנפתחת כשנכנסים לאפליקציה. נשמר במכשיר הזה.</p>
+        <div class="psr" style="border:0;margin-top:4px"><div class="pst"><b>דשבורד ״היום״</b><small>כרטיס בראש הלו״ז: מי במשמרת, מבחנים ואירועים, ימי הולדת</small></div><button type="button" role="switch" class="pswitch" id="lkDash" aria-checked="true" aria-label="דשבורד היום"></button></div></div>
     </div>
     <div class="setpage panel" id="sub-shifts" data-title="משמרות ושיבוץ" hidden>
       <div class="card">
@@ -2479,8 +2524,9 @@ lookApply();</script></head><body>
       </div>
     </div>
     <div class="setpage panel" id="sub-backup" data-title="גיבוי ושחזור" hidden>
+      <div class="card"><h2>גיבוי בענן</h2><div id="autoBk"></div></div>
       <div class="card">
-        <h2>גיבוי ושחזור</h2>
+        <h2>גיבוי ידני</h2>
         <p class="hint" style="margin-bottom:10px">גיבוי מלא של כל הנתונים לקובץ, ושחזור ממנו.</p>
         <div class="row"><button id="backupBtn">הורדת גיבוי</button><button id="restoreBtn">שחזור מגיבוי</button><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
       </div>
@@ -2556,6 +2602,7 @@ lookApply();</script></head><body>
         </div>
       </div>
     </div>
+    <div class="setpage panel" id="sub-report" data-title="דוחות" hidden><div id="reportBox" style="display:grid;gap:14px"></div></div>
     <div class="setpage panel" id="sub-push" data-title="התראות" hidden><div id="pushSet"></div></div>
     <div class="setpage panel" id="sub-about" data-title="אודות" hidden><div id="aboutSet"></div></div>
   </section>
@@ -2575,7 +2622,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent=OS_NAME+" "+OS_LOG[0].v+" · "+APP_VER});
-const APP_VER="24.10.2026 11:15";
+const APP_VER="24.10.2026 12:30";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -3178,7 +3225,7 @@ document.querySelectorAll("#viewSeg button").forEach(b=>b.addEventListener("clic
       {opacity:1,transform:"none",clipPath:"inset(0% 0% 0% 0% round 22px)"}],{duration:620,easing:EZ.pop})];
     newEl._a[0].onfinish=()=>{newEl.style.transformOrigin=""}}}));
 let MSG_OPEN=false;
-function render(){if(typeof maybeToday==="function"&&performance.now()<15000)maybeToday();if(typeof renderSetMenu==="function"&&typeof SET_PAGE!=="undefined"&&!$("#tab-set").hidden)renderSetMenu();if(typeof updBack==="function")updBack();
+function render(){if(typeof maybeToday==="function"&&performance.now()<15000)maybeToday();if(typeof renderSetMenu==="function"&&typeof SET_PAGE!=="undefined"&&!$("#tab-set").hidden)renderSetMenu();if(typeof updBack==="function")updBack();if(typeof renderDash==="function")renderDash();
   ensureData();calcNeed();
   const w=W();
   const d0=parseKey(cur),d5=dayDate(5);
@@ -4055,11 +4102,13 @@ function renderLook(){const w=lookGet("wall"),a=lookGet("accent")||"green",st=lo
   const G=$("#lkGlass");if(G)G.innerHTML=[["clear","שקופה"],["","רגילה"],["solid","אטומה"]].map(([k,n])=>`<button type="button" data-lkglass="${k}" aria-pressed="${gl===k}">${n}</button>`).join("");
   const H=$("#lkGlassHint");if(H)H.textContent=gl==="solid"?"בלי שקיפות וטשטוש – הכי קריא, וחוסך סוללה":gl==="clear"?"יותר שקיפות – הרקע בולט יותר מבעד לזכוכית":"האיזון המקורי";
   const M=$("#lkMove");if(M)M.setAttribute("aria-checked",lookGet("bgmove")==="1");
+  const DB=$("#lkDash");if(DB)DB.setAttribute("aria-checked",lookGet("dash")!=="0");
   const W1=$("#lkWall");if(W1)W1.innerHTML=LK_WALLS.map(([k,n,_,c])=>`<button type="button" role="radio" aria-checked="${w===k}" data-lkwall="${k}"><span class="lkw" style="--c1:${c[0]};--c2:${c[1]};--c3:${c[2]}" aria-hidden="true"></span>${n}</button>`).join("");
   const A=$("#lkAcc");if(A)A.innerHTML=LK_ACC.map(([k,n,c])=>`<button type="button" role="radio" aria-checked="${a===k}" data-lkacc="${k}" style="--c:${c}" aria-label="${n}" title="${n}"></button>`).join("");
   const S1=$("#lkStart");if(S1)S1.innerHTML=LK_START.map(([k,n])=>`<button type="button" data-lkstart="${k}" aria-pressed="${st===k}">${n}</button>`).join("")}
 function lookSet(k,v){try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k)}catch(e){}}
 document.addEventListener("click",e=>{const g=e.target.closest("[data-lkglass]"),mv=e.target.closest("#lkMove");
+  if(e.target.closest("#lkDash")){haptic();lookSet("dash",lookGet("dash")==="0"?"":"0");renderLook();if(typeof renderDash==="function")renderDash();return}
   if(g||mv){haptic();if(g)lookSet("glass",g.dataset.lkglass);else lookSet("bgmove",lookGet("bgmove")==="1"?"":"1");lookApply();renderLook();return}
   const w=e.target.closest("[data-lkwall]"),a=e.target.closest("[data-lkacc]"),st=e.target.closest("[data-lkstart]");if(!w&&!a&&!st)return;haptic();
   if(st){lookSet("start-tab",st.dataset.lkstart==="sched"?"":st.dataset.lkstart);renderLook();return}
@@ -4099,7 +4148,8 @@ const SIC={sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l
   spark:'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
   hist:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l4 2"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
-  bldg:'<path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/>'};
+  bldg:'<path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/>',
+  chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'};
 const SIC_MAP=[["מראה","sun","#0A84FF"],["מסך פתיחה","phone","#34C759"],["משמרות ושיבוץ","clock","#34C759"],["סנכרון ואחסון","cloud","#32ADE6"],["גיבוי ושחזור","archive","#8E8E93"],
   ["עובדים","people","#5856D6"],["ימי הולדת","cal","#FF2D55"],["נמעני מייל","mail","#0A84FF"],["קבוצת הצוות","chat","#30B04F"],["נוסח בקשת זמינות","cal","#00A79D"],["נוסח תזכורת","bell","#FF9500"],
   ["נוסח הסידור השבועי","table","#AF52DE"],["התראות במכשיר","phone","#FF3B30"],["מתי לשלוח","clock","#FF9500"],["מה לכלול","list","#0A84FF"],["שעות שקטות","moon","#5856D6"],
@@ -4240,7 +4290,7 @@ document.addEventListener("change",e=>{const t=e.target;if(t.dataset.ebday){cons
 
 /* ---------- Settings like iPhone Settings: a grouped menu, each row pushes its own page (iPad-style split on wide screens) ---------- */
 const SET_MENU=[[["look","תצוגה ומראה","sun","#0A84FF"],["push","התראות","bell","#FF3B30"]],
-  [["shifts","משמרות ושיבוץ","clock","#34C759"],["sites","קמפוסים וחדרים","bldg","#FF9500"],["staff","צוות","people","#5856D6"]],
+  [["shifts","משמרות ושיבוץ","clock","#34C759"],["sites","קמפוסים וחדרים","bldg","#FF9500"],["staff","צוות","people","#5856D6"],["report","דוחות","chart","#AF52DE"]],
   [["msg","תקשורת","chat","#30B04F"]],
   [["sync","סנכרון ואחסון","cloud","#32ADE6"],["backup","גיבוי ושחזור","archive","#8E8E93"]]];
 let SET_PAGE="root";
@@ -4263,7 +4313,7 @@ function setGo(k,anim=true){const sec=$("#tab-set");if(!sec)return;if(k!=="root"
   const prev=SET_PAGE;SET_PAGE=k;try{sessionStorage.setItem("set-page",k)}catch(e){}
   sec.classList.toggle("split",split);const root=$("#sub-root");root.hidden=!split&&k!=="root";
   sec.querySelectorAll(".setpage").forEach(p=>p.hidden=p.id!=="sub-"+k);
-  if(k==="push"){renderPushSet();loadDevices()}if(k==="about")renderAbout();if(k==="look")renderLook();
+  if(k==="push"){renderPushSet();loadDevices()}if(k==="about")renderAbout();if(k==="look")renderLook();if(k==="report")renderReport();if(k==="backup")renderAutoBk(true);
   renderSetMenu();
   const calm=matchMedia("(prefers-reduced-motion: reduce)").matches;
   if(anim&&!calm&&prev!==k){const el=k==="root"?root:$("#sub-"+k),fwd=k!=="root";
@@ -4332,10 +4382,127 @@ function openEmpSheet(id){const e=S.employees.find(x=>x.id===id);if(!e)return;
     if(f==="bday"){if(t.value){const had=e.bday;e.bday=t.value;if(e.hb===undefined||e.hb===null&&!had)e.hb=hbFromDate(t.value)}else delete e.bday;save();draw()}
     if(f==="hbd"||f==="hbm"){const d=+o.querySelector('[data-ef="hbd"]').value,m=o.querySelector('[data-ef="hbm"]').value;if(d&&m){e.hb={d,m};save();draw()}}})}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-empopen]");if(b)openEmpSheet(b.dataset.empopen)});
+
+/* ---------- undo: every destructive action can be taken back for 3 seconds ---------- */
+var UNDO_ARM=null;
+const UNDO_SEL=[["[data-edel],[data-edel2]","הטכנאי הוסר"],["[data-hdel]","החג נמחק"],["[data-vdel]","החופשה נמחקה"],["[data-xdel],[data-idel]","נמחק"],["[data-rdel]","החדר נמחק"],
+  ["[data-sdel]","הקמפוס הוסר"],["#clearBtn","הסידור אופס"],["#genBtn","שיבוץ חכם בוצע"],["[data-bkrestore]","שוחזר מגיבוי"],["#restoreBtn","שוחזר מגיבוי"]];
+function undoArm(label){UNDO_ARM={snap:JSON.stringify(S),label,t:Date.now()}}
+function undoFire(soft){if(!UNDO_ARM||soft)return;const a=UNDO_ARM;UNDO_ARM=null;if(Date.now()-a.t>30000)return;if(JSON.stringify(S)===a.snap)return;undoToast(a)}
+function undoToast(a){document.querySelectorAll(".undot").forEach(x=>x.remove());const o=document.createElement("div");o.className="undot";o.setAttribute("role","status");
+  o.innerHTML=`<span>${esc(a.label)}</span><button type="button">בטל</button><i aria-hidden="true"></i>`;document.body.appendChild(o);
+  const t=setTimeout(()=>{o.classList.add("out");setTimeout(()=>o.remove(),260)},3000);
+  o.querySelector("button").onclick=()=>{clearTimeout(t);haptic();load(a.snap);document.querySelectorAll(".swapmsg").forEach(x=>x.remove());changed();render();o.classList.add("out");setTimeout(()=>o.remove(),260);toast("הפעולה בוטלה")}}
+document.addEventListener("click",e=>{const m=UNDO_SEL.find(([sel])=>e.target.closest(sel));if(m){undoArm(m[1]);return}
+  if(!e.target.closest(".alertbox,.pastebox"))UNDO_ARM=null},true);
+
+/* ---------- today dashboard at the top of the schedule ---------- */
+const dashOn=()=>lookGet("dash")!=="0";
+function renderDash(){const box=$("#todayDash");if(!box)return;if(!dashOn()){box.hidden=true;return}box.hidden=false;
+  const now=new Date(),dw=now.getDay(),wk=key(sundayOf(now)),w=S.weeks[wk],dmode=dayMode(now),hm=hhmm(now);
+  const items=todayItems(),st=tState(),pend=items.filter(x=>st.sent[x.id]!==tSig(x)),bd=typeof bdaysOn==="function"?bdaysOn(now):[];
+  let duty="";
+  if(dw===6)duty=`<p class="dsh-m">שבת – אין משמרות</p>`;
+  else if(dmode.off)duty=`<p class="dsh-m">${esc(dmode.names[0]||"יום חופש")} – אין משמרות</p>`;
+  else if(!w)duty=`<p class="dsh-m">עוד אין סידור לשבוע הזה</p>`;
+  else duty=todayCtx(d=>S.sites.map(s=>{const m=namesAt(W(),s.id,"m",d),e=namesAt(W(),s.id,"e",d);if(!m.length&&!e.length)return "";
+    const lb=S.shiftLbl||{},eveNow=hm>=((lb.e||"14:00").match(/\d{1,2}:\d{2}/)||["14:00"])[0];
+    return `<div class="dsh-site"><b>${esc(s.name)}</b><span class="${eveNow?"":"now"}">בוקר: ${esc(m.join(", ")||"—")}</span>${e.length?`<span class="${eveNow?"now":""}">ערב: ${esc(e.join(", "))}</span>`:""}</div>`}).join(""))||`<p class="dsh-m">אין משמרות היום</p>`;
+  const it=items.slice(0,3).map(x=>`<li><b>${esc(x.time||"")}</b> ${esc(x.name)}${x.room?` · ${esc(roomLbl(x.room,x.campus)||x.room)}`:""}</li>`).join("");
+  box.innerHTML=`<div class="dsh-h"><b>היום</b><span>יום ${dw<6?DAYS[dw]:"שבת"} ${dot(now)}</span>${dmode.names.length&&!dmode.off?`<em>${esc(dmode.names[0])}</em>`:""}</div>
+    <div class="dsh-g">
+      <div class="dsh-c"><small>במשמרת</small>${duty}</div>
+      <div class="dsh-c"><small>מבחנים ואירועים</small>${items.length?`<ul>${it}</ul>${items.length>3?`<p class="dsh-m">ועוד ${items.length-3}</p>`:""}`:`<p class="dsh-m">אין היום</p>`}
+        ${items.length?`<button type="button" class="dsh-b${pend.length?" warn":""}" data-dashtoday>${pend.length?`${pend.length} לא נשלחו · שליחה`:"✓ נשלח לצוות"}</button>`:""}</div>
+      ${bd.length?`<div class="dsh-c"><small>ימי הולדת</small><p>🎂 ${bd.map(b=>esc(b.e.name)).join(", ")}</p><button type="button" class="dsh-b" data-bdwa="${bd[0].e.id}">ברכה</button></div>`:""}
+    </div>`}
+document.addEventListener("click",e=>{if(e.target.closest("[data-dashtoday]")){const it=todayItems();if(it.length)openToday(it)}});
+
+/* ---------- swap history + monthly report ---------- */
+function logSwap(x,y,a,b){S.swapLog=S.swapLog||[];S.swapLog.unshift({at:Date.now(),x,y,da:key(dayDate(a.d)),db:key(dayDate(b.d)),sa:a.sid,sb:b.sid,ha:a.sh,hb:b.sh});if(S.swapLog.length>300)S.swapLog.length=300}
+let RP_M=null;
+const HE_MON=["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+function reportData(y,m){const rows={},tot={sh:0,ex:0,ev:0,sw:0},pre=`${y}-${String(m+1).padStart(2,"0")}`;
+  const R=id=>rows[id]||(rows[id]={m:0,e:0,f:0,sw:0});
+  for(let d=new Date(y,m,1);d.getMonth()===m;d.setDate(d.getDate()+1)){const dw=d.getDay();if(dw>5)continue;const w=S.weeks[key(sundayOf(d))];if(!w||!w.assign)continue;
+    S.sites.forEach(s=>["m","e"].forEach(sh=>((w.assign[s.id]&&w.assign[s.id][sh]&&w.assign[s.id][sh][dw])||[]).forEach(id=>{const r=R(id);if(dw===5)r.f++;else r[sh]++;tot.sh++})))}
+  tot.ex=(S.exams||[]).filter(x=>(x.date||"").startsWith(pre)).length;tot.ev=(S.events||[]).filter(x=>(x.date||"").startsWith(pre)).length;
+  const swaps=(S.swapLog||[]).filter(z=>z.da.startsWith(pre)||z.db.startsWith(pre));swaps.forEach(z=>{R(z.x).sw++;R(z.y).sw++});tot.sw=swaps.length;
+  return {rows,tot,swaps}}
+function renderReport(){const box=$("#reportBox");if(!box)return;const n=new Date();if(!RP_M)RP_M=[n.getFullYear(),n.getMonth()];const [y,m]=RP_M,R=reportData(y,m);
+  const ids=Object.keys(R.rows).sort((a,b)=>HE.compare(empName(a),empName(b)));
+  const sl=(sid,sh,dk)=>`${dot(parseKey(dk)).slice(0,5)} ${sh==="m"?"בוקר":"ערב"}${S.sites.length>1?" · "+esc((S.sites.find(s=>s.id===sid)||{}).name||""):""}`;
+  box.innerHTML=`<div class="card rpnav"><button type="button" dir="ltr" data-rpm="-1" aria-label="חודש קודם">›</button><b>${HE_MON[m]} ${y}</b><button type="button" dir="ltr" data-rpm="1" aria-label="חודש הבא">‹</button></div>
+    <div class="rptiles"><div class="st"><small>משמרות</small><b>${R.tot.sh}</b></div><div class="st"><small>מבחנים</small><b>${R.tot.ex}</b></div><div class="st"><small>אירועים</small><b>${R.tot.ev}</b></div><div class="st"><small>החלפות</small><b>${R.tot.sw}</b></div></div>
+    <div class="card"><h2>משמרות לפי טכנאי</h2>${ids.length?`<div class="scroll"><table class="rpt"><tr><th>טכנאי</th><th>בקרים</th><th>ערבים</th><th>שישי</th><th>סה״כ</th><th>החלפות</th></tr>
+      ${ids.map(id=>{const r=R.rows[id];return `<tr><td><span class="enm" style="--ec:${empColor(id)||"transparent"}">${esc(empName(id))}</span></td><td>${r.m}</td><td>${r.e}</td><td>${r.f}</td><td><b>${r.m+r.e+r.f}</b></td><td>${r.sw||""}</td></tr>`}).join("")}</table></div>`:`<p class="hint">אין משמרות בחודש הזה.</p>`}</div>
+    <div class="card"><h2>היסטוריית החלפות</h2>${R.swaps.length?`<div class="rpsw">${R.swaps.map(z=>`<div class="rps"><b>${esc(empName(z.x))} ⇄ ${esc(empName(z.y))}</b><small>${sl(z.sa,z.ha,z.da)} ↔ ${sl(z.sb,z.hb,z.db)} · נרשם ${new Date(z.at).toLocaleDateString("he-IL")}</small></div>`).join("")}</div>`:`<p class="hint">לא היו החלפות בחודש הזה. כל החלפה בסידור נרשמת כאן אוטומטית.</p>`}</div>
+    <div class="row rpact"><button type="button" data-rpprint>הדפסה / PDF</button><button type="button" data-rpcsv>ייצוא ל־Excel (CSV)</button></div>`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-rpm]");if(b){let [y,m]=RP_M;m+=+b.dataset.rpm;if(m<0){m=11;y--}if(m>11){m=0;y++}RP_M=[y,m];haptic();renderReport();return}
+  if(e.target.closest("[data-rpcsv]")){const [y,m]=RP_M,R=reportData(y,m),L=[["טכנאי","בקרים","ערבים","שישי","סה״כ","החלפות"]];
+    Object.keys(R.rows).forEach(id=>{const r=R.rows[id];L.push([empName(id),r.m,r.e,r.f,r.m+r.e+r.f,r.sw])});
+    const csv="﻿"+L.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");saveFile(`דוח משמרות ${HE_MON[m]} ${y}.csv`,new Blob([csv],{type:"text/csv;charset=utf-8"}));return}
+  if(e.target.closest("[data-rpprint]")){const box=$("#printBox"),src=$("#reportBox").cloneNode(true);src.querySelectorAll(".rpnav button,.rpact").forEach(x=>x.remove());
+    box.innerHTML=`<div class="export rpprint"><h1 style="font:700 26px var(--font);margin:0">דוח חודשי – ${HE_MON[RP_M[1]]} ${RP_M[0]}</h1>${src.innerHTML}</div>`;const t=document.title;document.title=`דוח ${HE_MON[RP_M[1]]} ${RP_M[0]}`;
+    setTimeout(()=>{window.print();document.title=t;setTimeout(()=>box.innerHTML="",500)},100)}});
+
+/* ---------- weekly automatic backup in the cloud (keeps the last 4) ---------- */
+let BK_LIST=null,BK_ERR="";
+async function bkFetch(){if(DEV_DATA||!fbUser||typeof firebase==="undefined")return null;try{const d=await firebase.firestore().doc("app/backups").get();BK_ERR="";return (d.data()||{}).list||[]}catch(e){BK_ERR="אין הרשאה לשמור גיבויים בענן – צריך לעדכן את חוקי Firestore ל־app/{doc}";return null}}
+async function autoBackup(force){if(!force&&S.autoBk===false)return;const list=await bkFetch();if(!list)return;
+  if(!force&&list[0]&&Date.now()-list[0].at<7*864e5){BK_LIST=list;return}
+  try{const fs=firebase.firestore(),raw=JSON.stringify(S),at=Date.now(),id="bk-"+key(new Date())+"-"+at.toString(36);
+    await fs.doc("app/"+id).set({state:raw,at});const nl=[{id,at,size:raw.length},...list],keep=nl.slice(0,4);
+    await fs.doc("app/backups").set({list:keep});for(const x of nl.slice(4)){try{await fs.doc("app/"+x.id).delete()}catch(e){}}BK_LIST=keep;BK_ERR="";if(force)toast("הגיבוי נשמר בענן ✓")}
+  catch(e){BK_ERR="השמירה נכשלה – צריך לעדכן את חוקי Firestore ל־app/{doc}";if(force)toast("הגיבוי נכשל")}
+  if(SET_PAGE==="backup")renderAutoBk()}
+async function renderAutoBk(load){const box=$("#autoBk");if(!box)return;if(load){const l=await bkFetch();if(l)BK_LIST=l}
+  const on=S.autoBk!==false,kb=n=>"⁦"+Math.max(1,Math.round(n/1024))+" KB⁩";
+  box.innerHTML=`<div class="psr" style="border:0"><div class="pst"><b>גיבוי שבועי אוטומטי</b><small>פעם בשבוע נשמר עותק מלא בענן. נשמרים 4 האחרונים.</small></div><button type="button" role="switch" class="pswitch" aria-checked="${on}" data-bksw></button></div>
+    ${BK_ERR?`<p class="msg">${esc(BK_ERR)}</p>`:""}
+    ${!fbUser||DEV_DATA?`<p class="hint">הגיבויים בענן זמינים אחרי התחברות.</p>`:BK_LIST&&BK_LIST.length?`<div class="bklist">${BK_LIST.map(x=>`<div class="bki"><span><b>${new Date(x.at).toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"numeric"})}</b><small>${new Date(x.at).toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})} · ${kb(x.size)}</small></span><button type="button" data-bkdl="${x.id}">הורדה</button><button type="button" data-bkrestore="${x.id}">שחזור</button></div>`).join("")}</div>`:BK_LIST?`<p class="hint">עדיין אין גיבויים בענן.</p>`:""}
+    <div class="row" style="margin-top:8px"><button type="button" data-bknow ${!fbUser||DEV_DATA?"disabled":""}>גיבוי עכשיו</button></div>`}
+document.addEventListener("click",async e=>{if(e.target.closest("[data-bksw]")){S.autoBk=S.autoBk===false;haptic();changed();renderAutoBk();return}
+  if(e.target.closest("[data-bknow]")){haptic();await autoBackup(true);renderAutoBk();return}
+  const dl=e.target.closest("[data-bkdl]"),rs=e.target.closest("[data-bkrestore]");if(!dl&&!rs)return;
+  try{const d=(await firebase.firestore().doc("app/"+(dl||rs).dataset[dl?"bkdl":"bkrestore"]).get()).data();if(!d)return;
+    if(dl){saveFile(`גיבוי ${new Date(d.at).toLocaleDateString("he-IL").replace(/\./g,"-")}.json`,new Blob([d.state],{type:"application/json"}));return}
+    const ok=await askSave("לשחזר את הגיבוי?",`כל הנתונים יחזרו למצב של ${new Date(d.at).toLocaleString("he-IL")}.`,"שחזור","ביטול");if(!ok){UNDO_ARM=null;return}
+    undoArm("שוחזר מגיבוי");load(d.state);changed();render();toast("שוחזר")}catch(err){toast("לא ניתן לקרוא את הגיבוי")}});
+setTimeout(()=>autoBackup(false),30000);setInterval(()=>{if(document.visibilityState==="visible")autoBackup(false)},6*36e5);
+
+/* ---------- settings: swipe from the edge to go back (iPhone) ---------- */
+{let st=null;const pg=()=>$("#sub-"+SET_PAGE);
+  document.addEventListener("touchstart",e=>{if(SET_PAGE==="root"||setSplit()||$("#tab-set").hidden||document.querySelector(".pastebox,.alertbox,.spot"))return;const t=e.touches[0];
+    if(t.clientX<innerWidth-26)return;st={x:t.clientX,y:t.clientY,on:false,el:pg()}},{passive:true});
+  document.addEventListener("touchmove",e=>{if(!st)return;const t=e.touches[0],dx=st.x-t.clientX,dy=Math.abs(t.clientY-st.y);
+    if(!st.on){if(dy>12&&dy>dx){st=null;return}if(dx>10){st.on=true;st.el.style.transition="none"}}
+    if(st.on){st.dx=Math.max(0,dx);st.el.style.transform=`translateX(${-st.dx}px)`;st.el.style.opacity=String(1-st.dx/innerWidth*.6)}},{passive:true});
+  document.addEventListener("touchend",()=>{if(!st)return;const s0=st;st=null;if(!s0.on)return;const go=s0.dx>innerWidth*.3;
+    s0.el.style.transition="transform 260ms var(--ease-out),opacity 260ms ease";
+    if(go){s0.el.style.transform=`translateX(${-innerWidth}px)`;s0.el.style.opacity="0";haptic();setTimeout(()=>{s0.el.style.cssText="";setGo("root")},230)}
+    else{s0.el.style.transform="";s0.el.style.opacity="";setTimeout(()=>s0.el.style.cssText="",280)}})}
+
+/* ---------- pull down to refresh (in the installed app, where there is no browser reload) ---------- */
+{const ptrOn=()=>standalone()||/[?&]ptr=1/.test(location.search);let st=null,ind=null;
+  const blocked=t=>document.querySelector(".pastebox,.alertbox,.todaybox,.spot,.pop,.calsheet,.itembox,.roombox,.empbox")||t.closest(".scroll,.spres,textarea,input,select,#sheet,.tabs,.week");
+  document.addEventListener("touchstart",e=>{if(!ptrOn()||window.scrollY>0||blocked(e.target))return;st={y:e.touches[0].clientY,d:0,ok:false}},{passive:true});
+  document.addEventListener("touchmove",e=>{if(!st)return;const d=e.touches[0].clientY-st.y;if(d<=0||window.scrollY>0){if(ind)ind.style.opacity="0";return}
+    if(!ind){ind=document.createElement("div");ind.className="ptr";ind.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>`;document.body.appendChild(ind)}
+    st.d=d;const p=Math.min(1,d/90);ind.style.opacity=String(p);ind.style.transform=`translate(-50%,${Math.min(d*.5,60)}px) scale(${.6+.4*p})`;
+    const ok=d>90;if(ok!==st.ok){st.ok=ok;ind.classList.toggle("ok",ok);if(ok)haptic()}},{passive:true});
+  document.addEventListener("touchend",()=>{if(!st)return;const s0=st;st=null;if(!ind)return;const el=ind;ind=null;
+    if(s0.ok){el.classList.add("spin");try{flush()}catch(e){}setTimeout(()=>location.reload(),450)}else{el.style.opacity="0";setTimeout(()=>el.remove(),200)}})}
 /* ---------- sceOS: about page + what's new. The change log lives in the code (not in the data),
    and only the current version + the 3 before it are kept – older entries are deleted from here. ---------- */
 const OS_NAME="sceOS";
 const OS_LOG=[
+  {v:"4.8",name:"ניהול חכם",date:"24.10.2026",items:[
+    "דשבורד ״היום״ בראש הלו״ז: מי במשמרת עכשיו, מבחנים ואירועים, מה עוד לא נשלח וימי הולדת",
+    "״בטל״ למשך 3 שניות אחרי כל פעולה – מחיקה, החלפה, איפוס, שיבוץ חכם ושחזור",
+    "דוחות: משמרות לכל טכנאי בכל חודש, היסטוריית החלפות, הדפסה וייצוא ל־Excel",
+    "גיבוי שבועי אוטומטי בענן (4 האחרונים) עם הורדה ושחזור",
+    "בטלפון: החלקה מקצה המסך לחזרה בהגדרות, ומשיכה למטה לרענון"]},
   {v:"4.7",name:"SCE רשמי",date:"24.10.2026",items:[
     "ערכת נושא רשמית בצבעי המכללה – צהוב־זהב SCE על רקע אפור־פחם",
     "צבע ההדגשה חל עכשיו על הכל: כפתורים, מתגים, משבצות בסידור, תורנות שישי וכותרות טבלאות",
@@ -4349,12 +4516,7 @@ const OS_LOG=[
     "ההגדרות נפתחות כתפריט מקובץ בסגנון הגדרות האייפון – כל שורה פותחת עמוד משלה עם כפתור חזרה",
     "ליד כל שורה מוצג המצב הנוכחי (מראה, התראות, מספר טכנאים וקמפוסים, סנכרון)",
     "במחשב התפריט מוצג בצד והעמוד לידו, כמו באייפד",
-    "חיפוש בראש ההגדרות, ולחיצה נוספת על לשונית ההגדרות חוזרת לתפריט"]},
-  {v:"4.4",name:"Spotlight",date:"23.10.2026",items:[
-    "חיפוש בכל האפליקציה בסגנון Spotlight: מבחנים, אירועים, צוות, משמרות, חדרים, חגים, הערות, הגדרות ופעולות (⌘K / Ctrl+K, או כפתור החיפוש ליד סרגל הלשוניות)",
-    "אחרי החלפת משמרות – הודעת וואטסאפ מוכנה לקבוצה או ישירות לכל אחד מהטכנאים",
-    "פרטי טכנאי: טלפון, יום הולדת (לועזי ועברי) עם תזכורת וברכה, וצבע לזיהוי בסידור",
-    "ערכות נושא וצבעי הדגשה, ובחירת מסך הפתיחה"]}
+    "חיפוש בראש ההגדרות, ולחיצה נוספת על לשונית ההגדרות חוזרת לתפריט"]}
 ].slice(0,4);
 const osLtr=t=>esc(t).replace(/[A-Za-z][\w.\-]*(?: \d[\d.]*)?/g,m=>`<bdi class="osl">${m}</bdi>`);
 const osSeen=()=>{try{return localStorage.getItem("os-seen")||""}catch(e){return ""}};
@@ -4840,11 +5002,12 @@ function startSwap(k){const a=slotRef(k);if(!a.arr[a.idx])return;SWAP=k;document
   document.addEventListener("pointerup",up,true);document.addEventListener("pointercancel",up,true);
   document.addEventListener("touchmove",e=>{if(D)e.preventDefault()},{passive:false});
   document.addEventListener("click",e=>{if(skip){skip=false;e.stopPropagation();e.preventDefault()}},true)}
-function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();haptic();if(a.arr===b.arr&&a.idx===b.idx)return;
+function doSwap(k2){const a=slotRef(SWAP),b=slotRef(k2);endSwap();haptic();if(a.arr===b.arr&&a.idx===b.idx)return;undoArm("ההחלפה בוצעה");
   const x=a.arr[a.idx],y=b.arr[b.idx];if(!x)return;
   if(y){a.arr[a.idx]=y;b.arr[b.idx]=x}
   else{a.arr.splice(a.idx,1);if(b.idx>=b.arr.length)b.arr.push(x);else b.arr.splice(b.idx,0,x)}
   const w=W(),bad=[[x,b],[y,a]].filter(([e,s])=>e&&!canWork(w,e,s.d,s.sh)).map(([e])=>empName(e));
+  if(y&&x!==y)logSwap(x,y,a,b);
   changed();render();toast(y?`הוחלפו: ${empName(x)} ⇄ ${empName(y)}`:`${empName(x)} הועבר/ה`+(bad.length?` · שים לב לאילוץ של ${bad.join(", ")}`:""));
   if(y&&x!==y)setTimeout(()=>swapMsg(x,y,a,b),450)}
 /* after a swap the techs agreed on: a ready WhatsApp update (to the group, or straight to each of them) */
@@ -5208,7 +5371,7 @@ function setStatus(t){const el=$("#status");
   const st=/מסונכרן|^נשמר$|^מוכן$/.test(t)?"ok":/לא מחובר|נותק|אין הרשאה|אין חיבור|שומר במכשיר|במכשיר הזה|בדפדפן הזה/.test(t)?"bad":/שומר…|מתחבר|טוען/.test(t)?"wait":/מצב בדיקה/.test(t)?"dev":null;
   if(!st){toast(t);return}
   el.dataset.st=st;el.title=t;el.setAttribute("aria-label",t);el.classList.toggle("warn",st==="bad");el.innerHTML=CLOUD_SVG(st!=="bad")}
-function changed(soft){if(DEV_DATA){setStatus("מצב בדיקה – לא נשמר");return}dirty=true;setStatus("שומר…");clearTimeout(saveTimer);saveTimer=setTimeout(flush,soft?900:300)}
+function changed(soft){if(typeof undoFire==="function")undoFire(soft);if(DEV_DATA){setStatus("מצב בדיקה – לא נשמר");return}dirty=true;setStatus("שומר…");clearTimeout(saveTimer);saveTimer=setTimeout(flush,soft?900:300)}
 async function flush(){
   if(!dirty)return;
   if(saving){clearTimeout(saveTimer);saveTimer=setTimeout(flush,400);return}
