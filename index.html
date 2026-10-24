@@ -2168,7 +2168,7 @@ bdi.osl{white-space:nowrap;direction:ltr}
 </style><style>
 /* look: theme tiles, accent swatches */
 .lkh{font-size:14px;font-weight:600;margin:16px 0 8px}
-.lkwall{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.lkwall{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
 .lkwall button{display:grid;justify-items:center;gap:6px;padding:8px 2px!important;min-height:0!important;border-radius:16px!important;font-size:12.5px;font-weight:600;
   border:1.5px solid transparent!important;background:none!important;box-shadow:none!important}
 .lkwall button[aria-checked="true"]{border-color:var(--accent)!important;background:color-mix(in srgb,var(--accent) 10%,transparent)!important}
@@ -2179,7 +2179,7 @@ bdi.osl{white-space:nowrap;direction:ltr}
   box-shadow:inset 0 0 0 .5px rgba(0,0,0,.2)!important;transition:transform 220ms var(--pop)}
 .lkacc button[aria-checked="true"]{box-shadow:0 0 0 2.5px var(--surface),0 0 0 4.5px var(--c)!important;transform:scale(1.04)}
 .lkacc button:active{transform:scale(.9)}
-@media (max-width:700px){.lkwall{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:700px){.lkwall{grid-template-columns:repeat(4,1fr)}}
 
 /* iPhone-style Settings */
 .setroot,.setpage,#setMenu{display:grid;gap:14px;align-content:start}
@@ -2250,18 +2250,36 @@ bdi.osl{white-space:nowrap;direction:ltr}
 .eclr{width:28px;height:28px;min-height:0!important;padding:0!important;border-radius:50%!important;font-size:12px}
 .ecalc{justify-self:start;margin:8px 0;min-height:34px!important;padding:4px 12px!important;border-radius:999px!important;font-size:13.5px}
 .edel{color:#E5484D!important;font-weight:600}
+
+/* chosen accent reaches everything that used to be fixed green (status colours – available, ok, conflict – keep their meaning) */
+:root[data-acc] button.primary:where(:not(:is(#sheet,.export) *)){background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 82%,#fff) 0%,var(--accent) 58%,color-mix(in srgb,var(--accent) 88%,#000) 100%)!important;color:var(--accent-ink)!important;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.35)!important}
+:root[data-acc] .pswitch[aria-checked="true"]{background:var(--accent)!important}
+:root[data-acc] .chip,:root[data-acc] .mp,:root[data-acc] #sheet table.sh .c,:root[data-acc] #sheet table.sh .c2,:root[data-acc] table.rotT td.now{
+  background:color-mix(in srgb,var(--accent) 24%,transparent)!important;color:color-mix(in srgb,var(--accent-text,var(--accent)) 45%,var(--ink))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 .5px color-mix(in srgb,var(--accent) 40%,transparent)!important;border-color:transparent!important}
+:root[data-acc] .chip.ce,:root[data-acc] .mp.e,:root[data-acc] #sheet table.sh .ce,:root[data-acc] #sheet table.sh .date,:root[data-acc] table.rotT tr.cur td,:root[data-acc] ol.rot .turn,:root[data-acc] table.cal th{
+  background:color-mix(in srgb,var(--accent) 14%,transparent)!important;color:color-mix(in srgb,var(--accent-text,var(--accent)) 40%,var(--ink))!important}
+:root[data-acc] #sheet table.sh .ce{box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--accent) 30%,transparent)}
+:root[data-acc] .chip .av:not([style*="--ec"]){background:color-mix(in srgb,var(--accent) 30%,var(--surface))!important;color:var(--accent-text,var(--accent))!important}
+:root[data-acc] .upd,:root[data-acc] .got.on{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--accent-ink)!important}
+:root[data-acc] .nwp-ic{background:color-mix(in srgb,var(--accent) 16%,transparent)!important;color:var(--accent-text,var(--accent))!important}
+:root[data-acc] .cmbl button.hl{background:color-mix(in srgb,var(--accent) 18%,transparent)!important;color:var(--ink)!important}
+:root[data-acc] .bar .act.soft{color:var(--accent-text,var(--accent))!important}
 </style><script>/* look chosen in Settings → מראה (this device): accent colour + background theme, applied before the page paints */
 var LOOK={acc:{blue:[["#0A6CD6","#0A5DBA","#fff"],["#4DA3FF","#7DBBFF","#06111F"]],purple:[["#7B4BD6","#6A3CC2","#fff"],["#B28CFF","#C4A8FF","#140A26"]],
   pink:[["#C8327A","#B02A6A","#fff"],["#FF7AB6","#FF9CC8","#24060F"]],red:[["#C9342C","#B02A23","#fff"],["#FF6B5E","#FF8C82","#240604"]],
   orange:[["#C25E00","#A35000","#fff"],["#FF9F45","#FFB26B","#1E0F02"]],teal:[["#0B8585","#0A7070","#fff"],["#3FD0C9","#6FE0DA","#031615"]],
-  graphite:[["#4A5360","#3E4650","#fff"],["#B5BEC9","#C9D0D9","#0D1014"]]},
+  graphite:[["#4A5360","#3E4650","#fff"],["#B5BEC9","#C9D0D9","#0D1014"]],
+  gold:[["#E5AC00","#8A6400","#1A1400"],["#FDC110","#FFD45C","#1A1400"]]},
  wall:{ocean:[[40,140,230],[30,190,200],[90,110,240],[50,200,230]],sunset:[[255,140,60],[240,80,120],[255,190,90],[200,80,170]],
   nebula:[[140,90,230],[210,90,200],[80,110,240],[170,120,255]],rose:[[255,120,160],[255,170,190],[200,120,255],[255,190,150]],
-  graphite:[[150,155,165],[120,125,135],[170,170,175],[110,115,125]]}};
+  graphite:[[150,155,165],[120,125,135],[170,170,175],[110,115,125]],
+  sce:[[253,193,16],[70,70,76],[255,214,90],[40,40,46]]}};
 function lookGet(k){try{return localStorage.getItem(k)||""}catch(e){return ""}}
 function lookApply(){var r=document.documentElement,st=r.style,t=r.getAttribute("data-theme"),dark=t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
   var a=LOOK.acc[lookGet("accent")],w=LOOK.wall[lookGet("wall")];
   ["--accent","--accent-text","--accent-ink"].forEach(function(v,i){if(a)st.setProperty(v,a[dark?1:0][i]);else st.removeProperty(v)});
+  if(a)r.setAttribute("data-acc",lookGet("accent"));else r.removeAttribute("data-acc");
   var al=lookGet("wall")==="graphite"?(dark?[.26,.22,.2,.22]:[.24,.2,.2,.18]):(dark?[.40,.34,.26,.30]:[.42,.30,.30,.26]);
   for(var i=0;i<4;i++){if(w)st.setProperty("--g-blob"+(i+1),"rgba("+w[i].join(",")+","+al[i]+")");else st.removeProperty("--g-blob"+(i+1))}
   var gl=lookGet("glass");if(gl)r.setAttribute("data-glass",gl);else r.removeAttribute("data-glass");
@@ -2557,7 +2575,7 @@ window.SCE_LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 <script>
 try{document.getElementById("nojs").remove()}catch(e){}
 document.addEventListener("DOMContentLoaded",()=>{const v=document.getElementById("appVer");if(v)v.textContent=OS_NAME+" "+OS_LOG[0].v+" · "+APP_VER});
-const APP_VER="23.10.2026 23:00";
+const APP_VER="24.10.2026 11:15";
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
 const CST=["A","M","E","X"], CST_LBL={A:"זמין",M:"בוקר",E:"ערב",X:"חופש",T:"תורן שישי",B:"גיבוי לאירוע",F:"—",O:"פגרה",V:"חופש (יומן)"};
 const EXAM_PRESET=[
@@ -4029,9 +4047,9 @@ document.addEventListener("click",e=>{const b=e.target.closest('[data-sub="push"
 
 
 /* ---------- look: themes, accent colours, start screen (per device) ---------- */
-const LK_WALLS=[["","SCE","green",["#7CC24E","#3FA79B","#E0B45A"]],["ocean","אוקיינוס","blue",["#2F8BE6","#25B8C4","#5A6EF0"]],["sunset","שקיעה","orange",["#FF8C3C","#EE5078","#FFBE5A"]],
+const LK_WALLS=[["","מקורי","green",["#7CC24E","#3FA79B","#E0B45A"]],["sce","SCE רשמי","gold",["#FDC110","#46464C","#FFD65A"]],["ocean","אוקיינוס","blue",["#2F8BE6","#25B8C4","#5A6EF0"]],["sunset","שקיעה","orange",["#FF8C3C","#EE5078","#FFBE5A"]],
   ["nebula","ערפילית","purple",["#8C5AE6","#D25AC8","#5070F0"]],["rose","ורד","pink",["#FF78A0","#FFAABE","#C878FF"]],["graphite","גרפיט","graphite",["#969BA5","#787D87","#AAAAAF"]]];
-const LK_ACC=[["green","ירוק","#4F7A2C"],["blue","כחול","#0A6CD6"],["teal","טורקיז","#0B8585"],["purple","סגול","#7B4BD6"],["pink","ורוד","#C8327A"],["red","אדום","#C9342C"],["orange","כתום","#C25E00"],["graphite","גרפיט","#4A5360"]];
+const LK_ACC=[["green","ירוק","#4F7A2C"],["blue","כחול","#0A6CD6"],["teal","טורקיז","#0B8585"],["purple","סגול","#7B4BD6"],["pink","ורוד","#C8327A"],["red","אדום","#C9342C"],["orange","כתום","#C25E00"],["graphite","גרפיט","#4A5360"],["gold","זהב SCE","#FDC110"]];
 const LK_START=[["sched","לו״ז"],["cal","חופשות"],["ev","יומן"],["set","הגדרות"],["last","האחרון"]];
 function renderLook(){const w=lookGet("wall"),a=lookGet("accent")||"green",st=lookGet("start-tab")||"sched",gl=lookGet("glass");
   const G=$("#lkGlass");if(G)G.innerHTML=[["clear","שקופה"],["","רגילה"],["solid","אטומה"]].map(([k,n])=>`<button type="button" data-lkglass="${k}" aria-pressed="${gl===k}">${n}</button>`).join("");
@@ -4318,6 +4336,10 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-empopen]")
    and only the current version + the 3 before it are kept – older entries are deleted from here. ---------- */
 const OS_NAME="sceOS";
 const OS_LOG=[
+  {v:"4.7",name:"SCE רשמי",date:"24.10.2026",items:[
+    "ערכת נושא רשמית בצבעי המכללה – צהוב־זהב SCE על רקע אפור־פחם",
+    "צבע ההדגשה חל עכשיו על הכל: כפתורים, מתגים, משבצות בסידור, תורנות שישי וכותרות טבלאות",
+    "צבעים עם משמעות (זמין, תקין, סתירה) נשארים קבועים בכל ערכה"]},
   {v:"4.6",name:"כרטיס טכנאי",date:"23.10.2026",items:[
     "כרטיס לכל טכנאי בסגנון אנשי קשר: צבע, טלפון, פעיל וגיבוי בלבד",
     "יום הולדת לועזי ועברי בנפרד, עם אפשרות למחוק כל אחד מהם ולחשב את העברי מהלועזי",
@@ -4332,10 +4354,7 @@ const OS_LOG=[
     "חיפוש בכל האפליקציה בסגנון Spotlight: מבחנים, אירועים, צוות, משמרות, חדרים, חגים, הערות, הגדרות ופעולות (⌘K / Ctrl+K, או כפתור החיפוש ליד סרגל הלשוניות)",
     "אחרי החלפת משמרות – הודעת וואטסאפ מוכנה לקבוצה או ישירות לכל אחד מהטכנאים",
     "פרטי טכנאי: טלפון, יום הולדת (לועזי ועברי) עם תזכורת וברכה, וצבע לזיהוי בסידור",
-    "ערכות נושא וצבעי הדגשה, ובחירת מסך הפתיחה"]},
-  {v:"4.3",name:"חזרה לשבוע",date:"23.10.2026",items:[
-    "כשעוברים לשבוע אחר בלו״ז מופיע ליד התאריכים כפתור ״חזרה״ שמחזיר לשבוע שעובדים עליו",
-    "הכפתור מופיע ונעלם בהנפשה חלקה, ובטלפון התאריכים זזים הצידה כדי לפנות לו מקום"]}
+    "ערכות נושא וצבעי הדגשה, ובחירת מסך הפתיחה"]}
 ].slice(0,4);
 const osLtr=t=>esc(t).replace(/[A-Za-z][\w.\-]*(?: \d[\d.]*)?/g,m=>`<bdi class="osl">${m}</bdi>`);
 const osSeen=()=>{try{return localStorage.getItem("os-seen")||""}catch(e){return ""}};
